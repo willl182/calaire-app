@@ -562,13 +562,18 @@ export async function listResultados(rondaId: string): Promise<ResultadoContamin
   })
 }
 
-export type RondaParticipanteAsignada = Ronda & { invitado_at: string }
+export type RondaParticipanteAsignada = Ronda & {
+  invitado_at: string
+  ronda_participante_id: string
+  ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
+}
 
 export async function listRondasParticipante(userId: string): Promise<RondaParticipanteAsignada[]> {
   const { data, error } = await getSupabaseAdmin()
     .from('ronda_participantes')
     .select(
       `
+        id,
         invitado_at,
         rondas (
           id, codigo, nombre, estado, created_at,
@@ -581,19 +586,35 @@ export async function listRondasParticipante(userId: string): Promise<RondaParti
 
   if (error) throw new Error(`No fue posible cargar las rondas: ${error.message}`)
 
-  return (data ?? []).flatMap((row) => {
+  const rpRows = (data ?? []).flatMap((row) => {
     const ronda = row.rondas as unknown as RondaRow | null
     if (!ronda) return []
-    return [
-      {
-        ...ronda,
-        invitado_at: row.invitado_at,
-        contaminantes: ((ronda.ronda_contaminantes ?? []) as RondaContaminante[]).sort(
-          (a, b) => CONTAMINANTES.indexOf(a.contaminante) - CONTAMINANTES.indexOf(b.contaminante)
-        ),
-      },
-    ]
+    return [{ rpId: row.id, invitado_at: row.invitado_at, ronda }]
   })
+
+  const rpIds = rpRows.map((r) => r.rpId)
+  const fichasMap: Record<string, 'borrador' | 'enviado'> = {}
+
+  if (rpIds.length > 0) {
+    const { data: fichas } = await getSupabaseAdmin()
+      .from('fichas_registro')
+      .select('ronda_participante_id, estado')
+      .in('ronda_participante_id', rpIds)
+
+    for (const f of fichas ?? []) {
+      fichasMap[f.ronda_participante_id] = f.estado as 'borrador' | 'enviado'
+    }
+  }
+
+  return rpRows.map(({ rpId, invitado_at, ronda }) => ({
+    ...ronda,
+    invitado_at,
+    ronda_participante_id: rpId,
+    ficha_estado: fichasMap[rpId] ?? 'no_iniciada',
+    contaminantes: ((ronda.ronda_contaminantes ?? []) as RondaContaminante[]).sort(
+      (a, b) => CONTAMINANTES.indexOf(a.contaminante) - CONTAMINANTES.indexOf(b.contaminante)
+    ),
+  }))
 }
 
 export type ParticipanteGlobal = {

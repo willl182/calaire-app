@@ -4,6 +4,7 @@ import { notFound, redirect } from 'next/navigation'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { requireAuth, isAdmin } from '@/lib/auth'
 import { getRonda, listParticipantes, type RondaParticipante, type Ronda } from '@/lib/rondas'
+import { listFichaResumenesByRonda, type FichaResumen } from '@/lib/fichas'
 import {
   addReferenceSlotAction,
   inviteParticipanteAction,
@@ -149,14 +150,38 @@ function FoundUserCard({
   )
 }
 
+function FichaAdminBadge({ ficha, participanteId, rondaId }: { ficha: FichaResumen | undefined; participanteId: string; rondaId: string }) {
+  if (!ficha) {
+    return (
+      <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+        No iniciada
+      </span>
+    )
+  }
+  return (
+    <Link
+      href={`/dashboard/rondas/${rondaId}/participantes/${participanteId}/ficha`}
+      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold transition hover:opacity-80 ${
+        ficha.estado === 'enviado'
+          ? 'bg-emerald-100 text-emerald-800'
+          : 'bg-amber-100 text-amber-800'
+      }`}
+    >
+      {ficha.estado === 'enviado' ? 'Enviada ✓' : 'Borrador'}
+    </Link>
+  )
+}
+
 function ParticipanteRow({
   participante,
   canEdit,
   rondaCodigo,
+  ficha,
 }: {
   participante: RondaParticipante
   canEdit: boolean
   rondaCodigo: string
+  ficha: FichaResumen | undefined
 }) {
   const tieneEnvios = participante.envios_count > 0
   const enlace =
@@ -183,6 +208,9 @@ function ParticipanteRow({
             Pendiente
           </span>
         )}
+      </td>
+      <td className="py-3 pr-4 text-sm">
+        <FichaAdminBadge ficha={ficha} participanteId={participante.id} rondaId={participante.ronda_id} />
       </td>
       <td className="py-3 pr-4 text-xs text-[var(--foreground-muted)]">
         {enlace ? (
@@ -233,7 +261,10 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
   const ronda = await getRonda(rondaId)
   if (!ronda) notFound()
 
-  const participantes = await listParticipantes(rondaId)
+  const [participantes, fichasMap] = await Promise.all([
+    listParticipantes(rondaId),
+    listFichaResumenesByRonda(rondaId),
+  ])
 
   const sp = searchParams ? await searchParams : {}
   const success = getParam(sp.success)
@@ -417,6 +448,9 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
                       Envíos
                     </th>
                     <th className="pb-3 pr-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                      Ficha
+                    </th>
+                    <th className="pb-3 pr-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
                       Enlace
                     </th>
                     <th className="pb-3 pr-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
@@ -434,6 +468,7 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
                       participante={p}
                       canEdit={canEdit}
                       rondaCodigo={ronda.codigo}
+                      ficha={fichasMap[p.id]}
                     />
                   ))}
                 </tbody>
