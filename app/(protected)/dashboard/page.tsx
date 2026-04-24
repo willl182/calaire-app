@@ -9,6 +9,7 @@ import {
   changeRondaStatusAction,
   createRondaAction,
   deleteRondaAction,
+  reabrirRondaAction,
   updateRondaAction,
 } from '@/app/(protected)/dashboard/actions'
 import { isAdmin, requireAuth } from '@/lib/auth'
@@ -220,9 +221,15 @@ function RondaForm({
 function StatusAction({ round }: { round: Ronda }) {
   if (round.estado === 'cerrada') {
     return (
-      <span className="rounded-full border border-[var(--border)] px-3 py-1 text-xs font-medium text-[var(--foreground-muted)]">
-        Sin acciones
-      </span>
+      <form action={reabrirRondaAction}>
+        <input type="hidden" name="ronda_id" value={round.id} />
+        <button
+          type="submit"
+          className="rounded-full border border-amber-300 px-3 py-1.5 text-xs font-medium text-amber-700 transition hover:bg-amber-50"
+        >
+          Reabrir ronda
+        </button>
+      </form>
     )
   }
 
@@ -475,9 +482,32 @@ function estadoParticipanteBadge(estado: Ronda['estado']) {
   return 'bg-amber-100 text-amber-800'
 }
 
+function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estado'] }) {
+  if (estado === 'enviado') {
+    return (
+      <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+        Ficha enviada ✓
+      </span>
+    )
+  }
+  if (estado === 'borrador') {
+    return (
+      <span className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
+        Ficha en borrador
+      </span>
+    )
+  }
+  return (
+    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+      Ficha no iniciada
+    </span>
+  )
+}
+
 function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) {
   const esActiva = ronda.estado === 'activa'
   const esBorrador = ronda.estado === 'borrador'
+  const fichaEnviada = ronda.ficha_estado === 'enviado'
 
   return (
     <article className="card grid gap-4 p-6">
@@ -494,23 +524,44 @@ function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) 
           <p className="text-sm text-[var(--foreground-muted)]">
             Código <span className="font-medium text-[var(--foreground)]">{ronda.codigo}</span>
           </p>
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            <FichaBadge estado={ronda.ficha_estado} />
+          </div>
         </div>
 
-        {esActiva && (
-          <Link href={`/ronda/${ronda.codigo}`} className="btn-primary self-start">
-            Ingresar datos →
-          </Link>
-        )}
-        {ronda.estado === 'cerrada' && (
-          <Link href={`/ronda/${ronda.codigo}`} className="btn-outline self-start">
-            Ver mis envíos
-          </Link>
-        )}
-        {esBorrador && (
-          <span className="self-start rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-700">
-            Próximamente
-          </span>
-        )}
+        <div className="flex flex-col items-start gap-2 sm:items-end">
+          {esActiva && (
+            <Link href={`/ronda/${ronda.codigo}`} className="btn-primary self-start">
+              Ingresar datos →
+            </Link>
+          )}
+          {ronda.estado === 'cerrada' && (
+            <Link href={`/ronda/${ronda.codigo}`} className="btn-outline self-start">
+              Ver mis envíos
+            </Link>
+          )}
+          {esBorrador && (
+            <span className="self-start rounded-full border border-amber-200 bg-amber-50 px-4 py-2 text-xs font-medium text-amber-700">
+              Próximamente
+            </span>
+          )}
+          {esActiva && !fichaEnviada && (
+            <Link
+              href={`/ronda/${ronda.codigo}/registro`}
+              className="self-start rounded-full border border-[var(--border)] px-3 py-1.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
+            >
+              {ronda.ficha_estado === 'borrador' ? 'Continuar ficha →' : 'Iniciar ficha →'}
+            </Link>
+          )}
+          {fichaEnviada && (
+            <Link
+              href={`/ronda/${ronda.codigo}/registro`}
+              className="self-start text-xs text-[var(--foreground-muted)] underline-offset-2 hover:underline"
+            >
+              Ver ficha enviada
+            </Link>
+          )}
+        </div>
       </div>
 
       {ronda.contaminantes.length > 0 && (

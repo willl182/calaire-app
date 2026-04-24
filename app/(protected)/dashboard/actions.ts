@@ -319,6 +319,41 @@ export async function changeRondaStatusAction(formData: FormData) {
   redirect(targetUrl)
 }
 
+export async function reabrirRondaAction(formData: FormData) {
+  await requireAdmin()
+
+  let targetUrl = buildErrorUrl('No fue posible reabrir la ronda.')
+
+  try {
+    const rondaId = parseText(formData, 'ronda_id')
+    if (!rondaId) throw new Error('No se recibió la ronda.')
+
+    const { data: ronda, error: rondaError } = await getSupabaseAdmin()
+      .from('rondas')
+      .select('id, estado')
+      .eq('id', rondaId)
+      .single()
+
+    if (rondaError || !ronda) throw new Error('La ronda no existe.')
+    if (ronda.estado !== 'cerrada') throw new Error('Solo se pueden reabrir rondas cerradas.')
+
+    const { error: updateError } = await getSupabaseAdmin()
+      .from('rondas')
+      .update({ estado: 'activa' satisfies EstadoRonda })
+      .eq('id', rondaId)
+
+    if (updateError) throw new Error(updateError.message)
+
+    revalidatePath('/dashboard')
+    targetUrl = buildSuccessUrl('Ronda reabierta correctamente.')
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No fue posible reabrir la ronda.'
+    targetUrl = buildErrorUrl(message)
+  }
+
+  redirect(targetUrl)
+}
+
 export async function deleteRondaAction(formData: FormData) {
   await requireAdmin()
 

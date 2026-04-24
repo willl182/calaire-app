@@ -1,0 +1,436 @@
+'use client'
+
+import { useState, useCallback } from 'react'
+import type { FichaCompleta, AcompananteInput, AnalizadorInput, InstrumentoInput } from '@/lib/fichas'
+import { adminGuardarCampoFichaAction, adminGuardarListasAction } from './actions'
+
+const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
+
+type Props = {
+  fichaId: string
+  ficha: FichaCompleta
+}
+
+type SaveState = 'idle' | 'saving' | 'saved' | 'error'
+
+function FieldSaveIndicator({ state }: { state: SaveState }) {
+  if (state === 'saving') return <span className="text-xs text-[var(--foreground-muted)]">Guardando…</span>
+  if (state === 'saved') return <span className="text-xs text-emerald-600">✓ Guardado</span>
+  if (state === 'error') return <span className="text-xs text-rose-600">Error al guardar</span>
+  return null
+}
+
+function SectionHeader({ title, description }: { title: string; description?: string }) {
+  return (
+    <div className="border-b border-[var(--border)] pb-3">
+      <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{title}</h3>
+      {description && <p className="mt-1 text-sm text-[var(--foreground-muted)]">{description}</p>}
+    </div>
+  )
+}
+
+export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props) {
+  const [fieldStates, setFieldStates] = useState<Record<string, SaveState>>({})
+
+  const [acompanantes, setAcompanantes] = useState<AcompananteInput[]>(
+    fichaInicial.acompanantes.map(({ sort_order, nombre_completo, documento_identidad, rol }) => ({
+      sort_order, nombre_completo, documento_identidad, rol,
+    }))
+  )
+  const [analizadores, setAnalizadores] = useState<AnalizadorInput[]>(
+    fichaInicial.analizadores.map(({ sort_order, analito, fabricante, modelo, numero_serie, metodo_epa, fecha_ultima_calibracion, tipo_verificacion, incertidumbre_declarada, unidad_salida }) => ({
+      sort_order, analito, fabricante, modelo, numero_serie, metodo_epa, fecha_ultima_calibracion, tipo_verificacion, incertidumbre_declarada, unidad_salida,
+    }))
+  )
+  const [instrumentos, setInstrumentos] = useState<InstrumentoInput[]>(
+    fichaInicial.instrumentos.map(({ sort_order, equipo, marca_modelo, numero_serie, cantidad }) => ({
+      sort_order, equipo, marca_modelo, numero_serie, cantidad,
+    }))
+  )
+
+  const [listSaving, setListSaving] = useState(false)
+  const [listSaved, setListSaved] = useState(false)
+  const [listError, setListError] = useState<string | null>(null)
+
+  const handleBlur = useCallback(
+    async (field: string, value: string) => {
+      setFieldStates((prev) => ({ ...prev, [field]: 'saving' }))
+      const result = await adminGuardarCampoFichaAction(fichaId, field, value || null)
+      setFieldStates((prev) => ({ ...prev, [field]: result.ok ? 'saved' : 'error' }))
+    },
+    [fichaId]
+  )
+
+  const handleCheckboxChange = useCallback(
+    async (field: string, checked: boolean) => {
+      setFieldStates((prev) => ({ ...prev, [field]: 'saving' }))
+      const result = await adminGuardarCampoFichaAction(fichaId, field, checked)
+      setFieldStates((prev) => ({ ...prev, [field]: result.ok ? 'saved' : 'error' }))
+    },
+    [fichaId]
+  )
+
+  const handleGuardarListas = async () => {
+    setListSaving(true)
+    setListSaved(false)
+    setListError(null)
+    const result = await adminGuardarListasAction(fichaId, acompanantes, analizadores, instrumentos)
+    setListSaving(false)
+    if (result.ok) setListSaved(true)
+    else setListError(result.error ?? 'Error al guardar listas')
+  }
+
+  const inputClass =
+    'rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0 w-full'
+  const labelClass = 'grid gap-1 text-sm text-[var(--foreground-muted)]'
+
+  return (
+    <div className="flex flex-col gap-6">
+      {/* Datos del participante */}
+      <section className="card grid gap-5 p-6">
+        <SectionHeader
+          title="Datos del participante"
+          description="Información del laboratorio responsable de los ensayos."
+        />
+        <div className="grid gap-4 md:grid-cols-2">
+          {([
+            ['nombre_laboratorio', 'Nombre del laboratorio'],
+            ['nombre_responsable', 'Nombre del responsable'],
+            ['cargo', 'Cargo'],
+            ['ciudad', 'Ciudad'],
+            ['departamento', 'Departamento'],
+            ['telefono', 'Teléfono'],
+          ] as const).map(([field, label]) => (
+            <label key={field} className={labelClass}>
+              <span className="flex items-center justify-between">
+                {label}
+                <FieldSaveIndicator state={fieldStates[field] ?? 'idle'} />
+              </span>
+              <input
+                type="text"
+                className={inputClass}
+                defaultValue={fichaInicial[field] ?? ''}
+                onBlur={(e) => handleBlur(field, e.target.value)}
+              />
+            </label>
+          ))}
+        </div>
+      </section>
+
+      {/* Personal acompañante */}
+      <section className="card grid gap-5 p-6">
+        <SectionHeader title="Personal acompañante" />
+        {acompanantes.length === 0 && (
+          <p className="text-sm text-[var(--foreground-muted)]">Sin acompañantes registrados.</p>
+        )}
+        <div className="grid gap-3">
+          {acompanantes.map((item, idx) => (
+            <div key={idx} className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 md:grid-cols-3">
+              <label className={labelClass}>
+                <span>Nombre completo</span>
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={item.nombre_completo}
+                  onChange={(e) => {
+                    setAcompanantes((prev) => prev.map((a, i) => i === idx ? { ...a, nombre_completo: e.target.value } : a))
+                    setListSaved(false)
+                  }}
+                />
+              </label>
+              <label className={labelClass}>
+                <span>Documento de identidad</span>
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={item.documento_identidad}
+                  onChange={(e) => {
+                    setAcompanantes((prev) => prev.map((a, i) => i === idx ? { ...a, documento_identidad: e.target.value } : a))
+                    setListSaved(false)
+                  }}
+                />
+              </label>
+              <label className={labelClass}>
+                <span className="flex items-center justify-between">
+                  Rol
+                  <button
+                    type="button"
+                    className="text-xs text-rose-500 hover:text-rose-700"
+                    onClick={() => {
+                      setAcompanantes((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 })))
+                      setListSaved(false)
+                    }}
+                  >
+                    Quitar
+                  </button>
+                </span>
+                <input
+                  type="text"
+                  className={inputClass}
+                  value={item.rol}
+                  onChange={(e) => {
+                    setAcompanantes((prev) => prev.map((a, i) => i === idx ? { ...a, rol: e.target.value } : a))
+                    setListSaved(false)
+                  }}
+                />
+              </label>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="btn-outline self-start"
+          onClick={() => {
+            setAcompanantes((prev) => [...prev, { sort_order: prev.length + 1, nombre_completo: '', documento_identidad: '', rol: '' }])
+            setListSaved(false)
+          }}
+        >
+          + Agregar acompañante
+        </button>
+      </section>
+
+      {/* Analizadores */}
+      <section className="card grid gap-5 p-6">
+        <SectionHeader title="Analizadores declarados" />
+        {analizadores.length === 0 && (
+          <p className="text-sm text-[var(--foreground-muted)]">Sin analizadores registrados.</p>
+        )}
+        <div className="grid gap-4">
+          {analizadores.map((item, idx) => (
+            <div key={idx} className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Analizador {idx + 1}
+                </span>
+                <button
+                  type="button"
+                  className="text-xs text-rose-500 hover:text-rose-700"
+                  onClick={() => {
+                    setAnalizadores((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 })))
+                    setListSaved(false)
+                  }}
+                >
+                  Quitar
+                </button>
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                <label className={labelClass}>
+                  <span>Analito</span>
+                  <select
+                    className={inputClass}
+                    value={item.analito}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, analito: e.target.value } : a)); setListSaved(false) }}
+                  >
+                    <option value="">Seleccionar…</option>
+                    {ANALITOS.map((a) => <option key={a} value={a}>{a}</option>)}
+                  </select>
+                </label>
+                <label className={labelClass}>
+                  <span>Fabricante</span>
+                  <input type="text" className={inputClass} value={item.fabricante}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, fabricante: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Modelo</span>
+                  <input type="text" className={inputClass} value={item.modelo}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, modelo: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Número de serie</span>
+                  <input type="text" className={inputClass} value={item.numero_serie}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, numero_serie: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Método EPA</span>
+                  <input type="text" className={inputClass} value={item.metodo_epa}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, metodo_epa: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Fecha última calibración</span>
+                  <input type="date" className={inputClass} value={item.fecha_ultima_calibracion ?? ''}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, fecha_ultima_calibracion: e.target.value || null } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Tipo de verificación</span>
+                  <input type="text" className={inputClass} value={item.tipo_verificacion}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, tipo_verificacion: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Incertidumbre declarada</span>
+                  <input type="text" className={inputClass} value={item.incertidumbre_declarada}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, incertidumbre_declarada: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+                <label className={labelClass}>
+                  <span>Unidad de salida</span>
+                  <input type="text" className={inputClass} value={item.unidad_salida}
+                    onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, unidad_salida: e.target.value } : a)); setListSaved(false) }} />
+                </label>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="btn-outline self-start"
+          onClick={() => {
+            setAnalizadores((prev) => [
+              ...prev,
+              { sort_order: prev.length + 1, analito: '', fabricante: '', modelo: '', numero_serie: '', metodo_epa: '', fecha_ultima_calibracion: null, tipo_verificacion: '', incertidumbre_declarada: '', unidad_salida: '' },
+            ])
+            setListSaved(false)
+          }}
+        >
+          + Agregar analizador
+        </button>
+      </section>
+
+      {/* Instrumentos auxiliares */}
+      <section className="card grid gap-5 p-6">
+        <SectionHeader title="Instrumentos auxiliares" />
+        {instrumentos.length === 0 && (
+          <p className="text-sm text-[var(--foreground-muted)]">Sin instrumentos registrados.</p>
+        )}
+        <div className="grid gap-3">
+          {instrumentos.map((item, idx) => (
+            <div key={idx} className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 md:grid-cols-4">
+              <label className={labelClass}>
+                <span>Equipo</span>
+                <input type="text" className={inputClass} value={item.equipo}
+                  onChange={(e) => { setInstrumentos((prev) => prev.map((a, i) => i === idx ? { ...a, equipo: e.target.value } : a)); setListSaved(false) }} />
+              </label>
+              <label className={labelClass}>
+                <span>Marca / Modelo</span>
+                <input type="text" className={inputClass} value={item.marca_modelo}
+                  onChange={(e) => { setInstrumentos((prev) => prev.map((a, i) => i === idx ? { ...a, marca_modelo: e.target.value } : a)); setListSaved(false) }} />
+              </label>
+              <label className={labelClass}>
+                <span>Número de serie</span>
+                <input type="text" className={inputClass} value={item.numero_serie}
+                  onChange={(e) => { setInstrumentos((prev) => prev.map((a, i) => i === idx ? { ...a, numero_serie: e.target.value } : a)); setListSaved(false) }} />
+              </label>
+              <label className={labelClass}>
+                <span className="flex items-center justify-between">
+                  Cantidad
+                  <button type="button" className="text-xs text-rose-500 hover:text-rose-700"
+                    onClick={() => { setInstrumentos((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 }))); setListSaved(false) }}>
+                    Quitar
+                  </button>
+                </span>
+                <input type="number" min="1" className={inputClass} value={item.cantidad}
+                  onChange={(e) => { setInstrumentos((prev) => prev.map((a, i) => i === idx ? { ...a, cantidad: Number(e.target.value) || 1 } : a)); setListSaved(false) }} />
+              </label>
+            </div>
+          ))}
+        </div>
+        <button
+          type="button"
+          className="btn-outline self-start"
+          onClick={() => {
+            setInstrumentos((prev) => [...prev, { sort_order: prev.length + 1, equipo: '', marca_modelo: '', numero_serie: '', cantidad: 1 }])
+            setListSaved(false)
+          }}
+        >
+          + Agregar instrumento
+        </button>
+      </section>
+
+      {/* Logística */}
+      <section className="card grid gap-5 p-6">
+        <SectionHeader title="Logística" />
+        <div className="grid gap-4 md:grid-cols-2">
+          <label className={labelClass}>
+            <span className="flex items-center justify-between">
+              Medio de transporte
+              <FieldSaveIndicator state={fieldStates['transporte'] ?? 'idle'} />
+            </span>
+            <input type="text" className={inputClass} defaultValue={fichaInicial.transporte ?? ''}
+              onBlur={(e) => handleBlur('transporte', e.target.value)} />
+          </label>
+          <label className={labelClass}>
+            <span className="flex items-center justify-between">
+              Hora estimada de llegada
+              <FieldSaveIndicator state={fieldStates['hora_llegada'] ?? 'idle'} />
+            </span>
+            <input type="time" className={inputClass} defaultValue={fichaInicial.hora_llegada ?? ''}
+              onBlur={(e) => handleBlur('hora_llegada', e.target.value)} />
+          </label>
+        </div>
+        <label className="inline-flex items-center gap-3 text-sm text-[var(--foreground)]">
+          <input
+            type="checkbox"
+            className="h-4 w-4 rounded border-[var(--border)]"
+            defaultChecked={fichaInicial.estacionamiento}
+            onChange={(e) => handleCheckboxChange('estacionamiento', e.target.checked)}
+          />
+          <span>Requiere estacionamiento</span>
+          <FieldSaveIndicator state={fieldStates['estacionamiento'] ?? 'idle'} />
+        </label>
+        <label className={labelClass}>
+          <span className="flex items-center justify-between">
+            Observaciones de logística
+            <FieldSaveIndicator state={fieldStates['observaciones'] ?? 'idle'} />
+          </span>
+          <textarea
+            rows={3}
+            className={`${inputClass} resize-none`}
+            defaultValue={fichaInicial.observaciones ?? ''}
+            onBlur={(e) => handleBlur('observaciones', e.target.value)}
+          />
+        </label>
+      </section>
+
+      {/* Declaraciones */}
+      <section className="card grid gap-5 p-6">
+        <SectionHeader title="Declaraciones" />
+        <div className="grid gap-4">
+          {([
+            ['dec_datos_correctos', 'Los datos consignados en esta ficha son correctos y verificables.'],
+            ['dec_acepta_condiciones', 'Acepta las condiciones de participación en la ronda de ensayo de aptitud.'],
+            ['dec_compromisos', 'Se compromete a seguir los procedimientos establecidos durante el ensayo.'],
+            ['dec_firma_autorizada', 'La firma registrada está autorizada por la dirección del laboratorio.'],
+          ] as const).map(([field, texto]) => (
+            <label key={field} className="flex items-start gap-3 text-sm text-[var(--foreground)]">
+              <input
+                type="checkbox"
+                className="mt-0.5 h-4 w-4 shrink-0 rounded border-[var(--border)]"
+                defaultChecked={fichaInicial[field]}
+                onChange={(e) => handleCheckboxChange(field, e.target.checked)}
+              />
+              <span className="flex-1">{texto}</span>
+              <FieldSaveIndicator state={fieldStates[field] ?? 'idle'} />
+            </label>
+          ))}
+        </div>
+        <label className={labelClass}>
+          <span className="flex items-center justify-between">
+            Nombre para la firma
+            <FieldSaveIndicator state={fieldStates['nombre_firma'] ?? 'idle'} />
+          </span>
+          <input
+            type="text"
+            className={inputClass}
+            defaultValue={fichaInicial.nombre_firma ?? ''}
+            onBlur={(e) => handleBlur('nombre_firma', e.target.value)}
+          />
+        </label>
+      </section>
+
+      {/* Guardar listas */}
+      <section className="card grid gap-4 p-6">
+        <SectionHeader title="Guardar listas" description="Guarda los cambios en acompañantes, analizadores e instrumentos." />
+        <div className="flex flex-wrap items-center gap-4">
+          <button
+            type="button"
+            className="btn-outline"
+            disabled={listSaving}
+            onClick={handleGuardarListas}
+          >
+            {listSaving ? 'Guardando…' : 'Guardar listas'}
+          </button>
+          {listSaved && <span className="text-sm text-emerald-600">✓ Listas guardadas</span>}
+          {listError && <span className="text-sm text-rose-600">{listError}</span>}
+        </div>
+      </section>
+    </div>
+  )
+}
