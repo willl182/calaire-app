@@ -908,7 +908,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   CALAIRE APP
                 </p>
                 <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-                  Dashboard de rondas de ensayo
+                  Dashboard de gestión de rondas de ensayos de aptitud
                 </h1>
                 <p className="text-sm text-[var(--foreground-muted)]">
                   {auth.user.email} · {admin ? 'Coordinador' : 'Participante'}
