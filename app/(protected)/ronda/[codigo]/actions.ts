@@ -3,6 +3,7 @@
 import { isAdmin, requireAuth } from '@/lib/auth'
 import {
   getEstadoEnvioPTParticipante,
+  getRequiredPTReplicateCount,
   getRonda,
   getRondaParticipantePT,
   isInvitado,
@@ -17,8 +18,8 @@ export async function guardarEnvioAction(
   ptItemId: string,
   sampleGroupId: string,
   d1: number,
-  d2: number,
-  d3: number,
+  d2: number | null,
+  d3: number | null,
   meanValue: number,
   sdValue: number,
   ux: number,
@@ -60,8 +61,13 @@ export async function guardarEnvioAction(
     return { error: 'El grupo de muestra no pertenece a esta ronda.' }
   }
 
-  if (!Number.isFinite(d1) || !Number.isFinite(d2) || !Number.isFinite(d3)) {
-    return { error: 'Los tres datos individuales deben ser números válidos.' }
+  const item = items.find((candidate) => candidate.id === ptItemId)
+  const requiredReplicates = item ? getRequiredPTReplicateCount(item, items) : 3
+  if (!Number.isFinite(d1)) {
+    return { error: 'd1 debe ser un número válido.' }
+  }
+  if (requiredReplicates === 3 && (!Number.isFinite(d2) || !Number.isFinite(d3))) {
+    return { error: 'd2 y d3 deben ser números válidos para niveles distintos de la concentración inicial.' }
   }
   if (!Number.isFinite(meanValue)) {
     return { error: 'El promedio debe ser un número válido.' }

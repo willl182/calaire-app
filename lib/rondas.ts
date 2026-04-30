@@ -19,6 +19,19 @@ export type RondaPTItem = {
   created_at: string
 }
 
+export function isInitialConcentrationLevel(item: RondaPTItem, ptItems: RondaPTItem[]): boolean {
+  const sameContaminante = ptItems.filter((candidate) => candidate.contaminante === item.contaminante)
+  const lowestSortOrder = Math.min(...sameContaminante.map((candidate) => candidate.sort_order))
+  const normalizedLevel = item.level_label.trim().toLowerCase().replace(',', '.')
+  const numericLevel = Number(normalizedLevel)
+
+  return item.sort_order === lowestSortOrder || normalizedLevel === 'cero' || numericLevel === 0
+}
+
+export function getRequiredPTReplicateCount(item: RondaPTItem, ptItems: RondaPTItem[]): 1 | 3 {
+  return isInitialConcentrationLevel(item, ptItems) ? 1 : 3
+}
+
 export type RondaPTItemInput = {
   runCode: string
   levelLabel: string
@@ -841,8 +854,8 @@ export async function upsertEnvioPT(
   ptItemId: string,
   sampleGroupId: string,
   d1: number,
-  d2: number,
-  d3: number,
+  d2: number | null,
+  d3: number | null,
   meanValue: number,
   sdValue: number,
   ux: number,
@@ -854,8 +867,8 @@ export async function upsertEnvioPT(
     ptItemId: ptItemId as Id<'rondaPtItems'>,
     sampleGroupId: sampleGroupId as Id<'rondaPtSampleGroups'>,
     d1,
-    d2,
-    d3,
+    d2: d2 ?? undefined,
+    d3: d3 ?? undefined,
     meanValue,
     sdValue,
     ux,

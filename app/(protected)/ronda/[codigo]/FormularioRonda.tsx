@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import {
   CONTAMINANTES,
+  getRequiredPTReplicateCount,
   type EnvioPT,
   type Ronda,
   type RondaPTItem,
@@ -38,8 +39,12 @@ function isValidNumberInput(value: string): boolean {
   return Number.isFinite(parsed)
 }
 
-function getCellIssue(data: CellData): string | null {
-  for (const [label, field] of [['d1', data.d1], ['d2', data.d2], ['d3', data.d3]] as const) {
+function getCellIssue(data: CellData, requiredReplicates: 1 | 3): string | null {
+  const fields = requiredReplicates === 1
+    ? ([['d1', data.d1]] as const)
+    : ([['d1', data.d1], ['d2', data.d2], ['d3', data.d3]] as const)
+
+  for (const [label, field] of fields) {
     if (field.trim() !== '' && !isValidNumberInput(field)) {
       return `${label} debe ser un número válido.`
     }
@@ -59,11 +64,13 @@ function getCellIssue(data: CellData): string | null {
   return null
 }
 
-function isCellComplete(data: CellData): boolean {
+function isCellComplete(data: CellData, requiredReplicates: 1 | 3): boolean {
+  const hasRequiredReplicates = requiredReplicates === 1
+    ? isValidNumberInput(data.d1)
+    : isValidNumberInput(data.d1) && isValidNumberInput(data.d2) && isValidNumberInput(data.d3)
+
   return (
-    isValidNumberInput(data.d1) &&
-    isValidNumberInput(data.d2) &&
-    isValidNumberInput(data.d3) &&
+    hasRequiredReplicates &&
     isValidNumberInput(data.meanValue) &&
     isValidNumberInput(data.sdValue) &&
     Number(data.sdValue) >= 0 &&
@@ -164,8 +171,18 @@ export default function FormularioRonda({
   const hasParticipantCodes = Boolean(participantCode) && replicateCode != null
 
   const totalCells = ptItems.length * sampleGroups.length
-  const completedCells = Object.values(cells).filter((cell) => isCellComplete(cell)).length
-  const invalidCells = Object.values(cells).filter((cell) => getCellIssue(cell) !== null).length
+  const cellEntries = ptItems.flatMap((item) =>
+    sampleGroups.map((group) => ({
+      key: toCellKey(item.id, group.id),
+      requiredReplicates: getRequiredPTReplicateCount(item, ptItems),
+    }))
+  )
+  const completedCells = cellEntries.filter(({ key, requiredReplicates }) =>
+    isCellComplete(cells[key], requiredReplicates)
+  ).length
+  const invalidCells = cellEntries.filter(({ key, requiredReplicates }) =>
+    getCellIssue(cells[key], requiredReplicates) !== null
+  ).length
   const progressPct = totalCells > 0 ? Math.round((completedCells / totalCells) * 100) : 0
   const allComplete = totalCells > 0 && completedCells === totalCells
   const allSaved = Object.values(saveStatus).every((status) => status === 'saved' || status === 'idle')
@@ -182,25 +199,27 @@ export default function FormularioRonda({
   }, [])
 
   async function triggerSave(key: CellKey, data: CellData) {
-    const issue = getCellIssue(data)
+    const { ptItemId, sampleGroupId } = fromCellKey(key)
+    const item = ptItems.find((candidate) => candidate.id === ptItemId)
+    const requiredReplicates = item ? getRequiredPTReplicateCount(item, ptItems) : 3
+    const issue = getCellIssue(data, requiredReplicates)
     if (issue) {
       setSaveStatus((prev) => ({ ...prev, [key]: 'error' }))
       setSaveErrors((prev) => ({ ...prev, [key]: issue }))
       return
     }
-    if (!isCellComplete(data)) return
+    if (!isCellComplete(data, requiredReplicates)) return
     if (soloLectura) return
 
     const d1 = Number(data.d1)
-    const d2 = Number(data.d2)
-    const d3 = Number(data.d3)
+    const d2 = requiredReplicates === 1 ? null : Number(data.d2)
+    const d3 = requiredReplicates === 1 ? null : Number(data.d3)
     const meanValue = Number(data.meanValue)
     const sdValue = Number(data.sdValue)
     const ux = Number(data.ux)
     const uxExp = Number(data.uxExp)
     setSaveStatus((prev) => ({ ...prev, [key]: 'saving' }))
 
-    const { ptItemId, sampleGroupId } = fromCellKey(key)
     const result = await guardarEnvioAction(ronda.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp)
 
     if (result.error) {
@@ -367,7 +386,9 @@ export default function FormularioRonda({
             items.length > 0 &&
             sampleGroups.length > 0 &&
             items.every((item) =>
-              sampleGroups.every((group) => isCellComplete(cells[toCellKey(item.id, group.id)]))
+              sampleGroups.every((group) =>
+                isCellComplete(cells[toCellKey(item.id, group.id)], getRequiredPTReplicateCount(item, ptItems))
+              )
             )
 
           return (
@@ -414,9 +435,10 @@ export default function FormularioRonda({
                       sampleGroups.map((group) => {
                         const key = toCellKey(item.id, group.id)
                         const data = cells[key]
-                        const issue = saveErrors[key] ?? getCellIssue(data)
+                        const requiredReplicates = getRequiredPTReplicateCount(item, ptItems)
+                        const issue = saveErrors[key] ?? getCellIssue(data, requiredReplicates)
                         const status = saveStatus[key] ?? 'idle'
-                        const complete = isCellComplete(data)
+                        const complete = isCellComplete(data, requiredReplicates)
 
                         const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
@@ -434,14 +456,14 @@ export default function FormularioRonda({
                             {sampleGroups.length > 1 && (
                               <td className="px-4 py-2 text-[var(--foreground-muted)]">{group.sample_group}</td>
                             )}
-                            {(['d1', 'd2', 'd3'] as const).map((field) => (
+                            {(['d1', 'd2', 'd3'] as const).map((field, index) => (
                               <td key={field} className="px-2 py-2">
                                 <input
                                   type="number"
                                   step="any"
                                   inputMode="decimal"
                                   value={data[field]}
-                                  disabled={soloLectura}
+                                  disabled={soloLectura || index >= requiredReplicates}
                                   onChange={(e) => updateCell(key, { ...data, [field]: e.target.value })}
                                   className={inputCls}
                                 />
