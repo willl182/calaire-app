@@ -88,7 +88,7 @@ export default async function NuevaRondaPage() {
               </p>
             </div>
 
-            <div className="grid gap-2">
+            <div className="grid gap-2 md:grid-cols-2">
               {CONTAMINANTES.map((contaminante) => (
                 <div
                   key={contaminante}
