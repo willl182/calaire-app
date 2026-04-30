@@ -11,7 +11,7 @@ export default async function NuevaRondaPage() {
 
   return (
     <div className="min-h-screen px-6 py-8">
-      <div className="mx-auto max-w-3xl flex flex-col gap-6">
+      <div className="mx-auto max-w-5xl flex flex-col gap-6">
 
         <div className="flex items-center gap-3">
           <Link
