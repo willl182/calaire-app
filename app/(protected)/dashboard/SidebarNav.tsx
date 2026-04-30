@@ -82,13 +82,7 @@ function TopNavInner() {
         {/* Brand */}
         <div className="flex items-center pr-6 border-r border-[var(--border-soft)] py-4">
           <span className="text-xs font-bold tracking-[0.18em] uppercase text-[var(--foreground)]">
-            CALAIRE
-          </span>
-          <span
-            className="ml-1 text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded"
-            style={{ background: 'var(--pt-primary)', color: 'var(--foreground)' }}
-          >
-            EA
+            CALAIRE APP
           </span>
         </div>
 
