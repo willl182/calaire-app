@@ -57,6 +57,12 @@ test('mapea niveles flexibles y convierte NA de sd_value a cero para nivel inici
   assert.equal(preview.cells.length, 4)
   assert.equal(preview.cells.find((cell) => cell.ptItemId === 'co-0')?.sdValue, 0)
   assert.equal(preview.cells.find((cell) => cell.ptItemId === 'so2-0')?.sdValue, 0)
+
+  const co63 = preview.cells.find((cell) => cell.ptItemId === 'co-63')
+  assert.equal(co63?.d1, 6.2805)
+  assert.equal(co63?.d2, 6.2807)
+  assert.equal(co63?.d3, 6.31706666666667)
+  assert.equal(co63?.meanValue, 6.29275555555556)
 })
 
 test('rechaza NA en mean_value o u_value', () => {
@@ -92,6 +98,9 @@ test('reporta contaminantes y niveles sin configuracion', () => {
       level: '1-ppb',
       unit: 'ppb',
       instrument: 'ref',
+      meanH1: 1,
+      meanH2: 1,
+      meanH3: 1,
       meanValue: 1,
       sdValue: 0.1,
       ux: 0.1,
@@ -105,6 +114,9 @@ test('reporta contaminantes y niveles sin configuracion', () => {
       level: '999-ppm',
       unit: 'ppm',
       instrument: 'ref',
+      meanH1: 1,
+      meanH2: 1,
+      meanH3: 1,
       meanValue: 1,
       sdValue: 0.1,
       ux: 0.1,

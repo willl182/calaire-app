@@ -22,6 +22,9 @@ export type ParsedReferenciaRow = {
   level: string
   unit: string
   instrument: string
+  meanH1: number
+  meanH2: number | null
+  meanH3: number | null
   meanValue: number
   sdValue: number | null
   ux: number
@@ -134,6 +137,13 @@ function parseRequiredNumber(value: string, label: string, rowNumber: number): n
   return parsed
 }
 
+function parseOptionalNumber(value: string): number | null {
+  const trimmed = value.trim()
+  if (trimmed === '' || trimmed.toUpperCase() === 'NA') return null
+  const parsed = Number(trimmed)
+  return Number.isFinite(parsed) ? parsed : null
+}
+
 export function parseReferenciaCsv(text: string): ParsedReferenciaRow[] {
   const records = parseCsvRecords(text)
   if (records.length === 0) return []
@@ -145,7 +155,7 @@ export function parseReferenciaCsv(text: string): ParsedReferenciaRow[] {
   }
 
   const indexByColumn = new Map(header.map((column, index) => [column, index]))
-  const getValue = (record: string[], column: (typeof REQUIRED_COLUMNS)[number]) =>
+  const getValue = (record: string[], column: string) =>
     record[indexByColumn.get(column) ?? -1]?.trim() ?? ''
 
   return records.slice(1).map((record, index) => {
@@ -157,6 +167,7 @@ export function parseReferenciaCsv(text: string): ParsedReferenciaRow[] {
 
     const sdRaw = getValue(record, 'sd_value')
     const sdValue = sdRaw === '' || sdRaw.toUpperCase() === 'NA' ? null : parseRequiredNumber(sdRaw, 'sd_value', rowNumber)
+    const meanValue = parseRequiredNumber(getValue(record, 'mean_value'), 'mean_value', rowNumber)
 
     return {
       rowNumber,
@@ -165,7 +176,10 @@ export function parseReferenciaCsv(text: string): ParsedReferenciaRow[] {
       level: getValue(record, 'level'),
       unit: getValue(record, 'unit'),
       instrument: getValue(record, 'instrument'),
-      meanValue: parseRequiredNumber(getValue(record, 'mean_value'), 'mean_value', rowNumber),
+      meanH1: indexByColumn.has('mean_h1') ? (parseOptionalNumber(getValue(record, 'mean_h1')) ?? meanValue) : meanValue,
+      meanH2: indexByColumn.has('mean_h2') ? parseOptionalNumber(getValue(record, 'mean_h2')) : meanValue,
+      meanH3: indexByColumn.has('mean_h3') ? parseOptionalNumber(getValue(record, 'mean_h3')) : meanValue,
+      meanValue,
       sdValue,
       ux: parseRequiredNumber(getValue(record, 'u_value'), 'u_value', rowNumber),
       nHours: parseRequiredNumber(getValue(record, 'n_hours'), 'n_hours', rowNumber),
@@ -213,9 +227,15 @@ export function buildReferenciaImportPreview(
       continue
     }
 
+    if (requiredReplicates === 3 && (row.meanH2 == null || row.meanH3 == null)) {
+      errors.push(`Fila ${row.rowNumber}: mean_h2 y mean_h3 son requeridos para niveles con tres replicas.`)
+      continue
+    }
+
     const sdValue = row.sdValue ?? 0
-    const d2 = requiredReplicates === 1 ? null : row.meanValue
-    const d3 = requiredReplicates === 1 ? null : row.meanValue
+    const d1 = row.meanH1
+    const d2 = requiredReplicates === 1 ? null : row.meanH2
+    const d3 = requiredReplicates === 1 ? null : row.meanH3
 
     for (const group of sampleGroups) {
       const cellKey = `${item.id}::${group.id}`
@@ -225,7 +245,7 @@ export function buildReferenciaImportPreview(
       cells.push({
         ptItemId: item.id,
         sampleGroupId: group.id,
-        d1: row.meanValue,
+        d1,
         d2,
         d3,
         meanValue: row.meanValue,
