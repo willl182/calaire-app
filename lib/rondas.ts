@@ -883,6 +883,13 @@ export async function upsertEnvioPT(
   return mapEnvioPTDoc(row)
 }
 
+export async function deleteParticipanteEnviosPT(rondaId: string, rondaParticipanteId: string): Promise<number> {
+  return fetchMutation(api.pt.deleteParticipanteEnviosPT, {
+    rondaId: rondaId as Id<'rondas'>,
+    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+  })
+}
+
 export async function submitFinalPT(rondaId: string, userId: string): Promise<string> {
   return fetchMutation(api.pt.submitFinalPT, {
     rondaId: rondaId as Id<'rondas'>,

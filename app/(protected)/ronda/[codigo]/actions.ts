@@ -2,6 +2,7 @@
 
 import { isAdmin, requireAuth } from '@/lib/auth'
 import {
+  deleteParticipanteEnviosPT,
   getEstadoEnvioPTParticipante,
   getRequiredPTReplicateCount,
   getRonda,
@@ -232,6 +233,44 @@ export async function enviarInformeFinalAction(
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : 'No fue posible enviar el informe final PT.',
+    }
+  }
+}
+
+export async function limpiarEnviosReferenciaAction(
+  rondaId: string
+): Promise<{ ok?: boolean; deleted?: number; error?: string }> {
+  const auth = await requireAuth()
+  if (!auth.user) return { error: 'No autenticado' }
+
+  const ronda = await getRonda(rondaId)
+  if (!ronda) return { error: 'La ronda no existe o ya no está disponible.' }
+  if (ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
+
+  if (!isAdmin(auth)) {
+    const invitado = await isInvitado(rondaId, auth.user.id)
+    if (!invitado) return { error: 'No tienes acceso a esta ronda.' }
+  }
+
+  const participante = await getRondaParticipantePT(rondaId, auth.user.id)
+  if (!participante) {
+    return { error: 'No fue posible encontrar la asignación del participante para esta ronda.' }
+  }
+  if (!isMemberSpecialRole(participante.participant_profile)) {
+    return { error: 'Solo el laboratorio de referencia puede limpiar los datos cargados.' }
+  }
+
+  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId, auth.user.id)
+  if (estadoEnvio.enviado) {
+    return { error: 'Ya enviaste tus resultados finales. No puedes limpiar los datos.' }
+  }
+
+  try {
+    const deleted = await deleteParticipanteEnviosPT(rondaId, participante.id)
+    return { ok: true, deleted }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'No fue posible limpiar los datos cargados.',
     }
   }
 }

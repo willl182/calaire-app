@@ -14,7 +14,7 @@ import {
   parseReferenciaCsv,
   type ReferenciaImportPreview,
 } from '@/lib/referencia-csv'
-import { enviarInformeFinalAction, guardarEnvioAction, guardarReferenciaCsvAction } from './actions'
+import { enviarInformeFinalAction, guardarEnvioAction, guardarReferenciaCsvAction, limpiarEnviosReferenciaAction } from './actions'
 
 type CellKey = `${string}::${string}`
 type CellData = {
@@ -360,11 +360,39 @@ export default function FormularioReferencia({
     setImportMessage(`Se cargaron ${result.saved ?? importPreview.cells.length} celdas desde el CSV.`)
   }
 
-  function clearImport() {
+  async function handleLimpiar() {
+    if (soloLectura) return
+
+    setImportStatus('saving')
+    setImportMessage(null)
+
+    const result = await limpiarEnviosReferenciaAction(ronda.id)
+    if (result.error) {
+      setImportStatus('error')
+      setImportMessage(result.error)
+      return
+    }
+
+    // Resetear celdas al estado vacío
+    setCells(() =>
+      initCells(
+        ptItems,
+        sampleGroups,
+        []
+      )
+    )
+    setSaveStatus(() =>
+      initStatus(
+        ptItems,
+        sampleGroups,
+        []
+      )
+    )
+    setSaveErrors({})
     setImportFile(null)
     setImportPreview(null)
     setImportStatus('idle')
-    setImportMessage(null)
+    setImportMessage(`Se eliminaron ${result.deleted ?? 0} registros cargados.`)
   }
 
   const itemsByContaminante = CONTAMINANTES.map((contaminante) => ({
@@ -520,8 +548,13 @@ export default function FormularioReferencia({
               >
                 Cargar datos
               </button>
-              <button type="button" onClick={clearImport} className="btn-outline" disabled={soloLectura && !importPreview}>
-                Limpiar
+              <button
+                type="button"
+                onClick={() => void handleLimpiar()}
+                className="btn-outline"
+                disabled={soloLectura || importStatus === 'saving'}
+              >
+                {importStatus === 'saving' ? 'Limpiando…' : 'Limpiar datos'}
               </button>
             </div>
           </div>

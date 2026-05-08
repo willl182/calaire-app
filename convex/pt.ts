@@ -449,6 +449,24 @@ export const updateParticipantePT = mutation({
   },
 })
 
+export const deleteParticipanteEnviosPT = mutation({
+  args: {
+    rondaId:             v.id('rondas'),
+    rondaParticipanteId: v.id('rondaParticipantes'),
+  },
+  handler: async (ctx, { rondaId, rondaParticipanteId }) => {
+    const envios = await ctx.db
+      .query('enviosPt')
+      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', rondaParticipanteId))
+      .collect()
+
+    // Solo eliminar envíos que NO tengan envío final (draft)
+    const drafts = envios.filter((e) => e.finalSubmittedAt == null)
+    await Promise.all(drafts.map((e) => ctx.db.delete(e._id)))
+    return drafts.length
+  },
+})
+
 export const deletePTItem = mutation({
   args: { rondaId: v.id('rondas'), itemId: v.id('rondaPtItems') },
   handler: async (ctx, { rondaId, itemId }) => {
