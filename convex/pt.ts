@@ -460,8 +460,8 @@ export const deleteParticipanteEnviosPT = mutation({
       .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', rondaParticipanteId))
       .collect()
 
-    // Solo eliminar envíos que NO tengan envío final (draft)
-    const drafts = envios.filter((e) => e.finalSubmittedAt == null)
+    // Solo eliminar envíos de esta ronda que NO tengan envío final (draft)
+    const drafts = envios.filter((e) => e.rondaId === rondaId && e.finalSubmittedAt == null)
     await Promise.all(drafts.map((e) => ctx.db.delete(e._id)))
     return drafts.length
   },
