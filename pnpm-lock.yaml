@@ -15,8 +15,8 @@ importers:
         specifier: 8.13.0
         version: 8.13.0
       convex:
-        specifier: ^1.36.1
-        version: 1.36.1(react@19.2.4)
+        specifier: ^1.38.0
+        version: 1.38.0(react@19.2.4)
       next:
         specifier: 16.2.4
         version: 16.2.4(@babel/core@7.29.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -1034,8 +1034,8 @@ packages:
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
 
-  convex@1.36.1:
-    resolution: {integrity: sha512-NVnwNqU+h8jyPuS0Itvj4MPH9c2yF+tA/RNoSDpCqiLhmYD4+kZxm0dDkVM0QDzz66wem9NqheBb9YQGsHwzBQ==}
+  convex@1.38.0:
+    resolution: {integrity: sha512-122AC6y5lUS7mr39cluLw9+TOtRX5d/XxeivHhHObs/NTXoVvOnIgDzexVcxaz6Rk0oLFSoydSR1rDCltEz/0A==}
     engines: {node: '>=18.0.0', npm: '>=7.0.0'}
     hasBin: true
     peerDependencies:
@@ -3065,7 +3065,7 @@ snapshots:
 
   convert-source-map@2.0.0: {}
 
-  convex@1.36.1(react@19.2.4):
+  convex@1.38.0(react@19.2.4):
     dependencies:
       esbuild: 0.27.0
       prettier: 3.8.3
