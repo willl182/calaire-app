@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
   CONTAMINANTES,
@@ -412,17 +413,22 @@ export default function FormularioReferencia({
               <h1 className="text-xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">Código: {ronda.codigo}</p>
             </div>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
-                ronda.estado === 'activa'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : ronda.estado === 'cerrada'
-                    ? 'bg-slate-200 text-slate-700'
-                    : 'bg-amber-100 text-amber-800'
-              }`}
-            >
-              {ronda.estado}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/dashboard" className="btn-outline">
+                Mi dashboard
+              </Link>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
+                  ronda.estado === 'activa'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : ronda.estado === 'cerrada'
+                      ? 'bg-slate-200 text-slate-700'
+                      : 'bg-amber-100 text-amber-800'
+                }`}
+              >
+                {ronda.estado}
+              </span>
+            </div>
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-4">
