@@ -6,12 +6,14 @@ import {
   getRequiredPTReplicateCount,
   getRonda,
   getRondaParticipantePT,
+  isMemberSpecialRole,
   isInvitado,
   listPTItems,
   listPTSampleGroups,
   submitFinalPT,
   upsertEnvioPT,
 } from '@/lib/rondas'
+import type { ReferenciaImportCell } from '@/lib/referencia-csv'
 
 export async function guardarEnvioAction(
   rondaId: string,
@@ -88,6 +90,95 @@ export async function guardarEnvioAction(
   } catch (error) {
     return {
       error: error instanceof Error ? error.message : 'No fue posible guardar el envío PT.',
+    }
+  }
+}
+
+export async function guardarReferenciaCsvAction(
+  rondaId: string,
+  rows: ReferenciaImportCell[]
+): Promise<{ ok?: boolean; saved?: number; errors?: string[]; error?: string }> {
+  const auth = await requireAuth()
+  if (!auth.user) return { error: 'No autenticado' }
+
+  const ronda = await getRonda(rondaId)
+  if (!ronda) return { error: 'La ronda no existe o ya no está disponible.' }
+  if (ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
+
+  if (!isAdmin(auth)) {
+    const invitado = await isInvitado(rondaId, auth.user.id)
+    if (!invitado) return { error: 'No tienes acceso a esta ronda.' }
+  }
+
+  const participante = await getRondaParticipantePT(rondaId, auth.user.id)
+  if (!participante) {
+    return { error: 'No fue posible encontrar la asignación del participante para esta ronda.' }
+  }
+  if (!isMemberSpecialRole(participante.participant_profile)) {
+    return { error: 'La carga CSV solo está habilitada para el laboratorio de referencia.' }
+  }
+  if (!participante.participant_code || participante.replicate_code == null) {
+    return {
+      error:
+        'Aún no tienes código PT o código de réplica asignado. Contacta al coordinador para continuar.',
+    }
+  }
+
+  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId, auth.user.id)
+  if (estadoEnvio.enviado) {
+    return { error: 'Ya enviaste tus resultados finales. Solo puedes consultarlos.' }
+  }
+
+  const [items, sampleGroups] = await Promise.all([listPTItems(rondaId), listPTSampleGroups(rondaId)])
+  const itemsById = new Map(items.map((item) => [item.id, item]))
+  const sampleGroupIds = new Set(sampleGroups.map((group) => group.id))
+  const errors: string[] = []
+
+  rows.forEach((row, index) => {
+    const label = `Fila importada ${index + 1}`
+    const item = itemsById.get(row.ptItemId)
+    if (!item) errors.push(`${label}: la corrida PT no pertenece a esta ronda.`)
+    if (!sampleGroupIds.has(row.sampleGroupId)) errors.push(`${label}: el grupo de muestra no pertenece a esta ronda.`)
+
+    const requiredReplicates = item ? getRequiredPTReplicateCount(item, items) : 3
+    if (!Number.isFinite(row.d1)) errors.push(`${label}: d1 debe ser un número válido.`)
+    if (requiredReplicates === 3 && (!Number.isFinite(row.d2) || !Number.isFinite(row.d3))) {
+      errors.push(`${label}: d2 y d3 deben ser números válidos para niveles distintos de la concentración inicial.`)
+    }
+    if (!Number.isFinite(row.meanValue)) errors.push(`${label}: el promedio debe ser un número válido.`)
+    if (!Number.isFinite(row.sdValue) || row.sdValue < 0) {
+      errors.push(`${label}: la desviación estándar debe ser un número válido mayor o igual a cero.`)
+    }
+    if (!Number.isFinite(row.ux) || row.ux < 0) {
+      errors.push(`${label}: u(x) debe ser un número válido mayor o igual a cero.`)
+    }
+    if (!Number.isFinite(row.uxExp) || row.uxExp < 0) {
+      errors.push(`${label}: u(x) exp debe ser un número válido mayor o igual a cero.`)
+    }
+  })
+
+  if (errors.length > 0) return { ok: false, saved: 0, errors }
+
+  try {
+    for (const row of rows) {
+      await upsertEnvioPT(
+        rondaId,
+        participante.id,
+        row.ptItemId,
+        row.sampleGroupId,
+        row.d1,
+        row.d2,
+        row.d3,
+        row.meanValue,
+        row.sdValue,
+        row.ux,
+        row.uxExp
+      )
+    }
+    return { ok: true, saved: rows.length, errors: [] }
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : 'No fue posible guardar la importación CSV.',
     }
   }
 }

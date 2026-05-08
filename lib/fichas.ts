@@ -14,12 +14,15 @@ export type FichaRegistro = {
   departamento: string | null
   telefono: string | null
   transporte: string | null
+  dia_llegada: string | null
   hora_llegada: string | null
   estacionamiento: boolean
   observaciones: string | null
+  justificacion_cambio_equipo: string | null
   dec_datos_correctos: boolean
   dec_acepta_condiciones: boolean
   dec_compromisos: boolean
+  dec_procedimientos_calaire: boolean
   dec_firma_autorizada: boolean
   nombre_firma: string | null
   estado: EstadoFicha
@@ -85,12 +88,15 @@ export const FICHA_SCALAR_ALLOWLIST = [
   'departamento',
   'telefono',
   'transporte',
+  'dia_llegada',
   'hora_llegada',
   'estacionamiento',
   'observaciones',
+  'justificacion_cambio_equipo',
   'dec_datos_correctos',
   'dec_acepta_condiciones',
   'dec_compromisos',
+  'dec_procedimientos_calaire',
   'dec_firma_autorizada',
   'nombre_firma',
 ] as const
@@ -102,22 +108,25 @@ export type FichaScalarField = (typeof FICHA_SCALAR_ALLOWLIST)[number]
 // ---------------------------------------------------------------------------
 
 // Maps snake_case lib field names to camelCase Convex field names
-const SCALAR_FIELD_MAP: Record<FichaScalarField, 'nombreLaboratorio' | 'nombreResponsable' | 'cargo' | 'ciudad' | 'departamento' | 'telefono' | 'transporte' | 'horaLlegada' | 'estacionamiento' | 'observaciones' | 'decDatosCorrectos' | 'decAceptaCondiciones' | 'decCompromisos' | 'decFirmaAutorizada' | 'nombreFirma'> = {
-  nombre_laboratorio:    'nombreLaboratorio',
-  nombre_responsable:    'nombreResponsable',
-  cargo:                 'cargo',
-  ciudad:                'ciudad',
-  departamento:          'departamento',
-  telefono:              'telefono',
-  transporte:            'transporte',
-  hora_llegada:          'horaLlegada',
-  estacionamiento:       'estacionamiento',
-  observaciones:         'observaciones',
-  dec_datos_correctos:   'decDatosCorrectos',
-  dec_acepta_condiciones:'decAceptaCondiciones',
-  dec_compromisos:       'decCompromisos',
-  dec_firma_autorizada:  'decFirmaAutorizada',
-  nombre_firma:          'nombreFirma',
+const SCALAR_FIELD_MAP: Record<FichaScalarField, 'nombreLaboratorio' | 'nombreResponsable' | 'cargo' | 'ciudad' | 'departamento' | 'telefono' | 'transporte' | 'diaLlegada' | 'horaLlegada' | 'estacionamiento' | 'observaciones' | 'justificacionCambioEquipo' | 'decDatosCorrectos' | 'decAceptaCondiciones' | 'decCompromisos' | 'decProcedimientosCalaire' | 'decFirmaAutorizada' | 'nombreFirma'> = {
+  nombre_laboratorio:          'nombreLaboratorio',
+  nombre_responsable:          'nombreResponsable',
+  cargo:                       'cargo',
+  ciudad:                      'ciudad',
+  departamento:                'departamento',
+  telefono:                    'telefono',
+  transporte:                  'transporte',
+  dia_llegada:                 'diaLlegada',
+  hora_llegada:                'horaLlegada',
+  estacionamiento:             'estacionamiento',
+  observaciones:               'observaciones',
+  justificacion_cambio_equipo: 'justificacionCambioEquipo',
+  dec_datos_correctos:         'decDatosCorrectos',
+  dec_acepta_condiciones:      'decAceptaCondiciones',
+  dec_compromisos:             'decCompromisos',
+  dec_procedimientos_calaire:  'decProcedimientosCalaire',
+  dec_firma_autorizada:        'decFirmaAutorizada',
+  nombre_firma:                'nombreFirma',
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -132,12 +141,15 @@ function mapFichaDoc(doc: any): FichaRegistro {
     departamento: (doc.departamento ?? null) as string | null,
     telefono: (doc.telefono ?? null) as string | null,
     transporte: (doc.transporte ?? null) as string | null,
+    dia_llegada: (doc.diaLlegada ?? null) as string | null,
     hora_llegada: (doc.horaLlegada ?? null) as string | null,
     estacionamiento: (doc.estacionamiento ?? false) as boolean,
     observaciones: (doc.observaciones ?? null) as string | null,
+    justificacion_cambio_equipo: (doc.justificacionCambioEquipo ?? null) as string | null,
     dec_datos_correctos: (doc.decDatosCorrectos ?? false) as boolean,
     dec_acepta_condiciones: (doc.decAceptaCondiciones ?? false) as boolean,
     dec_compromisos: (doc.decCompromisos ?? false) as boolean,
+    dec_procedimientos_calaire: (doc.decProcedimientosCalaire ?? false) as boolean,
     dec_firma_autorizada: (doc.decFirmaAutorizada ?? false) as boolean,
     nombre_firma: (doc.nombreFirma ?? null) as string | null,
     estado: doc.estado as EstadoFicha,

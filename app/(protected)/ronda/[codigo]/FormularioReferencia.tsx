@@ -9,7 +9,12 @@ import {
   type RondaPTItem,
   type RondaPTSampleGroup,
 } from '@/lib/rondas'
-import { enviarInformeFinalAction, guardarEnvioAction } from './actions'
+import {
+  buildReferenciaImportPreview,
+  parseReferenciaCsv,
+  type ReferenciaImportPreview,
+} from '@/lib/referencia-csv'
+import { enviarInformeFinalAction, guardarEnvioAction, guardarReferenciaCsvAction } from './actions'
 
 type CellKey = `${string}::${string}`
 type CellData = {
@@ -22,6 +27,7 @@ type CellData = {
   uxExp: string
 }
 type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
+type ImportStatus = 'idle' | 'previewing' | 'ready' | 'saving' | 'saved' | 'error'
 
 function toCellKey(ptItemId: string, sampleGroupId: string): CellKey {
   return `${ptItemId}::${sampleGroupId}`
@@ -163,6 +169,10 @@ export default function FormularioReferencia({
   )
   const [saveErrors, setSaveErrors] = useState<Record<CellKey, string>>({})
   const [formMessage, setFormMessage] = useState<string | null>(null)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importPreview, setImportPreview] = useState<ReferenciaImportPreview | null>(null)
+  const [importStatus, setImportStatus] = useState<ImportStatus>('idle')
+  const [importMessage, setImportMessage] = useState<string | null>(null)
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   const cerrada = ronda.estado === 'cerrada'
@@ -276,6 +286,87 @@ export default function FormularioReferencia({
     setSubmittedAt(result.submittedAt ?? new Date().toISOString())
   }
 
+  async function handlePreviewImport() {
+    if (!importFile) {
+      setImportMessage('Selecciona un archivo CSV antes de previsualizar.')
+      setImportStatus('error')
+      return
+    }
+
+    setImportStatus('previewing')
+    setImportMessage(null)
+    try {
+      const text = await importFile.text()
+      const parsedRows = parseReferenciaCsv(text)
+      const existingCells = new Set(
+        Object.entries(cells)
+          .filter(([, data]) => data.meanValue.trim() !== '' || data.d1.trim() !== '')
+          .map(([key]) => key)
+      )
+      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells)
+      setImportPreview(preview)
+      setImportStatus(preview.errors.length > 0 ? 'error' : 'ready')
+      setImportMessage(null)
+    } catch (error) {
+      setImportPreview(null)
+      setImportStatus('error')
+      setImportMessage(error instanceof Error ? error.message : 'No fue posible leer el CSV.')
+    }
+  }
+
+  async function handleImportSave() {
+    if (!importPreview || importPreview.errors.length > 0 || importPreview.cells.length === 0) return
+    setImportStatus('saving')
+    setImportMessage(null)
+
+    const result = await guardarReferenciaCsvAction(ronda.id, importPreview.cells)
+    if (result.error || (result.errors && result.errors.length > 0)) {
+      setImportStatus('error')
+      setImportMessage(result.error ?? result.errors?.join(' ') ?? 'No fue posible guardar la importación.')
+      return
+    }
+
+    setCells((prev) => {
+      const next = { ...prev }
+      for (const row of importPreview.cells) {
+        const key = toCellKey(row.ptItemId, row.sampleGroupId)
+        next[key] = {
+          d1: String(row.d1),
+          d2: row.d2 != null ? String(row.d2) : '',
+          d3: row.d3 != null ? String(row.d3) : '',
+          meanValue: String(row.meanValue),
+          sdValue: String(row.sdValue),
+          ux: String(row.ux),
+          uxExp: String(row.uxExp),
+        }
+      }
+      return next
+    })
+    setSaveStatus((prev) => {
+      const next = { ...prev }
+      for (const row of importPreview.cells) {
+        next[toCellKey(row.ptItemId, row.sampleGroupId)] = 'saved'
+      }
+      return next
+    })
+    setSaveErrors((prev) => {
+      const next = { ...prev }
+      for (const row of importPreview.cells) {
+        delete next[toCellKey(row.ptItemId, row.sampleGroupId)]
+      }
+      return next
+    })
+    setImportStatus('saved')
+    setImportMessage(`Se cargaron ${result.saved ?? importPreview.cells.length} celdas desde el CSV.`)
+  }
+
+  function clearImport() {
+    setImportFile(null)
+    setImportPreview(null)
+    setImportStatus('idle')
+    setImportMessage(null)
+  }
+
   const itemsByContaminante = CONTAMINANTES.map((contaminante) => ({
     contaminante,
     items: ptItems.filter((item) => item.contaminante === contaminante),
@@ -384,6 +475,116 @@ export default function FormularioReferencia({
           )}
         </section>
 
+        <section className="card p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
+                Carga CSV de referencia
+              </h2>
+              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                Importa valores de referencia y revisa la tabla antes del envío final.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="file"
+                accept=".csv,text/csv"
+                disabled={soloLectura}
+                onChange={(event) => {
+                  setImportFile(event.target.files?.[0] ?? null)
+                  setImportPreview(null)
+                  setImportStatus('idle')
+                  setImportMessage(null)
+                }}
+                className="max-w-72 rounded border border-[var(--border)] px-3 py-2 text-sm disabled:bg-[var(--surface-muted)]"
+              />
+              <button
+                type="button"
+                onClick={() => void handlePreviewImport()}
+                className="btn-outline"
+                disabled={soloLectura || importStatus === 'previewing' || !importFile}
+              >
+                Previsualizar
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleImportSave()}
+                className="btn-primary"
+                disabled={
+                  soloLectura ||
+                  importStatus === 'saving' ||
+                  !importPreview ||
+                  importPreview.errors.length > 0 ||
+                  importPreview.cells.length === 0
+                }
+              >
+                Cargar datos
+              </button>
+              <button type="button" onClick={clearImport} className="btn-outline" disabled={soloLectura && !importPreview}>
+                Limpiar
+              </button>
+            </div>
+          </div>
+
+          {importPreview && (
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="card-accent px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Filas leídas
+                </div>
+                <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                  {importPreview.rowsRead}
+                </div>
+              </div>
+              <div className="card-accent px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Celdas
+                </div>
+                <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                  {importPreview.cells.length}
+                </div>
+              </div>
+              <div className="card-accent px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Alertas
+                </div>
+                <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                  {importPreview.warnings.length + importPreview.errors.length}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {importMessage && (
+            <div
+              className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+                importStatus === 'saved'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : 'border-rose-200 bg-rose-50 text-rose-700'
+              }`}
+            >
+              {importMessage}
+            </div>
+          )}
+
+          {importPreview && importPreview.warnings.length > 0 && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {importPreview.warnings.slice(0, 4).map((warning) => (
+                <div key={warning}>{warning}</div>
+              ))}
+              {importPreview.warnings.length > 4 && <div>Y {importPreview.warnings.length - 4} advertencias más.</div>}
+            </div>
+          )}
+
+          {importPreview && importPreview.errors.length > 0 && (
+            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {importPreview.errors.map((error) => (
+                <div key={error}>{error}</div>
+              ))}
+            </div>
+          )}
+        </section>
+
         {itemsByContaminante.map(({ contaminante, items }) => {
           const contaminanteComplete =
             items.length > 0 &&
@@ -420,12 +621,12 @@ export default function FormularioReferencia({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
-                      <th className="px-4 py-2 font-semibold">Run</th>
-                      <th className="px-4 py-2 font-semibold">Level</th>
+                      <th className="px-4 py-2 font-semibold">Corrida</th>
+                      <th className="px-4 py-2 font-semibold">Nivel</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
-                      <th className="px-4 py-2 font-semibold">d1</th>
-                      <th className="px-4 py-2 font-semibold">d2</th>
-                      <th className="px-4 py-2 font-semibold">d3</th>
+                      <th className="px-4 py-2 font-semibold">Dato 1</th>
+                      <th className="px-4 py-2 font-semibold">Dato 2</th>
+                      <th className="px-4 py-2 font-semibold">Dato 3</th>
                       <th className="px-4 py-2 font-semibold">Promedio</th>
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
                       <th className="px-4 py-2 font-semibold">u(x)</th>

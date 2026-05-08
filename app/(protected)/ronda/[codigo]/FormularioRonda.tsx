@@ -417,12 +417,12 @@ export default function FormularioRonda({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
-                      <th className="px-4 py-2 font-semibold">Run</th>
-                      <th className="px-4 py-2 font-semibold">Level</th>
+                      <th className="px-4 py-2 font-semibold">Corrida</th>
+                      <th className="px-4 py-2 font-semibold">Nivel</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
-                      <th className="px-4 py-2 font-semibold">d1</th>
-                      <th className="px-4 py-2 font-semibold">d2</th>
-                      <th className="px-4 py-2 font-semibold">d3</th>
+                      <th className="px-4 py-2 font-semibold">Dato 1</th>
+                      <th className="px-4 py-2 font-semibold">Dato 2</th>
+                      <th className="px-4 py-2 font-semibold">Dato 3</th>
                       <th className="px-4 py-2 font-semibold">Promedio</th>
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
                       <th className="px-4 py-2 font-semibold">u(x)</th>
