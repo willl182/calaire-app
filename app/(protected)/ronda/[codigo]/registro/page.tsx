@@ -34,7 +34,7 @@ export default async function RegistroPage({ params }: Props) {
           <p className="text-sm text-[var(--foreground-muted)]">
             No tiene una asignación en esta ronda para registrar la ficha.
           </p>
-          <Link href="/dashboard" className="btn-outline mt-4 inline-block">
+          <Link href={admin ? '/dashboard' : '/mi-dashboard'} className="btn-outline mt-4 inline-block">
             Volver al dashboard
           </Link>
         </div>

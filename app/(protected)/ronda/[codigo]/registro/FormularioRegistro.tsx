@@ -148,7 +148,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <Link href="/dashboard" className="btn-outline">
+              <Link href="/mi-dashboard" className="btn-outline">
                 Volver
               </Link>
               {puedeCargarDatos ? (

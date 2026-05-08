@@ -45,7 +45,7 @@ export default async function RondaPage({
       )
       if (claim === 'claimed' || claim === 'already-assigned') {
         redirect(
-          `/dashboard?success=${encodeURIComponent(
+          `/mi-dashboard?success=${encodeURIComponent(
             'Invitación aceptada. Complete la ficha antes de ingresar datos.'
           )}`
         )

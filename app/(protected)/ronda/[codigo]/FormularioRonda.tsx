@@ -292,7 +292,7 @@ export default function FormularioRonda({
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">Código: {ronda.codigo}</p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
-              <Link href="/dashboard" className="btn-outline">
+              <Link href="/mi-dashboard" className="btn-outline">
                 Mi dashboard
               </Link>
               <span
