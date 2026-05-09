@@ -1,6 +1,5 @@
 'use client'
 
-import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
   CONTAMINANTES,
@@ -291,22 +290,17 @@ export default function FormularioRonda({
               <h1 className="text-xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">Código: {ronda.codigo}</p>
             </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Link href="/mi-dashboard" className="btn-outline">
-                Mi dashboard
-              </Link>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
-                  ronda.estado === 'activa'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : ronda.estado === 'cerrada'
-                      ? 'bg-slate-200 text-slate-700'
-                      : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                {ronda.estado}
-              </span>
-            </div>
+            <span
+              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
+                ronda.estado === 'activa'
+                  ? 'bg-emerald-100 text-emerald-800'
+                  : ronda.estado === 'cerrada'
+                    ? 'bg-slate-200 text-slate-700'
+                    : 'bg-amber-100 text-amber-800'
+              }`}
+            >
+              {ronda.estado}
+            </span>
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-4">
@@ -423,12 +417,12 @@ export default function FormularioRonda({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
-                      <th className="px-4 py-2 font-semibold">Corrida</th>
-                      <th className="px-4 py-2 font-semibold">Nivel</th>
+                      <th className="px-4 py-2 font-semibold">Run</th>
+                      <th className="px-4 py-2 font-semibold">Level</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
-                      <th className="px-4 py-2 font-semibold">Dato 1</th>
-                      <th className="px-4 py-2 font-semibold">Dato 2</th>
-                      <th className="px-4 py-2 font-semibold">Dato 3</th>
+                      <th className="px-4 py-2 font-semibold">d1</th>
+                      <th className="px-4 py-2 font-semibold">d2</th>
+                      <th className="px-4 py-2 font-semibold">d3</th>
                       <th className="px-4 py-2 font-semibold">Promedio</th>
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
                       <th className="px-4 py-2 font-semibold">u(x)</th>
