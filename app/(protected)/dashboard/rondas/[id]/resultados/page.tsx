@@ -7,7 +7,6 @@ import {
   listPTSampleGroups,
   listResultadosPTRonda,
   type ResultadoParticipantePT,
-  type Ronda,
 } from '@/lib/rondas'
 import { RondaContextNav } from '../RondaContextNav'
 import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'

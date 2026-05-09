@@ -19,6 +19,21 @@ export type RondaPTItem = {
   created_at: string
 }
 
+export function isInitialConcentrationLevel(item: RondaPTItem, ptItems: RondaPTItem[]): boolean {
+  const sameContaminante = ptItems.filter((candidate) => candidate.contaminante === item.contaminante)
+  if (sameContaminante.length === 0) return false
+  const lowestSortOrder = Math.min(...sameContaminante.map((candidate) => candidate.sort_order))
+  const normalizedLevel = item.level_label.trim().toLowerCase().replace(/,/g, '.')
+  const numericMatch = normalizedLevel.match(/^[+-]?(\d+\.?\d*|\.\d+)/)
+  const numericLevel = numericMatch ? parseFloat(numericMatch[0]) : NaN
+
+  return item.sort_order === lowestSortOrder || normalizedLevel === 'cero' || numericLevel === 0
+}
+
+export function getRequiredPTReplicateCount(item: RondaPTItem, ptItems: RondaPTItem[]): 1 | 3 {
+  return isInitialConcentrationLevel(item, ptItems) ? 1 : 3
+}
+
 export type RondaPTItemInput = {
   runCode: string
   levelLabel: string
@@ -841,8 +856,8 @@ export async function upsertEnvioPT(
   ptItemId: string,
   sampleGroupId: string,
   d1: number,
-  d2: number,
-  d3: number,
+  d2: number | null,
+  d3: number | null,
   meanValue: number,
   sdValue: number,
   ux: number,
@@ -854,8 +869,8 @@ export async function upsertEnvioPT(
     ptItemId: ptItemId as Id<'rondaPtItems'>,
     sampleGroupId: sampleGroupId as Id<'rondaPtSampleGroups'>,
     d1,
-    d2,
-    d3,
+    d2: d2 ?? undefined,
+    d3: d3 ?? undefined,
     meanValue,
     sdValue,
     ux,
@@ -868,6 +883,13 @@ export async function upsertEnvioPT(
   })
   if (!row) throw new Error('No fue posible recuperar el envio PT tras guardarlo')
   return mapEnvioPTDoc(row)
+}
+
+export async function deleteParticipanteEnviosPT(rondaId: string, rondaParticipanteId: string): Promise<number> {
+  return fetchMutation(api.pt.deleteParticipanteEnviosPT, {
+    rondaId: rondaId as Id<'rondas'>,
+    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+  })
 }
 
 export async function submitFinalPT(rondaId: string, userId: string): Promise<string> {

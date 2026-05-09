@@ -148,7 +148,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
             </div>
 
             <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <Link href="/dashboard" className="btn-outline">
+              <Link href="/mi-dashboard" className="btn-outline">
                 Volver
               </Link>
               {puedeCargarDatos ? (
@@ -455,12 +455,29 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
           <div className="grid gap-4 md:grid-cols-2">
             <label className={labelClass}>
               <span className="flex items-center justify-between">
-                Medio de transporte
+                Tipo de transporte
                 <FieldSaveIndicator state={fieldStates['transporte'] ?? 'idle'} />
               </span>
-              <input type="text" className={inputClass} defaultValue={fichaInicial.transporte ?? ''}
+              <select className={inputClass} defaultValue={fichaInicial.transporte ?? ''}
                 disabled={disabled}
-                onBlur={(e) => handleBlur('transporte', e.target.value)} />
+                onChange={(e) => handleBlur('transporte', e.target.value)}>
+                <option value="">Seleccionar…</option>
+                {fichaInicial.transporte && fichaInicial.transporte !== 'propio' && fichaInicial.transporte !== 'empresarial' && (
+                  <option value={fichaInicial.transporte}>{fichaInicial.transporte} (valor anterior)</option>
+                )}
+                <option value="propio">Propio</option>
+                <option value="empresarial">Empresarial</option>
+              </select>
+            </label>
+            <label className={labelClass}>
+              <span className="flex items-center justify-between">
+                Día de llegada de equipos
+                <FieldSaveIndicator state={fieldStates['dia_llegada'] ?? 'idle'} />
+              </span>
+              <input type="date" className={inputClass} defaultValue={fichaInicial.dia_llegada ?? ''}
+                disabled={disabled}
+                onBlur={(e) => handleBlur('dia_llegada', e.target.value)} />
+              <span className="text-xs text-[var(--foreground-muted)]">Aplica para equipos fuera de Medellín</span>
             </label>
             <label className={labelClass}>
               <span className="flex items-center justify-between">
@@ -496,6 +513,19 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               onBlur={(e) => handleBlur('observaciones', e.target.value)}
             />
           </label>
+          <label className={labelClass}>
+            <span className="flex items-center justify-between">
+              Justificación de cambio de equipo
+              <FieldSaveIndicator state={fieldStates['justificacion_cambio_equipo'] ?? 'idle'} />
+            </span>
+            <textarea
+              rows={3}
+              className={`${inputClass} resize-none`}
+              defaultValue={fichaInicial.justificacion_cambio_equipo ?? ''}
+              disabled={disabled}
+              onBlur={(e) => handleBlur('justificacion_cambio_equipo', e.target.value)}
+            />
+          </label>
         </section>
 
         {/* Sección 7: Declaraciones */}
@@ -509,7 +539,8 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               ['dec_datos_correctos', 'Los datos consignados en esta ficha son correctos y verificables.'],
               ['dec_acepta_condiciones', 'Acepto las condiciones de participación en la ronda de ensayo de aptitud.'],
               ['dec_compromisos', 'Me comprometo a seguir los procedimientos establecidos durante el ensayo.'],
-              ['dec_firma_autorizada', 'La firma registrada está autorizada por la dirección del laboratorio.'],
+              ['dec_procedimientos_calaire', 'Seguiré los procedimientos internos de Calaire para el desarrollo de la prueba de aptitud.'],
+              ['dec_firma_autorizada', 'El responsable registrado está autorizado por la dirección del laboratorio.'],
             ] as const).map(([field, texto]) => (
               <label key={field} className="flex items-start gap-3 text-sm text-[var(--foreground)]">
                 <input
@@ -526,7 +557,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
           </div>
           <label className={labelClass}>
             <span className="flex items-center justify-between">
-              Nombre para la firma
+              Nombre del responsable autorizado
               <FieldSaveIndicator state={fieldStates['nombre_firma'] ?? 'idle'} />
             </span>
             <input
@@ -553,7 +584,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                   disabled={listSaving}
                   onClick={handleGuardarListas}
                 >
-                  {listSaving ? 'Guardando…' : 'Guardar listas'}
+                  {listSaving ? 'Guardando…' : 'Guardar datos temporalmente'}
                 </button>
                 {listSaved && <span className="text-sm text-emerald-600">✓ Listas guardadas</span>}
                 {listError && <span className="text-sm text-rose-600">{listError}</span>}

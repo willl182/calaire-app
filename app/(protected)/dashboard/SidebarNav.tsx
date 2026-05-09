@@ -80,15 +80,12 @@ function TopNavInner() {
     <header className="sticky top-0 z-40 bg-[var(--surface)] border-b border-[var(--border)]">
       <div className="flex items-stretch gap-6 px-6 max-w-screen-2xl mx-auto">
         {/* Brand */}
-        <div className="flex items-center pr-6 border-r border-[var(--border-soft)] py-4">
+        <div className="flex items-center gap-1.5 pr-6 border-r border-[var(--border-soft)] py-4">
           <span className="text-xs font-bold tracking-[0.18em] uppercase text-[var(--foreground)]">
             CALAIRE
           </span>
-          <span
-            className="ml-1 text-[10px] font-semibold tracking-wider px-1.5 py-0.5 rounded"
-            style={{ background: 'var(--pt-primary)', color: 'var(--foreground)' }}
-          >
-            EA
+          <span className="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide bg-[var(--pt-primary)] text-white">
+            APP
           </span>
         </div>
 

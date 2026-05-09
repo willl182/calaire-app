@@ -1,14 +1,21 @@
 'use client'
 
+import Link from 'next/link'
 import { useEffect, useRef, useState } from 'react'
 import {
   CONTAMINANTES,
+  getRequiredPTReplicateCount,
   type EnvioPT,
   type Ronda,
   type RondaPTItem,
   type RondaPTSampleGroup,
 } from '@/lib/rondas'
-import { enviarInformeFinalAction, guardarEnvioAction } from './actions'
+import {
+  buildReferenciaImportPreview,
+  parseReferenciaCsv,
+  type ReferenciaImportPreview,
+} from '@/lib/referencia-csv'
+import { enviarInformeFinalAction, guardarEnvioAction, guardarReferenciaCsvAction, limpiarEnviosReferenciaAction } from './actions'
 
 type CellKey = `${string}::${string}`
 type CellData = {
@@ -21,6 +28,7 @@ type CellData = {
   uxExp: string
 }
 type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
+type ImportStatus = 'idle' | 'previewing' | 'ready' | 'saving' | 'saved' | 'error'
 
 function toCellKey(ptItemId: string, sampleGroupId: string): CellKey {
   return `${ptItemId}::${sampleGroupId}`
@@ -38,8 +46,12 @@ function isValidNumberInput(value: string): boolean {
   return Number.isFinite(parsed)
 }
 
-function getCellIssue(data: CellData): string | null {
-  for (const [label, field] of [['d1', data.d1], ['d2', data.d2], ['d3', data.d3]] as const) {
+function getCellIssue(data: CellData, requiredReplicates: 1 | 3): string | null {
+  const fields = requiredReplicates === 1
+    ? ([['d1', data.d1]] as const)
+    : ([['d1', data.d1], ['d2', data.d2], ['d3', data.d3]] as const)
+
+  for (const [label, field] of fields) {
     if (field.trim() !== '' && !isValidNumberInput(field)) {
       return `${label} debe ser un número válido.`
     }
@@ -59,11 +71,13 @@ function getCellIssue(data: CellData): string | null {
   return null
 }
 
-function isCellComplete(data: CellData): boolean {
+function isCellComplete(data: CellData, requiredReplicates: 1 | 3): boolean {
+  const hasRequiredReplicates = requiredReplicates === 1
+    ? isValidNumberInput(data.d1)
+    : isValidNumberInput(data.d1) && isValidNumberInput(data.d2) && isValidNumberInput(data.d3)
+
   return (
-    isValidNumberInput(data.d1) &&
-    isValidNumberInput(data.d2) &&
-    isValidNumberInput(data.d3) &&
+    hasRequiredReplicates &&
     isValidNumberInput(data.meanValue) &&
     isValidNumberInput(data.sdValue) &&
     Number(data.sdValue) >= 0 &&
@@ -156,7 +170,12 @@ export default function FormularioReferencia({
   )
   const [saveErrors, setSaveErrors] = useState<Record<CellKey, string>>({})
   const [formMessage, setFormMessage] = useState<string | null>(null)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importPreview, setImportPreview] = useState<ReferenciaImportPreview | null>(null)
+  const [importStatus, setImportStatus] = useState<ImportStatus>('idle')
+  const [importMessage, setImportMessage] = useState<string | null>(null)
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const importFileInputRef = useRef<HTMLInputElement | null>(null)
 
   const cerrada = ronda.estado === 'cerrada'
   const soloLectura = cerrada || submitDone
@@ -164,8 +183,18 @@ export default function FormularioReferencia({
   const hasParticipantCodes = Boolean(participantCode) && replicateCode != null
 
   const totalCells = ptItems.length * sampleGroups.length
-  const completedCells = Object.values(cells).filter((cell) => isCellComplete(cell)).length
-  const invalidCells = Object.values(cells).filter((cell) => getCellIssue(cell) !== null).length
+  const cellEntries = ptItems.flatMap((item) =>
+    sampleGroups.map((group) => ({
+      key: toCellKey(item.id, group.id),
+      requiredReplicates: getRequiredPTReplicateCount(item, ptItems),
+    }))
+  )
+  const completedCells = cellEntries.filter(({ key, requiredReplicates }) =>
+    isCellComplete(cells[key], requiredReplicates)
+  ).length
+  const invalidCells = cellEntries.filter(({ key, requiredReplicates }) =>
+    getCellIssue(cells[key], requiredReplicates) !== null
+  ).length
   const progressPct = totalCells > 0 ? Math.round((completedCells / totalCells) * 100) : 0
   const allComplete = totalCells > 0 && completedCells === totalCells
   const allSaved = Object.values(saveStatus).every((status) => status === 'saved' || status === 'idle')
@@ -181,26 +210,35 @@ export default function FormularioReferencia({
     }
   }, [])
 
+  function cancelAllPendingSaves() {
+    for (const [key, timer] of Object.entries(timers.current)) {
+      clearTimeout(timer)
+      delete timers.current[key]
+    }
+  }
+
   async function triggerSave(key: CellKey, data: CellData) {
-    const issue = getCellIssue(data)
+    const { ptItemId, sampleGroupId } = fromCellKey(key)
+    const item = ptItems.find((candidate) => candidate.id === ptItemId)
+    const requiredReplicates = item ? getRequiredPTReplicateCount(item, ptItems) : 3
+    const issue = getCellIssue(data, requiredReplicates)
     if (issue) {
       setSaveStatus((prev) => ({ ...prev, [key]: 'error' }))
       setSaveErrors((prev) => ({ ...prev, [key]: issue }))
       return
     }
-    if (!isCellComplete(data)) return
+    if (!isCellComplete(data, requiredReplicates)) return
     if (soloLectura) return
 
     const d1 = Number(data.d1)
-    const d2 = Number(data.d2)
-    const d3 = Number(data.d3)
+    const d2 = requiredReplicates === 1 ? null : Number(data.d2)
+    const d3 = requiredReplicates === 1 ? null : Number(data.d3)
     const meanValue = Number(data.meanValue)
     const sdValue = Number(data.sdValue)
     const ux = Number(data.ux)
     const uxExp = Number(data.uxExp)
     setSaveStatus((prev) => ({ ...prev, [key]: 'saving' }))
 
-    const { ptItemId, sampleGroupId } = fromCellKey(key)
     const result = await guardarEnvioAction(ronda.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp)
 
     if (result.error) {
@@ -257,6 +295,118 @@ export default function FormularioReferencia({
     setSubmittedAt(result.submittedAt ?? new Date().toISOString())
   }
 
+  async function handlePreviewImport() {
+    if (!importFile) {
+      setImportMessage('Selecciona un archivo CSV antes de previsualizar.')
+      setImportStatus('error')
+      return
+    }
+
+    setImportStatus('previewing')
+    setImportMessage(null)
+    try {
+      const text = await importFile.text()
+      const parsedRows = parseReferenciaCsv(text)
+      const existingCells = new Set(
+        Object.entries(cells)
+          .filter(([, data]) => data.meanValue.trim() !== '' || data.d1.trim() !== '')
+          .map(([key]) => key)
+      )
+      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells)
+      setImportPreview(preview)
+      setImportStatus(preview.errors.length > 0 ? 'error' : 'ready')
+      setImportMessage(null)
+    } catch (error) {
+      setImportPreview(null)
+      setImportStatus('error')
+      setImportMessage(error instanceof Error ? error.message : 'No fue posible leer el CSV.')
+    }
+  }
+
+  async function handleImportSave() {
+    if (!importPreview || importPreview.errors.length > 0 || importPreview.cells.length === 0) return
+    cancelAllPendingSaves()
+    setImportStatus('saving')
+    setImportMessage(null)
+
+    const result = await guardarReferenciaCsvAction(ronda.id, importPreview.cells)
+    if (result.error || (result.errors && result.errors.length > 0)) {
+      setImportStatus('error')
+      setImportMessage(result.error ?? result.errors?.join(' ') ?? 'No fue posible guardar la importación.')
+      return
+    }
+
+    setCells((prev) => {
+      const next = { ...prev }
+      for (const row of importPreview.cells) {
+        const key = toCellKey(row.ptItemId, row.sampleGroupId)
+        next[key] = {
+          d1: String(row.d1),
+          d2: row.d2 != null ? String(row.d2) : '',
+          d3: row.d3 != null ? String(row.d3) : '',
+          meanValue: String(row.meanValue),
+          sdValue: String(row.sdValue),
+          ux: String(row.ux),
+          uxExp: String(row.uxExp),
+        }
+      }
+      return next
+    })
+    setSaveStatus((prev) => {
+      const next = { ...prev }
+      for (const row of importPreview.cells) {
+        next[toCellKey(row.ptItemId, row.sampleGroupId)] = 'saved'
+      }
+      return next
+    })
+    setSaveErrors((prev) => {
+      const next = { ...prev }
+      for (const row of importPreview.cells) {
+        delete next[toCellKey(row.ptItemId, row.sampleGroupId)]
+      }
+      return next
+    })
+    setImportStatus('saved')
+    setImportMessage(`Se cargaron ${result.saved ?? importPreview.cells.length} celdas desde el CSV.`)
+  }
+
+  async function handleLimpiar() {
+    if (soloLectura) return
+    cancelAllPendingSaves()
+
+    setImportStatus('saving')
+    setImportMessage(null)
+
+    const result = await limpiarEnviosReferenciaAction(ronda.id)
+    if (result.error) {
+      setImportStatus('error')
+      setImportMessage(result.error)
+      return
+    }
+
+    // Resetear celdas al estado vacío
+    setCells(() =>
+      initCells(
+        ptItems,
+        sampleGroups,
+        []
+      )
+    )
+    setSaveStatus(() =>
+      initStatus(
+        ptItems,
+        sampleGroups,
+        []
+      )
+    )
+    setSaveErrors({})
+    setImportFile(null)
+    if (importFileInputRef.current) importFileInputRef.current.value = ''
+    setImportPreview(null)
+    setImportStatus('idle')
+    setImportMessage(`Se eliminaron ${result.deleted ?? 0} registros cargados.`)
+  }
+
   const itemsByContaminante = CONTAMINANTES.map((contaminante) => ({
     contaminante,
     items: ptItems.filter((item) => item.contaminante === contaminante),
@@ -274,17 +424,22 @@ export default function FormularioReferencia({
               <h1 className="text-xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">Código: {ronda.codigo}</p>
             </div>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
-                ronda.estado === 'activa'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : ronda.estado === 'cerrada'
-                    ? 'bg-slate-200 text-slate-700'
-                    : 'bg-amber-100 text-amber-800'
-              }`}
-            >
-              {ronda.estado}
-            </span>
+            <div className="flex flex-wrap items-center gap-2">
+              <Link href="/mi-dashboard" className="btn-outline">
+                Mi dashboard
+              </Link>
+              <span
+                className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
+                  ronda.estado === 'activa'
+                    ? 'bg-emerald-100 text-emerald-800'
+                    : ronda.estado === 'cerrada'
+                      ? 'bg-slate-200 text-slate-700'
+                      : 'bg-amber-100 text-amber-800'
+                }`}
+              >
+                {ronda.estado}
+              </span>
+            </div>
           </div>
 
           <div className="mt-4 grid gap-3 md:grid-cols-4">
@@ -365,12 +520,130 @@ export default function FormularioReferencia({
           )}
         </section>
 
+        <section className="card p-6">
+          <div className="flex flex-wrap items-end justify-between gap-4">
+            <div>
+              <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
+                Carga CSV de referencia
+              </h2>
+              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                Importa valores de referencia y revisa la tabla antes del envío final.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                ref={importFileInputRef}
+                type="file"
+                accept=".csv,text/csv"
+                disabled={soloLectura}
+                onChange={(event) => {
+                  setImportFile(event.target.files?.[0] ?? null)
+                  setImportPreview(null)
+                  setImportStatus('idle')
+                  setImportMessage(null)
+                }}
+                className="max-w-72 rounded border border-[var(--border)] px-3 py-2 text-sm disabled:bg-[var(--surface-muted)]"
+              />
+              <button
+                type="button"
+                onClick={() => void handlePreviewImport()}
+                className="btn-outline"
+                disabled={soloLectura || importStatus === 'previewing' || !importFile}
+              >
+                Previsualizar
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleImportSave()}
+                className="btn-primary"
+                disabled={
+                  soloLectura ||
+                  importStatus === 'saving' ||
+                  !importPreview ||
+                  importPreview.errors.length > 0 ||
+                  importPreview.cells.length === 0
+                }
+              >
+                Cargar datos
+              </button>
+              <button
+                type="button"
+                onClick={() => void handleLimpiar()}
+                className="btn-outline"
+                disabled={soloLectura || importStatus === 'saving'}
+              >
+                {importStatus === 'saving' ? 'Limpiando…' : 'Limpiar datos'}
+              </button>
+            </div>
+          </div>
+
+          {importPreview && (
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              <div className="card-accent px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Filas leídas
+                </div>
+                <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                  {importPreview.rowsRead}
+                </div>
+              </div>
+              <div className="card-accent px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Celdas
+                </div>
+                <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                  {importPreview.cells.length}
+                </div>
+              </div>
+              <div className="card-accent px-4 py-3">
+                <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  Alertas
+                </div>
+                <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                  {importPreview.warnings.length + importPreview.errors.length}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {importMessage && (
+            <div
+              className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+                importStatus === 'saved'
+                  ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                  : 'border-rose-200 bg-rose-50 text-rose-700'
+              }`}
+            >
+              {importMessage}
+            </div>
+          )}
+
+          {importPreview && importPreview.warnings.length > 0 && (
+            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              {importPreview.warnings.slice(0, 4).map((warning) => (
+                <div key={warning}>{warning}</div>
+              ))}
+              {importPreview.warnings.length > 4 && <div>Y {importPreview.warnings.length - 4} advertencias más.</div>}
+            </div>
+          )}
+
+          {importPreview && importPreview.errors.length > 0 && (
+            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              {importPreview.errors.map((error) => (
+                <div key={error}>{error}</div>
+              ))}
+            </div>
+          )}
+        </section>
+
         {itemsByContaminante.map(({ contaminante, items }) => {
           const contaminanteComplete =
             items.length > 0 &&
             sampleGroups.length > 0 &&
             items.every((item) =>
-              sampleGroups.every((group) => isCellComplete(cells[toCellKey(item.id, group.id)]))
+              sampleGroups.every((group) =>
+                isCellComplete(cells[toCellKey(item.id, group.id)], getRequiredPTReplicateCount(item, ptItems))
+              )
             )
 
           return (
@@ -399,12 +672,12 @@ export default function FormularioReferencia({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
-                      <th className="px-4 py-2 font-semibold">Run</th>
-                      <th className="px-4 py-2 font-semibold">Level</th>
+                      <th className="px-4 py-2 font-semibold">Corrida</th>
+                      <th className="px-4 py-2 font-semibold">Nivel</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
-                      <th className="px-4 py-2 font-semibold">d1</th>
-                      <th className="px-4 py-2 font-semibold">d2</th>
-                      <th className="px-4 py-2 font-semibold">d3</th>
+                      <th className="px-4 py-2 font-semibold">Dato 1</th>
+                      <th className="px-4 py-2 font-semibold">Dato 2</th>
+                      <th className="px-4 py-2 font-semibold">Dato 3</th>
                       <th className="px-4 py-2 font-semibold">Promedio</th>
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
                       <th className="px-4 py-2 font-semibold">u(x)</th>
@@ -417,9 +690,10 @@ export default function FormularioReferencia({
                       sampleGroups.map((group) => {
                         const key = toCellKey(item.id, group.id)
                         const data = cells[key]
-                        const issue = saveErrors[key] ?? getCellIssue(data)
+                        const requiredReplicates = getRequiredPTReplicateCount(item, ptItems)
+                        const issue = saveErrors[key] ?? getCellIssue(data, requiredReplicates)
                         const status = saveStatus[key] ?? 'idle'
-                        const complete = isCellComplete(data)
+                        const complete = isCellComplete(data, requiredReplicates)
 
                         const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
@@ -437,14 +711,14 @@ export default function FormularioReferencia({
                             {sampleGroups.length > 1 && (
                               <td className="px-4 py-2 text-[var(--foreground-muted)]">{group.sample_group}</td>
                             )}
-                            {(['d1', 'd2', 'd3'] as const).map((field) => (
+                            {(['d1', 'd2', 'd3'] as const).map((field, index) => (
                               <td key={field} className="px-2 py-2">
                                 <input
                                   type="number"
                                   step="any"
                                   inputMode="decimal"
                                   value={data[field]}
-                                  disabled={soloLectura}
+                                  disabled={soloLectura || index >= requiredReplicates}
                                   onChange={(e) => updateCell(key, { ...data, [field]: e.target.value })}
                                   className={inputCls}
                                 />

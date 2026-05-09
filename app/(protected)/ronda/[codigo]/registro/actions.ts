@@ -92,8 +92,9 @@ export async function enviarFichaFinalAction(
   if (!ficha.dec_datos_correctos) errores.push('Debe confirmar que los datos son correctos')
   if (!ficha.dec_acepta_condiciones) errores.push('Debe aceptar las condiciones de participación')
   if (!ficha.dec_compromisos) errores.push('Debe aceptar los compromisos del participante')
-  if (!ficha.dec_firma_autorizada) errores.push('Debe confirmar que la firma está autorizada')
-  if (!ficha.nombre_firma?.trim()) errores.push('Nombre para la firma es requerido')
+  if (!ficha.dec_procedimientos_calaire) errores.push('Debe confirmar que seguirá los procedimientos internos de Calaire')
+  if (!ficha.dec_firma_autorizada) errores.push('Debe confirmar que el responsable está autorizado por la dirección del laboratorio')
+  if (!ficha.nombre_firma?.trim()) errores.push('Nombre del responsable autorizado es requerido')
 
   if (errores.length > 0) return { errores }
 
