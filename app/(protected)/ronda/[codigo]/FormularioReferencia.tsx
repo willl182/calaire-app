@@ -175,6 +175,7 @@ export default function FormularioReferencia({
   const [importStatus, setImportStatus] = useState<ImportStatus>('idle')
   const [importMessage, setImportMessage] = useState<string | null>(null)
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const importFileInputRef = useRef<HTMLInputElement | null>(null)
 
   const cerrada = ronda.estado === 'cerrada'
   const soloLectura = cerrada || submitDone
@@ -208,6 +209,13 @@ export default function FormularioReferencia({
       }
     }
   }, [])
+
+  function cancelAllPendingSaves() {
+    for (const [key, timer] of Object.entries(timers.current)) {
+      clearTimeout(timer)
+      delete timers.current[key]
+    }
+  }
 
   async function triggerSave(key: CellKey, data: CellData) {
     const { ptItemId, sampleGroupId } = fromCellKey(key)
@@ -317,6 +325,7 @@ export default function FormularioReferencia({
 
   async function handleImportSave() {
     if (!importPreview || importPreview.errors.length > 0 || importPreview.cells.length === 0) return
+    cancelAllPendingSaves()
     setImportStatus('saving')
     setImportMessage(null)
 
@@ -363,6 +372,7 @@ export default function FormularioReferencia({
 
   async function handleLimpiar() {
     if (soloLectura) return
+    cancelAllPendingSaves()
 
     setImportStatus('saving')
     setImportMessage(null)
@@ -391,6 +401,7 @@ export default function FormularioReferencia({
     )
     setSaveErrors({})
     setImportFile(null)
+    if (importFileInputRef.current) importFileInputRef.current.value = ''
     setImportPreview(null)
     setImportStatus('idle')
     setImportMessage(`Se eliminaron ${result.deleted ?? 0} registros cargados.`)
@@ -521,6 +532,7 @@ export default function FormularioReferencia({
             </div>
             <div className="flex flex-wrap items-center gap-2">
               <input
+                ref={importFileInputRef}
                 type="file"
                 accept=".csv,text/csv"
                 disabled={soloLectura}

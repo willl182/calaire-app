@@ -35,7 +35,7 @@ Formato para la confirmación formal de participación de un laboratorio en una 
 | **Analitos** | CO, SO₂ |
 | **Niveles** | Según P-PSEA-03 (CO) y P-PSEA-05 (SO₂) |
 | **Equipos del participante** | 2 analizadores (1 CO, 1 SO₂) |
-| **Periodo** | Semana 1: 20–25 de abril 2026 |
+| **Periodo** | Semana 1: 20–25 de abril de 2026 |
 | **Modalidad** | In situ — medición en instalaciones del PEA |
 
 ### Campos a completar

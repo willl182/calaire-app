@@ -2,7 +2,7 @@
 
 **Código:** F-PSEA-14  
 **Nivel:** 4 — Formato / Registro  
-**Estado:** placeholder — copia de trabajo (Ronda Simple)  
+**Estado:** Borrador — en revisión; pasar a Vigente tras aprobación por dirección técnica  
 **Oleada:** 1  
 **Prioridad:** 🔴 Crítica  
 
@@ -21,7 +21,7 @@ Registro formal de los cálculos estadísticos realizados para cada ronda y la a
 | ISO/IEC 17043:2023 | 7.4.2 |
 | ISO 13528:2022 | 7, 8, 9 |
 
-**Justificación:** Registro de cálculos: x_pt, sigma_pt, z, decisión estadística
+**Justificación:** Registro de cálculos: x_pt, σ_pt, z, decisión estadística
 
 > Fuente: `trazabilidad_normativa_sgc.md`
 

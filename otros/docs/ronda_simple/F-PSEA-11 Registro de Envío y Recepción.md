@@ -42,7 +42,7 @@ Registro para documentar el envío y recepción de ítems PT (si aplica envío f
 - [ ] Identificación de los equipos del participante (marca, modelo, serie)
   - [ ] Equipo 1: analizador CO
   - [ ] Equipo 2: analizador SO₂
-- [ ] Verificación de estado de los equipos al arrival
+- [ ] Verificación de estado de los equipos a la llegada
 - [ ] Registro de instalación y conexión al sistema de generación
 - [ ] Acuse de recibo firmado por el participante
 - [ ] Observaciones sobre condiciones de instalación

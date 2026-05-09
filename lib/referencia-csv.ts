@@ -4,9 +4,11 @@ const CONTAMINANTES = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 
 function isInitialConcentrationLevel(item: RondaPTItem, ptItems: RondaPTItem[]): boolean {
   const sameContaminante = ptItems.filter((candidate) => candidate.contaminante === item.contaminante)
+  if (sameContaminante.length === 0) return false
   const lowestSortOrder = Math.min(...sameContaminante.map((candidate) => candidate.sort_order))
-  const normalizedLevel = item.level_label.trim().toLowerCase().replace(',', '.')
-  const numericLevel = Number(normalizedLevel)
+  const normalizedLevel = item.level_label.trim().toLowerCase().replace(/,/g, '.')
+  const numericMatch = normalizedLevel.match(/^[+-]?(\d+\.?\d*|\.\d+)/)
+  const numericLevel = numericMatch ? parseFloat(numericMatch[0]) : NaN
 
   return item.sort_order === lowestSortOrder || normalizedLevel === 'cero' || numericLevel === 0
 }
@@ -119,7 +121,7 @@ export function normalizeLevel(value: string): string {
   return value
     .trim()
     .toLowerCase()
-    .replace(',', '.')
+    .replace(/,/g, '.')
     .replace(/\s+/g, '')
     .replace(/-/g, '')
     .replace(/ppm|ppb/g, '')
@@ -194,6 +196,9 @@ export function buildReferenciaImportPreview(
   sampleGroups: RondaPTSampleGroup[],
   existingCells: Set<string> = new Set()
 ): ReferenciaImportPreview {
+  // Coverage factor for expanded uncertainty: U = k * u(x).
+  // Currently assumes k=2 (≈95% confidence). Change if protocol differs.
+  const UX_EXP_K = 2
   const warnings: string[] = []
   const errors: string[] = []
   const cells: ReferenciaImportCell[] = []
@@ -251,7 +256,7 @@ export function buildReferenciaImportPreview(
         meanValue: row.meanValue,
         sdValue,
         ux: row.ux,
-        uxExp: row.ux * 2,
+        uxExp: row.ux * UX_EXP_K,
       })
     }
   }

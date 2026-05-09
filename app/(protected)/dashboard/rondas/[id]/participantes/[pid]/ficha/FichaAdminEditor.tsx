@@ -346,6 +346,9 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
             <select className={inputClass} defaultValue={fichaInicial.transporte ?? ''}
               onChange={(e) => handleBlur('transporte', e.target.value)}>
               <option value="">Seleccionar…</option>
+              {fichaInicial.transporte && fichaInicial.transporte !== 'propio' && fichaInicial.transporte !== 'empresarial' && (
+                <option value={fichaInicial.transporte}>{fichaInicial.transporte} (valor anterior)</option>
+              )}
               <option value="propio">Propio</option>
               <option value="empresarial">Empresarial</option>
             </select>

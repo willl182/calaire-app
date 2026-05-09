@@ -746,12 +746,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const activeTab = getParamValue(params.tab) ?? 'inicio'
   const editando = getParamValue(params.editando) ?? ''
 
-  const rondas = admin ? await listRondas() : []
-  const allParticipantes = admin ? await listAllParticipantes() : []
+  const rondas = await listRondas()
+  const allParticipantes = await listAllParticipantes()
   const rondasActivas = rondas.filter((r) => r.estado === 'activa')
-  const participantesRondasActivas = admin
-    ? await Promise.all(rondasActivas.map((r) => listParticipantesRondaResumen(r.id)))
-    : []
+  const participantesRondasActivas = await Promise.all(rondasActivas.map((r) => listParticipantesRondaResumen(r.id)))
   const fichasPendientesCount = participantesRondasActivas
     .flat()
     .filter((p) => p.ficha_estado !== 'enviado').length
@@ -763,9 +761,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const rondasListasParaExportar = rondasActivas.filter((_, i) =>
     participantesRondasActivas[i]?.some((p) => p.envios_pt_count > 0)
   ).length
-  const attentionItems = admin
-    ? buildAttentionItems(rondas, participantesRondasActivas)
-    : []
+  const attentionItems = buildAttentionItems(rondas, participantesRondasActivas)
 
   return (
     <div className="min-h-screen px-6 py-8">
@@ -782,20 +778,18 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   Dashboard de gestión de rondas de ensayos de aptitud
                 </h1>
                 <p className="text-sm text-[var(--foreground-muted)]">
-                  {auth.user.email} · {admin ? 'Coordinador' : 'Participante'}
+                  {auth.user.email} · Coordinador
                 </p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              {admin && (
-                <Link
+              <Link
                   href="/dashboard/rondas/nueva"
                   className="btn-primary"
                 >
                   ＋ Nueva ronda
                 </Link>
-              )}
               <form
                 action={async () => {
                   'use server'

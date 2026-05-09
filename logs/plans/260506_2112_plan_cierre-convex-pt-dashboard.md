@@ -184,7 +184,6 @@ Cerrar de forma ordenada la rama real actual `carga-referencia-csv`, incorporand
   - `lib/fichas.ts` mapea snake_case/camelCase y aplica defaults para documentos existentes.
   - Se alinea `FichaAdminEditor.tsx` con los nuevos campos y labels para que administracion pueda ver/editar lo mismo que registro.
   - Verificaciones: `pnpm exec tsc --noEmit` y eslint focal pasan.
-- [ ] Fase 3 completada.
 - [ ] Fase 4 evaluada/cerrada o marcada fuera de alcance.
 - [ ] Fase 5 evaluada/cerrada o marcada fuera de alcance.
 - [ ] Fase 6 completada.

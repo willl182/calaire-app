@@ -95,10 +95,16 @@ export async function guardarEnvioAction(
   }
 }
 
+const MAX_IMPORT_ROWS = 500
+
 export async function guardarReferenciaCsvAction(
   rondaId: string,
   rows: ReferenciaImportCell[]
 ): Promise<{ ok?: boolean; saved?: number; errors?: string[]; error?: string }> {
+  if (rows.length > MAX_IMPORT_ROWS) {
+    return { error: `El archivo excede el máximo permitido de ${MAX_IMPORT_ROWS} filas (recibidas: ${rows.length}).` }
+  }
+
   const auth = await requireAuth()
   if (!auth.user) return { error: 'No autenticado' }
 
@@ -160,6 +166,7 @@ export async function guardarReferenciaCsvAction(
 
   if (errors.length > 0) return { ok: false, saved: 0, errors }
 
+  let saved = 0
   try {
     for (const row of rows) {
       await upsertEnvioPT(
@@ -175,11 +182,14 @@ export async function guardarReferenciaCsvAction(
         row.ux,
         row.uxExp
       )
+      saved += 1
     }
-    return { ok: true, saved: rows.length, errors: [] }
+    return { ok: true, saved, errors: [] }
   } catch (error) {
     return {
-      error: error instanceof Error ? error.message : 'No fue posible guardar la importación CSV.',
+      ok: false,
+      saved,
+      error: `Error en la fila ${saved + 1}: ${error instanceof Error ? error.message : 'No fue posible guardar la importación CSV.'}`,
     }
   }
 }
