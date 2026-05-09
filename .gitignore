@@ -30,15 +30,28 @@ yarn-debug.log*
 yarn-error.log*
 .pnpm-debug.log*
 
-# env files (can opt-in for committing if needed)
-.env*
+# env files
+.env
+.env.local
+.env.*.local
+!.env.example
 
 # vercel
 .vercel
 
-# AI tools
-.codex
+# AI tools / local agent state
+AGENTS.md
+CLAUDE.md
+.agents/
 .claude/
+.codex
+.cursor/
+.windsurf/
+.opencode/
+.pi/
+.augment/
+.omit/
+skills-lock.json
 
 # migration outputs
 scripts/.migration-state.json
