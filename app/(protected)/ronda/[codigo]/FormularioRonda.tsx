@@ -417,8 +417,7 @@ export default function FormularioRonda({
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
-                      <th className="px-4 py-2 font-semibold">Run</th>
-                      <th className="px-4 py-2 font-semibold">Level</th>
+                      <th className="px-4 py-2 font-semibold">Corrida</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
                       <th className="px-4 py-2 font-semibold">d1</th>
                       <th className="px-4 py-2 font-semibold">d2</th>
@@ -452,7 +451,6 @@ export default function FormularioRonda({
                             } ${issue ? 'bg-rose-50/20' : ''}`}
                           >
                             <td className="px-4 py-2 font-mono text-xs text-[var(--foreground)]">{item.run_code}</td>
-                            <td className="px-4 py-2 text-[var(--foreground-muted)]">{item.level_label}</td>
                             {sampleGroups.length > 1 && (
                               <td className="px-4 py-2 text-[var(--foreground-muted)]">{group.sample_group}</td>
                             )}

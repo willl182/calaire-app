@@ -673,7 +673,6 @@ export default function FormularioReferencia({
                   <thead>
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
                       <th className="px-4 py-2 font-semibold">Corrida</th>
-                      <th className="px-4 py-2 font-semibold">Nivel</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
                       <th className="px-4 py-2 font-semibold">Dato 1</th>
                       <th className="px-4 py-2 font-semibold">Dato 2</th>
@@ -707,7 +706,6 @@ export default function FormularioReferencia({
                             } ${issue ? 'bg-rose-50/20' : ''}`}
                           >
                             <td className="px-4 py-2 font-mono text-xs text-[var(--foreground)]">{item.run_code}</td>
-                            <td className="px-4 py-2 text-[var(--foreground-muted)]">{item.level_label}</td>
                             {sampleGroups.length > 1 && (
                               <td className="px-4 py-2 text-[var(--foreground-muted)]">{group.sample_group}</td>
                             )}
