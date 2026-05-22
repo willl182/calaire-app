@@ -72,6 +72,7 @@ export type EnvioPT = {
   mean_value: number
   sd_value: number
   ux: number | null
+  k: number | null
   ux_exp: number | null
   draft_saved_at: string
   final_submitted_at: string | null
@@ -91,6 +92,7 @@ export type EnvioPTConMetadatos = {
   mean_value: number
   sd_value: number
   ux: number | null
+  k: number | null
   ux_exp: number | null
 }
 
@@ -302,6 +304,7 @@ export function buildPTCsv(envios: EnvioPTConMetadatos[]): string {
     'mean_value',
     'sd_value',
     'ux',
+    'k',
     'ux_exp',
   ]
 
@@ -318,6 +321,7 @@ export function buildPTCsv(envios: EnvioPTConMetadatos[]): string {
     String(envio.mean_value),
     String(envio.sd_value),
     envio.ux != null ? String(envio.ux) : '',
+    envio.k != null ? String(envio.k) : '',
     envio.ux_exp != null ? String(envio.ux_exp) : '',
   ])
 
@@ -479,6 +483,7 @@ function mapEnvioPTDoc(e: any): EnvioPT {
     mean_value: e.meanValue as number,
     sd_value: e.sdValue as number,
     ux: (e.ux ?? null) as number | null,
+    k: (e.k ?? null) as number | null,
     ux_exp: (e.uxExp ?? null) as number | null,
     draft_saved_at: msToISO(e.draftSavedAt as number),
     final_submitted_at: optMsToISO(e.finalSubmittedAt),
@@ -529,9 +534,13 @@ export async function listRondasParticipante(userId: string): Promise<RondaParti
   const rows = await fetchQuery(api.rondas.listRondasParticipante, { userId })
   return rows.map((r) => ({
     ...mapRondaWithContaminantes(r),
+    email: r.email as string,
     invitado_at: r.invitado_at as string,
     ronda_participante_id: r.ronda_participante_id as string,
+    participant_profile: (r.participant_profile ?? 'member') as ParticipantePerfil,
     ficha_estado: r.ficha_estado as 'no_iniciada' | 'borrador' | 'enviado',
+    envios_pt_count: (r.envios_pt_count ?? 0) as number,
+    envio_pt_enviado: Boolean(r.envio_pt_enviado),
   }))
 }
 
@@ -544,8 +553,16 @@ export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
     rondas: r.rondas.map((ronda) => ({
       ...ronda,
       estado: ronda.estado as EstadoRonda,
+      participant_profile: (ronda.participant_profile ?? 'member') as ParticipantePerfil,
+      ronda_participante_id: normalizeOptionalId(
+        ronda.ronda_participante_id ?? ronda.rondaParticipanteId
+      ),
     })),
   }))
+}
+
+function normalizeOptionalId(value: unknown): string | null {
+  return typeof value === 'string' && value !== '' && value !== 'undefined' ? value : null
 }
 
 export async function isInvitado(rondaId: string, userId: string): Promise<boolean> {
@@ -672,6 +689,18 @@ export async function updateRondaConfig(
   })
 }
 
+export async function updateRondaBasicInfo(
+  rondaId: string,
+  nombre: string,
+  codigo: string
+): Promise<void> {
+  await fetchMutation(api.rondas.updateRondaBasicInfo, {
+    id: rondaId as Id<'rondas'>,
+    nombre,
+    codigo,
+  })
+}
+
 export async function transitionRondaEstado(
   rondaId: string,
   nextState: 'activa' | 'cerrada'
@@ -749,9 +778,13 @@ export async function addReferenceSlot(
 // ---------------------------------------------------------------------------
 
 export type RondaParticipanteAsignada = Ronda & {
+  email: string
   invitado_at: string
   ronda_participante_id: string
+  participant_profile: ParticipantePerfil
   ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
+  envios_pt_count: number
+  envio_pt_enviado: boolean
 }
 
 export type ParticipanteGlobal = {
@@ -763,6 +796,8 @@ export type ParticipanteGlobal = {
     nombre: string
     estado: EstadoRonda
     envios_count: number
+    participant_profile: ParticipantePerfil
+    ronda_participante_id: string | null
   }[]
   total_envios: number
 }
@@ -814,6 +849,13 @@ export async function listEnviosPT(rondaId: string, userId: string): Promise<Env
   return rows.map(mapEnvioPTDoc)
 }
 
+export async function listEnviosPTByParticipante(rondaParticipanteId: string): Promise<EnvioPT[]> {
+  const rows = await fetchQuery(api.pt.listEnviosPTByParticipante, {
+    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+  })
+  return rows.map(mapEnvioPTDoc)
+}
+
 export async function getEnvioPT(
   rondaParticipanteId: string,
   ptItemId: string,
@@ -836,6 +878,16 @@ export async function getEstadoEnvioPTParticipante(
     rondaId: rondaId as Id<'rondas'>,
     userId,
   })
+}
+
+export async function getParticipanteRondaResumen(
+  participanteId: string
+): Promise<ParticipanteRondaResumen | null> {
+  const row = await fetchQuery(api.rondas.getParticipanteRondaResumen, {
+    participanteId: participanteId as Id<'rondaParticipantes'>,
+  })
+  if (!row) return null
+  return mapParticipanteRondaResumenDoc(row)
 }
 
 export async function listResultadosPTRonda(rondaId: string): Promise<ResultadoParticipantePT[]> {
@@ -862,6 +914,7 @@ export async function upsertEnvioPT(
   sdValue: number,
   ux: number,
   uxExp: number,
+  k = 2,
 ): Promise<EnvioPT> {
   await fetchMutation(api.pt.upsertEnvioPT, {
     rondaId: rondaId as Id<'rondas'>,
@@ -875,6 +928,7 @@ export async function upsertEnvioPT(
     sdValue,
     ux,
     uxExp,
+    k,
   })
   const row = await fetchQuery(api.pt.getEnvioPT, {
     rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
@@ -983,6 +1037,30 @@ export async function updateParticipantePT(
     participantCode,
     replicateCode,
   })
+}
+
+export async function updatePTItem(
+  rondaId: string,
+  itemId: string,
+  runCode: string,
+  levelLabel: string
+): Promise<RondaPTItem> {
+  const doc = await fetchMutation(api.pt.updatePTItem, {
+    rondaId: rondaId as Id<'rondas'>,
+    itemId: itemId as Id<'rondaPtItems'>,
+    runCode,
+    levelLabel,
+  })
+  if (!doc) throw new Error('No fue posible recuperar el item PT tras actualizarlo')
+  return {
+    id: doc._id as string,
+    ronda_id: doc.rondaId as string,
+    contaminante: doc.contaminante,
+    run_code: doc.runCode,
+    level_label: doc.levelLabel,
+    sort_order: doc.sortOrder,
+    created_at: new Date(doc._creationTime).toISOString(),
+  }
 }
 
 export async function deletePTItem(rondaId: string, itemId: string): Promise<void> {

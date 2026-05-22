@@ -1,10 +1,8 @@
-import { signOut } from '@workos-inc/authkit-nextjs'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { LogoUnal } from '@/app/components/LogoUnal'
-import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { listRondasParticipante, type Ronda, type RondaParticipanteAsignada } from '@/lib/rondas'
 
@@ -112,6 +110,37 @@ function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) 
   )
 }
 
+function ParticipantKpiCard({
+  label,
+  value,
+  detail,
+  variant = 'default',
+}: {
+  label: string
+  value: number
+  detail: string
+  variant?: 'default' | 'success' | 'warning' | 'danger'
+}) {
+  const variantClass = {
+    default: 'border-l-[var(--pt-primary)]',
+    success: 'border-l-emerald-500 bg-emerald-50/40',
+    warning: 'border-l-amber-500 bg-amber-50/50',
+    danger: 'border-l-rose-500 bg-rose-50/50',
+  }[variant]
+
+  return (
+    <div className={`card-accent px-5 py-4 ${variantClass}`}>
+      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
+        {label}
+      </p>
+      <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
+        {value}
+      </div>
+      <p className="mt-1 text-xs text-[var(--foreground-muted)]">{detail}</p>
+    </div>
+  )
+}
+
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
@@ -129,37 +158,35 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const success = getParamValue(params.success)
   const error = getParamValue(params.error)
   const rondas = await listRondasParticipante(auth.user.id)
+  const rondasActivas = rondas.filter((r) => r.estado === 'activa').length
+  const fichasPendientes = rondas.filter((r) => r.ficha_estado !== 'enviado').length
+  const resultadosPendientes = rondas.filter(
+    (r) => r.estado === 'activa' && r.ficha_estado === 'enviado' && !r.envio_pt_enviado
+  ).length
+  const rondasBorrador = rondas.filter((r) => r.estado === 'borrador').length
 
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-6 py-5">
+        <header className="header-bar px-8 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-2">
-              <LogoUnal height={32} />
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)]">
-                  CALAIRE APP
-                </p>
-                <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-                  Ensayos de Aptitud de Calidad del Aire
+            <div className="flex items-center gap-6">
+              <LogoUnal height={64} />
+              <div className="space-y-0.5">
+                <h1 className="text-xl font-bold text-[var(--foreground)]">
+                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
                 </h1>
+                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
+                  Gases Contaminantes Criterio
+                </p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
+                </p>
                 <p className="text-sm text-[var(--foreground-muted)]">
                   {auth.user.email} · Participante
                 </p>
               </div>
             </div>
-
-            <form
-              action={async () => {
-                'use server'
-                await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
-              }}
-            >
-              <button type="submit" className="btn-outline">
-                Cerrar sesión
-              </button>
-            </form>
           </div>
         </header>
 
@@ -167,11 +194,51 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
         <Alert tone="error" message={error} />
 
         <section className="grid gap-6">
-          <div className="card p-6">
-            <h2 className="text-lg font-semibold text-[var(--foreground)]">Mis rondas asignadas</h2>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-              Rondas en las que está habilitado para diligenciar ficha y cargar resultados.
-            </p>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <ParticipantKpiCard
+              label="Rondas activas"
+              value={rondasActivas}
+              detail="Disponibles para gestión"
+              variant={rondasActivas > 0 ? 'success' : 'default'}
+            />
+            <ParticipantKpiCard
+              label="Fichas pendientes"
+              value={fichasPendientes}
+              detail="Por diligenciar o enviar"
+              variant={fichasPendientes > 0 ? 'warning' : 'default'}
+            />
+            <ParticipantKpiCard
+              label="Resultados pendientes"
+              value={resultadosPendientes}
+              detail="Con ficha lista y PT sin envío final"
+              variant={resultadosPendientes > 0 ? 'danger' : 'default'}
+            />
+            <ParticipantKpiCard
+              label="En borrador"
+              value={rondasBorrador}
+              detail="Rondas aún no activas"
+              variant={rondasBorrador > 0 ? 'warning' : 'default'}
+            />
+          </div>
+
+          <div className="card flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Mis rondas asignadas</h2>
+              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                Rondas en las que está habilitado para diligenciar ficha y cargar resultados.
+              </p>
+            </div>
+            <a
+              href="/guia.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-outline inline-flex items-center gap-2 self-start"
+              title="Abrir guía del participante en nueva pestaña"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+              Guía del participante
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
           </div>
 
           {rondas.length === 0 ? (

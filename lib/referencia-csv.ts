@@ -30,6 +30,8 @@ export type ParsedReferenciaRow = {
   meanValue: number
   sdValue: number | null
   ux: number
+  k: number | null
+  uxExp: number | null
   nHours: number
   hourStarts: string
 }
@@ -43,6 +45,7 @@ export type ReferenciaImportCell = {
   meanValue: number
   sdValue: number
   ux: number
+  k: number
   uxExp: number
 }
 
@@ -62,6 +65,7 @@ const REQUIRED_COLUMNS = [
   'mean_value',
   'sd_value',
   'u_value',
+  'u_exp',
   'n_hours',
   'hour_starts',
 ] as const
@@ -146,6 +150,15 @@ function parseOptionalNumber(value: string): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function parseOptionalNonNegativeNumber(value: string, label: string, rowNumber: number): number | null {
+  const parsed = parseOptionalNumber(value)
+  if (parsed == null) return null
+  if (parsed < 0) {
+    throw new Error(`Fila ${rowNumber}: ${label} debe ser mayor o igual a cero.`)
+  }
+  return parsed
+}
+
 export function parseReferenciaCsv(text: string): ParsedReferenciaRow[] {
   const records = parseCsvRecords(text)
   if (records.length === 0) return []
@@ -184,6 +197,8 @@ export function parseReferenciaCsv(text: string): ParsedReferenciaRow[] {
       meanValue,
       sdValue,
       ux: parseRequiredNumber(getValue(record, 'u_value'), 'u_value', rowNumber),
+      k: indexByColumn.has('k') ? parseOptionalNonNegativeNumber(getValue(record, 'k'), 'k', rowNumber) : null,
+      uxExp: indexByColumn.has('u_exp') ? parseOptionalNonNegativeNumber(getValue(record, 'u_exp'), 'u_exp', rowNumber) : null,
       nHours: parseRequiredNumber(getValue(record, 'n_hours'), 'n_hours', rowNumber),
       hourStarts: getValue(record, 'hour_starts'),
     }
@@ -194,14 +209,16 @@ export function buildReferenciaImportPreview(
   rows: ParsedReferenciaRow[],
   ptItems: RondaPTItem[],
   sampleGroups: RondaPTSampleGroup[],
-  existingCells: Set<string> = new Set()
+  existingCells: Set<string> = new Set(),
+  defaultK = 2
 ): ReferenciaImportPreview {
-  // Coverage factor for expanded uncertainty: U = k * u(x).
-  // Currently assumes k=2 (≈95% confidence). Change if protocol differs.
-  const UX_EXP_K = 2
   const warnings: string[] = []
   const errors: string[] = []
   const cells: ReferenciaImportCell[] = []
+
+  if (!Number.isFinite(defaultK) || defaultK < 0) {
+    errors.push('El valor grupal de k debe ser un numero mayor o igual a cero.')
+  }
 
   if (sampleGroups.length === 0) {
     errors.push('La ronda no tiene grupos de muestra configurados.')
@@ -237,7 +254,13 @@ export function buildReferenciaImportPreview(
       continue
     }
 
+    if (row.uxExp == null) {
+      errors.push(`Fila ${row.rowNumber}: u_exp es requerido.`)
+      continue
+    }
+
     const sdValue = row.sdValue ?? 0
+    const k = row.k ?? defaultK
     const d1 = row.meanH1
     const d2 = requiredReplicates === 1 ? null : row.meanH2
     const d3 = requiredReplicates === 1 ? null : row.meanH3
@@ -256,7 +279,8 @@ export function buildReferenciaImportPreview(
         meanValue: row.meanValue,
         sdValue,
         ux: row.ux,
-        uxExp: row.ux * UX_EXP_K,
+        k,
+        uxExp: row.uxExp,
       })
     }
   }

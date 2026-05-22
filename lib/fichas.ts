@@ -300,11 +300,41 @@ export async function upsertFichaScalars(
   })
 }
 
+export async function adminUpsertFichaScalars(
+  fichaId: string,
+  field: FichaScalarField,
+  value: string | boolean | null
+): Promise<void> {
+  const convexField = SCALAR_FIELD_MAP[field]
+  await fetchMutation(api.fichas.adminUpsertFichaScalar, {
+    fichaId: fichaId as Id<'fichasRegistro'>,
+    field: convexField,
+    ...(typeof value === 'boolean'
+      ? { valueBoolean: value }
+      : { valueString: value }),
+  })
+}
+
 export async function replaceAcompanantes(
   fichaId: string,
   items: AcompananteInput[]
 ): Promise<void> {
   await fetchMutation(api.fichas.replaceAcompanantes, {
+    fichaId: fichaId as Id<'fichasRegistro'>,
+    items: items.map((item) => ({
+      sortOrder:          item.sort_order,
+      nombreCompleto:     item.nombre_completo,
+      documentoIdentidad: item.documento_identidad,
+      rol:                item.rol,
+    })),
+  })
+}
+
+export async function adminReplaceAcompanantes(
+  fichaId: string,
+  items: AcompananteInput[]
+): Promise<void> {
+  await fetchMutation(api.fichas.adminReplaceAcompanantes, {
     fichaId: fichaId as Id<'fichasRegistro'>,
     items: items.map((item) => ({
       sortOrder:          item.sort_order,
@@ -336,11 +366,48 @@ export async function replaceAnalizadores(
   })
 }
 
+export async function adminReplaceAnalizadores(
+  fichaId: string,
+  items: AnalizadorInput[]
+): Promise<void> {
+  await fetchMutation(api.fichas.adminReplaceAnalizadores, {
+    fichaId: fichaId as Id<'fichasRegistro'>,
+    items: items.map((item) => ({
+      sortOrder:              item.sort_order,
+      analito:                item.analito,
+      fabricante:             item.fabricante,
+      modelo:                 item.modelo,
+      numeroSerie:            item.numero_serie,
+      metodoEpa:              item.metodo_epa,
+      fechaUltimaCalibracion: item.fecha_ultima_calibracion ?? undefined,
+      tipoVerificacion:       item.tipo_verificacion,
+      incertidumbreDeclarada: item.incertidumbre_declarada,
+      unidadSalida:           item.unidad_salida,
+    })),
+  })
+}
+
 export async function replaceInstrumentos(
   fichaId: string,
   items: InstrumentoInput[]
 ): Promise<void> {
   await fetchMutation(api.fichas.replaceInstrumentos, {
+    fichaId: fichaId as Id<'fichasRegistro'>,
+    items: items.map((item) => ({
+      sortOrder:   item.sort_order,
+      equipo:      item.equipo,
+      marcaModelo: item.marca_modelo,
+      numeroSerie: item.numero_serie,
+      cantidad:    item.cantidad,
+    })),
+  })
+}
+
+export async function adminReplaceInstrumentos(
+  fichaId: string,
+  items: InstrumentoInput[]
+): Promise<void> {
+  await fetchMutation(api.fichas.adminReplaceInstrumentos, {
     fichaId: fichaId as Id<'fichasRegistro'>,
     items: items.map((item) => ({
       sortOrder:   item.sort_order,

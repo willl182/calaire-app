@@ -94,6 +94,7 @@ export default defineSchema({
     meanValue:           v.number(),
     sdValue:             v.number(),
     ux:                  v.optional(v.number()),
+    k:                   v.optional(v.number()),
     uxExp:               v.optional(v.number()),
     draftSavedAt:        v.number(),
     finalSubmittedAt:    v.optional(v.number()),

@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
+import { LogoUnal } from '@/app/components/LogoUnal'
 import {
   CONTAMINANTES,
   getRequiredPTReplicateCount,
@@ -19,9 +20,11 @@ type CellData = {
   meanValue: string
   sdValue: string
   ux: string
+  k: string
   uxExp: string
 }
 type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
+type KMode = 'individual' | 'grupal'
 
 function toCellKey(ptItemId: string, sampleGroupId: string): CellKey {
   return `${ptItemId}::${sampleGroupId}`
@@ -41,8 +44,8 @@ function isValidNumberInput(value: string): boolean {
 
 function getCellIssue(data: CellData, requiredReplicates: 1 | 3): string | null {
   const fields = requiredReplicates === 1
-    ? ([['d1', data.d1]] as const)
-    : ([['d1', data.d1], ['d2', data.d2], ['d3', data.d3]] as const)
+    ? ([['Dato 1', data.d1]] as const)
+    : ([['Dato 1', data.d1], ['Dato 2', data.d2], ['Dato 3', data.d3]] as const)
 
   for (const [label, field] of fields) {
     if (field.trim() !== '' && !isValidNumberInput(field)) {
@@ -56,10 +59,13 @@ function getCellIssue(data: CellData, requiredReplicates: 1 | 3): string | null 
     return 'La desviación estándar debe ser ≥ 0.'
   }
   if (data.ux.trim() !== '' && (!isValidNumberInput(data.ux) || Number(data.ux) < 0)) {
-    return 'u(x) debe ser ≥ 0.'
+    return 'La incertidumbre estándar u(x) debe ser ≥ 0.'
+  }
+  if (data.k.trim() !== '' && (!isValidNumberInput(data.k) || Number(data.k) < 0)) {
+    return 'El factor de cobertura k debe ser ≥ 0.'
   }
   if (data.uxExp.trim() !== '' && (!isValidNumberInput(data.uxExp) || Number(data.uxExp) < 0)) {
-    return 'u(x) exp debe ser ≥ 0.'
+    return 'La incertidumbre expandida U(X) debe ser ≥ 0.'
   }
   return null
 }
@@ -76,6 +82,8 @@ function isCellComplete(data: CellData, requiredReplicates: 1 | 3): boolean {
     Number(data.sdValue) >= 0 &&
     isValidNumberInput(data.ux) &&
     Number(data.ux) >= 0 &&
+    isValidNumberInput(data.k) &&
+    Number(data.k) >= 0 &&
     isValidNumberInput(data.uxExp) &&
     Number(data.uxExp) >= 0
   )
@@ -102,6 +110,7 @@ function initCells(
         meanValue: envio != null ? String(envio.mean_value) : '',
         sdValue: envio != null ? String(envio.sd_value) : '',
         ux: envio?.ux != null ? String(envio.ux) : '',
+        k: envio?.k != null ? String(envio.k) : '2',
         uxExp: envio?.ux_exp != null ? String(envio.ux_exp) : '',
       }
     }
@@ -145,6 +154,7 @@ export default function FormularioRonda({
   enviadoAt,
   participantCode,
   replicateCode,
+  participanteEmail,
 }: {
   ronda: Ronda
   ptItems: RondaPTItem[]
@@ -154,6 +164,7 @@ export default function FormularioRonda({
   enviadoAt: string | null
   participantCode: string | null
   replicateCode: number | null
+  participanteEmail: string
 }) {
   const [submitDone, setSubmitDone] = useState(envioFinalizado)
   const [submittedAt, setSubmittedAt] = useState<string | null>(enviadoAt)
@@ -163,6 +174,8 @@ export default function FormularioRonda({
   )
   const [saveErrors, setSaveErrors] = useState<Record<CellKey, string>>({})
   const [formMessage, setFormMessage] = useState<string | null>(null)
+  const [kMode, setKMode] = useState<KMode>('individual')
+  const [globalK, setGlobalK] = useState('2')
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
   const cerrada = ronda.estado === 'cerrada'
@@ -217,10 +230,11 @@ export default function FormularioRonda({
     const meanValue = Number(data.meanValue)
     const sdValue = Number(data.sdValue)
     const ux = Number(data.ux)
+    const k = Number(data.k)
     const uxExp = Number(data.uxExp)
     setSaveStatus((prev) => ({ ...prev, [key]: 'saving' }))
 
-    const result = await guardarEnvioAction(ronda.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp)
+    const result = await guardarEnvioAction(ronda.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp, k)
 
     if (result.error) {
       setSaveStatus((prev) => ({ ...prev, [key]: 'error' }))
@@ -253,6 +267,22 @@ export default function FormularioRonda({
     }, 1200)
   }
 
+  function handleKModeChange(nextMode: KMode) {
+    setKMode(nextMode)
+    if (nextMode !== 'grupal' || !isValidNumberInput(globalK) || Number(globalK) < 0) return
+    for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
+      updateCell(key, { ...data, k: globalK })
+    }
+  }
+
+  function handleGlobalKChange(value: string) {
+    setGlobalK(value)
+    if (kMode !== 'grupal' || !isValidNumberInput(value) || Number(value) < 0) return
+    for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
+      updateCell(key, { ...data, k: value })
+    }
+  }
+
   async function handleSubmit() {
     if (!canSubmit) {
       if (!hasPTConfig) {
@@ -282,16 +312,42 @@ export default function FormularioRonda({
   })).filter((entry) => entry.items.length > 0)
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
-      <div className="mx-auto flex max-w-7xl flex-col gap-6 px-4 py-8">
+    <div className="min-h-screen bg-[var(--background)] px-6 py-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
+        <header className="header-bar px-8 py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-6">
+              <LogoUnal height={64} />
+              <div className="space-y-0.5">
+                <h1 className="text-xl font-bold text-[var(--foreground)]">
+                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
+                </h1>
+                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
+                  Gases Contaminantes Criterio
+                </p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
+                </p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  {participanteEmail} · Participante
+                </p>
+              </div>
+            </div>
+          </div>
+        </header>
+
         <section className="card p-6">
-          <div className="flex flex-wrap items-start justify-between gap-4">
-            <div>
-              <h1 className="text-xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
-              <p className="mt-1 text-sm text-[var(--foreground-muted)]">Código: {ronda.codigo}</p>
+          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+            <div className="space-y-1">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">
+                {ronda.nombre}
+              </h2>
+              <p className="text-sm font-medium text-[var(--pt-primary-dark)]">
+                Código de Ronda: {ronda.codigo}
+              </p>
             </div>
             <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
+              className={`self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
                 ronda.estado === 'activa'
                   ? 'bg-emerald-100 text-emerald-800'
                   : ronda.estado === 'cerrada'
@@ -299,44 +355,46 @@ export default function FormularioRonda({
                     : 'bg-amber-100 text-amber-800'
               }`}
             >
-              {ronda.estado}
+              Ronda {ronda.estado}
             </span>
           </div>
+        </section>
 
-          <div className="mt-4 grid gap-3 md:grid-cols-4">
-            <div className="card-accent px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Código PT
-              </div>
-              <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
-                {participantCode ?? '—'}
-              </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="card-accent px-5 py-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+              Código PT
             </div>
-            <div className="card-accent px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Réplica
-              </div>
-              <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
-                {replicateCode ?? '—'}
-              </div>
-            </div>
-            <div className="card-accent px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Completitud
-              </div>
-              <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
-                {completedCells}/{totalCells}
-              </div>
-            </div>
-            <div className="card-accent px-4 py-3">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Observaciones
-              </div>
-              <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">{invalidCells}</div>
+            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">
+              {participantCode ?? '—'}
             </div>
           </div>
+          <div className="card-accent px-5 py-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+              Réplica
+            </div>
+            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">
+              {replicateCode ?? '—'}
+            </div>
+          </div>
+          <div className="card-accent px-5 py-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+              Completitud
+            </div>
+            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">
+              {completedCells}/{totalCells}
+            </div>
+          </div>
+          <div className="card-accent px-5 py-4">
+            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+              Observaciones
+            </div>
+            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">{invalidCells}</div>
+          </div>
+        </div>
 
-          <div className="mt-4">
+        <section className="card grid gap-4 p-6">
+          <div>
             <div className="mb-1 flex justify-between text-xs text-[var(--foreground-muted)]">
               <span>Progreso PT</span>
               <span>{progressPct}%</span>
@@ -350,35 +408,74 @@ export default function FormularioRonda({
           </div>
 
           {cerrada && (
-            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               Esta ronda está cerrada. Los datos son de solo lectura.
             </div>
           )}
 
           {!hasPTConfig && (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               La configuración PT no está completa. Debe existir al menos una corrida PT y un grupo de muestra.
             </div>
           )}
 
           {!hasParticipantCodes && (
-            <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
               No tienes asignado `participant_id` o `replicate`. Solicita al coordinador completar esa configuración.
             </div>
           )}
 
           {submitDone && (
-            <div className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
               Tu informe final PT fue enviado correctamente.
               {submittedAt ? ` Fecha de envío: ${new Date(submittedAt).toLocaleString('es-CO')}.` : ''}
             </div>
           )}
 
           {formMessage && (
-            <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {formMessage}
             </div>
           )}
+        </section>
+
+        <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
+              Configuración del factor de cobertura k
+            </h2>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <div className="flex items-center rounded border border-[var(--border)] p-1 text-sm">
+              <button
+                type="button"
+                onClick={() => handleKModeChange('individual')}
+                className={`rounded px-3 py-1 ${kMode === 'individual' ? 'bg-[var(--pt-primary)] text-white' : 'text-[var(--foreground-muted)]'}`}
+                disabled={soloLectura}
+              >
+                Factor individual
+              </button>
+              <button
+                type="button"
+                onClick={() => handleKModeChange('grupal')}
+                className={`rounded px-3 py-1 ${kMode === 'grupal' ? 'bg-[var(--pt-primary)] text-white' : 'text-[var(--foreground-muted)]'}`}
+                disabled={soloLectura}
+              >
+                Factor grupal
+              </button>
+            </div>
+            <input
+              type="number"
+              step="any"
+              min="0"
+              inputMode="decimal"
+              value={globalK}
+              disabled={soloLectura}
+              onChange={(event) => handleGlobalKChange(event.target.value)}
+              className="w-24 rounded border border-[var(--border)] px-3 py-2 text-sm numeric disabled:bg-[var(--surface-muted)]"
+              aria-label="Valor grupal del factor de cobertura k"
+            />
+          </div>
         </section>
 
         {itemsByContaminante.map(({ contaminante, items }) => {
@@ -419,13 +516,14 @@ export default function FormularioRonda({
                     <tr className="border-b border-[var(--border)] bg-[var(--surface-muted)] text-left text-xs text-[var(--foreground-muted)]">
                       <th className="px-4 py-2 font-semibold">Corrida</th>
                       {sampleGroups.length > 1 && <th className="px-4 py-2 font-semibold">Grupo</th>}
-                      <th className="px-4 py-2 font-semibold">d1</th>
-                      <th className="px-4 py-2 font-semibold">d2</th>
-                      <th className="px-4 py-2 font-semibold">d3</th>
+                      <th className="px-4 py-2 font-semibold">Dato 1</th>
+                      <th className="px-4 py-2 font-semibold">Dato 2</th>
+                      <th className="px-4 py-2 font-semibold">Dato 3</th>
                       <th className="px-4 py-2 font-semibold">Promedio</th>
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
-                      <th className="px-4 py-2 font-semibold">u(x)</th>
-                      <th className="px-4 py-2 font-semibold">u(x) exp</th>
+                      <th className="min-w-36 px-4 py-2 font-semibold">Incertidumbre estándar u(x)</th>
+                      <th className="min-w-32 px-4 py-2 font-semibold">Factor de cobertura k</th>
+                      <th className="min-w-36 px-4 py-2 font-semibold">Incertidumbre expandida U(X)</th>
                       <th className="px-4 py-2 font-semibold text-center">OK</th>
                     </tr>
                   </thead>
@@ -499,6 +597,18 @@ export default function FormularioRonda({
                                 value={data.ux}
                                 disabled={soloLectura}
                                 onChange={(e) => updateCell(key, { ...data, ux: e.target.value })}
+                                className={inputCls}
+                              />
+                            </td>
+                            <td className="px-2 py-2">
+                              <input
+                                type="number"
+                                step="any"
+                                min="0"
+                                inputMode="decimal"
+                                value={data.k}
+                                disabled={soloLectura || kMode === 'grupal'}
+                                onChange={(e) => updateCell(key, { ...data, k: e.target.value })}
                                 className={inputCls}
                               />
                             </td>

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Factor de cobertura k</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #E8EAED;
+    color: #111827;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    padding: 24px;
+  }
+  .card {
+    background: #F5F6F7;
+    border: 1px solid #D1D5DB;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    padding: 20px 24px;
+  }
+  .card h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em;
+    color: #111827;
+  }
+  .toggle {
+    display: inline-flex; align-items: center;
+    border: 1px solid #D1D5DB; border-radius: 8px; padding: 3px;
+    background: #fff;
+  }
+  .toggle button {
+    padding: 6px 14px; border: none; border-radius: 6px;
+    font-size: 13px; font-weight: 500; cursor: pointer; background: transparent; color: #6B7280;
+  }
+  .toggle button.active {
+    background: #FDB913; color: #111827; font-weight: 600;
+  }
+  .k-input {
+    width: 90px; padding: 8px 10px; border: 1px solid #D1D5DB; border-radius: 8px;
+    background: #fff; font-size: 14px; text-align: center;
+  }
+</style>
+</head>
+<body>
+  <div class="card" style="display:flex; flex-wrap:wrap; justify-content:space-between; align-items:center; gap:16px;">
+    <h2>Configuración del factor de cobertura k</h2>
+    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+      <div class="toggle">
+        <button class="active">Factor individual</button>
+        <button>Factor grupal</button>
+      </div>
+      <input type="number" step="any" value="2" class="k-input" aria-label="Valor grupal del factor de cobertura k">
+    </div>
+  </div>
+</body>
+</html>

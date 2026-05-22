@@ -13,6 +13,7 @@ import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
 import {
   updateParticipantePTAction,
+  updatePTItemAction,
   deletePTItemAction,
 } from './actions'
 import { PTLevelsBulkForm } from './PTLevelsBulkForm'
@@ -28,22 +29,63 @@ function getParam(v: string | string[] | undefined) {
 
 
 function PTItemRow({ item, canEdit }: { item: RondaPTItem; canEdit: boolean }) {
+  if (canEdit) {
+    return (
+      <tr className="border-b border-[var(--border-soft)] last:border-0">
+        <td className="py-3 pr-4 text-sm font-medium text-[var(--foreground)]">
+          {item.contaminante}
+        </td>
+        <td className="py-3 pr-4">
+          <form id={`pt-item-${item.id}`} action={updatePTItemAction} className="contents">
+            <input type="hidden" name="ronda_id" value={item.ronda_id} />
+            <input type="hidden" name="item_id" value={item.id} />
+            <input
+              type="text"
+              name="run_code"
+              defaultValue={item.run_code}
+              required
+              className="w-28 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--pt-primary)]"
+            />
+          </form>
+        </td>
+        <td className="py-3 pr-4">
+          <input
+            form={`pt-item-${item.id}`}
+            type="text"
+            name="level_label"
+            defaultValue={item.level_label}
+            required
+            className="w-32 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-2.5 py-1.5 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--pt-primary)]"
+          />
+        </td>
+        <td className="py-3 text-right">
+          <div className="flex justify-end gap-2">
+            <button
+              type="submit"
+              form={`pt-item-${item.id}`}
+              className="rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
+            >
+              Guardar
+            </button>
+            <form action={deletePTItemAction} className="inline">
+              <input type="hidden" name="ronda_id" value={item.ronda_id} />
+              <input type="hidden" name="item_id" value={item.id} />
+              <button type="submit" className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800">
+                Eliminar
+              </button>
+            </form>
+          </div>
+        </td>
+      </tr>
+    )
+  }
+
   return (
     <tr className="border-b border-[var(--border-soft)] last:border-0">
       <td className="py-3 pr-4 text-sm text-[var(--foreground)]">{item.contaminante}</td>
       <td className="py-3 pr-4 text-sm text-[var(--foreground)]">{item.run_code}</td>
       <td className="py-3 pr-4 text-sm text-[var(--foreground)]">{item.level_label}</td>
-      <td className="py-3 text-right">
-        {canEdit && (
-          <form action={deletePTItemAction} className="inline">
-            <input type="hidden" name="ronda_id" value={item.ronda_id} />
-            <input type="hidden" name="item_id" value={item.id} />
-            <button type="submit" className="text-xs text-rose-600 transition hover:text-rose-800">
-              Eliminar
-            </button>
-          </form>
-        )}
-      </td>
+      <td className="py-3 text-right text-xs text-[var(--foreground-muted)]">Solo lectura</td>
     </tr>
   )
 }

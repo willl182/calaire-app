@@ -10,8 +10,10 @@ import {
   createPTSampleGroup,
   deletePTItem,
   deletePTSampleGroup,
+  getRonda,
   listPTItems,
   listPTSampleGroups,
+  updatePTItem,
   updateParticipantePT,
   type Contaminante,
 } from '@/lib/rondas'
@@ -254,6 +256,53 @@ export async function updateParticipantePTAction(formData: FormData) {
     targetUrl = successUrl(rondaId, 'Participante PT actualizado correctamente.')
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al actualizar el participante PT.'
+    targetUrl = errorUrl(rondaId, msg)
+  }
+
+  redirect(targetUrl)
+}
+
+export async function updatePTItemAction(formData: FormData) {
+  await requireAdmin()
+
+  const rondaId = parseText(formData, 'ronda_id')
+  const itemId = parseText(formData, 'item_id')
+  const runCode = parseText(formData, 'run_code')
+  const levelLabel = parseText(formData, 'level_label')
+  let targetUrl = errorUrl(rondaId, 'Error al actualizar el nivel PT.')
+
+  try {
+    if (!rondaId || !itemId || !runCode || !levelLabel) {
+      throw new Error('Run y Level son obligatorios para actualizar el nivel PT.')
+    }
+
+    const ronda = await getRonda(rondaId)
+    if (!ronda) throw new Error('Ronda no encontrada.')
+    if (ronda.estado === 'cerrada') {
+      throw new Error('La ronda está cerrada. No se pueden editar los niveles PT.')
+    }
+
+    const items = await listPTItems(rondaId)
+    const current = items.find((row) => row.id === itemId)
+    if (!current) throw new Error('El nivel PT no pertenece a esta ronda.')
+
+    const sameContaminante = items.filter(
+      (row) => row.contaminante === current.contaminante && row.id !== itemId
+    )
+    if (sameContaminante.some((row) => row.run_code === runCode)) {
+      throw new Error(`Ya existe la corrida ${runCode} para ${current.contaminante}.`)
+    }
+    if (sameContaminante.some((row) => row.level_label === levelLabel)) {
+      throw new Error(`Ya existe el nivel ${levelLabel} para ${current.contaminante}.`)
+    }
+
+    await updatePTItem(rondaId, itemId, runCode, levelLabel)
+
+    revalidatePath(pageUrl(rondaId))
+    revalidatePath(`/dashboard/rondas/${rondaId}`)
+    targetUrl = successUrl(rondaId, 'Nivel PT actualizado correctamente.')
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al actualizar el nivel PT.'
     targetUrl = errorUrl(rondaId, msg)
   }
 

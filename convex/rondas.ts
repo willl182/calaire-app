@@ -216,6 +216,38 @@ export const listParticipantesRondaResumen = query({
   },
 })
 
+export const getParticipanteRondaResumen = query({
+  args: { participanteId: v.id('rondaParticipantes') },
+  handler: async (ctx, { participanteId }) => {
+    const p = await ctx.db.get(participanteId)
+    if (!p) return null
+
+    const ficha = await getLatestFichaByRondaParticipante(ctx, p._id)
+    const enviosPt = await ctx.db
+      .query('enviosPt')
+      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', p._id))
+      .collect()
+    const workosUserId = p.workosUserId ?? ''
+    const pendiente = workosUserId.startsWith(PENDING_PREFIX)
+
+    return {
+      ronda_participante_id: p._id,
+      ronda_id: p.rondaId,
+      email: p.email ?? '',
+      workos_user_id: pendiente ? null : workosUserId,
+      participant_profile: p.participantProfile ?? 'member',
+      participant_code: p.participantCode ?? null,
+      replicate_code: p.replicateCode ?? null,
+      estado: pendiente ? 'pendiente' : 'reclamado',
+      slot_token: pendiente ? workosUserId.slice(PENDING_PREFIX.length) : null,
+      claimed_at: p.claimedAt ? new Date(p.claimedAt).toISOString() : null,
+      invitado_at: new Date(p.invitadoAt).toISOString(),
+      ficha_estado: ficha ? ficha.estado : 'no_iniciada',
+      envios_pt_count: enviosPt.length,
+    }
+  },
+})
+
 export const listRondasParticipante = query({
   args: { userId: v.string() },
   handler: async (ctx, { userId }) => {
@@ -240,13 +272,22 @@ export const listRondasParticipante = query({
 
         const fichaEstado: 'no_iniciada' | 'borrador' | 'enviado' =
           ficha ? (ficha.estado as 'borrador' | 'enviado') : 'no_iniciada'
+        const enviosPt = await ctx.db
+          .query('enviosPt')
+          .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', rp._id))
+          .collect()
+        const envioPtEnviado = enviosPt.some((envio) => envio.finalSubmittedAt != null)
 
         return {
           ...ronda,
           contaminantes,
+          email: rp.email,
           invitado_at: new Date(rp.invitadoAt).toISOString(),
           ronda_participante_id: rp._id,
+          participant_profile: rp.participantProfile ?? 'member',
           ficha_estado: fichaEstado,
+          envios_pt_count: enviosPt.length,
+          envio_pt_enviado: envioPtEnviado,
         }
       })
     )
@@ -274,7 +315,16 @@ export const listAllParticipantes = query({
     type ParticipanteGlobal = {
       workos_user_id: string
       email: string
-      rondas: { id: string; codigo: string; nombre: string; estado: string; envios_count: number }[]
+      rondas: {
+        id: string
+        codigo: string
+        nombre: string
+        estado: string
+        envios_count: number
+        participant_profile: string
+        ronda_participante_id: string
+        rondaParticipanteId: string
+      }[]
       total_envios: number
     }
 
@@ -294,7 +344,16 @@ export const listAllParticipantes = query({
         grouped.set(row.workosUserId, entry)
       }
       const rondaEnvios = envioCount.get(row.workosUserId)?.get(row.rondaId) ?? 0
-      entry.rondas.push({ id: ronda._id, codigo: ronda.codigo, nombre: ronda.nombre, estado: ronda.estado, envios_count: rondaEnvios })
+      entry.rondas.push({
+        id: ronda._id,
+        codigo: ronda.codigo,
+        nombre: ronda.nombre,
+        estado: ronda.estado,
+        envios_count: rondaEnvios,
+        participant_profile: row.participantProfile ?? 'member',
+        ronda_participante_id: row._id,
+        rondaParticipanteId: row._id,
+      })
       entry.total_envios += rondaEnvios
     }
 
@@ -637,6 +696,40 @@ export const addParticipante = mutation({
   },
 })
 
+export const updateParticipanteAdmin = mutation({
+  args: {
+    participanteId: v.id('rondaParticipantes'),
+    email: v.string(),
+    participantProfile: v.union(v.literal('member'), v.literal('member_special')),
+    participantCode: v.union(v.string(), v.null()),
+    replicateCode: v.union(v.number(), v.null()),
+  },
+  handler: async (ctx, { participanteId, email, participantProfile, participantCode, replicateCode }) => {
+    const participante = await ctx.db.get(participanteId)
+    if (!participante) throw new Error('Participante no encontrado.')
+
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) throw new Error('El correo es obligatorio.')
+
+    const normalizedCode = participantCode?.trim().toUpperCase() || null
+    if (normalizedCode) {
+      const participantes = await ctx.db
+        .query('rondaParticipantes')
+        .withIndex('by_ronda', (q) => q.eq('rondaId', participante.rondaId))
+        .collect()
+      const duplicate = participantes.find((p) => p._id !== participanteId && p.participantCode === normalizedCode)
+      if (duplicate) throw new Error('Ya existe otro cupo con ese código en la ronda.')
+    }
+
+    await ctx.db.patch(participanteId, {
+      email: normalizedEmail,
+      participantProfile,
+      participantCode: normalizedCode,
+      replicateCode,
+    })
+  },
+})
+
 export const createConfiguredRonda = mutation({
   args: {
     codigo: v.string(),
@@ -752,6 +845,29 @@ export const updateRondaConfig = mutation({
         replicas: item.replicas,
       })
     ))
+  },
+})
+
+export const updateRondaBasicInfo = mutation({
+  args: {
+    id: v.id('rondas'),
+    codigo: v.string(),
+    nombre: v.string(),
+  },
+  handler: async (ctx, { id, codigo, nombre }) => {
+    const ronda = await ctx.db.get(id)
+    if (!ronda) throw new Error('La ronda no existe.')
+    if (ronda.estado === 'cerrada') {
+      throw new Error('No se puede editar una ronda cerrada.')
+    }
+
+    const sameCode = await ctx.db
+      .query('rondas')
+      .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
+      .first()
+    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese codigo.')
+
+    await ctx.db.patch(id, { codigo, nombre })
   },
 })
 

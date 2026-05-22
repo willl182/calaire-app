@@ -25,6 +25,19 @@ const sampleGroups: RondaPTSampleGroup[] = [
   },
 ]
 
+function withUxExpColumn(csv: string): string {
+  const [header, ...rows] = csv.trim().split('\n')
+  return [
+    header.replace('"u_value","n_hours"', '"u_value","u_exp","n_hours"'),
+    ...rows.map((row) => {
+      const columns = row.split(',')
+      const ux = Number(columns[10])
+      columns.splice(11, 0, Number.isFinite(ux) ? String(ux * 2) : '')
+      return columns.join(',')
+    }),
+  ].join('\n')
+}
+
 function makeItem(id: string, contaminante: 'CO' | 'SO2', level: string, sortOrder: number): RondaPTItem {
   return {
     id,
@@ -38,7 +51,7 @@ function makeItem(id: string, contaminante: 'CO' | 'SO2', level: string, sortOrd
 }
 
 test('lee el CSV de referencia y reconoce CO y SO2', () => {
-  const csv = readFileSync('data/referencia_ronda.csv', 'utf8')
+  const csv = withUxExpColumn(readFileSync('data/referencia_ronda.csv', 'utf8'))
   const rows = parseReferenciaCsv(csv)
 
   assert.equal(rows.length, 10)
@@ -46,7 +59,7 @@ test('lee el CSV de referencia y reconoce CO y SO2', () => {
 })
 
 test('mapea niveles flexibles y convierte NA de sd_value a cero para nivel inicial', () => {
-  const rows = parseReferenciaCsv(readFileSync('data/referencia_ronda.csv', 'utf8')).filter(
+  const rows = parseReferenciaCsv(withUxExpColumn(readFileSync('data/referencia_ronda.csv', 'utf8'))).filter(
     (row) =>
       (row.pollutant === 'CO' && ['0-ppm', '6.3-ppm'].includes(row.level)) ||
       (row.pollutant === 'SO2' && ['0-ppb', '179-ppb'].includes(row.level))
@@ -63,6 +76,25 @@ test('mapea niveles flexibles y convierte NA de sd_value a cero para nivel inici
   assert.equal(co63?.d2, 6.2807)
   assert.equal(co63?.d3, 6.31706666666667)
   assert.equal(co63?.meanValue, 6.29275555555556)
+  assert.equal(co63?.k, 2)
+  assert.equal(co63?.uxExp, co63 ? co63.ux * 2 : undefined)
+})
+
+test('acepta k opcional por fila y valor grupal por defecto', () => {
+  const rows = parseReferenciaCsv(
+    [
+      '"source","pollutant","level","unit","instrument","mean_value","sd_value","u_value","u_exp","k","n_hours","hour_starts"',
+      '"ronda","co","0-ppm","ppm","ref",0,NA,0.5,0.8,1.5,1,"2026-04-23 12:30:00"',
+      '"ronda","co","6.3-ppm","ppm","ref",6.2,0.1,0.2,0.7,,3,"2026-04-23 12:30:00"',
+    ].join('\n')
+  )
+
+  const preview = buildReferenciaImportPreview(rows, ptItems, sampleGroups, new Set(), 3)
+  assert.deepEqual(preview.errors, [])
+  assert.equal(preview.cells.find((cell) => cell.ptItemId === 'co-0')?.k, 1.5)
+  assert.equal(preview.cells.find((cell) => cell.ptItemId === 'co-0')?.uxExp, 0.8)
+  assert.equal(preview.cells.find((cell) => cell.ptItemId === 'co-63')?.k, 3)
+  assert.equal(preview.cells.find((cell) => cell.ptItemId === 'co-63')?.uxExp, 0.7)
 })
 
 test('rechaza NA en mean_value o u_value', () => {
@@ -70,7 +102,7 @@ test('rechaza NA en mean_value o u_value', () => {
     () =>
       parseReferenciaCsv(
         [
-          '"source","pollutant","level","unit","instrument","mean_value","sd_value","u_value","n_hours","hour_starts"',
+          '"source","pollutant","level","unit","instrument","mean_value","sd_value","u_value","u_exp","n_hours","hour_starts"',
           '"ronda","co","0-ppm","ppm","ref",NA,NA,1,1,"2026-04-23 12:30:00"',
         ].join('\n')
       ),
@@ -81,8 +113,8 @@ test('rechaza NA en mean_value o u_value', () => {
     () =>
       parseReferenciaCsv(
         [
-          '"source","pollutant","level","unit","instrument","mean_value","sd_value","u_value","n_hours","hour_starts"',
-          '"ronda","co","0-ppm","ppm","ref",0,NA,NA,1,"2026-04-23 12:30:00"',
+          '"source","pollutant","level","unit","instrument","mean_value","sd_value","u_value","u_exp","n_hours","hour_starts"',
+          '"ronda","co","0-ppm","ppm","ref",0,NA,NA,1,1,"2026-04-23 12:30:00"',
         ].join('\n')
       ),
     /u_value es requerido/
@@ -104,6 +136,8 @@ test('reporta contaminantes y niveles sin configuracion', () => {
       meanValue: 1,
       sdValue: 0.1,
       ux: 0.1,
+      k: null,
+      uxExp: 0.2,
       nHours: 3,
       hourStarts: '',
     },
@@ -120,6 +154,8 @@ test('reporta contaminantes y niveles sin configuracion', () => {
       meanValue: 1,
       sdValue: 0.1,
       ux: 0.1,
+      k: null,
+      uxExp: 0.2,
       nHours: 3,
       hourStarts: '',
     },

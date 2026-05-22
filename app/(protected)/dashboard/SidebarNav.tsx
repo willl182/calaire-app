@@ -3,6 +3,7 @@
 import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
+import { LogoUnal } from '@/app/components/LogoUnal'
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
@@ -29,7 +30,7 @@ function NavLink({
   isActive: boolean
 }) {
   const base =
-    'relative px-1 py-5 text-sm font-medium whitespace-nowrap transition-colors duration-150 ' +
+    'relative inline-flex items-center self-stretch px-1 py-0 text-sm font-medium whitespace-nowrap transition-colors duration-150 ' +
     'after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:rounded-t-full after:transition-all after:duration-200'
 
   if (item.external) {
@@ -40,7 +41,7 @@ function NavLink({
         rel="noopener noreferrer"
         className={
           `${base} text-[var(--foreground-muted)] hover:text-[var(--foreground)] ` +
-          `after:bg-transparent hover:after:bg-[var(--border)] inline-flex items-center gap-1`
+          `after:bg-transparent hover:after:bg-[var(--border)] gap-1`
         }
       >
         {item.label}
@@ -77,15 +78,16 @@ function TopNavInner() {
   }
 
   return (
-    <header className="sticky top-0 z-40 bg-[var(--surface)] border-b border-[var(--border)]">
+    <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)]" style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}>
       <div className="flex items-stretch gap-6 px-6 max-w-screen-2xl mx-auto">
         {/* Brand */}
-        <div className="flex items-center gap-1.5 pr-6 border-r border-[var(--border-soft)] py-4">
+        <div className="flex items-center gap-3 pr-6 border-r border-[var(--border-soft)] py-4">
+          <LogoUnal height={32} />
           <span className="text-xs font-bold tracking-[0.18em] uppercase text-[var(--foreground)]">
-            CALAIRE
-          </span>
-          <span className="rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wide bg-[var(--pt-primary)] text-white">
-            APP
+            CALAIRE-APP{' '}
+            <span className="inline-block rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wider bg-[var(--pt-primary)] text-[var(--foreground)]">
+              EA
+            </span>
           </span>
         </div>
 

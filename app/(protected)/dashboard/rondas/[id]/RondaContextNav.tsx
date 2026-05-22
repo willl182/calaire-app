@@ -12,7 +12,7 @@ const TABS = [
   { label: 'Resultados', href: (id: string) => `/dashboard/rondas/${id}/resultados` },
 ]
 
-export function RondaContextNav({ rondaId, rondaCodigo, ptConfigurado = true }: Props) {
+export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
   const pathname = usePathname()
 
   function isActive(tab: (typeof TABS)[number]) {
@@ -26,7 +26,7 @@ export function RondaContextNav({ rondaId, rondaCodigo, ptConfigurado = true }: 
   }
 
   return (
-    <nav className="bg-[var(--surface)] border border-[var(--border)] rounded-xl overflow-hidden shadow-sm">
+    <nav className="border border-[var(--border)] rounded-xl overflow-hidden shadow-sm" style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}>
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 px-5 pt-3 pb-0">
         <Link
@@ -47,19 +47,15 @@ export function RondaContextNav({ rondaId, rondaCodigo, ptConfigurado = true }: 
       <div className="flex gap-0 overflow-x-auto px-2">
         {TABS.map((tab) => {
           const active = isActive(tab)
-          const disabled = tab.label === 'Participantes' && !ptConfigurado
-          const href = disabled ? `/dashboard/rondas/${rondaId}/configuracion-pt` : tab.href(rondaId)
+          const href = tab.href(rondaId)
           return (
             <Link
               key={tab.label}
               href={href}
               aria-current={active ? 'page' : undefined}
-              title={disabled ? 'Configure los niveles PT antes de gestionar participantes' : undefined}
               className={`whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
                 active
                   ? 'border-[var(--pt-primary)] text-[var(--foreground)] font-semibold'
-                : disabled
-                    ? 'border-transparent text-[var(--foreground-muted)] opacity-60'
                   : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:border-[var(--border)]'
               }`}
             >

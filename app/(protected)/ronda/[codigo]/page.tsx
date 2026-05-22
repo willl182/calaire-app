@@ -128,6 +128,7 @@ export default async function RondaPage({
         enviadoAt={estadoEnvio.enviados_at}
         participantCode={participantePT?.participant_code ?? null}
         replicateCode={participantePT?.replicate_code ?? null}
+        participanteEmail={auth.user.email}
       />
     )
   }
@@ -142,6 +143,7 @@ export default async function RondaPage({
       enviadoAt={estadoEnvio.enviados_at}
       participantCode={participantePT?.participant_code ?? null}
       replicateCode={participantePT?.replicate_code ?? null}
+      participanteEmail={auth.user.email}
     />
   )
 }

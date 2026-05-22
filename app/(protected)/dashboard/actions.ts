@@ -13,6 +13,7 @@ import {
   deleteRonda,
   reabrirRonda,
   transitionRondaEstado,
+  updateRondaBasicInfo,
   updateRondaConfig,
   type Contaminante,
 } from '@/lib/rondas'
@@ -176,6 +177,38 @@ export async function updateRondaAction(formData: FormData) {
 
     revalidatePath('/dashboard')
     targetUrl = buildSuccessUrl('Configuración de ronda actualizada.')
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'No fue posible actualizar la ronda.'
+    targetUrl = buildErrorUrl(message)
+  }
+
+  redirect(targetUrl)
+}
+
+export async function updateRondaBasicInfoAction(formData: FormData) {
+  await requireAdmin()
+
+  let targetUrl = buildErrorUrl('No fue posible actualizar la ronda.')
+
+  try {
+    const rondaId = parseText(formData, 'ronda_id')
+    const nombre = parseText(formData, 'nombre')
+    const codigo = normalizeCodigo(parseText(formData, 'codigo'))
+
+    if (!rondaId) {
+      throw new Error('No se recibió la ronda a editar.')
+    }
+
+    if (!nombre || !codigo) {
+      throw new Error('Nombre y código son obligatorios.')
+    }
+
+    await updateRondaBasicInfo(rondaId, nombre, codigo)
+
+    revalidatePath('/dashboard')
+    revalidatePath(`/dashboard/rondas/${rondaId}`)
+    targetUrl = buildSuccessUrl('Datos básicos de la ronda actualizados.')
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'No fue posible actualizar la ronda.'

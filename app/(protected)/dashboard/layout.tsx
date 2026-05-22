@@ -13,7 +13,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-[var(--background)]">
+    <div className="flex flex-col min-h-[100%] bg-[var(--background)]">
       <Sidebar />
       <div className="flex-1 min-w-0">
         {children}

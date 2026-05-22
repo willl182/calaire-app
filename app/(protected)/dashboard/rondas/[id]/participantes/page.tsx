@@ -51,10 +51,12 @@ function perfilBadge(p: ParticipanteRondaResumen) {
 }
 
 function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
+  const href = `/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`
+
   if (p.ficha_estado === 'enviado') {
     return (
       <Link
-        href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`}
+        href={href}
         className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 transition hover:opacity-80"
       >
         Enviada ✓
@@ -64,7 +66,7 @@ function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
   if (p.ficha_estado === 'borrador') {
     return (
       <Link
-        href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`}
+        href={href}
         className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 transition hover:opacity-80"
       >
         Borrador
@@ -72,9 +74,12 @@ function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
     )
   }
   return (
-    <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600">
+    <Link
+      href={href}
+      className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 hover:text-slate-800"
+    >
       No iniciada
-    </span>
+    </Link>
   )
 }
 
@@ -255,8 +260,21 @@ function ParticipanteRow({
 
       {/* Col 5: Acciones */}
       <td className="py-3 text-right">
-        {canEdit && (
-          <div className="flex items-center justify-end gap-2">
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <Link
+            href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`}
+            className="rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2 py-1 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
+          >
+            Editar ficha
+          </Link>
+          <Link
+            href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/datos`}
+            className="rounded-lg border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 transition hover:border-blue-400 hover:bg-blue-100"
+          >
+            Editar datos
+          </Link>
+          {canEdit && (
+            <>
             <form action={regenerateSlotAction} className="inline">
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
@@ -278,8 +296,9 @@ function ParticipanteRow({
                 Eliminar
               </ConfirmSubmitButton>
             </form>
-          </div>
-        )}
+            </>
+          )}
+        </div>
       </td>
     </tr>
   )
@@ -360,9 +379,6 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
   if (!ronda) notFound()
 
   const ptItems = await listPTItems(rondaId)
-  if (ptItems.length === 0) {
-    redirect(`/dashboard/rondas/${rondaId}/configuracion-pt?error=${encodeURIComponent('Configure los niveles PT antes de gestionar participantes.')}`)
-  }
 
   // Single consolidated query — no more dual listParticipantes + listFichaResumenesByRonda
   const participantes = await listParticipantesRondaResumen(rondaId)

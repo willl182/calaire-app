@@ -3,13 +3,11 @@ import { signOut } from '@workos-inc/authkit-nextjs'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import type { ReactNode } from 'react'
 
 import { LogoUnal } from '@/app/components/LogoUnal'
 import { ConfirmSubmitButton } from '@/app/(protected)/dashboard/components/ConfirmSubmitButton'
 import {
   changeRondaStatusAction,
-  createRondaAction,
   deleteRondaAction,
   reabrirRondaAction,
   updateRondaAction,
@@ -17,13 +15,20 @@ import {
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { Alert } from './components/Alert'
 import {
-  CONTAMINANTES,
   listAllParticipantes,
   listParticipantesRondaResumen,
+  listPTItems,
+  listPTSampleGroups,
+  listResultadosPTRonda,
   listRondas,
   listRondasParticipante,
+  CONTAMINANTES,
+  type Contaminante,
   type ParticipanteGlobal,
   type Ronda,
+  type ResultadoParticipantePT,
+  type RondaPTItem,
+  type RondaPTSampleGroup,
   type RondaParticipanteAsignada,
   type ParticipanteRondaResumen,
 } from '@/lib/rondas'
@@ -57,83 +62,19 @@ function statusClasses(status: Ronda['estado']) {
   }
 }
 
+function RondaConfigForm({ round }: { round: Ronda }) {
+  const contaminantesByName = new Map(round.contaminantes.map((item) => [item.contaminante, item]))
 
-
-function ContaminanteFields({
-  round,
-}: {
-  round?: Ronda
-}) {
   return (
-    <div className="grid gap-3">
-      {CONTAMINANTES.map((contaminante) => {
-        const config = round?.contaminantes.find((item) => item.contaminante === contaminante)
+    <form action={updateRondaAction} className="grid gap-4 rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+      <input type="hidden" name="ronda_id" value={round.id} />
 
-        return (
-          <div
-            key={contaminante}
-            className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 md:grid-cols-[1.2fr_1fr_1fr]"
-          >
-            <label className="flex items-center gap-3 text-sm font-medium text-[var(--foreground)]">
-              <input
-                type="checkbox"
-                name={`enabled_${contaminante}`}
-                defaultChecked={Boolean(config)}
-                className="h-4 w-4 rounded border-[var(--border)]"
-              />
-              <span>{contaminante}</span>
-            </label>
-
-            <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
-              <span>Niveles</span>
-              <input
-                type="number"
-                min="1"
-                name={`niveles_${contaminante}`}
-                defaultValue={config?.niveles ?? 1}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none ring-0"
-              />
-            </label>
-
-            <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
-              <span>Réplicas</span>
-              <select
-                name={`replicas_${contaminante}`}
-                defaultValue={String(config?.replicas ?? 2)}
-                className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none ring-0"
-              >
-                <option value="2">2</option>
-                <option value="3">3</option>
-              </select>
-            </label>
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-function RondaForm({
-  action,
-  title,
-  description,
-  submitLabel,
-  round,
-}: {
-  action: (formData: FormData) => void | Promise<void>
-  title: string
-  description: string
-  submitLabel: string
-  round?: Ronda
-}) {
-  return (
-    <form action={action} className="card grid gap-5 p-6">
       <div className="space-y-1">
-        <h2 className="text-lg font-semibold text-[var(--foreground)]">{title}</h2>
-        <p className="text-sm text-[var(--foreground-muted)]">{description}</p>
+        <h2 className="text-base font-semibold text-[var(--foreground)]">Editar configuración de ronda</h2>
+        <p className="text-sm text-[var(--foreground-muted)]">
+          Actualice nombre, código, contaminantes, niveles y réplicas antes de recibir envíos.
+        </p>
       </div>
-
-      {round && <input type="hidden" name="ronda_id" value={round.id} />}
 
       <div className="grid gap-4 md:grid-cols-2">
         <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
@@ -142,64 +83,73 @@ function RondaForm({
             type="text"
             name="nombre"
             required
-            defaultValue={round?.nombre ?? ''}
-            placeholder="Ronda CO abril 2026"
+            defaultValue={round.nombre}
             className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none ring-0"
           />
         </label>
-
         <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
           <span>Código</span>
           <input
             type="text"
             name="codigo"
             required
-            defaultValue={round?.codigo ?? ''}
-            placeholder="RDA-CO-2026-01"
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 uppercase text-[var(--foreground)] outline-none ring-0"
+            defaultValue={round.codigo}
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none ring-0"
           />
         </label>
       </div>
 
-      {!round && (
-        <div className="grid gap-3">
-          <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
-            <span>Número de participantes</span>
-            <input
-              type="number"
-              name="participantes_planeados"
-              min="1"
-              required
-              defaultValue="1"
-              className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none ring-0"
-            />
-          </label>
-          <label className="inline-flex items-center gap-2 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-sm text-[var(--foreground)]">
-            <input
-              type="checkbox"
-              name="include_reference"
-              className="h-4 w-4 rounded border-[var(--border)]"
-            />
-            <span>Incluir referencia (member special) con enlace individual</span>
-          </label>
-        </div>
-      )}
+      <div className="grid gap-2 md:grid-cols-2">
+        {CONTAMINANTES.map((contaminante) => {
+          const config = contaminantesByName.get(contaminante)
+          return (
+            <div
+              key={contaminante}
+              className="grid gap-3 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 md:grid-cols-[1.4fr_1fr_1fr]"
+            >
+              <label className="flex items-center gap-3 text-sm font-medium text-[var(--foreground)]">
+                <input
+                  type="checkbox"
+                  name={`enabled_${contaminante}`}
+                  defaultChecked={Boolean(config)}
+                  className="h-4 w-4 rounded border-[var(--border)] accent-[var(--pt-primary)]"
+                />
+                <span>{contaminante}</span>
+              </label>
 
-      <div className="space-y-3">
-        <div>
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
-            Configuración por contaminante
-          </h3>
-          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-            Seleccione los contaminantes incluidos y defina niveles y número de réplicas.
-          </p>
-        </div>
-        <ContaminanteFields round={round} />
+              <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
+                <span>Niveles</span>
+                <input
+                  type="number"
+                  min="1"
+                  name={`niveles_${contaminante}`}
+                  defaultValue={config?.niveles ?? 1}
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none focus:border-[var(--pt-primary)] transition-colors"
+                />
+              </label>
+
+              <label className="grid gap-1 text-sm text-[var(--foreground-muted)]">
+                <span>Réplicas</span>
+                <select
+                  name={`replicas_${contaminante}`}
+                  defaultValue={String(config?.replicas ?? 2)}
+                  className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none focus:border-[var(--pt-primary)] transition-colors"
+                >
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                </select>
+              </label>
+            </div>
+          )
+        })}
       </div>
 
-      <div className="flex justify-end">
+      <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border-soft)] pt-4">
+        <Link href="/dashboard?tab=rondas" className="btn-outline">
+          Cancelar
+        </Link>
         <button type="submit" className="btn-primary">
-          {submitLabel}
+          Guardar configuración
         </button>
       </div>
     </form>
@@ -207,51 +157,62 @@ function RondaForm({
 }
 
 function StatusAction({ round }: { round: Ronda }) {
-  if (round.estado === 'cerrada') {
+  const secondaryButtonClass =
+    'min-w-20 rounded-lg border border-[var(--border)] px-2.5 py-1 text-center text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)]'
+
+  if (round.estado === 'borrador') {
     return (
-      <form action={reabrirRondaAction}>
+      <form action={changeRondaStatusAction}>
         <input type="hidden" name="ronda_id" value={round.id} />
+        <input type="hidden" name="next_state" value="activa" />
         <button
           type="submit"
-          className="rounded-lg border border-amber-300 px-2.5 py-1 text-xs font-medium text-amber-700 transition hover:bg-amber-50"
+          className={secondaryButtonClass}
         >
-          Reabrir
+          Abrir
         </button>
       </form>
     )
   }
 
-  const nextState = round.estado === 'borrador' ? 'activa' : 'cerrada'
-  const label = round.estado === 'borrador' ? 'Publicar' : 'Cerrar'
+  if (round.estado === 'cerrada') {
+    return (
+      <form action={reabrirRondaAction}>
+        <input type="hidden" name="ronda_id" value={round.id} />
+        <button type="submit" className={secondaryButtonClass}>
+          Abrir
+        </button>
+      </form>
+    )
+  }
+
+  return (
+    <button type="button" disabled className={secondaryButtonClass}>
+      Abrir
+    </button>
+  )
+}
+
+function CloseRondaAction({ round }: { round: Ronda }) {
+  const secondaryButtonClass =
+    'min-w-20 rounded-lg border border-[var(--border)] px-2.5 py-1 text-center text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)]'
+
+  if (round.estado !== 'activa') {
+    return (
+      <button type="button" disabled className={secondaryButtonClass}>
+        Cerrar
+      </button>
+    )
+  }
 
   return (
     <form action={changeRondaStatusAction}>
       <input type="hidden" name="ronda_id" value={round.id} />
-      <input type="hidden" name="next_state" value={nextState} />
-      <button
-        type="submit"
-        className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
-      >
-        {label}
+      <input type="hidden" name="next_state" value="cerrada" />
+      <button type="submit" className={secondaryButtonClass}>
+        Cerrar
       </button>
     </form>
-  )
-}
-
-function RowActionLink({
-  href,
-  children,
-}: {
-  href: string
-  children: ReactNode
-}) {
-  return (
-    <Link
-      href={href}
-      className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
-    >
-      {children}
-    </Link>
   )
 }
 
@@ -336,27 +297,20 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
           <div className="flex items-center justify-end gap-2">
             <Link
               href={`/dashboard/rondas/${round.id}`}
-              className="btn-primary px-3 py-1 text-xs"
+              className="btn-primary min-w-20 px-3 py-1 text-center text-xs"
             >
-              Abrir
+              Ingresar
             </Link>
-            {canEdit && (
-              <Link
-                href={`/dashboard?tab=rondas&editando=${round.id}`}
-                className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground-muted)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] hover:text-[var(--foreground)]"
-              >
-                Editar
-              </Link>
-            )}
             <StatusAction round={round} />
+            <CloseRondaAction round={round} />
             <form action={deleteRondaAction}>
               <input type="hidden" name="ronda_id" value={round.id} />
               <ConfirmSubmitButton
                 type="submit"
                 message={`¿Borrar la ronda ${round.codigo}? Esta acción no se puede deshacer.`}
-                className="rounded-lg border border-rose-200 px-2.5 py-1 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800"
+                className="min-w-20 rounded-lg border border-rose-200 px-2.5 py-1 text-center text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800"
               >
-                Borrar
+                Eliminar
               </ConfirmSubmitButton>
             </form>
           </div>
@@ -365,13 +319,7 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
       {isEditing && canEdit && (
         <tr className="border-b border-[var(--border-soft)]">
           <td colSpan={6} className="px-4 py-4 bg-[var(--surface-muted)]">
-            <RondaForm
-              action={updateRondaAction}
-              title="Editar configuración"
-              description="Ajuste el nombre, código y configuración analítica de la ronda."
-              submitLabel="Guardar cambios"
-              round={round}
-            />
+            <RondaConfigForm round={round} />
           </td>
         </tr>
       )}
@@ -381,8 +329,166 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
 
 
 
-function ResultadosGlobalView({ rondas }: { rondas: Ronda[] }) {
-  if (rondas.length === 0) {
+type ResultadoDashboardRonda = {
+  ronda: Ronda
+  ptItems: RondaPTItem[]
+  sampleGroups: RondaPTSampleGroup[]
+  resultados: ResultadoParticipantePT[]
+}
+
+type ResultadoColumna = {
+  key: string
+  contaminante: Contaminante
+  run: string
+  level: string
+  sampleGroup: string
+}
+
+async function loadResultadosDashboard(rondas: Ronda[]): Promise<ResultadoDashboardRonda[]> {
+  return Promise.all(
+    rondas.map(async (ronda) => {
+      const [ptItems, sampleGroups, resultados] = await Promise.all([
+        listPTItems(ronda.id),
+        listPTSampleGroups(ronda.id),
+        listResultadosPTRonda(ronda.id),
+      ])
+
+      return { ronda, ptItems, sampleGroups, resultados }
+    })
+  )
+}
+
+function getResultadoColumns(
+  ptItems: RondaPTItem[],
+  sampleGroups: RondaPTSampleGroup[],
+  contaminante?: Contaminante
+): ResultadoColumna[] {
+  const filteredItems = contaminante
+    ? ptItems.filter((item) => item.contaminante === contaminante)
+    : ptItems
+
+  return filteredItems.flatMap((item) =>
+    sampleGroups.map((group) => ({
+      key: `${item.id}::${group.id}`,
+      contaminante: item.contaminante,
+      run: item.run_code,
+      level: item.level_label,
+      sampleGroup: group.sample_group,
+    }))
+  )
+}
+
+function getResultadoCellMap(resultado: ResultadoParticipantePT) {
+  return resultado.celdas.reduce<Record<string, { mean_value: number; sd_value: number }>>((acc, celda) => {
+    acc[`${celda.pt_item_id}::${celda.sample_group_id}`] = {
+      mean_value: celda.mean_value,
+      sd_value: celda.sd_value,
+    }
+    return acc
+  }, {})
+}
+
+function formatFinalSubmitted(value: string | null) {
+  if (!value) return 'Sin envío final'
+  return formatDate(value)
+}
+
+function ResultadosDashboardTable({
+  resultados,
+  columnas,
+}: {
+  resultados: ResultadoParticipantePT[]
+  columnas: ResultadoColumna[]
+}) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[64rem] border-separate border-spacing-0 text-sm">
+        <thead>
+          <tr>
+            <th className="sticky left-0 z-20 border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+              Participante
+            </th>
+            <th className="border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+              Estado
+            </th>
+            <th className="border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+              Envío final
+            </th>
+            {columnas.map((columna) => (
+              <th
+                key={columna.key}
+                className="border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]"
+              >
+                <div className="text-xs uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                  {columna.contaminante}
+                </div>
+                <div>{columna.run}</div>
+                <div className="text-xs text-[var(--foreground-muted)]">
+                  {columna.level} · {columna.sampleGroup}
+                </div>
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {resultados.map((resultado) => {
+            const celdas = getResultadoCellMap(resultado)
+            const completo = resultado.completados >= resultado.total_esperado && resultado.total_esperado > 0
+            return (
+              <tr key={resultado.participante_id} className="align-top">
+                <td className="sticky left-0 z-10 border-b border-[var(--border-soft)] bg-[var(--surface)] px-4 py-4">
+                  <div className="font-medium text-[var(--foreground)]">{resultado.email}</div>
+                  <div className="mt-1 text-xs text-[var(--foreground-muted)]">
+                    participant_id:{' '}
+                    <span className="numeric text-[var(--foreground)]">{resultado.participant_code ?? '—'}</span>
+                  </div>
+                  <div className="text-xs text-[var(--foreground-muted)]">
+                    replicate:{' '}
+                    <span className="numeric text-[var(--foreground)]">{resultado.replicate_code ?? '—'}</span>
+                  </div>
+                </td>
+                <td className="border-b border-[var(--border-soft)] px-4 py-4">
+                  <span className={`numeric rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                    completo ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                  }`}>
+                    {resultado.completados}/{resultado.total_esperado}
+                  </span>
+                </td>
+                <td className="border-b border-[var(--border-soft)] px-4 py-4 text-[var(--foreground-muted)]">
+                  {formatFinalSubmitted(resultado.enviados_at)}
+                </td>
+                {columnas.map((columna) => {
+                  const celda = celdas[columna.key]
+                  return (
+                    <td key={`${resultado.participante_id}-${columna.key}`} className="border-b border-[var(--border-soft)] px-4 py-4">
+                      {celda ? (
+                        <div className="space-y-1">
+                          <div className="numeric font-medium text-[var(--foreground)]">mean {celda.mean_value}</div>
+                          <div className="numeric text-xs text-[var(--foreground-muted)]">sd {celda.sd_value}</div>
+                        </div>
+                      ) : (
+                        <span className="text-[var(--border)]">Sin dato</span>
+                      )}
+                    </td>
+                  )
+                })}
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function ResultadosGlobalView({
+  rondasResultados,
+  activeContaminante,
+}: {
+  rondasResultados: ResultadoDashboardRonda[]
+  activeContaminante: Contaminante | null
+}) {
+  if (rondasResultados.length === 0) {
     return (
       <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center text-sm text-[var(--foreground-muted)]">
         No hay rondas creadas todavía.
@@ -390,60 +496,182 @@ function ResultadosGlobalView({ rondas }: { rondas: Ronda[] }) {
     )
   }
 
+  const rondasConConfig = rondasResultados.filter((item) => item.ptItems.length > 0 && item.sampleGroups.length > 0)
+  const totalParticipantes = rondasResultados.reduce((sum, item) => sum + item.resultados.length, 0)
+  const totalEnviosFinales = rondasResultados.reduce(
+    (sum, item) => sum + item.resultados.filter((resultado) => resultado.enviados_at !== null).length,
+    0
+  )
+  const contaminantes = Array.from(
+    new Set(rondasResultados.flatMap((item) => item.ptItems.map((ptItem) => ptItem.contaminante)))
+  )
+  const baseHref = '/dashboard?tab=resultados'
+  const activeContaminanteDisponible = activeContaminante && contaminantes.includes(activeContaminante)
+  const activeTab = activeContaminanteDisponible ? activeContaminante : 'rondas'
+
   return (
-    <div className="card overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full min-w-[40rem]">
-          <thead>
-            <tr className="border-b-2 border-[var(--pt-primary)]">
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Estado</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Ronda</th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Contaminantes</th>
-              <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Participantes</th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rondas.map((round) => (
-              <tr key={round.id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
-                <td className="px-4 py-4">
-                  <span className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${statusClasses(round.estado)}`}>
-                    {round.estado}
-                  </span>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="font-medium text-sm text-[var(--foreground)]">{round.nombre}</div>
-                  <div className="text-xs text-[var(--foreground-muted)] mt-0.5">{round.codigo}</div>
-                </td>
-                <td className="px-4 py-4">
-                  <div className="flex flex-wrap gap-1">
-                    {round.contaminantes.length === 0 ? (
-                      <span className="text-xs text-[var(--foreground-muted)]">—</span>
-                    ) : (
-                      round.contaminantes.map((c) => (
-                        <span key={c.id} className="rounded border border-[var(--border)] bg-[var(--surface-muted)] px-1.5 py-0.5 text-[10px] text-[var(--foreground-muted)]">
-                          {c.contaminante}
+    <div className="grid gap-6">
+      <header className="header-bar px-6 py-5">
+        <div className="flex flex-col gap-2">
+          <h2 className="text-2xl font-semibold text-[var(--foreground)]">Resultados PT</h2>
+          <p className="text-sm text-[var(--foreground-muted)]">
+            Dashboard global de resultados. Ingrese por ronda o revise una pestaña específica por contaminante.
+          </p>
+        </div>
+      </header>
+
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="card-accent border-l-[var(--pt-primary)] px-5 py-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Rondas</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{rondasResultados.length}</div>
+        </div>
+        <div className="card-accent border-l-[var(--pt-primary)] px-5 py-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Participantes</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{totalParticipantes}</div>
+        </div>
+        <div className="card-accent border-l-emerald-500 bg-emerald-50/40 px-5 py-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Envíos finales</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{totalEnviosFinales}</div>
+        </div>
+        <div className="card-accent border-l-[var(--pt-primary)] px-5 py-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Contaminantes</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{contaminantes.length}</div>
+        </div>
+      </section>
+
+      <nav
+        className="overflow-hidden rounded-xl border border-[var(--border)] shadow-sm"
+        style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}
+      >
+        <div className="flex gap-0 overflow-x-auto px-2">
+          <Link
+            href={baseHref}
+            aria-current={activeTab === 'rondas' ? 'page' : undefined}
+            className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+              activeTab === 'rondas'
+                ? 'border-[var(--pt-primary)] font-semibold text-[var(--foreground)]'
+                : 'border-transparent text-[var(--foreground-muted)] hover:border-[var(--border)] hover:text-[var(--foreground)]'
+            }`}
+          >
+            Rondas
+          </Link>
+          {contaminantes.map((contaminante) => (
+            <Link
+              key={contaminante}
+              href={`${baseHref}&contaminante=${contaminante}`}
+              aria-current={activeTab === contaminante ? 'page' : undefined}
+              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
+                activeTab === contaminante
+                  ? 'border-[var(--pt-primary)] font-semibold text-[var(--foreground)]'
+                  : 'border-transparent text-[var(--foreground-muted)] hover:border-[var(--border)] hover:text-[var(--foreground)]'
+              }`}
+            >
+              {contaminante}
+            </Link>
+          ))}
+        </div>
+      </nav>
+
+      {rondasConConfig.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center text-sm text-[var(--foreground-muted)]">
+          No hay resultados PT configurados todavía.
+        </div>
+      ) : activeTab === 'rondas' ? (
+        <section className="card overflow-hidden">
+          <div className="border-b border-[var(--border-soft)] px-4 py-3">
+            <h3 className="text-sm font-semibold text-[var(--foreground)]">Rondas con resultados</h3>
+            <p className="text-xs text-[var(--foreground-muted)]">
+              Tabla global para entrar a la matriz de resultados de cada ronda.
+            </p>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-[48rem]">
+              <thead>
+                <tr className="border-b-2 border-[var(--pt-primary)]">
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Estado</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Ronda</th>
+                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Contaminantes</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Participantes</th>
+                  <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Envíos finales</th>
+                  <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {rondasConConfig.map(({ ronda, ptItems, resultados }) => {
+                  const enviosFinales = resultados.filter((resultado) => resultado.enviados_at !== null).length
+                  const contaminantesRonda = Array.from(new Set(ptItems.map((item) => item.contaminante)))
+                  return (
+                    <tr key={ronda.id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
+                      <td className="px-4 py-4">
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${statusClasses(ronda.estado)}`}>
+                          {ronda.estado}
                         </span>
-                      ))
-                    )}
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="font-medium text-sm text-[var(--foreground)]">{ronda.nombre}</div>
+                        <div className="mt-0.5 text-xs text-[var(--foreground-muted)]">{ronda.codigo}</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <div className="flex flex-wrap gap-1">
+                          {contaminantesRonda.map((contaminante) => (
+                            <span key={`${ronda.id}-${contaminante}`} className="rounded border border-[var(--border)] bg-[var(--surface-muted)] px-1.5 py-0.5 text-[10px] text-[var(--foreground-muted)]">
+                              {contaminante}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="numeric text-sm text-[var(--foreground)]">{resultados.length}</span>
+                      </td>
+                      <td className="px-4 py-4 text-center">
+                        <span className="numeric rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                          {enviosFinales}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <Link
+                          href={`/dashboard/rondas/${ronda.id}/resultados`}
+                          className="btn-primary inline-flex px-3 py-1 text-xs"
+                        >
+                          Ingresar
+                        </Link>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      ) : (
+        <section className="grid gap-6">
+          {rondasConConfig
+            .map((item) => ({
+              ...item,
+              columnas: getResultadoColumns(item.ptItems, item.sampleGroups, activeTab as Contaminante),
+            }))
+            .filter((item) => item.columnas.length > 0)
+            .map(({ ronda, resultados, columnas }) => (
+              <article key={`${activeTab}-${ronda.id}`} className="card overflow-hidden">
+                <div className="border-b border-[var(--border-soft)] px-4 py-3">
+                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+                    <div>
+                      <h3 className="text-base font-semibold text-[var(--foreground)]">{ronda.nombre}</h3>
+                      <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                        {ronda.codigo} · resultados para {activeTab}
+                      </p>
+                    </div>
+                    <Link href={`/dashboard/rondas/${ronda.id}/resultados`} className="btn-outline self-start">
+                      Ingresar
+                    </Link>
                   </div>
-                </td>
-                <td className="px-4 py-4 text-center">
-                  <span className="numeric text-sm text-[var(--foreground)]">
-                    {round.participantes_asignados ?? 0}/{round.participantes_planeados ?? 0}
-                  </span>
-                </td>
-                <td className="px-4 py-4 text-right">
-                  <RowActionLink href={`/dashboard/rondas/${round.id}/resultados`}>
-                    Ver resultados →
-                  </RowActionLink>
-                </td>
-              </tr>
+                </div>
+                <ResultadosDashboardTable resultados={resultados} columnas={columnas} />
+              </article>
             ))}
-          </tbody>
-        </table>
+        </section>
+      )}
       </div>
-    </div>
   )
 }
 
@@ -490,21 +718,18 @@ function ParticipantesGlobalView({
           <tbody>
             {participantes.map((p) => {
               const rondasActivas = p.rondas.filter((r) => r.estado === 'activa')
-              const rondaMasReciente = rondasActivas[rondasActivas.length - 1] ?? p.rondas[p.rondas.length - 1]
+              const rondasComoParticipante = rondasActivas.filter((r) => r.participant_profile !== 'member_special').length
+              const rondasComoReferencia = rondasActivas.filter((r) => r.participant_profile === 'member_special').length
+              const participanteHref = `/dashboard/participantes/${encodeURIComponent(p.workos_user_id)}`
 
               return (
                 <tr key={p.workos_user_id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
                   <td className="px-4 py-4">
                     <div className="text-sm font-medium text-[var(--foreground)]">{p.email}</div>
-                    <div className="mt-0.5 flex flex-wrap gap-1">
-                      {p.rondas.map((r) => (
-                        <span
-                          key={r.id}
-                          className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${statusClasses(r.estado)}`}
-                        >
-                          {r.codigo}
-                        </span>
-                      ))}
+                    <div className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--foreground-muted)]">
+                      <span>{rondasComoParticipante} como participante</span>
+                      <span>·</span>
+                      <span>{rondasComoReferencia} como referencia</span>
                     </div>
                   </td>
                   <td className="px-4 py-4">
@@ -518,16 +743,12 @@ function ParticipantesGlobalView({
                     </span>
                   </td>
                   <td className="px-4 py-4 text-right">
-                    {rondaMasReciente ? (
-                      <Link
-                        href={`/dashboard/rondas/${rondaMasReciente.id}/participantes`}
-                        className="inline-flex items-center rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
-                      >
-                        Abrir ronda →
-                      </Link>
-                    ) : (
-                      <span className="text-xs text-[var(--foreground-muted)]">—</span>
-                    )}
+                    <Link
+                      href={participanteHref}
+                      className="btn-primary inline-flex px-3 py-1 text-xs"
+                    >
+                      Ingresar
+                    </Link>
                   </td>
                 </tr>
               )
@@ -682,31 +903,62 @@ function CoordinatorKpiBar({
   rondasListasParaExportar,
 }: CoordinatorKpiBarProps) {
   const kpis = [
-    { label: 'Rondas activas', value: rondasActivas, href: '/dashboard?tab=rondas', negative: false },
-    { label: 'Fichas pendientes', value: fichasPendientes, href: '/dashboard?tab=participantes', negative: true },
-    { label: 'Cupos sin reclamar', value: enlacesSinReclamar, href: '/dashboard?tab=participantes', negative: true },
-    { label: 'Listas para exportar', value: rondasListasParaExportar, href: '/dashboard?tab=resultados', negative: false },
-    { label: 'En borrador', value: rondasBorrador, href: '/dashboard?tab=rondas', negative: false },
+    {
+      label: 'Rondas activas',
+      value: rondasActivas,
+      detail: 'Disponibles para gestión',
+      href: '/dashboard?tab=rondas',
+      negative: false,
+    },
+    {
+      label: 'Fichas pendientes',
+      value: fichasPendientes,
+      detail: 'Por revisar o completar',
+      href: '/dashboard?tab=participantes',
+      negative: true,
+    },
+    {
+      label: 'Cupos sin reclamar',
+      value: enlacesSinReclamar,
+      detail: 'Invitaciones pendientes',
+      href: '/dashboard?tab=participantes',
+      negative: true,
+    },
+    {
+      label: 'Listas para exportar',
+      value: rondasListasParaExportar,
+      detail: 'Con resultados finales',
+      href: '/dashboard?tab=resultados',
+      negative: false,
+    },
+    {
+      label: 'En borrador',
+      value: rondasBorrador,
+      detail: 'Rondas aún no activas',
+      href: '/dashboard?tab=rondas',
+      negative: false,
+    },
   ]
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-      {kpis.map(({ label, value, href, negative }) => (
+      {kpis.map(({ label, value, detail, href, negative }) => (
         <Link
           key={label}
           href={href}
-          className={`card-accent flex flex-col gap-1 px-5 py-4 transition hover:border-[var(--pt-primary)] ${
+          className={`card-accent px-5 py-4 transition hover:border-[var(--pt-primary)] ${
             value > 0 && negative ? 'border-amber-300 bg-amber-50/50' : ''
           }`}
         >
-          <span className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
             {label}
-          </span>
-          <span className={`numeric text-3xl font-semibold ${
+          </p>
+          <div className={`numeric mt-2 text-3xl font-semibold ${
             value > 0 && negative ? 'text-amber-700' : 'text-[var(--foreground)]'
           }`}>
             {value}
-          </span>
+          </div>
+          <p className="mt-1 text-xs text-[var(--foreground-muted)]">{detail}</p>
         </Link>
       ))}
     </div>
@@ -872,10 +1124,14 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const admin = isAdmin(auth)
   const activeTab = getParamValue(params.tab) ?? 'inicio'
   const editando = getParamValue(params.editando) ?? ''
+  const resultadosContaminante = (getParamValue(params.contaminante) ?? null) as Contaminante | null
 
   const rondas = admin ? await listRondas() : []
   const allParticipantes = admin ? await listAllParticipantes() : []
   const rondasParticipante = !admin ? await listRondasParticipante(auth.user.id) : []
+  const rondasResultados = admin && activeTab === 'resultados'
+    ? await loadResultadosDashboard(rondas)
+    : []
 
   const rondasActivas = rondas.filter((r) => r.estado === 'activa')
   const participantesRondasActivas = admin
@@ -899,17 +1155,20 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-6 py-5">
+        <header className="header-bar px-8 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex flex-col gap-2">
-              <LogoUnal height={32} />
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)]">
-                  CALAIRE APP
-                </p>
-                <h1 className="text-2xl font-semibold text-[var(--foreground)]">
-                  Dashboard de gestión de rondas de ensayos de aptitud
+            <div className="flex items-center gap-6">
+              <LogoUnal height={64} />
+              <div className="space-y-0.5">
+                <h1 className="text-xl font-bold text-[var(--foreground)]">
+                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
                 </h1>
+                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
+                  Gases Contaminantes Criterio
+                </p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
+                </p>
                 <p className="text-sm text-[var(--foreground-muted)]">
                   {auth.user.email} · {admin ? 'Coordinador' : 'Participante'}
                 </p>
@@ -1000,7 +1259,12 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
               />
             )}
 
-            {activeTab === 'resultados' && <ResultadosGlobalView rondas={rondas} />}
+            {activeTab === 'resultados' && (
+              <ResultadosGlobalView
+                rondasResultados={rondasResultados}
+                activeContaminante={resultadosContaminante}
+              />
+            )}
           </div>
         )}
       </div>

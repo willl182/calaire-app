@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from 'react'
 import Link from 'next/link'
+import { LogoUnal } from '@/app/components/LogoUnal'
 import type { FichaCompleta, AcompananteInput, AnalizadorInput, InstrumentoInput } from '@/lib/fichas'
 import type { EstadoRonda } from '@/lib/rondas'
 import {
@@ -18,6 +19,7 @@ type Props = {
   rondaCodigo: string
   rondaEstado: EstadoRonda
   participanteCodigo: string | null
+  participanteEmail: string
   ficha: FichaCompleta
   soloLectura: boolean
 }
@@ -40,7 +42,7 @@ function SectionHeader({ title, description }: { title: string; description?: st
   )
 }
 
-export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEstado, participanteCodigo, ficha: fichaInicial, soloLectura }: Props) {
+export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEstado, participanteCodigo, participanteEmail, ficha: fichaInicial, soloLectura }: Props) {
   const [fieldStates, setFieldStates] = useState<Record<string, SaveState>>({})
 
   // Dynamic lists
@@ -121,56 +123,70 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
   const labelClass = 'grid gap-1 text-sm text-[var(--foreground-muted)]'
 
   return (
-    <div className="min-h-screen bg-[var(--background)] px-4 py-8">
-      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+    <div className="min-h-screen bg-[var(--background)] px-6 py-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-6">
 
         {/* Encabezado */}
-        <header className="header-bar px-6 py-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)]">
-                F-PSEA-05A v0.1
-              </p>
-              <h1 className="text-xl font-semibold text-[var(--foreground)]">
-                Hoja de Registro del Participante
-              </h1>
-              <div className="flex flex-wrap gap-4 text-sm text-[var(--foreground-muted)]">
-                <span>Ronda: <strong className="text-[var(--foreground)]">{rondaCodigo}</strong></span>
-                {participanteCodigo && (
-                  <span>Participante: <strong className="text-[var(--foreground)]">{participanteCodigo}</strong></span>
-                )}
+        <header className="header-bar px-8 py-6">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="flex items-center gap-6">
+              <LogoUnal height={64} />
+              <div className="space-y-0.5">
+                <h1 className="text-xl font-bold text-[var(--foreground)]">
+                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
+                </h1>
+                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
+                  Gases Contaminantes Criterio
+                </p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
+                </p>
+                <p className="text-sm text-[var(--foreground-muted)]">
+                  {participanteEmail} · Participante
+                </p>
               </div>
-              {enviado && (
-                <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-4 py-1.5 text-sm font-semibold text-emerald-800">
-                  Ficha enviada ✓
-                </div>
-              )}
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-              <Link href="/mi-dashboard" className="btn-outline">
-                Volver
-              </Link>
-              {puedeCargarDatos ? (
-                <Link href={`/ronda/${codigoRonda}`} className="btn-primary">
-                  Cargar datos →
-                </Link>
-              ) : (
-                <span
-                  className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 text-sm font-semibold text-[var(--foreground-muted)]"
-                  title={enviado ? 'La carga se habilita cuando la ronda esté activa.' : 'Envíe la ficha para habilitar la carga de datos.'}
-                >
-                  Cargar datos
-                </span>
-              )}
-              <form action={cerrarSesionParticipanteAction}>
-                <button type="submit" className="btn-outline">
-                  Cerrar sesión
-                </button>
-              </form>
             </div>
           </div>
         </header>
+
+        <section className="card flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1">
+            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)]">
+              F-PSEA-05A v0.1
+            </p>
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">
+              Hoja de Registro del Participante
+            </h2>
+            <p className="text-sm font-medium text-[var(--pt-primary-dark)]">
+              Ronda: {rondaCodigo} {participanteCodigo && `· Participante: ${participanteCodigo}`}
+            </p>
+            {enviado && (
+              <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                Ficha enviada ✓
+              </div>
+            )}
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+            {puedeCargarDatos ? (
+              <Link href={`/ronda/${codigoRonda}`} className="btn-primary">
+                Cargar datos →
+              </Link>
+            ) : (
+              <span
+                className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 text-sm font-semibold text-[var(--foreground-muted)]"
+                title={enviado ? 'La carga se habilita cuando la ronda esté activa.' : 'Envíe la ficha para habilitar la carga de datos.'}
+              >
+                Cargar datos
+              </span>
+            )}
+            <form action={cerrarSesionParticipanteAction}>
+              <button type="submit" className="btn-outline">
+                Cerrar sesión
+              </button>
+            </form>
+          </div>
+        </section>
 
         {/* Sección 2: Datos del participante */}
         <section className="card grid gap-5 p-6">
@@ -178,7 +194,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
             title="Datos del participante"
             description="Información del laboratorio responsable de los ensayos."
           />
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
             {([
               ['nombre_laboratorio', 'Nombre del laboratorio'],
               ['nombre_responsable', 'Nombre del responsable'],

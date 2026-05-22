@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup — Tabla de Resultados por Contaminante</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: #E8EAED;
+    color: #111827;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    padding: 24px;
+  }
+  .card {
+    background: #F5F6F7;
+    border: 1px solid #D1D5DB;
+    border-radius: 12px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    overflow: hidden;
+  }
+  .card-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 16px 20px; border-bottom: 1px solid #D1D5DB;
+  }
+  .card-header h2 {
+    font-size: 12px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.14em;
+  }
+  .badge-ok {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 999px;
+    background: #D1FAE5; color: #065F46; font-size: 11px; font-weight: 600;
+  }
+  .badge-pending {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 4px 10px; border-radius: 999px;
+    background: #FEF3C7; color: #92400E; font-size: 11px; font-weight: 600;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th {
+    background: linear-gradient(180deg, #F5F5F0 0%, #F5F6F7 100%);
+    padding: 10px 8px; text-align: left; font-size: 11px; font-weight: 600;
+    color: #6B7280; border-bottom: 1px solid #D1D5DB; white-space: nowrap;
+  }
+  td {
+    padding: 8px; border-bottom: 1px solid #E5E7EB;
+    vertical-align: middle;
+  }
+  tr:hover { background: rgba(245,245,240,0.4); }
+  tr.complete { background: rgba(236,253,245,0.25); }
+  tr.error { background: rgba(255,241,242,0.25); }
+  input.cell {
+    width: 64px; padding: 5px 6px; border: 1px solid #D1D5DB; border-radius: 6px;
+    font-size: 12px; font-family: 'JetBrains Mono', monospace; text-align: right; outline: none;
+    background: #fff;
+  }
+  input.cell.error-cell { border-color: #FCA5A5; background: #FFF1F2; }
+  input.cell:disabled { background: #F3F4F6; color: #9CA3AF; border-color: #E5E7EB; }
+  .ok { color: #10B981; font-weight: 700; font-size: 14px; }
+  .err { color: #EF4444; font-size: 11px; }
+  .dot { color: #F59E0B; font-size: 11px; }
+  .saving { color: #6B7280; font-size: 10px; }
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="card-header">
+      <div>
+        <h2>CO</h2>
+        <p style="font-size:11px; color:#6B7280; margin-top:2px;">6 combinaciones</p>
+      </div>
+      <span class="badge-pending">Pendiente</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Corrida</th>
+            <th>Grupo</th>
+            <th>Dato 1</th>
+            <th>Dato 2</th>
+            <th>Dato 3</th>
+            <th>Promedio</th>
+            <th>Desv. Est.</th>
+            <th>u(x)</th>
+            <th>k</th>
+            <th>U(X)</th>
+            <th style="text-align:center;">OK</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="complete">
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-01</td>
+            <td>A</td>
+            <td><input class="cell" value="1.245" disabled></td>
+            <td><input class="cell" value="1.238" disabled></td>
+            <td><input class="cell" value="1.251" disabled></td>
+            <td><input class="cell" value="1.245" disabled></td>
+            <td><input class="cell" value="0.0065" disabled></td>
+            <td><input class="cell" value="0.0042" disabled></td>
+            <td><input class="cell" value="2" disabled></td>
+            <td><input class="cell" value="0.0084" disabled></td>
+            <td style="text-align:center;"><span class="ok">✓</span></td>
+          </tr>
+          <tr class="complete">
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-01</td>
+            <td>B</td>
+            <td><input class="cell" value="0.000" disabled></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value="0.000" disabled></td>
+            <td><input class="cell" value="0.0000" disabled></td>
+            <td><input class="cell" value="0.0021" disabled></td>
+            <td><input class="cell" value="2" disabled></td>
+            <td><input class="cell" value="0.0042" disabled></td>
+            <td style="text-align:center;"><span class="ok">✓</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-02</td>
+            <td>A</td>
+            <td><input class="cell" value="2.512"></td>
+            <td><input class="cell" value="2.498"></td>
+            <td><input class="cell" value="2.505"></td>
+            <td><input class="cell" value="2.505"></td>
+            <td><input class="cell" value="0.0070"></td>
+            <td><input class="cell" value="0.0055"></td>
+            <td><input class="cell" value="2"></td>
+            <td><input class="cell" value=""></td>
+            <td style="text-align:center;"><span class="saving">guardando…</span></td>
+          </tr>
+          <tr class="error">
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-02</td>
+            <td>B</td>
+            <td><input class="cell error-cell" value="abc"></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value="2"></td>
+            <td><input class="cell" value=""></td>
+            <td style="text-align:center;"><span class="err" title="Dato 1 debe ser un número válido.">✗</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-03</td>
+            <td>A</td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value="2"></td>
+            <td><input class="cell" value=""></td>
+            <td style="text-align:center;"><span class="dot">•</span></td>
+          </tr>
+          <tr>
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-03</td>
+            <td>B</td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value=""></td>
+            <td><input class="cell" value="2"></td>
+            <td><input class="cell" value=""></td>
+            <td style="text-align:center;"><span class="dot">•</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:16px;">
+    <div class="card-header">
+      <div>
+        <h2>SO₂</h2>
+        <p style="font-size:11px; color:#6B7280; margin-top:2px;">6 combinaciones</p>
+      </div>
+      <span class="badge-ok">✓ Completo</span>
+    </div>
+    <div style="overflow-x:auto;">
+      <table>
+        <thead>
+          <tr>
+            <th>Corrida</th>
+            <th>Grupo</th>
+            <th>Dato 1</th>
+            <th>Dato 2</th>
+            <th>Dato 3</th>
+            <th>Promedio</th>
+            <th>Desv. Est.</th>
+            <th>u(x)</th>
+            <th>k</th>
+            <th>U(X)</th>
+            <th style="text-align:center;">OK</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="complete">
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-01</td>
+            <td>A</td>
+            <td><input class="cell" value="5.120" disabled></td>
+            <td><input class="cell" value="5.098" disabled></td>
+            <td><input class="cell" value="5.115" disabled></td>
+            <td><input class="cell" value="5.111" disabled></td>
+            <td><input class="cell" value="0.0113" disabled></td>
+            <td><input class="cell" value="0.0081" disabled></td>
+            <td><input class="cell" value="2" disabled></td>
+            <td><input class="cell" value="0.0162" disabled></td>
+            <td style="text-align:center;"><span class="ok">✓</span></td>
+          </tr>
+          <tr class="complete">
+            <td style="font-family:'JetBrains Mono',monospace; font-size:11px;">RUN-01</td>
+            <td>B</td>
+            <td><input class="cell" value="0.000" disabled></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value="" disabled></td>
+            <td><input class="cell" value="0.000" disabled></td>
+            <td><input class="cell" value="0.0000" disabled></td>
+            <td><input class="cell" value="0.0035" disabled></td>
+            <td><input class="cell" value="2" disabled></td>
+            <td><input class="cell" value="0.0070" disabled></td>
+            <td style="text-align:center;"><span class="ok">✓</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</body>
+</html>

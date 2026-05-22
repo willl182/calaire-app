@@ -158,6 +158,47 @@ export const upsertFichaScalar = mutation({
   },
 })
 
+export const adminUpsertFichaScalar = mutation({
+  args: {
+    fichaId: v.id('fichasRegistro'),
+    field: v.union(
+      v.literal('nombreLaboratorio'),
+      v.literal('nombreResponsable'),
+      v.literal('cargo'),
+      v.literal('ciudad'),
+      v.literal('departamento'),
+      v.literal('telefono'),
+      v.literal('transporte'),
+      v.literal('diaLlegada'),
+      v.literal('horaLlegada'),
+      v.literal('estacionamiento'),
+      v.literal('observaciones'),
+      v.literal('justificacionCambioEquipo'),
+      v.literal('decDatosCorrectos'),
+      v.literal('decAceptaCondiciones'),
+      v.literal('decCompromisos'),
+      v.literal('decProcedimientosCalaire'),
+      v.literal('decFirmaAutorizada'),
+      v.literal('nombreFirma'),
+    ),
+    valueString:  v.optional(v.union(v.string(), v.null())),
+    valueBoolean: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { fichaId, field, valueString, valueBoolean }) => {
+    const ficha = await ctx.db.get(fichaId)
+    if (!ficha) throw new Error('Ficha no encontrada')
+
+    const hasValue = valueBoolean !== undefined || valueString !== undefined
+    if (!hasValue) {
+      await ctx.db.patch(fichaId, { updatedAt: Date.now() })
+      return
+    }
+
+    const value = valueBoolean !== undefined ? valueBoolean : valueString
+    await ctx.db.patch(fichaId, { [field]: value, updatedAt: Date.now() })
+  },
+})
+
 export const replaceAcompanantes = mutation({
   args: {
     fichaId: v.id('fichasRegistro'),
@@ -171,6 +212,30 @@ export const replaceAcompanantes = mutation({
   handler: async (ctx, { fichaId, items }) => {
     const ficha = await ctx.db.get(fichaId)
     if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no editable')
+
+    const existing = await ctx.db
+      .query('fichasAcompanantes')
+      .withIndex('by_ficha', (q) => q.eq('fichaId', fichaId))
+      .collect()
+    await Promise.all(existing.map((r) => ctx.db.delete(r._id)))
+    await Promise.all(items.map((item) => ctx.db.insert('fichasAcompanantes', { fichaId, ...item })))
+    await ctx.db.patch(fichaId, { updatedAt: Date.now() })
+  },
+})
+
+export const adminReplaceAcompanantes = mutation({
+  args: {
+    fichaId: v.id('fichasRegistro'),
+    items: v.array(v.object({
+      sortOrder:          v.number(),
+      nombreCompleto:     v.string(),
+      documentoIdentidad: v.string(),
+      rol:                v.string(),
+    })),
+  },
+  handler: async (ctx, { fichaId, items }) => {
+    const ficha = await ctx.db.get(fichaId)
+    if (!ficha) throw new Error('Ficha no encontrada')
 
     const existing = await ctx.db
       .query('fichasAcompanantes')
@@ -212,6 +277,36 @@ export const replaceAnalizadores = mutation({
   },
 })
 
+export const adminReplaceAnalizadores = mutation({
+  args: {
+    fichaId: v.id('fichasRegistro'),
+    items: v.array(v.object({
+      sortOrder:              v.number(),
+      analito:                v.string(),
+      fabricante:             v.string(),
+      modelo:                 v.string(),
+      numeroSerie:            v.string(),
+      metodoEpa:              v.string(),
+      fechaUltimaCalibracion: v.optional(v.string()),
+      tipoVerificacion:       v.string(),
+      incertidumbreDeclarada: v.string(),
+      unidadSalida:           v.string(),
+    })),
+  },
+  handler: async (ctx, { fichaId, items }) => {
+    const ficha = await ctx.db.get(fichaId)
+    if (!ficha) throw new Error('Ficha no encontrada')
+
+    const existing = await ctx.db
+      .query('fichasAnalizadores')
+      .withIndex('by_ficha', (q) => q.eq('fichaId', fichaId))
+      .collect()
+    await Promise.all(existing.map((r) => ctx.db.delete(r._id)))
+    await Promise.all(items.map((item) => ctx.db.insert('fichasAnalizadores', { fichaId, ...item })))
+    await ctx.db.patch(fichaId, { updatedAt: Date.now() })
+  },
+})
+
 export const replaceInstrumentos = mutation({
   args: {
     fichaId: v.id('fichasRegistro'),
@@ -226,6 +321,31 @@ export const replaceInstrumentos = mutation({
   handler: async (ctx, { fichaId, items }) => {
     const ficha = await ctx.db.get(fichaId)
     if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no editable')
+
+    const existing = await ctx.db
+      .query('fichasInstrumentos')
+      .withIndex('by_ficha', (q) => q.eq('fichaId', fichaId))
+      .collect()
+    await Promise.all(existing.map((r) => ctx.db.delete(r._id)))
+    await Promise.all(items.map((item) => ctx.db.insert('fichasInstrumentos', { fichaId, ...item })))
+    await ctx.db.patch(fichaId, { updatedAt: Date.now() })
+  },
+})
+
+export const adminReplaceInstrumentos = mutation({
+  args: {
+    fichaId: v.id('fichasRegistro'),
+    items: v.array(v.object({
+      sortOrder:   v.number(),
+      equipo:      v.string(),
+      marcaModelo: v.string(),
+      numeroSerie: v.string(),
+      cantidad:    v.number(),
+    })),
+  },
+  handler: async (ctx, { fichaId, items }) => {
+    const ficha = await ctx.db.get(fichaId)
+    if (!ficha) throw new Error('Ficha no encontrada')
 
     const existing = await ctx.db
       .query('fichasInstrumentos')

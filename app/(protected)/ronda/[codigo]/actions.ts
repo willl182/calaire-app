@@ -27,6 +27,7 @@ export async function guardarEnvioAction(
   sdValue: number,
   ux: number,
   uxExp: number,
+  k = 2,
 ): Promise<{ ok?: boolean; error?: string }> {
   const auth = await requireAuth()
   if (!auth.user) return { error: 'No autenticado' }
@@ -81,12 +82,15 @@ export async function guardarEnvioAction(
   if (!Number.isFinite(ux) || ux < 0) {
     return { error: 'u(x) debe ser un número válido mayor o igual a cero.' }
   }
+  if (!Number.isFinite(k) || k < 0) {
+    return { error: 'k debe ser un número válido mayor o igual a cero.' }
+  }
   if (!Number.isFinite(uxExp) || uxExp < 0) {
     return { error: 'u(x) exp debe ser un número válido mayor o igual a cero.' }
   }
 
   try {
-    await upsertEnvioPT(rondaId, participante.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp)
+    await upsertEnvioPT(rondaId, participante.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp, k)
     return { ok: true }
   } catch (error) {
     return {
@@ -159,6 +163,9 @@ export async function guardarReferenciaCsvAction(
     if (!Number.isFinite(row.ux) || row.ux < 0) {
       errors.push(`${label}: u(x) debe ser un número válido mayor o igual a cero.`)
     }
+    if (!Number.isFinite(row.k) || row.k < 0) {
+      errors.push(`${label}: k debe ser un número válido mayor o igual a cero.`)
+    }
     if (!Number.isFinite(row.uxExp) || row.uxExp < 0) {
       errors.push(`${label}: u(x) exp debe ser un número válido mayor o igual a cero.`)
     }
@@ -180,7 +187,8 @@ export async function guardarReferenciaCsvAction(
         row.meanValue,
         row.sdValue,
         row.ux,
-        row.uxExp
+        row.uxExp,
+        row.k
       )
       saved += 1
     }

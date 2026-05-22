@@ -78,6 +78,16 @@ export const listEnviosPT = query({
   },
 })
 
+export const listEnviosPTByParticipante = query({
+  args: { rondaParticipanteId: v.id('rondaParticipantes') },
+  handler: async (ctx, { rondaParticipanteId }) => {
+    return ctx.db
+      .query('enviosPt')
+      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', rondaParticipanteId))
+      .collect()
+  },
+})
+
 export const getEnvioPT = query({
   args: {
     rondaParticipanteId: v.id('rondaParticipantes'),
@@ -238,6 +248,7 @@ export const listEnviosPTRound = query({
           mean_value: e.meanValue,
           sd_value: e.sdValue,
           ux: e.ux ?? null,
+          k: e.k ?? null,
           ux_exp: e.uxExp ?? null,
         }
       })
@@ -305,9 +316,10 @@ export const upsertEnvioPT = mutation({
     meanValue:           v.number(),
     sdValue:             v.number(),
     ux:                  v.optional(v.number()),
+    k:                   v.optional(v.number()),
     uxExp:               v.optional(v.number()),
   },
-  handler: async (ctx, { rondaId, rondaParticipanteId, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp }) => {
+  handler: async (ctx, { rondaId, rondaParticipanteId, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, k, uxExp }) => {
     const now = Date.now()
 
     const existing = await ctx.db
@@ -318,7 +330,7 @@ export const upsertEnvioPT = mutation({
       .unique()
 
     if (existing) {
-      await ctx.db.patch(existing._id, { d1, d2, d3, meanValue, sdValue, ux, uxExp, draftSavedAt: now, updatedAt: now })
+      await ctx.db.patch(existing._id, { d1, d2, d3, meanValue, sdValue, ux, k, uxExp, draftSavedAt: now, updatedAt: now })
       return existing._id
     }
 
@@ -333,6 +345,7 @@ export const upsertEnvioPT = mutation({
       meanValue,
       sdValue,
       ux,
+      k,
       uxExp,
       draftSavedAt: now,
       updatedAt: now,
@@ -446,6 +459,23 @@ export const updateParticipantePT = mutation({
     if (participantCode !== undefined) patch.participantCode = participantCode
     if (replicateCode !== undefined) patch.replicateCode = replicateCode
     if (Object.keys(patch).length > 0) await ctx.db.patch(participanteId, patch)
+  },
+})
+
+export const updatePTItem = mutation({
+  args: {
+    rondaId: v.id('rondas'),
+    itemId: v.id('rondaPtItems'),
+    runCode: v.string(),
+    levelLabel: v.string(),
+  },
+  handler: async (ctx, { rondaId, itemId, runCode, levelLabel }) => {
+    const item = await ctx.db.get(itemId)
+    if (!item) throw new Error('Item PT no encontrado')
+    if (item.rondaId !== rondaId) throw new Error('Item PT no pertenece a la ronda')
+
+    await ctx.db.patch(itemId, { runCode, levelLabel })
+    return ctx.db.get(itemId)
   },
 })
 

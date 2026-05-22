@@ -54,6 +54,7 @@ export default async function RegistroPage({ params }: Props) {
       rondaCodigo={ronda.codigo}
       rondaEstado={ronda.estado}
       participanteCodigo={rp.participant_code}
+      participanteEmail={auth.user.email}
       ficha={ficha}
       soloLectura={soloLectura}
     />

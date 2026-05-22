@@ -2,15 +2,15 @@
 
 import { requireAdminAuth } from '@/lib/auth'
 import {
-  replaceAcompanantes,
-  replaceAnalizadores,
-  replaceInstrumentos,
+  adminReplaceAcompanantes,
+  adminReplaceAnalizadores,
+  adminReplaceInstrumentos,
   FICHA_SCALAR_ALLOWLIST,
   type FichaScalarField,
   type AcompananteInput,
   type AnalizadorInput,
   type InstrumentoInput,
-  upsertFichaScalars,
+  adminUpsertFichaScalars,
 } from '@/lib/fichas'
 
 export async function adminGuardarCampoFichaAction(
@@ -25,7 +25,7 @@ export async function adminGuardarCampoFichaAction(
   }
 
   try {
-    await upsertFichaScalars(fichaId, field as FichaScalarField, value)
+    await adminUpsertFichaScalars(fichaId, field as FichaScalarField, value)
     return { ok: true }
   } catch (e) {
     const msg = e instanceof Error ? e.message : 'Error al guardar el campo'
@@ -43,9 +43,9 @@ export async function adminGuardarListasAction(
 
   try {
     await Promise.all([
-      replaceAcompanantes(fichaId, acompanantes),
-      replaceAnalizadores(fichaId, analizadores),
-      replaceInstrumentos(fichaId, instrumentos),
+      adminReplaceAcompanantes(fichaId, acompanantes),
+      adminReplaceAnalizadores(fichaId, analizadores),
+      adminReplaceInstrumentos(fichaId, instrumentos),
     ])
     return { ok: true }
   } catch (e) {
