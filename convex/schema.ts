@@ -133,6 +133,7 @@ export default defineSchema({
     rondaParticipanteId:  v.id('rondaParticipantes'),
     // Sección 2: Datos del participante
     nombreLaboratorio:    v.optional(v.union(v.string(), v.null())),
+    correoLaboratorio:    v.optional(v.union(v.string(), v.null())),
     nombreResponsable:    v.optional(v.union(v.string(), v.null())),
     cargo:                v.optional(v.union(v.string(), v.null())),
     ciudad:               v.optional(v.union(v.string(), v.null())),
@@ -156,7 +157,8 @@ export default defineSchema({
     createdAt:            v.number(),
     updatedAt:            v.number(),
   })
-    .index('by_ronda_participante', ['rondaParticipanteId']),
+    .index('by_ronda_participante', ['rondaParticipanteId'])
+    .index('by_correo_laboratorio', ['correoLaboratorio']),
 
   // -------------------------------------------------------------------------
   // fichas_registro_acompanantes  (0-N por ficha)
