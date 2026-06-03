@@ -149,6 +149,64 @@ function getParamValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
+function EmptyParticipantState({ email }: { email: string }) {
+  return (
+    <section className="card overflow-hidden">
+      <div className="border-b border-[var(--border-soft)] bg-[linear-gradient(135deg,rgba(245,246,247,.95)_0%,rgba(245,245,240,.95)_100%)] px-8 py-7">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--pt-primary-dark)]">
+          Acceso participante
+        </p>
+        <h2 className="mt-2 text-2xl font-bold text-[var(--foreground)]">
+          Aún no tiene rondas asignadas
+        </h2>
+        <p className="mt-2 max-w-3xl text-sm leading-6 text-[var(--foreground-muted)]">
+          La cuenta <span className="font-medium text-[var(--foreground)]">{email}</span> está
+          registrada, pero todavía no fue vinculada a una ronda activa.
+        </p>
+      </div>
+
+      <div className="grid gap-6 px-8 py-8 lg:grid-cols-[1.2fr_0.8fr]">
+        <div className="space-y-4">
+          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--foreground-muted)]">
+            Qué hacer ahora
+          </p>
+          <ol className="space-y-3 text-sm leading-6 text-[var(--foreground)]">
+            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              1. Verifique que haya iniciado sesión con el correo correcto.
+            </li>
+            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              2. Si esperaba tener una ronda, contacte al coordinador para que le asigne una.
+            </li>
+            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+              3. Cuando exista una asignación, aquí aparecerán las rondas disponibles para diligenciar la ficha y cargar resultados.
+            </li>
+          </ol>
+        </div>
+
+        <aside className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] p-5">
+          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground-muted)]">
+            Estado actual
+          </p>
+          <div className="mt-4 space-y-3">
+            <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] px-4 py-3">
+              <span className="text-sm text-[var(--foreground-muted)]">Rondas asignadas</span>
+              <span className="numeric text-2xl font-semibold text-[var(--foreground)]">0</span>
+            </div>
+            <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] px-4 py-3">
+              <span className="text-sm text-[var(--foreground-muted)]">Ficha habilitada</span>
+              <span className="text-sm font-semibold text-[var(--foreground-muted)]">No</span>
+            </div>
+            <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] px-4 py-3">
+              <span className="text-sm text-[var(--foreground-muted)]">Carga de datos</span>
+              <span className="text-sm font-semibold text-[var(--foreground-muted)]">No disponible</span>
+            </div>
+          </div>
+        </aside>
+      </div>
+    </section>
+  )
+}
+
 export default async function MiDashboardPage({ searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
@@ -221,34 +279,32 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
             />
           </div>
 
-          <div className="card flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">Mis rondas asignadas</h2>
-              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                Rondas en las que está habilitado para diligenciar ficha y cargar resultados.
-              </p>
-            </div>
-            {rondas.length > 0 && (
-              <a
-                href="/guia.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="btn-outline inline-flex items-center gap-2 self-start"
-                title="Abrir guía del participante en nueva pestaña"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
-                Guía del participante
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-              </a>
-            )}
-          </div>
-
           {rondas.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface)] p-10 text-center text-sm text-[var(--foreground-muted)]">
-              No tiene rondas asignadas todavía. Contacte al coordinador para que lo agregue.
-            </div>
+            <EmptyParticipantState email={auth.user.email} />
           ) : (
-            rondas.map((r) => <RondaParticipanteCard key={r.id} ronda={r} />)
+            <>
+              <div className="card flex flex-col gap-3 p-6 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h2 className="text-lg font-semibold text-[var(--foreground)]">Mis rondas asignadas</h2>
+                  <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                    Rondas en las que está habilitado para diligenciar ficha y cargar resultados.
+                  </p>
+                </div>
+                <a
+                  href="/guia.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-outline inline-flex items-center gap-2 self-start"
+                  title="Abrir guía del participante en nueva pestaña"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+                  Guía del participante
+                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a3 3 0 0 1 3-3h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+
+              {rondas.map((r) => <RondaParticipanteCard key={r.id} ronda={r} />)}
+            </>
           )}
         </section>
       </div>
