@@ -1003,6 +1003,36 @@ export const regenerateParticipanteSlot = mutation({
   },
 })
 
+export const updateParticipanteEmail = mutation({
+  args: {
+    rondaId: v.id('rondas'),
+    participanteId: v.id('rondaParticipantes'),
+    email: v.string(),
+  },
+  handler: async (ctx, { rondaId, participanteId, email }) => {
+    const ronda = await ctx.db.get(rondaId)
+    if (!ronda) throw new Error('La ronda no existe.')
+    if (ronda.estado === 'cerrada') throw new Error('No se puede modificar una ronda cerrada.')
+
+    const participante = await ctx.db.get(participanteId)
+    if (!participante || participante.rondaId !== rondaId) throw new Error('No se encontro el participante.')
+
+    const normalizedEmail = email.trim().toLowerCase()
+    if (!normalizedEmail) throw new Error('El correo es obligatorio.')
+
+    const fichas = await ctx.db
+      .query('fichasRegistro')
+      .withIndex('by_ronda_participante', (q) => q.eq('rondaParticipanteId', participanteId))
+      .collect()
+
+    await ctx.db.patch(participanteId, { email: normalizedEmail })
+
+    for (const ficha of fichas) {
+      await ctx.db.patch(ficha._id, { correoLaboratorio: normalizedEmail, updatedAt: Date.now() } as never)
+    }
+  },
+})
+
 export const removeParticipante = mutation({
   args: { rondaId: v.id('rondas'), participanteId: v.id('rondaParticipantes') },
   handler: async (ctx, { rondaId, participanteId }) => {

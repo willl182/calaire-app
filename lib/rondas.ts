@@ -1039,6 +1039,18 @@ export async function updateParticipantePT(
   })
 }
 
+export async function updateParticipanteEmail(
+  rondaId: string,
+  participanteId: string,
+  email: string
+): Promise<void> {
+  await fetchMutation(api.rondas.updateParticipanteEmail, {
+    rondaId: rondaId as Id<'rondas'>,
+    participanteId: participanteId as Id<'rondaParticipantes'>,
+    email,
+  })
+}
+
 export async function updatePTItem(
   rondaId: string,
   itemId: string,

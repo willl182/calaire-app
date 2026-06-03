@@ -103,6 +103,7 @@ http://localhost:3000
 pnpm lint
 pnpm build
 pnpm start
+pnpm release -- "mensaje del commit"
 ```
 
 Antes de desplegar, correr al menos:
@@ -110,6 +111,24 @@ Antes de desplegar, correr al menos:
 ```bash
 pnpm build
 ```
+
+## Release
+
+Para publicar cambios en una sola pasada:
+
+```bash
+pnpm release -- "mensaje del commit"
+```
+
+El flujo ejecuta:
+
+1. `pnpm lint`
+2. `pnpm build`
+3. `git add -A`
+4. `git commit`
+5. `pnpm exec convex deploy`
+6. `vercel --prod`
+7. `git push origin HEAD`
 
 ## Rutas principales
 

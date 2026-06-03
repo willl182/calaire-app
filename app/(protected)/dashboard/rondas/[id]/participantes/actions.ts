@@ -13,6 +13,7 @@ import {
   listParticipantes,
   regenerateParticipanteSlot,
   removeParticipante,
+  updateParticipanteEmail,
 } from '@/lib/rondas'
 import { findUserByEmail, createWorkOSUser } from '@/lib/workos'
 
@@ -184,6 +185,37 @@ export async function regenerateSlotAction(formData: FormData) {
     targetUrl = successUrl(rondaId, 'Enlace regenerado. El enlace anterior ya no es válido.')
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al regenerar el enlace.'
+    targetUrl = errorUrl(rondaId, msg)
+  }
+
+  redirect(targetUrl)
+}
+
+export async function updateParticipanteEmailAction(formData: FormData) {
+  await requireAdmin()
+
+  const rondaId = parseText(formData, 'ronda_id')
+  const participanteId = parseText(formData, 'participante_id')
+  const email = parseText(formData, 'email').toLowerCase()
+  let targetUrl = errorUrl(rondaId, 'Error al actualizar el correo.')
+
+  try {
+    if (!rondaId || !participanteId || !email) throw new Error('El correo es obligatorio.')
+
+    const ronda = await getRonda(rondaId)
+    if (!ronda) {
+      throw new Error('Ronda no encontrada.')
+    }
+    if (ronda.estado === 'cerrada') {
+      throw new Error('No se puede modificar una ronda cerrada.')
+    }
+
+    await updateParticipanteEmail(rondaId, participanteId, email)
+
+    revalidatePath(pageUrl(rondaId))
+    targetUrl = successUrl(rondaId, 'Correo del participante actualizado.')
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : 'Error al actualizar el correo.'
     targetUrl = errorUrl(rondaId, msg)
   }
 

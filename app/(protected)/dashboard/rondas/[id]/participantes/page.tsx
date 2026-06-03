@@ -23,6 +23,7 @@ import {
   removeParticipanteAction,
   regenerateSlotAction,
   createAndInviteAction,
+  updateParticipanteEmailAction,
 } from './actions'
 
 type PageProps = {
@@ -229,15 +230,41 @@ function ParticipanteRow({
 
       {/* Col 2: Enlace */}
       <td className="py-3 pr-4 text-sm">
-        {p.estado === 'pendiente' && enlace ? (
-          <CopyInvitationLinkButton url={enlace} />
-        ) : p.estado === 'reclamado' ? (
-          <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
-            Reclamado
-          </span>
-        ) : (
-          <span className="text-xs text-[var(--foreground-muted)]">—</span>
-        )}
+        <div className="flex flex-col gap-2">
+          {p.estado === 'pendiente' && enlace ? (
+            <CopyInvitationLinkButton url={enlace} />
+          ) : p.estado === 'reclamado' ? (
+            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+              Reclamado
+            </span>
+          ) : (
+            <span className="text-xs text-[var(--foreground-muted)]">—</span>
+          )}
+
+          {canEdit && p.estado === 'pendiente' && (
+            <form action={updateParticipanteEmailAction} className="flex flex-col gap-1">
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
+              <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                Correo
+              </label>
+              <input
+                type="email"
+                name="email"
+                defaultValue={p.email}
+                placeholder="correo@laboratorio.com"
+                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--foreground)] outline-none ring-0"
+                aria-label={`Correo del participante ${p.email}`}
+              />
+              <button
+                type="submit"
+                className="w-fit rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
+              >
+                Guardar correo
+              </button>
+            </form>
+          )}
+        </div>
       </td>
 
       {/* Col 3: Ficha */}
