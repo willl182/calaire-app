@@ -13,6 +13,15 @@ function run(command, args, options = {}) {
   }
 }
 
+function runWithEnv(command, args, extraEnv) {
+  run(command, args, {
+    env: {
+      ...process.env,
+      ...extraEnv,
+    },
+  })
+}
+
 function gitStatus() {
   const result = spawnSync('git', ['status', '--porcelain'], {
     encoding: 'utf8',
@@ -39,6 +48,9 @@ if (gitStatus()) {
   console.log('No changes to commit.')
 }
 
-run('pnpm', ['exec', 'convex', 'deploy'])
+runWithEnv('pnpm', ['exec', 'convex', 'deploy'], {
+  CONVEX_DEPLOYMENT: 'steady-kiwi-725',
+  NEXT_PUBLIC_CONVEX_URL: 'https://steady-kiwi-725.convex.cloud',
+})
 run('vercel', ['--prod'])
 run('git', ['push', 'origin', 'HEAD'])
