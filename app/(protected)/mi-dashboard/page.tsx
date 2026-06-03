@@ -165,43 +165,21 @@ function EmptyParticipantState({ email }: { email: string }) {
         </p>
       </div>
 
-      <div className="grid gap-6 px-8 py-8 lg:grid-cols-[1.2fr_0.8fr]">
-        <div className="space-y-4">
-          <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--foreground-muted)]">
-            Qué hacer ahora
-          </p>
-          <ol className="space-y-3 text-sm leading-6 text-[var(--foreground)]">
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-              1. Verifique que haya iniciado sesión con el correo correcto.
-            </li>
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-              2. Si esperaba tener una ronda, contacte al coordinador para que le asigne una.
-            </li>
-            <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
-              3. Cuando exista una asignación, aquí aparecerán las rondas disponibles para diligenciar la ficha y cargar resultados.
-            </li>
-          </ol>
-        </div>
-
-        <aside className="rounded-2xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] p-5">
-          <p className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground-muted)]">
-            Estado actual
-          </p>
-          <div className="mt-4 space-y-3">
-            <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] px-4 py-3">
-              <span className="text-sm text-[var(--foreground-muted)]">Rondas asignadas</span>
-              <span className="numeric text-2xl font-semibold text-[var(--foreground)]">0</span>
-            </div>
-            <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] px-4 py-3">
-              <span className="text-sm text-[var(--foreground-muted)]">Ficha habilitada</span>
-              <span className="text-sm font-semibold text-[var(--foreground-muted)]">No</span>
-            </div>
-            <div className="flex items-center justify-between rounded-xl bg-[var(--surface)] px-4 py-3">
-              <span className="text-sm text-[var(--foreground-muted)]">Carga de datos</span>
-              <span className="text-sm font-semibold text-[var(--foreground-muted)]">No disponible</span>
-            </div>
-          </div>
-        </aside>
+      <div className="px-8 py-8">
+        <p className="text-sm font-semibold uppercase tracking-[0.16em] text-[var(--foreground-muted)]">
+          Qué hacer ahora
+        </p>
+        <ol className="mt-4 space-y-3 text-sm leading-6 text-[var(--foreground)]">
+          <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+            1. Verifique que haya iniciado sesión con el correo correcto.
+          </li>
+          <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+            2. Si esperaba tener una ronda, contacte al coordinador para que le asigne una.
+          </li>
+          <li className="rounded-xl border border-[var(--border)] bg-[var(--surface)] p-4">
+            3. Cuando exista una asignación, aquí aparecerán las rondas disponibles para diligenciar la ficha y cargar resultados.
+          </li>
+        </ol>
       </div>
     </section>
   )
