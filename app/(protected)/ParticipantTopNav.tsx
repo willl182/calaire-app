@@ -2,7 +2,7 @@ import Link from 'next/link'
 
 import { LogoUnal } from '@/app/components/LogoUnal'
 
-export function ParticipantTopNav() {
+export function ParticipantTopNav({ hasRondas }: { hasRondas: boolean }) {
   return (
     <header
       className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)]"
@@ -27,16 +27,18 @@ export function ParticipantTopNav() {
           >
             Inicio
           </Link>
-          <a
-            href="/guia.html"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="relative inline-flex self-stretch items-center px-4 py-0 text-sm font-medium whitespace-nowrap text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors duration-150"
-            title="Abrir guía del participante en nueva pestaña"
-          >
-            Guía
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-1.5 opacity-60"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          </a>
+          {hasRondas && (
+            <a
+              href="/guia.html"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="relative inline-flex self-stretch items-center px-4 py-0 text-sm font-medium whitespace-nowrap text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors duration-150"
+              title="Abrir guía del participante en nueva pestaña"
+            >
+              Guía
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="ml-1.5 opacity-60"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            </a>
+          )}
         </nav>
       </div>
     </header>
