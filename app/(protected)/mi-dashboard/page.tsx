@@ -110,37 +110,6 @@ function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) 
   )
 }
 
-function ParticipantKpiCard({
-  label,
-  value,
-  detail,
-  variant = 'default',
-}: {
-  label: string
-  value: number
-  detail: string
-  variant?: 'default' | 'success' | 'warning' | 'danger'
-}) {
-  const variantClass = {
-    default: 'border-l-[var(--pt-primary)]',
-    success: 'border-l-emerald-500 bg-emerald-50/40',
-    warning: 'border-l-amber-500 bg-amber-50/50',
-    danger: 'border-l-rose-500 bg-rose-50/50',
-  }[variant]
-
-  return (
-    <div className={`card-accent px-5 py-4 ${variantClass}`}>
-      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
-        {label}
-      </p>
-      <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
-        {value}
-      </div>
-      <p className="mt-1 text-xs text-[var(--foreground-muted)]">{detail}</p>
-    </div>
-  )
-}
-
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
@@ -194,13 +163,6 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const success = getParamValue(params.success)
   const error = getParamValue(params.error)
   const rondas = await listRondasParticipante(auth.user.id)
-  const rondasActivas = rondas.filter((r) => r.estado === 'activa').length
-  const fichasPendientes = rondas.filter((r) => r.ficha_estado !== 'enviado').length
-  const resultadosPendientes = rondas.filter(
-    (r) => r.estado === 'activa' && r.ficha_estado === 'enviado' && !r.envio_pt_enviado
-  ).length
-  const rondasBorrador = rondas.filter((r) => r.estado === 'borrador').length
-
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -230,33 +192,6 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
         <Alert tone="error" message={error} />
 
         <section className="grid gap-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <ParticipantKpiCard
-              label="Rondas activas"
-              value={rondasActivas}
-              detail="Disponibles para gestión"
-              variant={rondasActivas > 0 ? 'success' : 'default'}
-            />
-            <ParticipantKpiCard
-              label="Fichas pendientes"
-              value={fichasPendientes}
-              detail="Por diligenciar o enviar"
-              variant={fichasPendientes > 0 ? 'warning' : 'default'}
-            />
-            <ParticipantKpiCard
-              label="Resultados pendientes"
-              value={resultadosPendientes}
-              detail="Con ficha lista y PT sin envío final"
-              variant={resultadosPendientes > 0 ? 'danger' : 'default'}
-            />
-            <ParticipantKpiCard
-              label="En borrador"
-              value={rondasBorrador}
-              detail="Rondas aún no activas"
-              variant={rondasBorrador > 0 ? 'warning' : 'default'}
-            />
-          </div>
-
           {rondas.length === 0 ? (
             <EmptyParticipantState email={auth.user.email} />
           ) : (
