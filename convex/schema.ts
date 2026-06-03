@@ -132,6 +132,7 @@ export default defineSchema({
   fichasRegistro: defineTable({
     rondaParticipanteId:  v.id('rondaParticipantes'),
     // Sección 2: Datos del participante
+    nitLaboratorio:       v.optional(v.union(v.string(), v.null())),
     nombreLaboratorio:    v.optional(v.union(v.string(), v.null())),
     correoLaboratorio:    v.optional(v.union(v.string(), v.null())),
     nombreResponsable:    v.optional(v.union(v.string(), v.null())),
@@ -146,6 +147,7 @@ export default defineSchema({
     estacionamiento:             v.boolean(),
     observaciones:               v.optional(v.union(v.string(), v.null())),
     justificacionCambioEquipo:   v.optional(v.union(v.string(), v.null())),
+    decNoCambioEquiposDuranteRonda: v.optional(v.boolean()),
     // Sección 7: Declaraciones
     decDatosCorrectos:           v.boolean(),
     decAceptaCondiciones:        v.boolean(),
