@@ -137,7 +137,6 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
               value={lookup}
               onChange={(e) => {
                 setLookup(e.target.value)
-                setLookupApplied(false)
               }}
               placeholder="123456789 o correo@laboratorio.com"
             />
