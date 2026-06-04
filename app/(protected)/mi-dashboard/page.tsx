@@ -1,8 +1,10 @@
+import { signOut } from '@workos-inc/authkit-nextjs'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { LogoUnal } from '@/app/components/LogoUnal'
+import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { listRondasParticipante, type Ronda, type RondaParticipanteAsignada } from '@/lib/rondas'
 
@@ -184,6 +186,19 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
                   {auth.user.email} · Participante
                 </p>
               </div>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <form
+                action={async () => {
+                  'use server'
+                  await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
+                }}
+              >
+                <button type="submit" className="btn-outline">
+                  Cerrar sesión
+                </button>
+              </form>
             </div>
           </div>
         </header>
