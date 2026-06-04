@@ -32,6 +32,7 @@ import {
   type RondaParticipanteAsignada,
   type ParticipanteRondaResumen,
 } from '@/lib/rondas'
+import { listWorkOSUsers, type WorkOSUserListItem } from '@/lib/workos'
 import { derivarEstadoOperativo, buildAttentionItems, type EstadoOperativo, type AttentionItem } from '@/lib/operativo'
 
 type DashboardPageProps = {
@@ -689,74 +690,309 @@ function ParticipantesGlobalView({
     )
   }
 
+  const conEnlace = participantes.filter((p) => p.rondas.some((r) => r.estado_enlace === 'reclamado'))
+  const sinEnlace = participantes.filter((p) => p.rondas.every((r) => r.estado_enlace === 'pendiente'))
+
   return (
-    <div className="card overflow-hidden">
+    <div className="grid gap-6">
+      <ParticipantGroupTable
+        title="Con enlace"
+        description="Cupos ya reclamados por una cuenta de WorkOS."
+        participantes={conEnlace}
+        emptyMessage="No hay participantes con enlace reclamado."
+        tone="success"
+      />
+      <ParticipantGroupTable
+        title="Sin enlace"
+        description="Cupos pendientes de reclamar, incluidos los que ya tienen ficha iniciada."
+        participantes={sinEnlace}
+        emptyMessage="No hay participantes pendientes de reclamar."
+        tone="warning"
+      />
+    </div>
+  )
+}
+
+function ParticipantGroupTable({
+  title,
+  description,
+  participantes,
+  emptyMessage,
+  tone,
+}: {
+  title: string
+  description: string
+  participantes: ParticipanteGlobal[]
+  emptyMessage: string
+  tone: 'success' | 'warning'
+}) {
+  const grouped = Array.from(
+    participantes.reduce((acc, participante) => {
+      const nit = participante.nit_laboratorio ?? '—'
+      const current = acc.get(nit) ?? []
+      current.push(participante)
+      acc.set(nit, current)
+      return acc
+    }, new Map<string, ParticipanteGlobal[]>())
+  ).sort(([nitA], [nitB]) => nitA.localeCompare(nitB))
+
+  if (participantes.length === 0) {
+    return (
+      <div className={`rounded-xl border border-dashed px-6 py-10 text-center text-sm ${tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
+        {emptyMessage}
+      </div>
+    )
+  }
+
+  return (
+    <section className="card overflow-hidden">
       <div className="border-b border-[var(--border-soft)] px-4 py-3">
-        <h2 className="text-sm font-semibold text-[var(--foreground)]">Índice de laboratorios</h2>
-        <p className="text-xs text-[var(--foreground-muted)]">
-          {participantes.length} laboratorio{participantes.length !== 1 ? 's' : ''} registrado{participantes.length !== 1 ? 's' : ''}
-        </p>
+        <h2 className="text-sm font-semibold text-[var(--foreground)]">{title}</h2>
+        <p className="text-xs text-[var(--foreground-muted)]">{description}</p>
       </div>
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[40rem]">
+        <table className="w-full min-w-[60rem]">
           <thead>
             <tr className="border-b-2 border-[var(--pt-primary)]">
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Email
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Rondas activas
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Envíos PT totales
-              </th>
-              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Acción
-              </th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">NIT</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Email</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Enlace</th>
+              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Ficha</th>
+              <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Rondas / envíos</th>
             </tr>
           </thead>
           <tbody>
-            {participantes.map((p) => {
-              const rondasActivas = p.rondas.filter((r) => r.estado === 'activa')
-              const rondasComoParticipante = rondasActivas.filter((r) => r.participant_profile !== 'member_special').length
-              const rondasComoReferencia = rondasActivas.filter((r) => r.participant_profile === 'member_special').length
-              const participanteHref = `/dashboard/participantes/${encodeURIComponent(p.workos_user_id)}`
+            {grouped.map(([nit, group]) =>
+              group.map((p, index) => {
+                const rondasActivas = p.rondas.filter((r) => r.estado === 'activa')
+                const reclamados = p.rondas.filter((r) => r.estado_enlace === 'reclamado').length
+                const pendientes = p.rondas.filter((r) => r.estado_enlace === 'pendiente').length
+                const participanteHref = `/dashboard/participantes/${encodeURIComponent(p.workos_user_id)}`
+                const fichaLabel =
+                  p.ficha_estado === 'enviado' ? 'Enviada' : p.ficha_estado === 'borrador' ? 'Borrador' : 'No iniciada'
 
-              return (
-                <tr key={p.workos_user_id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
-                  <td className="px-4 py-4">
-                    <div className="text-sm font-medium text-[var(--foreground)]">{p.email}</div>
-                    <div className="mt-1 flex flex-wrap gap-2 text-xs text-[var(--foreground-muted)]">
-                      <span>{rondasComoParticipante} como participante</span>
-                      <span>·</span>
-                      <span>{rondasComoReferencia} como referencia</span>
-                    </div>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="numeric rounded-full bg-[var(--pt-primary-subtle)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]">
-                      {rondasActivas.length}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4">
-                    <span className="numeric text-sm text-[var(--foreground)]">
-                      {p.total_envios}
-                    </span>
-                  </td>
-                  <td className="px-4 py-4 text-right">
-                    <Link
-                      href={participanteHref}
-                      className="btn-primary inline-flex px-3 py-1 text-xs"
-                    >
-                      Ingresar
-                    </Link>
-                  </td>
-                </tr>
-              )
-            })}
+                return (
+                  <tr key={p.workos_user_id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
+                    <td className="px-4 py-4">
+                      {index === 0 ? <div className="numeric text-sm font-medium text-[var(--foreground)]">{nit}</div> : <span className="text-[var(--foreground-muted)]">〃</span>}
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="text-sm font-medium text-[var(--foreground)]">
+                        {p.correo_laboratorio?.trim() || p.email}
+                      </div>
+                      {p.correo_laboratorio && p.correo_laboratorio !== p.email && (
+                        <div className="mt-0.5 text-xs text-[var(--foreground-muted)]">
+                          Correo WorkOS: {p.email}
+                        </div>
+                      )}
+                      <div className="mt-1 text-xs text-[var(--foreground-muted)]">
+                        <span>{reclamados} con enlace</span>
+                        <span> · </span>
+                        <span>{pendientes} pendientes de reclamar</span>
+                      </div>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${pendientes > 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                        {pendientes > 0 ? 'Sin enlace' : 'Con enlace'}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4">
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.ficha_estado === 'enviado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                        {fichaLabel}
+                      </span>
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <div className="flex flex-wrap items-center justify-end gap-2">
+                        {p.correo_laboratorio && (
+                          <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                            Laboratorio manual
+                          </span>
+                        )}
+                        <span className="rounded-full bg-[var(--pt-primary-subtle)] px-3 py-1 text-xs font-semibold text-[var(--foreground)]">
+                          {rondasActivas.length} activas
+                        </span>
+                        <span className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-medium text-[var(--foreground-muted)]">
+                          {p.total_envios} envíos
+                        </span>
+                        <Link href={participanteHref} className="btn-primary inline-flex px-3 py-1 text-xs">
+                          Ingresar
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                )
+              })
+            )}
           </tbody>
         </table>
       </div>
-    </div>
+    </section>
+  )
+}
+
+function RegistrosTabView({
+  participantesGlobal,
+  workosUsers,
+}: {
+  participantesGlobal: ParticipanteGlobal[]
+  workosUsers: WorkOSUserListItem[]
+}) {
+  const conEnlace = participantesGlobal.filter((p) => p.rondas.some((r) => r.estado_enlace === 'reclamado'))
+  const sinEnlace = participantesGlobal.filter((p) => p.rondas.every((r) => r.estado_enlace === 'pendiente'))
+  const pendientesIngreso = participantesGlobal.filter((p) =>
+    p.rondas.some(
+      (r) =>
+        r.estado_enlace === 'pendiente' &&
+        (r.ficha_estado !== 'no_iniciada' || Boolean(p.correo_laboratorio) || Boolean(p.nit_laboratorio))
+    )
+  )
+
+  return (
+    <section className="grid gap-6">
+      <section className="grid gap-3 sm:grid-cols-3">
+        <div className="card-accent px-5 py-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Total</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{participantesGlobal.length}</div>
+        </div>
+        <div className="card-accent px-5 py-4 border-l-emerald-500 bg-emerald-50/40">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Con enlace</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{conEnlace.length}</div>
+        </div>
+        <div className="card-accent px-5 py-4 border-l-amber-500 bg-amber-50/50">
+          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Sin reclamar</div>
+          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{sinEnlace.length}</div>
+        </div>
+      </section>
+
+      <section className="card overflow-hidden">
+        <div className="border-b border-[var(--border-soft)] px-4 py-3">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Pendientes de ingreso</h2>
+          <p className="text-xs text-[var(--foreground-muted)]">
+            Participantes creados por admin que todavía no han reclamado su enlace, pero ya tienen ficha o correo de laboratorio.
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[64rem]">
+            <thead>
+              <tr className="border-b-2 border-[var(--pt-primary)]">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">NIT</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Correo laboratorio</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Correo WorkOS</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Ficha</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Rondas</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendientesIngreso.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-8 text-center text-sm text-[var(--foreground-muted)]" colSpan={5}>
+                    No hay participantes pendientes de ingreso con ficha o correo cargado.
+                  </td>
+                </tr>
+              ) : (
+                pendientesIngreso.map((p) => {
+                  const rondasPendientes = p.rondas.filter((r) => r.estado_enlace === 'pendiente').length
+                  return (
+                    <tr key={`${p.workos_user_id}-pendiente`} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
+                      <td className="px-4 py-4 text-sm font-medium text-[var(--foreground)]">
+                        {p.nit_laboratorio?.trim() ? p.nit_laboratorio : '—'}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[var(--foreground)]">
+                        <div className="font-medium">{p.correo_laboratorio?.trim() || p.email}</div>
+                        {p.correo_laboratorio && p.correo_laboratorio !== p.email && (
+                          <div className="mt-0.5 text-xs text-[var(--foreground-muted)]">
+                            WorkOS: {p.email}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-4 py-4 text-sm text-[var(--foreground)]">
+                        <div>{p.email}</div>
+                        <div className="mt-1 text-xs text-[var(--foreground-muted)]">Enlace pendiente</div>
+                      </td>
+                      <td className="px-4 py-4">
+                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
+                          p.ficha_estado === 'enviado'
+                            ? 'bg-emerald-100 text-emerald-800'
+                            : p.ficha_estado === 'borrador'
+                              ? 'bg-amber-100 text-amber-800'
+                              : 'bg-slate-100 text-slate-600'
+                        }`}>
+                          {p.ficha_estado === 'enviado' ? 'Enviada' : p.ficha_estado === 'borrador' ? 'Borrador' : 'No iniciada'}
+                        </span>
+                      </td>
+                      <td className="px-4 py-4 text-right">
+                        <div className="flex flex-wrap items-center justify-end gap-2">
+                          {p.correo_laboratorio && (
+                            <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                              Admin creado
+                            </span>
+                          )}
+                          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                            {rondasPendientes} pendientes
+                          </span>
+                          <Link href={`/dashboard/participantes/${encodeURIComponent(p.workos_user_id)}`} className="btn-primary inline-flex px-3 py-1 text-xs">
+                            Abrir
+                          </Link>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section className="card overflow-hidden">
+        <div className="border-b border-[var(--border-soft)] px-4 py-3">
+          <h2 className="text-sm font-semibold text-[var(--foreground)]">Directorio WorkOS</h2>
+          <p className="text-xs text-[var(--foreground-muted)]">
+            Muestra todas las personas creadas en WorkOS, incluso si todavía no están en una ronda.
+          </p>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[60rem]">
+            <thead>
+              <tr className="border-b-2 border-[var(--pt-primary)]">
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Nombre</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Correo</th>
+                <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">WorkOS ID</th>
+                <th className="px-4 py-3 text-right text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {workosUsers.length === 0 ? (
+                <tr>
+                  <td className="px-4 py-8 text-center text-sm text-[var(--foreground-muted)]" colSpan={4}>
+                    No hay usuarios en WorkOS.
+                  </td>
+                </tr>
+              ) : (
+                workosUsers.map((user) => (
+                  <tr key={user.id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
+                    <td className="px-4 py-4 text-sm font-medium text-[var(--foreground)]">
+                      {user.firstName || user.lastName ? `${user.firstName ?? ''} ${user.lastName ?? ''}`.trim() : user.displayName}
+                    </td>
+                    <td className="px-4 py-4 text-sm text-[var(--foreground)]">
+                      {user.email}
+                    </td>
+                    <td className="px-4 py-4 text-xs text-[var(--foreground-muted)]">
+                      {user.id}
+                    </td>
+                    <td className="px-4 py-4 text-right">
+                      <Link href={`/dashboard/participantes/${encodeURIComponent(user.id)}`} className="btn-primary inline-flex px-3 py-1 text-xs">
+                        Abrir
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </section>
   )
 }
 
@@ -1128,6 +1364,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
   const rondas = admin ? await listRondas() : []
   const allParticipantes = admin ? await listAllParticipantes() : []
+  const workosUsers = admin ? await listWorkOSUsers() : []
   const rondasParticipante = !admin ? await listRondasParticipante(auth.user.id) : []
   const rondasResultados = admin && activeTab === 'resultados'
     ? await loadResultadosDashboard(rondas)
@@ -1251,6 +1488,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                 </div>
                 <RondasTable rondas={rondas} editando={editando} />
               </div>
+            )}
+
+            {activeTab === 'registros' && (
+              <RegistrosTabView participantesGlobal={allParticipantes} workosUsers={workosUsers} />
             )}
 
             {activeTab === 'participantes' && (

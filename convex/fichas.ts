@@ -14,6 +14,10 @@ async function getLatestFichaByRondaParticipante(
   return fichas[0] ?? null
 }
 
+function normalizeLookupValue(value: string) {
+  return value.trim().toLowerCase()
+}
+
 // ---------------------------------------------------------------------------
 // Fichas — read
 // ---------------------------------------------------------------------------
@@ -51,6 +55,40 @@ export const getFichaResumenByRondaParticipante = query({
     const ficha = await getLatestFichaByRondaParticipante(ctx, rondaParticipanteId)
     if (!ficha) return null
     return { id: ficha._id, rondaParticipanteId: ficha.rondaParticipanteId, estado: ficha.estado }
+  },
+})
+
+export const findFichaTemplateByLookup = query({
+  args: {
+    lookup: v.string(),
+  },
+  handler: async (ctx, { lookup }) => {
+    const normalizedLookup = normalizeLookupValue(lookup)
+    if (!normalizedLookup) return null
+
+    const fichas = await ctx.db.query('fichasRegistro').collect()
+    const matches = fichas.filter((ficha) => {
+      const correo = normalizeLookupValue(String(ficha.correoLaboratorio ?? ''))
+      const nit = normalizeLookupValue(String(ficha.nitLaboratorio ?? ''))
+      return correo === normalizedLookup || nit === normalizedLookup
+    })
+
+    if (matches.length === 0) return null
+
+    matches.sort((a, b) => b.updatedAt - a.updatedAt)
+    const ficha = matches[0]
+
+    const [acompanantes, analizadores, instrumentos] = await Promise.all([
+      ctx.db.query('fichasAcompanantes').withIndex('by_ficha', (q) => q.eq('fichaId', ficha._id)).collect(),
+      ctx.db.query('fichasAnalizadores').withIndex('by_ficha', (q) => q.eq('fichaId', ficha._id)).collect(),
+      ctx.db.query('fichasInstrumentos').withIndex('by_ficha', (q) => q.eq('fichaId', ficha._id)).collect(),
+    ])
+
+    acompanantes.sort((a, b) => a.sortOrder - b.sortOrder)
+    analizadores.sort((a, b) => a.sortOrder - b.sortOrder)
+    instrumentos.sort((a, b) => a.sortOrder - b.sortOrder)
+
+    return { ...ficha, acompanantes, analizadores, instrumentos }
   },
 })
 
@@ -121,6 +159,8 @@ export const upsertFichaScalar = mutation({
   args: {
     fichaId: v.id('fichasRegistro'),
     field: v.union(
+      v.literal('nitLaboratorio'),
+      v.literal('correoLaboratorio'),
       v.literal('nombreLaboratorio'),
       v.literal('nombreResponsable'),
       v.literal('cargo'),
@@ -162,6 +202,8 @@ export const adminUpsertFichaScalar = mutation({
   args: {
     fichaId: v.id('fichasRegistro'),
     field: v.union(
+      v.literal('nitLaboratorio'),
+      v.literal('correoLaboratorio'),
       v.literal('nombreLaboratorio'),
       v.literal('nombreResponsable'),
       v.literal('cargo'),

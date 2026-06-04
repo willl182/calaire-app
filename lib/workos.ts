@@ -15,6 +15,11 @@ export type WorkOSUserResult = {
   displayName: string
 }
 
+export type WorkOSUserListItem = WorkOSUserResult & {
+  firstName: string | null
+  lastName: string | null
+}
+
 export async function findUserByEmail(email: string): Promise<WorkOSUserResult | null> {
   const { data } = await getWorkOS().userManagement.listUsers({
     email,
@@ -50,4 +55,20 @@ export async function createWorkOSUser(
     email: user.email,
     displayName: parts.length > 0 ? parts.join(' ') : user.email,
   }
+}
+
+export async function listWorkOSUsers(limit = 100): Promise<WorkOSUserListItem[]> {
+  const paginator = await getWorkOS().userManagement.listUsers({ limit })
+  const users = await paginator.autoPagination()
+
+  return users.map((user) => {
+    const parts = [user.firstName, user.lastName].filter(Boolean)
+    return {
+      id: user.id,
+      email: user.email,
+      displayName: parts.length > 0 ? parts.join(' ') : user.email,
+      firstName: user.firstName ?? null,
+      lastName: user.lastName ?? null,
+    }
+  })
 }

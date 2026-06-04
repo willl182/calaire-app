@@ -214,7 +214,7 @@ function ParticipanteRow({
 
   return (
     <tr className="border-b border-[var(--border-soft)] last:border-0">
-      {/* Col 1: Cupo */}
+      {/* Col 1: Participante */}
       <td className="py-3 pr-4">
         <div className="text-sm font-medium text-[var(--foreground)]">{p.email}</div>
         <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
@@ -228,11 +228,42 @@ function ParticipanteRow({
         </div>
       </td>
 
-      {/* Col 2: Enlace */}
-      <td className="py-3 pr-4 text-sm">
+      {/* Col 2: Correo */}
+      <td className="py-3 pr-4 text-sm align-top">
+        {canEdit && p.estado === 'pendiente' ? (
+          <form action={updateParticipanteEmailAction} className="flex flex-col gap-1.5">
+            <input type="hidden" name="ronda_id" value={rondaId} />
+            <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
+            <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+              Correo
+            </label>
+            <input
+              type="email"
+              name="email"
+              defaultValue={p.email}
+              placeholder="correo@laboratorio.com"
+              className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--foreground)] outline-none ring-0"
+              aria-label={`Correo del participante ${p.email}`}
+            />
+            <button
+              type="submit"
+              className="w-fit rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
+            >
+              Guardar correo
+            </button>
+          </form>
+        ) : (
+          <div className="text-sm text-[var(--foreground)]">{p.email}</div>
+        )}
+      </td>
+
+      {/* Col 3: Enlace */}
+      <td className="py-3 pr-4 text-sm align-top">
         <div className="flex flex-col gap-2">
           {p.estado === 'pendiente' && enlace ? (
-            <CopyInvitationLinkButton url={enlace} />
+            <div className="w-fit max-w-full overflow-hidden">
+              <CopyInvitationLinkButton url={enlace} />
+            </div>
           ) : p.estado === 'reclamado' ? (
             <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
               Reclamado
@@ -240,39 +271,15 @@ function ParticipanteRow({
           ) : (
             <span className="text-xs text-[var(--foreground-muted)]">—</span>
           )}
-
-          {canEdit && p.estado === 'pendiente' && (
-            <form action={updateParticipanteEmailAction} className="flex flex-col gap-1">
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-              <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                Correo
-              </label>
-              <input
-                type="email"
-                name="email"
-                defaultValue={p.email}
-                placeholder="correo@laboratorio.com"
-                className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--foreground)] outline-none ring-0"
-                aria-label={`Correo del participante ${p.email}`}
-              />
-              <button
-                type="submit"
-                className="w-fit rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
-              >
-                Guardar correo
-              </button>
-            </form>
-          )}
         </div>
       </td>
 
-      {/* Col 3: Ficha */}
+      {/* Col 4: Ficha */}
       <td className="py-3 pr-4 text-sm">
         {fichaEstadoBadge(p, rondaId)}
       </td>
 
-      {/* Col 4: Envíos PT */}
+      {/* Col 5: Envíos PT */}
       <td className="py-3 pr-4 text-sm">
         {p.envios_pt_count > 0 ? (
           <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
@@ -285,7 +292,7 @@ function ParticipanteRow({
         )}
       </td>
 
-      {/* Col 5: Acciones */}
+      {/* Col 6: Acciones */}
       <td className="py-3 text-right">
         <div className="flex flex-wrap items-center justify-end gap-2">
           <Link
@@ -302,27 +309,27 @@ function ParticipanteRow({
           </Link>
           {canEdit && (
             <>
-            <form action={regenerateSlotAction} className="inline">
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-              <button
-                type="submit"
-                className="rounded-lg border border-[var(--border)] px-2 py-1 text-xs text-[var(--foreground-muted)] transition hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
-              >
-                Regenerar
-              </button>
-            </form>
-            <form action={removeParticipanteAction} className="inline">
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-              <ConfirmSubmitButton
-                type="submit"
-                message={`¿Eliminar a ${p.email} de esta ronda?`}
-                className="rounded-lg border border-rose-200 bg-rose-50/50 px-2 py-1 text-xs text-rose-600 transition hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800"
-              >
-                Eliminar
-              </ConfirmSubmitButton>
-            </form>
+              <form action={regenerateSlotAction} className="inline">
+                <input type="hidden" name="ronda_id" value={rondaId} />
+                <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
+                <button
+                  type="submit"
+                  className="rounded-lg border border-[var(--border)] px-2 py-1 text-xs text-[var(--foreground-muted)] transition hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
+                >
+                  Regenerar
+                </button>
+              </form>
+              <form action={removeParticipanteAction} className="inline">
+                <input type="hidden" name="ronda_id" value={rondaId} />
+                <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
+                <ConfirmSubmitButton
+                  type="submit"
+                  message={`¿Eliminar a ${p.email} de esta ronda?`}
+                  className="rounded-lg border border-rose-200 bg-rose-50/50 px-2 py-1 text-xs text-rose-600 transition hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800"
+                >
+                  Eliminar
+                </ConfirmSubmitButton>
+              </form>
             </>
           )}
         </div>
@@ -516,11 +523,22 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[36rem]">
+              <table className="w-full min-w-[70rem] table-fixed">
+                <colgroup>
+                  <col className="w-[18rem]" />
+                  <col className="w-[18rem]" />
+                  <col className="w-[13rem]" />
+                  <col className="w-[11rem]" />
+                  <col className="w-[11rem]" />
+                  <col className="w-auto" />
+                </colgroup>
                 <thead>
                   <tr className="border-b-2 border-[var(--pt-primary)]">
                     <th className="pb-3 pr-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-                      Cupo
+                      Participante
+                    </th>
+                    <th className="pb-3 pr-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                      Correo
                     </th>
                     <th className="pb-3 pr-4 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
                       Enlace

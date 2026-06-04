@@ -7,6 +7,8 @@ export type EstadoFicha = 'borrador' | 'enviado'
 export type FichaRegistro = {
   id: string
   ronda_participante_id: string
+  nit_laboratorio: string | null
+  correo_laboratorio: string | null
   nombre_laboratorio: string | null
   nombre_responsable: string | null
   cargo: string | null
@@ -81,6 +83,8 @@ export type AnalizadorInput = Omit<Analizador, 'id' | 'ficha_id'>
 export type InstrumentoInput = Omit<Instrumento, 'id' | 'ficha_id'>
 
 export const FICHA_SCALAR_ALLOWLIST = [
+  'nit_laboratorio',
+  'correo_laboratorio',
   'nombre_laboratorio',
   'nombre_responsable',
   'cargo',
@@ -108,7 +112,9 @@ export type FichaScalarField = (typeof FICHA_SCALAR_ALLOWLIST)[number]
 // ---------------------------------------------------------------------------
 
 // Maps snake_case lib field names to camelCase Convex field names
-const SCALAR_FIELD_MAP: Record<FichaScalarField, 'nombreLaboratorio' | 'nombreResponsable' | 'cargo' | 'ciudad' | 'departamento' | 'telefono' | 'transporte' | 'diaLlegada' | 'horaLlegada' | 'estacionamiento' | 'observaciones' | 'justificacionCambioEquipo' | 'decDatosCorrectos' | 'decAceptaCondiciones' | 'decCompromisos' | 'decProcedimientosCalaire' | 'decFirmaAutorizada' | 'nombreFirma'> = {
+const SCALAR_FIELD_MAP: Record<FichaScalarField, 'nitLaboratorio' | 'correoLaboratorio' | 'nombreLaboratorio' | 'nombreResponsable' | 'cargo' | 'ciudad' | 'departamento' | 'telefono' | 'transporte' | 'diaLlegada' | 'horaLlegada' | 'estacionamiento' | 'observaciones' | 'justificacionCambioEquipo' | 'decDatosCorrectos' | 'decAceptaCondiciones' | 'decCompromisos' | 'decProcedimientosCalaire' | 'decFirmaAutorizada' | 'nombreFirma'> = {
+  nit_laboratorio:             'nitLaboratorio',
+  correo_laboratorio:          'correoLaboratorio',
   nombre_laboratorio:          'nombreLaboratorio',
   nombre_responsable:          'nombreResponsable',
   cargo:                       'cargo',
@@ -134,6 +140,8 @@ function mapFichaDoc(doc: any): FichaRegistro {
   return {
     id: doc._id as string,
     ronda_participante_id: doc.rondaParticipanteId as string,
+    nit_laboratorio: (doc.nitLaboratorio ?? null) as string | null,
+    correo_laboratorio: (doc.correoLaboratorio ?? null) as string | null,
     nombre_laboratorio: (doc.nombreLaboratorio ?? null) as string | null,
     nombre_responsable: (doc.nombreResponsable ?? null) as string | null,
     cargo: (doc.cargo ?? null) as string | null,
@@ -252,6 +260,21 @@ export async function getFichaResumenByRondaParticipante(
   })
   if (!result) return null
   return mapFichaResumenFromResult(result)
+}
+
+export async function findFichaTemplateByLookup(lookup: string): Promise<FichaCompleta | null> {
+  const result = await fetchQuery(api.fichas.findFichaTemplateByLookup, { lookup })
+  if (!result) return null
+
+  return {
+    ...mapFichaDoc(result),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    acompanantes: (result.acompanantes as any[]).map(mapAcompananteDoc),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    analizadores: (result.analizadores as any[]).map(mapAnalizadorDoc),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    instrumentos: (result.instrumentos as any[]).map(mapInstrumentoDoc),
+  }
 }
 
 export async function getFichasResumenByRpIds(

@@ -1,27 +1,29 @@
-# Session State: CALAIRE App
+# Session State: calaire-app
 
-**Last Updated**: 2026-06-03 12:10 -05
+**Last Updated**: 2026-06-04 17:37 America/Bogota
 
 ## Session Objective
 
-Automatizar el flujo de release para el repo con `lint`, `build`, `git commit` y despliegue a Convex + Vercel sin confirmaciones intermedias.
+Implementar reutilización de ficha por `NIT` o correo para el flujo admin y publicar el cambio en producción.
 
 ## Current State
 
-- [x] Se agregó `pnpm release` en `package.json`.
-- [x] Se creó `scripts/release.mjs` para ejecutar el flujo completo.
-- [x] El orden actual es `pnpm lint` -> `pnpm build` -> `git add -A` -> `git commit` -> `convex deploy` -> `vercel deploy`.
-- [x] Se actualizó `README.md` con el uso del nuevo comando.
-- [x] Se dejó documentado el humo test solo como concepto, no implementado.
+- [x] La ficha admin ahora puede reutilizar datos previos por `NIT` o correo.
+- [x] Se agregaron `nit_laboratorio` y `correo_laboratorio` como campos editables y reutilizables en la ficha.
+- [x] Se creó una búsqueda de plantilla previa en Convex para copiar datos desde la ficha más reciente que coincida por `NIT` o correo.
+- [x] El editor admin de ficha ya permite disparar el autocompletado desde la UI.
+- [x] Se validó el proyecto con `pnpm build`.
+- [x] Se desplegó Convex a producción.
+- [x] Se desplegó Vercel a producción y se actualizó el alias `https://calaire-app.vercel.app`.
 
 ## Critical Technical Context
 
-- El proyecto usa `pnpm`; evitar `npm`/`npx` salvo que sea estrictamente necesario.
-- Next.js 16.2.4: seguir leyendo la doc local en `node_modules/next/dist/docs/` si se toca algo de Next.
-- Convex requiere seguir `convex/_generated/ai/guidelines.md` para cualquier cambio backend.
-- El script de release no pide confirmación: si hay cambios, intenta commit y luego despliegue.
+- El autocompletado busca coincidencia exacta normalizada por `NIT` o correo en `fichasRegistro`.
+- La plantilla reutilizada copia también listas asociadas: acompañantes, analizadores e instrumentos.
+- Los cambios fueron desplegados a Convex `https://steady-kiwi-725.convex.cloud` y a Vercel con alias de producción activo.
+- La build local pasó sin errores antes del despliegue.
 
 ## Next Steps
 
-1. Ejecutar `pnpm release -- "<mensaje>"` cuando se quiera publicar.
-2. Si se quiere endurecer el flujo, decidir si agregar smoke test automático post-deploy.
+1. Probar en producción un caso real de reutilización por `NIT` y por correo.
+2. Si se quiere más automatización, cambiar el botón de reutilización por disparo automático al detectar coincidencia.

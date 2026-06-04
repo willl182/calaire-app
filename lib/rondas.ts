@@ -549,6 +549,9 @@ export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
   return rows.map((r) => ({
     workos_user_id: r.workos_user_id,
     email: r.email,
+    nit_laboratorio: (r.nit_laboratorio ?? null) as string | null,
+    correo_laboratorio: (r.correo_laboratorio ?? null) as string | null,
+    ficha_estado: (r.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
     total_envios: r.total_envios,
     rondas: r.rondas.map((ronda) => ({
       ...ronda,
@@ -557,6 +560,10 @@ export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
       ronda_participante_id: normalizeOptionalId(
         ronda.ronda_participante_id ?? ronda.rondaParticipanteId
       ),
+      ficha_estado: (ronda.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
+      nit_laboratorio: (ronda.nit_laboratorio ?? null) as string | null,
+      correo_laboratorio: (ronda.correo_laboratorio ?? null) as string | null,
+      estado_enlace: (ronda.estado_enlace ?? 'reclamado') as 'pendiente' | 'reclamado',
     })),
   }))
 }
@@ -790,6 +797,9 @@ export type RondaParticipanteAsignada = Ronda & {
 export type ParticipanteGlobal = {
   workos_user_id: string
   email: string
+  nit_laboratorio: string | null
+  correo_laboratorio: string | null
+  ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
   rondas: {
     id: string
     codigo: string
@@ -798,6 +808,10 @@ export type ParticipanteGlobal = {
     envios_count: number
     participant_profile: ParticipantePerfil
     ronda_participante_id: string | null
+    ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
+    nit_laboratorio: string | null
+    correo_laboratorio: string | null
+    estado_enlace: 'pendiente' | 'reclamado'
   }[]
   total_envios: number
 }

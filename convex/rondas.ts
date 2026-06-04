@@ -300,7 +300,6 @@ export const listAllParticipantes = query({
   args: {},
   handler: async (ctx) => {
     const rows = await ctx.db.query('rondaParticipantes').collect()
-    const claimed = rows.filter((r) => !r.workosUserId.startsWith(PENDING_PREFIX))
 
     const envioRows = await ctx.db.query('envios').collect()
     const envioCount = new Map<string, Map<string, number>>()
@@ -311,10 +310,22 @@ export const listAllParticipantes = query({
     }
 
     const rondaCache = new Map<string, Doc<'rondas'> | null>()
+    const fichaCache = new Map<string, Doc<'fichasRegistro'> | null>()
+
+    async function getFicha(rondaParticipanteId: Id<'rondaParticipantes'>) {
+      const cached = fichaCache.get(rondaParticipanteId)
+      if (cached !== undefined) return cached
+      const ficha = await getLatestFichaByRondaParticipante(ctx, rondaParticipanteId)
+      fichaCache.set(rondaParticipanteId, ficha)
+      return ficha
+    }
 
     type ParticipanteGlobal = {
       workos_user_id: string
       email: string
+      nit_laboratorio: string | null
+      correo_laboratorio: string | null
+      ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
       rondas: {
         id: string
         codigo: string
@@ -324,13 +335,17 @@ export const listAllParticipantes = query({
         participant_profile: string
         ronda_participante_id: string
         rondaParticipanteId: string
+        ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
+        nit_laboratorio: string | null
+        correo_laboratorio: string | null
+        estado_enlace: 'pendiente' | 'reclamado'
       }[]
       total_envios: number
     }
 
     const grouped = new Map<string, ParticipanteGlobal>()
 
-    for (const row of claimed) {
+    for (const row of rows) {
       let ronda = rondaCache.get(row.rondaId)
       if (ronda === undefined) {
         ronda = await ctx.db.get(row.rondaId)
@@ -338,11 +353,38 @@ export const listAllParticipantes = query({
       }
       if (!ronda) continue
 
+      const ficha = await getFicha(row._id)
+      const nitLaboratorio = ficha?.nitLaboratorio ?? null
+      const correoLaboratorio = ficha?.correoLaboratorio ?? null
+      const fichaEstado = ficha?.estado ?? 'no_iniciada'
+      const estadoEnlace: 'pendiente' | 'reclamado' = row.workosUserId.startsWith(PENDING_PREFIX)
+        ? 'pendiente'
+        : 'reclamado'
+
       let entry = grouped.get(row.workosUserId)
       if (!entry) {
-        entry = { workos_user_id: row.workosUserId, email: row.email, rondas: [], total_envios: 0 }
+        entry = {
+          workos_user_id: row.workosUserId,
+          email: row.email,
+          nit_laboratorio: nitLaboratorio,
+          correo_laboratorio: correoLaboratorio,
+          ficha_estado: fichaEstado,
+          rondas: [],
+          total_envios: 0,
+        }
         grouped.set(row.workosUserId, entry)
       }
+
+      if (entry.nit_laboratorio == null && nitLaboratorio != null) {
+        entry.nit_laboratorio = nitLaboratorio
+      }
+      if (entry.correo_laboratorio == null && correoLaboratorio != null) {
+        entry.correo_laboratorio = correoLaboratorio
+      }
+      if (entry.ficha_estado === 'no_iniciada' && fichaEstado !== 'no_iniciada') {
+        entry.ficha_estado = fichaEstado
+      }
+
       const rondaEnvios = envioCount.get(row.workosUserId)?.get(row.rondaId) ?? 0
       entry.rondas.push({
         id: ronda._id,
@@ -353,11 +395,20 @@ export const listAllParticipantes = query({
         participant_profile: row.participantProfile ?? 'member',
         ronda_participante_id: row._id,
         rondaParticipanteId: row._id,
+        ficha_estado: fichaEstado,
+        nit_laboratorio: nitLaboratorio,
+        correo_laboratorio: correoLaboratorio,
+        estado_enlace: estadoEnlace,
       })
       entry.total_envios += rondaEnvios
     }
 
-    return Array.from(grouped.values()).sort((a, b) => a.email.localeCompare(b.email))
+    return Array.from(grouped.values()).sort((a, b) => {
+      const nitA = a.nit_laboratorio ?? ''
+      const nitB = b.nit_laboratorio ?? ''
+      if (nitA !== nitB) return nitA.localeCompare(nitB)
+      return a.email.localeCompare(b.email)
+    })
   },
 })
 

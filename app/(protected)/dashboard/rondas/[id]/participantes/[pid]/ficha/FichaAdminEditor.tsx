@@ -1,7 +1,9 @@
 'use client'
 
 import { useState, useCallback } from 'react'
+import { useConvex } from 'convex/react'
 import type { FichaCompleta, AcompananteInput, AnalizadorInput, InstrumentoInput } from '@/lib/fichas'
+import { api } from '@/convex/_generated/api'
 import { adminGuardarCampoFichaAction, adminGuardarListasAction } from './actions'
 
 const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
@@ -30,7 +32,25 @@ function SectionHeader({ title, description }: { title: string; description?: st
 }
 
 export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props) {
+  const convex = useConvex()
   const [fieldStates, setFieldStates] = useState<Record<string, SaveState>>({})
+  const [lookup, setLookup] = useState('')
+  const [scalarValues, setScalarValues] = useState<Record<string, string>>({
+    nit_laboratorio: fichaInicial.nit_laboratorio ?? '',
+    correo_laboratorio: fichaInicial.correo_laboratorio ?? '',
+    nombre_laboratorio: fichaInicial.nombre_laboratorio ?? '',
+    nombre_responsable: fichaInicial.nombre_responsable ?? '',
+    cargo: fichaInicial.cargo ?? '',
+    ciudad: fichaInicial.ciudad ?? '',
+    departamento: fichaInicial.departamento ?? '',
+    telefono: fichaInicial.telefono ?? '',
+    transporte: fichaInicial.transporte ?? '',
+    dia_llegada: fichaInicial.dia_llegada ?? '',
+    hora_llegada: fichaInicial.hora_llegada ?? '',
+    observaciones: fichaInicial.observaciones ?? '',
+    justificacion_cambio_equipo: fichaInicial.justificacion_cambio_equipo ?? '',
+    nombre_firma: fichaInicial.nombre_firma ?? '',
+  })
 
   const [acompanantes, setAcompanantes] = useState<AcompananteInput[]>(
     fichaInicial.acompanantes.map(({ sort_order, nombre_completo, documento_identidad, rol }) => ({
@@ -80,12 +100,58 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
     else setListError(result.error ?? 'Error al guardar listas')
   }
 
+  const handleReutilizarDatos = async () => {
+    const lookupValue = lookup.trim()
+    if (!lookupValue) return
+
+    const templateLookup = await convex.query(api.fichas.findFichaTemplateByLookup, { lookup: lookupValue }) as FichaCompleta | null
+    if (!templateLookup) return
+
+    setScalarValues((prev) => ({
+      ...prev,
+      nit_laboratorio: templateLookup.nit_laboratorio ?? prev.nit_laboratorio,
+      correo_laboratorio: templateLookup.correo_laboratorio ?? prev.correo_laboratorio,
+      nombre_laboratorio: templateLookup.nombre_laboratorio ?? prev.nombre_laboratorio,
+      nombre_responsable: templateLookup.nombre_responsable ?? prev.nombre_responsable,
+      telefono: templateLookup.telefono ?? prev.telefono,
+    }))
+  }
+
   const inputClass =
     'rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0 w-full'
   const labelClass = 'grid gap-1 text-sm text-[var(--foreground-muted)]'
 
   return (
     <div className="flex flex-col gap-6">
+      <section className="card grid gap-4 p-6">
+        <SectionHeader
+          title="Reutilizar datos"
+          description="Busca una ficha previa por NIT o correo y copia su información al formulario actual."
+        />
+        <div className="flex flex-col gap-3 md:flex-row md:items-end">
+          <label className={labelClass}>
+            <span>NIT o correo</span>
+            <input
+              type="text"
+              className={inputClass}
+              value={lookup}
+              onChange={(e) => {
+                setLookup(e.target.value)
+                setLookupApplied(false)
+              }}
+              placeholder="123456789 o correo@laboratorio.com"
+            />
+          </label>
+          <button
+            type="button"
+            className="btn-outline w-fit"
+            onClick={handleReutilizarDatos}
+          >
+            Reutilizar datos
+          </button>
+        </div>
+      </section>
+
       {/* Datos del participante */}
       <section className="card grid gap-5 p-6">
         <SectionHeader
@@ -94,6 +160,8 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
         />
         <div className="grid gap-4 md:grid-cols-2">
           {([
+            ['nit_laboratorio', 'NIT del laboratorio'],
+            ['correo_laboratorio', 'Correo del laboratorio'],
             ['nombre_laboratorio', 'Nombre del laboratorio'],
             ['nombre_responsable', 'Nombre del responsable'],
             ['cargo', 'Cargo'],
@@ -109,7 +177,8 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
               <input
                 type="text"
                 className={inputClass}
-                defaultValue={fichaInicial[field] ?? ''}
+                value={scalarValues[field]}
+                onChange={(e) => setScalarValues((prev) => ({ ...prev, [field]: e.target.value }))}
                 onBlur={(e) => handleBlur(field, e.target.value)}
               />
             </label>
