@@ -11,6 +11,7 @@ const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 type Props = {
   fichaId: string
   ficha: FichaCompleta
+  participanteEmail: string
 }
 
 type SaveState = 'idle' | 'saving' | 'saved' | 'error'
@@ -31,10 +32,10 @@ function SectionHeader({ title, description }: { title: string; description?: st
   )
 }
 
-export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props) {
+export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, participanteEmail }: Props) {
   const convex = useConvex()
   const [fieldStates, setFieldStates] = useState<Record<string, SaveState>>({})
-  const [lookup, setLookup] = useState('')
+  const [lookup, setLookup] = useState(participanteEmail)
   const [scalarValues, setScalarValues] = useState<Record<string, string>>({
     nit_laboratorio: fichaInicial.nit_laboratorio ?? '',
     correo_laboratorio: fichaInicial.correo_laboratorio ?? '',
@@ -101,7 +102,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
   }
 
   const handleReutilizarDatos = async () => {
-    const lookupValue = lookup.trim()
+    const lookupValue = lookup.trim() || participanteEmail.trim() || fichaInicial.correo_laboratorio?.trim() || fichaInicial.nit_laboratorio?.trim() || ''
     if (!lookupValue) return
 
     const templateLookup = await convex.query(api.fichas.findFichaTemplateByLookup, { lookup: lookupValue }) as FichaCompleta | null
@@ -126,7 +127,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
       <section className="card grid gap-4 p-6">
         <SectionHeader
           title="Reutilizar datos"
-          description="Busca una ficha previa por NIT o correo y copia su información al formulario actual."
+          description="Busca una ficha previa por NIT o correo del participante y copia solo NIT, correo, nombre, cédula y teléfono."
         />
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
           <label className={labelClass}>
@@ -138,7 +139,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial }: Props
               onChange={(e) => {
                 setLookup(e.target.value)
               }}
-              placeholder="123456789 o correo@laboratorio.com"
+              placeholder={participanteEmail || '123456789 o correo@laboratorio.com'}
             />
           </label>
           <button

@@ -70,7 +70,11 @@ export default async function FichaAdminPage({ params }: Props) {
           </div>
         </section>
 
-        <FichaAdminEditor fichaId={fichaCompleta.id} ficha={fichaCompleta} />
+        <FichaAdminEditor
+          fichaId={fichaCompleta.id}
+          ficha={fichaCompleta}
+          participanteEmail={participante.email}
+        />
 
         <div>
           <Link
