@@ -61,13 +61,15 @@ export const getFichaResumenByRondaParticipante = query({
 export const findFichaTemplateByLookup = query({
   args: {
     lookup: v.string(),
+    excludeFichaId: v.optional(v.id('fichasRegistro')),
   },
-  handler: async (ctx, { lookup }) => {
+  handler: async (ctx, { lookup, excludeFichaId }) => {
     const normalizedLookup = normalizeLookupValue(lookup)
     if (!normalizedLookup) return null
 
     const fichas = await ctx.db.query('fichasRegistro').collect()
     const matches = fichas.filter((ficha) => {
+      if (excludeFichaId && ficha._id === excludeFichaId) return false
       const correo = normalizeLookupValue(String(ficha.correoLaboratorio ?? ''))
       const nit = normalizeLookupValue(String(ficha.nitLaboratorio ?? ''))
       return correo === normalizedLookup || nit === normalizedLookup

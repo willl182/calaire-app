@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react'
 import { useConvex } from 'convex/react'
 import type { FichaCompleta, AcompananteInput, AnalizadorInput, InstrumentoInput } from '@/lib/fichas'
 import { api } from '@/convex/_generated/api'
+import type { Id } from '@/convex/_generated/dataModel'
 import { adminGuardarCampoFichaAction, adminGuardarListasAction } from './actions'
 
 const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
@@ -105,7 +106,10 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
     const lookupValue = lookup.trim() || participanteEmail.trim() || fichaInicial.correo_laboratorio?.trim() || fichaInicial.nit_laboratorio?.trim() || ''
     if (!lookupValue) return
 
-    const templateLookup = await convex.query(api.fichas.findFichaTemplateByLookup, { lookup: lookupValue }) as FichaCompleta | null
+    const templateLookup = await convex.query(api.fichas.findFichaTemplateByLookup, {
+      lookup: lookupValue,
+      excludeFichaId: fichaId as Id<'fichasRegistro'>,
+    }) as FichaCompleta | null
     if (!templateLookup) return
 
     setScalarValues((prev) => ({
