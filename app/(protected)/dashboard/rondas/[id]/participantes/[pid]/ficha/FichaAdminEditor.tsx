@@ -113,6 +113,10 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
       nit_laboratorio: templateLookup.nit_laboratorio ?? prev.nit_laboratorio,
       correo_laboratorio: templateLookup.correo_laboratorio ?? prev.correo_laboratorio,
       nombre_laboratorio: templateLookup.nombre_laboratorio ?? prev.nombre_laboratorio,
+      nombre_responsable: templateLookup.nombre_responsable ?? prev.nombre_responsable,
+      cargo: templateLookup.cargo ?? prev.cargo,
+      ciudad: templateLookup.ciudad ?? prev.ciudad,
+      departamento: templateLookup.departamento ?? prev.departamento,
       telefono: templateLookup.telefono ?? prev.telefono,
     }))
   }
@@ -126,7 +130,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
       <section className="card grid gap-4 p-6">
         <SectionHeader
           title="Reutilizar datos"
-          description="Busca una ficha previa por NIT o correo del participante y copia solo NIT, correo, nombre y teléfono."
+          description="Busca una ficha previa por NIT o correo del participante y copia la sección de datos del participante."
         />
         <div className="flex flex-col gap-3 md:flex-row md:items-end">
           <label className={labelClass}>
