@@ -1,6 +1,6 @@
 # Session State: calaire-app
 
-**Last Updated**: 2026-06-08 07:52 -0500
+**Last Updated**: 2026-06-08 07:58 -0500
 
 ## Session Objective
 
@@ -48,6 +48,11 @@ Continuar la implementacion del plan SGC Fase 1 y llevar los cambios a produccio
   - Vercel deployment hotfix: `dpl_8fb3HnW6iBfyKqF7zwhEoxu8u7gu`
   - Vercel URL: `https://calaire-r1ev5j5s2-will-salas-projects.vercel.app`
   - Alias productivo: `https://calaire-app.vercel.app`
+- [x] Segundo hotfix aplicado por error productivo posterior:
+  - Vercel logs mostraban `NoAuthProvider` desde Convex al recibir el JWT WorkOS;
+  - causa probable: el segundo provider WorkOS en `convex/auth.config.ts` tenia `applicationID`, aunque la guia oficial de Convex para AuthKit lo omite para `https://api.workos.com/user_management/${WORKOS_CLIENT_ID}`;
+  - solucion: removido `applicationID` del segundo provider;
+  - desplegado Convex produccion a `https://steady-kiwi-725.convex.cloud`.
 
 ## Critical Technical Context
 
