@@ -57,7 +57,7 @@ export async function activarRondaAction(formData: FormData) {
 }
 
 export async function cerrarRondaAction(formData: FormData) {
-  const auth = await requireAdmin()
+  await requireAdmin()
 
   const rondaId = parseText(formData, 'ronda_id')
   const confirm = parseText(formData, 'confirm')
@@ -77,7 +77,7 @@ export async function cerrarRondaAction(formData: FormData) {
       throw new Error('Solo una ronda activa puede pasar a documentacion pendiente.')
     }
 
-    await pasarADocumentacionPendiente(rondaId, auth.user?.email ?? auth.user?.id ?? 'admin')
+    await pasarADocumentacionPendiente(rondaId)
 
     revalidatePath(pageUrl(rondaId))
     targetUrl = successUrl(rondaId, 'Ronda enviada a documentacion pendiente.')
@@ -90,7 +90,7 @@ export async function cerrarRondaAction(formData: FormData) {
 }
 
 export async function reabrirRondaAction(formData: FormData) {
-  const auth = await requireAdmin()
+  await requireAdmin()
 
   const rondaId = parseText(formData, 'ronda_id')
   const confirm = parseText(formData, 'confirm')
@@ -110,7 +110,7 @@ export async function reabrirRondaAction(formData: FormData) {
       throw new Error('Solo se puede reabrir una ronda cerrada.')
     }
 
-    await reabrirRondaSgc(rondaId, auth.user?.email ?? auth.user?.id ?? 'admin', 'Reapertura solicitada desde resumen de ronda.')
+    await reabrirRondaSgc(rondaId, 'Reapertura solicitada desde resumen de ronda.')
 
     revalidatePath(pageUrl(rondaId))
     targetUrl = successUrl(rondaId, 'Ronda reabierta correctamente.')

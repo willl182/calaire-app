@@ -109,7 +109,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   const ronda = await getRonda(id)
   if (!ronda) notFound()
 
-  await inicializarPanelSgc(id, auth.user.email ?? auth.user.id ?? 'admin')
+  await inicializarPanelSgc(id)
   const panel = await getPanelSgc(id)
   if (!panel) notFound()
 

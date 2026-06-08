@@ -14,7 +14,6 @@ const REVISION_CHECKS = [
   'inconsistencias_resueltas',
 ] as const
 
-const actorValidator = v.string()
 const formatoValidator = v.union(
   v.literal('F-PPSEA-03'),
   v.literal('F-PSEA-05'),
@@ -482,7 +481,6 @@ export const createOrUpdatePlanRonda = mutation({
     bloques: v.record(v.string(), v.string()),
     camposEstructurados: v.record(v.string(), v.string()),
     motivoRevision: v.optional(v.string()),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -522,7 +520,7 @@ export const createOrUpdatePlanRonda = mutation({
 })
 
 export const finalizarPlanRonda = mutation({
-  args: { rondaId: v.id('rondas'), actor: actorValidator },
+  args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
     const actor = await requireSgcAdmin(ctx)
     const plan = await getPlan(ctx, rondaId)
@@ -540,7 +538,6 @@ export const createOrUpdateRevisionDatos = mutation({
     rondaId: v.id('rondas'),
     checks: v.record(v.string(), v.object({ cumple: v.boolean(), observacion: v.union(v.string(), v.null()) })),
     metricas: v.record(v.string(), v.union(v.string(), v.number(), v.boolean(), v.null())),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -574,7 +571,7 @@ export const createOrUpdateRevisionDatos = mutation({
 })
 
 export const finalizarRevisionDatos = mutation({
-  args: { rondaId: v.id('rondas'), actor: actorValidator },
+  args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
     const actor = await requireSgcAdmin(ctx)
     const revision = await getRevision(ctx, rondaId)
@@ -606,7 +603,6 @@ export const createHitoRonda = mutation({
     bloqueaCierre: v.boolean(),
     formatoRelacionado: v.union(v.string(), v.null()),
     notas: v.union(v.string(), v.null()),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -648,7 +644,6 @@ export const updateHitoRonda = mutation({
     bloqueaCierre: v.boolean(),
     formatoRelacionado: v.union(v.string(), v.null()),
     notas: v.union(v.string(), v.null()),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -681,7 +676,6 @@ export const createEvidenciaSeries = mutation({
     nombre: v.string(),
     requerida: v.boolean(),
     publicaParticipante: v.boolean(),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -708,7 +702,6 @@ export const registrarEvidenciaVersion = mutation({
     contentType: v.string(),
     size: v.number(),
     hash: v.union(v.string(), v.null()),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -748,7 +741,7 @@ export const registrarEvidenciaVersion = mutation({
 })
 
 export const retirarEvidenciaVersion = mutation({
-  args: { evidenciaVersionId: v.id('sgcEvidenciaVersiones'), motivo: v.string(), actor: actorValidator },
+  args: { evidenciaVersionId: v.id('sgcEvidenciaVersiones'), motivo: v.string() },
   handler: async (ctx, { evidenciaVersionId, motivo }) => {
     const actor = await requireSgcAdmin(ctx)
     if (!motivo.trim()) throw new Error('Retirar evidencia exige motivo.')
@@ -765,7 +758,6 @@ export const upsertJustificacion = mutation({
     formato: v.union(v.literal('F-PSEA-05'), v.literal('F-PSEA-05A'), v.literal('F-PSEA-12')),
     alcance: v.string(),
     razon: v.string(),
-    actor: actorValidator,
   },
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
@@ -798,7 +790,6 @@ export const retirarJustificacion = mutation({
   args: {
     justificacionId: v.id('sgcJustificaciones'),
     motivo: v.string(),
-    actor: actorValidator,
   },
   handler: async (ctx, { justificacionId, motivo }) => {
     const actor = await requireSgcAdmin(ctx)
@@ -811,7 +802,7 @@ export const retirarJustificacion = mutation({
 })
 
 export const transitionRondaToDocumentacionPendiente = mutation({
-  args: { rondaId: v.id('rondas'), actor: actorValidator },
+  args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
     const actor = await requireSgcAdmin(ctx)
     const ronda = await ctx.db.get(rondaId)
@@ -835,7 +826,7 @@ export const transitionRondaToDocumentacionPendiente = mutation({
 })
 
 export const transitionRondaToCerrada = mutation({
-  args: { rondaId: v.id('rondas'), actor: actorValidator },
+  args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
     const actor = await requireSgcAdmin(ctx)
     const ronda = await ctx.db.get(rondaId)
@@ -850,7 +841,7 @@ export const transitionRondaToCerrada = mutation({
 })
 
 export const reabrirRondaSgc = mutation({
-  args: { rondaId: v.id('rondas'), motivo: v.string(), actor: actorValidator },
+  args: { rondaId: v.id('rondas'), motivo: v.string() },
   handler: async (ctx, { rondaId, motivo }) => {
     const actor = await requireSgcAdmin(ctx)
     if (!motivo.trim()) throw new Error('Reabrir una ronda cerrada exige motivo.')
@@ -863,7 +854,7 @@ export const reabrirRondaSgc = mutation({
 })
 
 export const inicializarPanelSgc = mutation({
-  args: { rondaId: v.id('rondas'), actor: actorValidator },
+  args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
     const actor = await requireSgcAdmin(ctx)
     const now = Date.now()

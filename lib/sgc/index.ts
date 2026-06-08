@@ -135,7 +135,6 @@ export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
 
 export async function guardarJustificacionSgc(
   rondaId: string,
-  actor: string,
   formato: 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12',
   alcance: string,
   razon: string
@@ -143,33 +142,29 @@ export async function guardarJustificacionSgc(
   const token = await sgcToken()
   await fetchMutation(api.sgc.upsertJustificacion, {
     rondaId: rondaId as Id<'rondas'>,
-    actor,
     formato,
     alcance,
     razon
   }, { token })
 }
 
-export async function retirarJustificacionSgc(justificacionId: string, actor: string, motivo: string) {
+export async function retirarJustificacionSgc(justificacionId: string, motivo: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.retirarJustificacion, {
     justificacionId: justificacionId as Id<'sgcJustificaciones'>,
-    actor,
     motivo
   }, { token })
 }
 
-export async function inicializarPanelSgc(rondaId: string, actor: string) {
+export async function inicializarPanelSgc(rondaId: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.inicializarPanelSgc, {
-    rondaId: rondaId as Id<'rondas'>,
-    actor
+    rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
 export async function guardarPlanRonda(
   rondaId: string,
-  actor: string,
   bloques: Record<string, string>,
   camposEstructurados: Record<string, string>,
   motivoRevision?: string
@@ -177,47 +172,41 @@ export async function guardarPlanRonda(
   const token = await sgcToken()
   await fetchMutation(api.sgc.createOrUpdatePlanRonda, {
     rondaId: rondaId as Id<'rondas'>,
-    actor,
     bloques,
     camposEstructurados,
     motivoRevision
   }, { token })
 }
 
-export async function finalizarPlanRonda(rondaId: string, actor: string) {
+export async function finalizarPlanRonda(rondaId: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.finalizarPlanRonda, {
-    rondaId: rondaId as Id<'rondas'>,
-    actor
+    rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
 export async function guardarRevisionDatos(
   rondaId: string,
-  actor: string,
   checks: Record<string, { cumple: boolean; observacion: string | null }>,
   metricas: Record<string, string | number | boolean | null>
 ) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.createOrUpdateRevisionDatos, {
     rondaId: rondaId as Id<'rondas'>,
-    actor,
     checks,
     metricas
   }, { token })
 }
 
-export async function finalizarRevisionDatos(rondaId: string, actor: string) {
+export async function finalizarRevisionDatos(rondaId: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.finalizarRevisionDatos, {
-    rondaId: rondaId as Id<'rondas'>,
-    actor
+    rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
 export async function crearHitoRonda(args: {
   rondaId: string
-  actor: string
   codigo: string
   nombre: string
   fase: string
@@ -239,7 +228,6 @@ export async function crearHitoRonda(args: {
 
 export async function actualizarHitoRonda(args: {
   hitoId: string
-  actor: string
   codigo: string
   nombre: string
   fase: string
@@ -261,14 +249,12 @@ export async function actualizarHitoRonda(args: {
 
 export async function crearSerieEvidencia(
   rondaId: string,
-  actor: string,
   formato: SgcFormatoCodigo,
   nombre: string
 ) {
   const token = await sgcToken()
   return fetchMutation(api.sgc.createEvidenciaSeries, {
     rondaId: rondaId as Id<'rondas'>,
-    actor,
     formato,
     seccion: null,
     nombre,
@@ -285,7 +271,6 @@ export async function generateSgcUploadUrl() {
 export async function registrarEvidenciaVersion(args: {
   serieId: string
   storageId: string
-  actor: string
   fileName: string
   contentType: string
   size: number
@@ -299,11 +284,10 @@ export async function registrarEvidenciaVersion(args: {
   }, { token })
 }
 
-export async function retirarEvidenciaVersion(evidenciaVersionId: string, actor: string, motivo: string) {
+export async function retirarEvidenciaVersion(evidenciaVersionId: string, motivo: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.retirarEvidenciaVersion, {
     evidenciaVersionId: evidenciaVersionId as Id<'sgcEvidenciaVersiones'>,
-    actor,
     motivo
   }, { token })
 }
@@ -322,27 +306,24 @@ export async function getEvidenciaVersionContext(evidenciaVersionId: string) {
   }, { token })
 }
 
-export async function pasarADocumentacionPendiente(rondaId: string, actor: string) {
+export async function pasarADocumentacionPendiente(rondaId: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.transitionRondaToDocumentacionPendiente, {
-    rondaId: rondaId as Id<'rondas'>,
-    actor
+    rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function cerrarDocumentalmente(rondaId: string, actor: string) {
+export async function cerrarDocumentalmente(rondaId: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.transitionRondaToCerrada, {
-    rondaId: rondaId as Id<'rondas'>,
-    actor
+    rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function reabrirRondaSgc(rondaId: string, actor: string, motivo: string) {
+export async function reabrirRondaSgc(rondaId: string, motivo: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.reabrirRondaSgc, {
     rondaId: rondaId as Id<'rondas'>,
-    actor,
     motivo
   }, { token })
 }

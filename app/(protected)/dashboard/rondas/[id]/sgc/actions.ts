@@ -46,10 +46,9 @@ function parseFormatoJustificable(value: string) {
   throw new Error('Formato no justificable en Fase 1.')
 }
 
-async function requireAdminActor() {
+async function requireAdmin() {
   const auth = await requireAuth()
   if (!isAdmin(auth)) redirect('/denied?reason=role')
-  return auth.user?.email ?? auth.user?.id ?? 'admin'
 }
 
 async function assertEvidenciaVersionBelongsToRonda(evidenciaVersionId: string, rondaId: string) {
@@ -60,7 +59,7 @@ async function assertEvidenciaVersionBelongsToRonda(evidenciaVersionId: string, 
 }
 
 export async function guardarPlanRondaAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     const bloques: Record<string, string> = {}
@@ -69,7 +68,6 @@ export async function guardarPlanRondaAction(formData: FormData) {
     }
     await guardarPlanRonda(
       rondaId,
-      actor,
       bloques,
       {
         responsable: parseText(formData, 'responsable'),
@@ -85,10 +83,10 @@ export async function guardarPlanRondaAction(formData: FormData) {
 }
 
 export async function finalizarPlanRondaAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
-    await finalizarPlanRonda(rondaId, actor)
+    await finalizarPlanRonda(rondaId)
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Plan de ronda finalizado.')
   } catch (error) {
@@ -97,7 +95,7 @@ export async function finalizarPlanRondaAction(formData: FormData) {
 }
 
 export async function guardarRevisionDatosAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     const keys = String(formData.get('check_keys') ?? '').split(',').filter(Boolean)
@@ -108,7 +106,7 @@ export async function guardarRevisionDatosAction(formData: FormData) {
         observacion: parseText(formData, `obs_${key}`) || null,
       }
     }
-    await guardarRevisionDatos(rondaId, actor, checks, {})
+    await guardarRevisionDatos(rondaId, checks, {})
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Revision F-PSEA-13 guardada.')
   } catch (error) {
@@ -117,10 +115,10 @@ export async function guardarRevisionDatosAction(formData: FormData) {
 }
 
 export async function finalizarRevisionDatosAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
-    await finalizarRevisionDatos(rondaId, actor)
+    await finalizarRevisionDatos(rondaId)
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'F-PSEA-13 finalizado.')
   } catch (error) {
@@ -129,12 +127,11 @@ export async function finalizarRevisionDatosAction(formData: FormData) {
 }
 
 export async function crearHitoRondaAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     await crearHitoRonda({
       rondaId,
-      actor,
       codigo: parseText(formData, 'codigo'),
       nombre: parseText(formData, 'nombre'),
       fase: parseText(formData, 'fase') || 'cierre',
@@ -155,12 +152,11 @@ export async function crearHitoRondaAction(formData: FormData) {
 }
 
 export async function actualizarHitoRondaAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     await actualizarHitoRonda({
       hitoId: parseText(formData, 'hito_id'),
-      actor,
       codigo: parseText(formData, 'codigo'),
       nombre: parseText(formData, 'nombre'),
       fase: parseText(formData, 'fase') || 'cierre',
@@ -181,7 +177,7 @@ export async function actualizarHitoRondaAction(formData: FormData) {
 }
 
 export async function subirEvidenciaAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     const serieId = parseText(formData, 'serie_id')
@@ -198,7 +194,6 @@ export async function subirEvidenciaAction(formData: FormData) {
     await registrarEvidenciaVersion({
       serieId,
       storageId,
-      actor,
       fileName: file.name,
       contentType: file.type,
       size: file.size,
@@ -212,12 +207,12 @@ export async function subirEvidenciaAction(formData: FormData) {
 }
 
 export async function retirarEvidenciaAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     const evidenciaVersionId = parseText(formData, 'evidencia_version_id')
     await assertEvidenciaVersionBelongsToRonda(evidenciaVersionId, rondaId)
-    await retirarEvidenciaVersion(evidenciaVersionId, actor, parseText(formData, 'motivo'))
+    await retirarEvidenciaVersion(evidenciaVersionId, parseText(formData, 'motivo'))
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Evidencia retirada.')
   } catch (error) {
@@ -226,12 +221,11 @@ export async function retirarEvidenciaAction(formData: FormData) {
 }
 
 export async function guardarJustificacionAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
     await guardarJustificacionSgc(
       rondaId,
-      actor,
       parseFormatoJustificable(parseText(formData, 'formato')),
       parseText(formData, 'alcance') || 'ronda',
       parseText(formData, 'razon')
@@ -244,10 +238,10 @@ export async function guardarJustificacionAction(formData: FormData) {
 }
 
 export async function retirarJustificacionAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
-    await retirarJustificacionSgc(parseText(formData, 'justificacion_id'), actor, parseText(formData, 'motivo'))
+    await retirarJustificacionSgc(parseText(formData, 'justificacion_id'), parseText(formData, 'motivo'))
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Justificacion SGC retirada.')
   } catch (error) {
@@ -257,7 +251,7 @@ export async function retirarJustificacionAction(formData: FormData) {
 
 export async function descargarEvidenciaAction(formData: FormData) {
   const rondaId = parseText(formData, 'ronda_id')
-  await requireAdminActor()
+  await requireAdmin()
   try {
     const evidenciaVersionId = parseText(formData, 'evidencia_version_id')
     await assertEvidenciaVersionBelongsToRonda(evidenciaVersionId, rondaId)
@@ -272,13 +266,13 @@ export async function descargarEvidenciaAction(formData: FormData) {
 }
 
 export async function transicionSgcAction(formData: FormData) {
-  const actor = await requireAdminActor()
+  await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   const accion = parseText(formData, 'accion')
   try {
-    if (accion === 'documentacion_pendiente') await pasarADocumentacionPendiente(rondaId, actor)
-    else if (accion === 'cerrar') await cerrarDocumentalmente(rondaId, actor)
-    else if (accion === 'reabrir') await reabrirRondaSgc(rondaId, actor, parseText(formData, 'motivo'))
+    if (accion === 'documentacion_pendiente') await pasarADocumentacionPendiente(rondaId)
+    else if (accion === 'cerrar') await cerrarDocumentalmente(rondaId)
+    else if (accion === 'reabrir') await reabrirRondaSgc(rondaId, parseText(formData, 'motivo'))
     else throw new Error('Accion no soportada.')
     revalidatePath(`/dashboard/rondas/${rondaId}`)
     revalidatePath(pageUrl(rondaId))
