@@ -1,7 +1,7 @@
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
-import { cookies } from 'next/headers'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import { requireAuth } from '@/lib/auth'
 import {
   agruparChecklistPorFase,
   calcularChecklistSgc,
@@ -11,8 +11,8 @@ import {
 import type { SgcFase, SgcFormatoCodigo } from './catalog'
 
 async function sgcToken() {
-  const cookieStore = await cookies()
-  const token = cookieStore.get('workos-access-token')?.value
+  const auth = await requireAuth()
+  const token = auth.accessToken
   if (!token) {
     throw new Error('No hay sesion activa para operar SGC.')
   }

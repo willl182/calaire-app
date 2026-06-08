@@ -1,6 +1,6 @@
 # Session State: calaire-app
 
-**Last Updated**: 2026-06-08 07:45 -0500
+**Last Updated**: 2026-06-08 07:52 -0500
 
 ## Session Objective
 
@@ -41,6 +41,13 @@ Continuar la implementacion del plan SGC Fase 1 y llevar los cambios a produccio
   - Alias productivo: `https://calaire-app.vercel.app`
 - [x] Convex AI files actualizados con `pnpm exec convex ai-files update`.
 - [x] Cambios desplegados/actualizados listos para commit.
+- [x] Hotfix aplicado por error productivo en `/dashboard/rondas/kd77ck9jqbeafg5g61c7cw0vrh8756qr/sgc`:
+  - Vercel logs mostraban `No hay sesion activa para operar SGC.`
+  - causa: `lib/sgc/index.ts` leia directamente la cookie `workos-access-token`, ausente en Server Component de produccion;
+  - solucion: `sgcToken()` ahora usa `requireAuth()` y `auth.accessToken`.
+  - Vercel deployment hotfix: `dpl_8fb3HnW6iBfyKqF7zwhEoxu8u7gu`
+  - Vercel URL: `https://calaire-r1ev5j5s2-will-salas-projects.vercel.app`
+  - Alias productivo: `https://calaire-app.vercel.app`
 
 ## Critical Technical Context
 
@@ -51,6 +58,7 @@ Continuar la implementacion del plan SGC Fase 1 y llevar los cambios a produccio
 - La frontera de permisos SGC ya no depende de `SGC_SERVER_ACTION_SECRET`; las funciones Convex SGC validan identidad y rol admin.
 - El argumento `actor` ya fue eliminado de las mutaciones/wrappers SGC; mantener la identidad derivada exclusivamente en Convex.
 - El arbol de git quedara alineado con produccion al commitear la limpieza desplegada y el update de AI files.
+- Hay un archivo no trackeado `auth_test.md` no creado por esta sesion; no incluirlo sin confirmar su origen.
 
 ## Next Steps
 
