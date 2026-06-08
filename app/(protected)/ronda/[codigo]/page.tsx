@@ -72,15 +72,17 @@ export default async function RondaPage({
       )
     }
 
-    if (ronda.estado === 'cerrada') {
+    if (ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada') {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center">
           <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
             <div className="text-4xl mb-4">🔒</div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Ronda cerrada</h2>
+            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+              {ronda.estado === 'cerrada' ? 'Ronda cerrada' : 'Ronda en cierre documental'}
+            </h2>
             <p className="text-gray-500 text-sm">
-              La ronda <strong>{codigo}</strong> ya fue cerrada por el coordinador y no admite
-              nuevos ingresos.
+              La ronda <strong>{codigo}</strong> no admite nuevos ingresos mientras el coordinador
+              completa el cierre documental.
             </p>
           </div>
         </div>

@@ -227,18 +227,14 @@ export async function changeRondaStatusAction(formData: FormData) {
     const rondaId = parseText(formData, 'ronda_id')
     const nextState = parseText(formData, 'next_state')
 
-    if (!rondaId || !['activa', 'cerrada'].includes(nextState)) {
+    if (!rondaId || nextState !== 'activa') {
       throw new Error('La transición solicitada no es válida.')
     }
 
-    await transitionRondaEstado(rondaId, nextState as 'activa' | 'cerrada')
+    await transitionRondaEstado(rondaId, 'activa')
 
     revalidatePath('/dashboard')
-    targetUrl = buildSuccessUrl(
-      nextState === 'activa'
-        ? 'Ronda publicada y disponible para asignaciones.'
-        : 'Ronda cerrada correctamente.'
-    )
+    targetUrl = buildSuccessUrl('Ronda publicada y disponible para asignaciones.')
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'No fue posible cambiar el estado.'

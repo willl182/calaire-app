@@ -10,6 +10,7 @@ const TABS = [
   { label: 'Configuración PT', href: (id: string) => `/dashboard/rondas/${id}/configuracion-pt` },
   { label: 'Participantes', href: (id: string) => `/dashboard/rondas/${id}/participantes` },
   { label: 'Resultados', href: (id: string) => `/dashboard/rondas/${id}/resultados` },
+  { label: 'SGC', href: (id: string) => `/dashboard/rondas/${id}/sgc` },
 ]
 
 export function RondaContextNav({ rondaId, rondaCodigo }: Props) {

@@ -10,7 +10,18 @@ const CONTAMINANTES_ORDER = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 const PARTICIPANT_CODE_LENGTH = 6
 const PARTICIPANT_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const PARTICIPANT_CODE_MAX_ATTEMPTS = 20
-type RondaEstado = 'borrador' | 'activa' | 'cerrada'
+type RondaEstado = 'borrador' | 'activa' | 'documentacion_pendiente' | 'cerrada'
+type DirectorioInput = {
+  nit: string
+  correo: string
+  nombreLaboratorio?: string | null
+  nombreResponsable?: string | null
+  cargo?: string | null
+  ciudad?: string | null
+  departamento?: string | null
+  telefono?: string | null
+  workosUserId?: string | null
+}
 
 function contaminanteIdx(c: string): number {
   return CONTAMINANTES_ORDER.indexOf(c as (typeof CONTAMINANTES_ORDER)[number])
@@ -27,9 +38,16 @@ function generateParticipantCode(): string {
 
 function assertAllowedEstadoTransition(current: RondaEstado, next: RondaEstado) {
   if (current === next) return
-  if (current === 'cerrada') throw new Error('Las rondas cerradas no admiten nuevas transiciones.')
+  if (current === 'cerrada' && next !== 'documentacion_pendiente') {
+    throw new Error('Una ronda cerrada solo puede reabrirse a documentacion pendiente.')
+  }
   if (current === 'borrador' && next !== 'activa') throw new Error('Una ronda en borrador solo puede pasar a activa.')
-  if (current === 'activa' && next !== 'cerrada') throw new Error('Una ronda activa solo puede pasar a cerrada.')
+  if (current === 'activa' && next !== 'documentacion_pendiente') {
+    throw new Error('Una ronda activa solo puede pasar a documentacion pendiente.')
+  }
+  if (current === 'documentacion_pendiente' && next !== 'cerrada') {
+    throw new Error('Una ronda en documentacion pendiente solo puede pasar a cerrada.')
+  }
 }
 
 async function generateUniqueParticipantCode(
@@ -67,6 +85,71 @@ async function getLatestFichaByRondaParticipante(
     .collect()
   fichas.sort((a, b) => b.updatedAt - a.updatedAt)
   return fichas[0] ?? null
+}
+
+async function getDirectorioByLookup(
+  ctx: QueryCtx | MutationCtx,
+  lookup: string
+): Promise<Doc<'directorioParticipantes'> | null> {
+  const normalized = lookup.trim().toLowerCase()
+  if (!normalized) return null
+
+  const nitMatch = await ctx.db
+    .query('directorioParticipantes')
+    .withIndex('by_nit', (q) => q.eq('nit', lookup.trim()))
+    .first()
+  if (nitMatch) return nitMatch
+
+  return ctx.db
+    .query('directorioParticipantes')
+    .withIndex('by_correo', (q) => q.eq('correo', normalized))
+    .first()
+}
+
+function normalizeEmail(email: string) {
+  return email.trim().toLowerCase()
+}
+
+async function upsertDirectorioFromParticipant(
+  ctx: MutationCtx,
+  args: DirectorioInput
+): Promise<Doc<'directorioParticipantes'>> {
+  const nit = args.nit.trim()
+  const correo = normalizeEmail(args.correo)
+  if (!nit) throw new Error('El NIT es obligatorio.')
+  if (!correo) throw new Error('El correo es obligatorio.')
+
+  const existingByNit = await ctx.db
+    .query('directorioParticipantes')
+    .withIndex('by_nit', (q) => q.eq('nit', nit))
+    .first()
+  const existingByCorreo = await ctx.db
+    .query('directorioParticipantes')
+    .withIndex('by_correo', (q) => q.eq('correo', correo))
+    .first()
+
+  const existing = existingByNit ?? existingByCorreo
+  const now = Date.now()
+  const data = {
+    nit,
+    correo,
+    nombreLaboratorio: args.nombreLaboratorio ?? null,
+    nombreResponsable: args.nombreResponsable ?? null,
+    cargo: args.cargo ?? null,
+    ciudad: args.ciudad ?? null,
+    departamento: args.departamento ?? null,
+    telefono: args.telefono ?? null,
+    workosUserId: args.workosUserId ?? null,
+    updatedAt: now,
+  }
+
+  if (existing) {
+    await ctx.db.patch(existing._id, data)
+    return (await ctx.db.get(existing._id)) as Doc<'directorioParticipantes'>
+  }
+
+  const id = await ctx.db.insert('directorioParticipantes', { ...data, createdAt: now })
+  return (await ctx.db.get(id)) as Doc<'directorioParticipantes'>
 }
 
 // ---------------------------------------------------------------------------
@@ -167,6 +250,81 @@ export const listParticipantes = query({
         ? p.workosUserId.slice(PENDING_PREFIX.length)
         : null,
     }))
+  },
+})
+
+export const listDirectorioParticipantes = query({
+  args: {},
+  handler: async (ctx) => {
+    const rows = await ctx.db.query('directorioParticipantes').collect()
+    rows.sort((a, b) => {
+      const nitCmp = a.nit.localeCompare(b.nit)
+      if (nitCmp !== 0) return nitCmp
+      return a.correo.localeCompare(b.correo)
+    })
+
+    const links = await ctx.db.query('rondaParticipantes').collect()
+    const linkCount = new Map<string, number>()
+    for (const link of links) {
+      if (!link.directorioParticipanteId) continue
+      const key = String(link.directorioParticipanteId)
+      linkCount.set(key, (linkCount.get(key) ?? 0) + 1)
+    }
+
+    return rows.map((row) => ({
+      id: row._id,
+      nit: row.nit,
+      correo: row.correo,
+      nombre_laboratorio: row.nombreLaboratorio ?? null,
+      nombre_responsable: row.nombreResponsable ?? null,
+      cargo: row.cargo ?? null,
+      ciudad: row.ciudad ?? null,
+      departamento: row.departamento ?? null,
+      telefono: row.telefono ?? null,
+      workos_user_id: row.workosUserId ?? null,
+      rondas_count: linkCount.get(String(row._id)) ?? 0,
+      created_at: new Date(row.createdAt).toISOString(),
+      updated_at: new Date(row.updatedAt).toISOString(),
+    }))
+  },
+})
+
+export const getDirectorioParticipanteByLookup = query({
+  args: { lookup: v.string() },
+  handler: async (ctx, { lookup }) => {
+    const row = await getDirectorioByLookup(ctx, lookup)
+    if (!row) return null
+    return {
+      id: row._id,
+      nit: row.nit,
+      correo: row.correo,
+      nombre_laboratorio: row.nombreLaboratorio ?? null,
+      nombre_responsable: row.nombreResponsable ?? null,
+      cargo: row.cargo ?? null,
+      ciudad: row.ciudad ?? null,
+      departamento: row.departamento ?? null,
+      telefono: row.telefono ?? null,
+      workos_user_id: row.workosUserId ?? null,
+      created_at: new Date(row.createdAt).toISOString(),
+      updated_at: new Date(row.updatedAt).toISOString(),
+    }
+  },
+})
+
+export const upsertDirectorioParticipante = mutation({
+  args: {
+    nit: v.string(),
+    correo: v.string(),
+    nombreLaboratorio: v.optional(v.union(v.string(), v.null())),
+    nombreResponsable: v.optional(v.union(v.string(), v.null())),
+    cargo: v.optional(v.union(v.string(), v.null())),
+    ciudad: v.optional(v.union(v.string(), v.null())),
+    departamento: v.optional(v.union(v.string(), v.null())),
+    telefono: v.optional(v.union(v.string(), v.null())),
+    workosUserId: v.optional(v.union(v.string(), v.null())),
+  },
+  handler: async (ctx, args) => {
+    return upsertDirectorioFromParticipant(ctx, args)
   },
 })
 
@@ -299,6 +457,7 @@ export const listRondasParticipante = query({
 export const listAllParticipantes = query({
   args: {},
   handler: async (ctx) => {
+    const directorioRows = await ctx.db.query('directorioParticipantes').collect()
     const rows = await ctx.db.query('rondaParticipantes').collect()
 
     const envioRows = await ctx.db.query('envios').collect()
@@ -311,6 +470,12 @@ export const listAllParticipantes = query({
 
     const rondaCache = new Map<string, Doc<'rondas'> | null>()
     const fichaCache = new Map<string, Doc<'fichasRegistro'> | null>()
+    const directorioByLookup = new Map<string, Doc<'directorioParticipantes'>>()
+    for (const row of directorioRows) {
+      directorioByLookup.set(row.nit.toLowerCase(), row)
+      directorioByLookup.set(row.correo.toLowerCase(), row)
+      if (row.workosUserId) directorioByLookup.set(row.workosUserId, row)
+    }
 
     async function getFicha(rondaParticipanteId: Id<'rondaParticipantes'>) {
       const cached = fichaCache.get(rondaParticipanteId)
@@ -323,6 +488,7 @@ export const listAllParticipantes = query({
     type ParticipanteGlobal = {
       workos_user_id: string
       email: string
+      nit: string | null
       nit_laboratorio: string | null
       correo_laboratorio: string | null
       ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
@@ -339,11 +505,25 @@ export const listAllParticipantes = query({
         nit_laboratorio: string | null
         correo_laboratorio: string | null
         estado_enlace: 'pendiente' | 'reclamado'
+        directorio_id: string | null
       }[]
       total_envios: number
     }
 
     const grouped = new Map<string, ParticipanteGlobal>()
+
+    for (const directorio of directorioRows) {
+      grouped.set(directorio.nit.toLowerCase(), {
+        workos_user_id: directorio.workosUserId ?? '',
+        email: directorio.correo,
+        nit: directorio.nit,
+        nit_laboratorio: directorio.nit,
+        correo_laboratorio: directorio.correo,
+        ficha_estado: 'no_iniciada',
+        rondas: [],
+        total_envios: 0,
+      })
+    }
 
     for (const row of rows) {
       let ronda = rondaCache.get(row.rondaId)
@@ -360,21 +540,31 @@ export const listAllParticipantes = query({
       const estadoEnlace: 'pendiente' | 'reclamado' = row.workosUserId.startsWith(PENDING_PREFIX)
         ? 'pendiente'
         : 'reclamado'
+      const directorio =
+        (row.directorioParticipanteId ? await ctx.db.get(row.directorioParticipanteId) : null) ??
+        directorioByLookup.get(row.email.toLowerCase()) ??
+        directorioByLookup.get(row.workosUserId) ??
+        null
+      const groupKey = directorio?.nit.toLowerCase() ?? row.workosUserId
 
-      let entry = grouped.get(row.workosUserId)
+      let entry = grouped.get(groupKey)
       if (!entry) {
         entry = {
           workos_user_id: row.workosUserId,
           email: row.email,
+          nit: directorio?.nit ?? null,
           nit_laboratorio: nitLaboratorio,
           correo_laboratorio: correoLaboratorio,
           ficha_estado: fichaEstado,
           rondas: [],
           total_envios: 0,
         }
-        grouped.set(row.workosUserId, entry)
+        grouped.set(groupKey, entry)
       }
 
+      if (entry.nit == null && directorio?.nit) entry.nit = directorio.nit
+      if (entry.nit_laboratorio == null && directorio?.nit) entry.nit_laboratorio = directorio.nit
+      if (entry.correo_laboratorio == null && directorio?.correo) entry.correo_laboratorio = directorio.correo
       if (entry.nit_laboratorio == null && nitLaboratorio != null) {
         entry.nit_laboratorio = nitLaboratorio
       }
@@ -399,6 +589,7 @@ export const listAllParticipantes = query({
         nit_laboratorio: nitLaboratorio,
         correo_laboratorio: correoLaboratorio,
         estado_enlace: estadoEnlace,
+        directorio_id: directorio?._id ?? null,
       })
       entry.total_envios += rondaEnvios
     }
@@ -672,7 +863,12 @@ export const createRonda = mutation({
   args: {
     codigo:  v.string(),
     nombre:  v.string(),
-    estado:  v.union(v.literal('borrador'), v.literal('activa'), v.literal('cerrada')),
+    estado:  v.union(
+      v.literal('borrador'),
+      v.literal('activa'),
+      v.literal('documentacion_pendiente'),
+      v.literal('cerrada')
+    ),
   },
   handler: async (ctx, { codigo, nombre, estado }) => {
     const existing = await ctx.db
@@ -686,7 +882,15 @@ export const createRonda = mutation({
 })
 
 export const updateRondaEstado = mutation({
-  args: { id: v.id('rondas'), estado: v.union(v.literal('borrador'), v.literal('activa'), v.literal('cerrada')) },
+  args: {
+    id: v.id('rondas'),
+    estado: v.union(
+      v.literal('borrador'),
+      v.literal('activa'),
+      v.literal('documentacion_pendiente'),
+      v.literal('cerrada')
+    )
+  },
   handler: async (ctx, { id, estado }) => {
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
@@ -734,11 +938,13 @@ export const addParticipante = mutation({
     if (existing) throw new Error('Este usuario ya esta asignado a esta ronda.')
 
     const assignedParticipantCode = participantCode ?? await generateUniqueParticipantCode(ctx, rondaId)
+    const directorio = await getDirectorioByLookup(ctx, email)
 
     return ctx.db.insert('rondaParticipantes', {
       rondaId,
       workosUserId,
-      email,
+      email: normalizeEmail(email),
+      directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode: assignedParticipantCode,
       replicateCode,
@@ -778,6 +984,11 @@ export const updateParticipanteAdmin = mutation({
       participantCode: normalizedCode,
       replicateCode,
     })
+
+    const directorio = await getDirectorioByLookup(ctx, normalizedEmail)
+    if (directorio) {
+      await ctx.db.patch(participanteId, { directorioParticipanteId: directorio._id })
+    }
   },
 })
 
@@ -826,10 +1037,12 @@ export const createConfiguredRonda = mutation({
 
     for (const slot of slots) {
       const participantCode = await generateUniqueParticipantCode(ctx, rondaId)
+      const directorio = await getDirectorioByLookup(ctx, slot.email)
       await ctx.db.insert('rondaParticipantes', {
         rondaId,
         workosUserId: slot.workosUserId,
-        email: slot.email,
+        email: normalizeEmail(slot.email),
+        directorioParticipanteId: directorio?._id ?? null,
         participantProfile: slot.participantProfile,
         participantCode,
         invitadoAt: now,
@@ -925,7 +1138,11 @@ export const updateRondaBasicInfo = mutation({
 export const transitionRondaEstado = mutation({
   args: {
     id: v.id('rondas'),
-    nextState: v.union(v.literal('activa'), v.literal('cerrada')),
+    nextState: v.union(
+      v.literal('activa'),
+      v.literal('documentacion_pendiente'),
+      v.literal('cerrada')
+    ),
   },
   handler: async (ctx, { id, nextState }) => {
     const ronda = await ctx.db.get(id)
@@ -941,7 +1158,7 @@ export const reabrirRonda = mutation({
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado !== 'cerrada') throw new Error('Solo se pueden reabrir rondas cerradas.')
-    await ctx.db.patch(id, { estado: 'activa' })
+    await ctx.db.patch(id, { estado: 'documentacion_pendiente' })
   },
 })
 
@@ -1017,11 +1234,13 @@ export const assignParticipante = mutation({
     if (existing) throw new Error('Este usuario ya esta asignado a esta ronda.')
 
     const participantCode = await generateUniqueParticipantCode(ctx, rondaId)
+    const directorio = await getDirectorioByLookup(ctx, email)
 
     return ctx.db.insert('rondaParticipantes', {
       rondaId,
       workosUserId,
-      email,
+      email: normalizeEmail(email),
+      directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode,
       invitadoAt: Date.now(),
@@ -1047,7 +1266,7 @@ export const regenerateParticipanteSlot = mutation({
     // Preserve participantCode when regenerating the invitation link.
     await ctx.db.patch(participanteId, {
       workosUserId,
-      email,
+      email: normalizeEmail(email),
       claimedAt: undefined,
       invitadoAt: Date.now(),
     })
@@ -1077,6 +1296,11 @@ export const updateParticipanteEmail = mutation({
       .collect()
 
     await ctx.db.patch(participanteId, { email: normalizedEmail })
+
+    const directorio = await getDirectorioByLookup(ctx, normalizedEmail)
+    if (directorio) {
+      await ctx.db.patch(participanteId, { directorioParticipanteId: directorio._id })
+    }
 
     for (const ficha of fichas) {
       await ctx.db.patch(ficha._id, { correoLaboratorio: normalizedEmail, updatedAt: Date.now() } as never)

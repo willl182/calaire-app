@@ -12,6 +12,7 @@ import type * as fichas from "../fichas.js";
 import type * as migrations from "../migrations.js";
 import type * as pt from "../pt.js";
 import type * as rondas from "../rondas.js";
+import type * as sgc from "../sgc.js";
 
 import type {
   ApiFromModules,
@@ -24,6 +25,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   pt: typeof pt;
   rondas: typeof rondas;
+  sgc: typeof sgc;
 }>;
 
 /**

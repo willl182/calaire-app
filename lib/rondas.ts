@@ -204,7 +204,7 @@ export type ResultadoParticipantePT = {
 }
 
 export type Contaminante = (typeof CONTAMINANTES)[number]
-export type EstadoRonda = 'borrador' | 'activa' | 'cerrada'
+export type EstadoRonda = 'borrador' | 'activa' | 'documentacion_pendiente' | 'cerrada'
 
 export type RondaContaminante = {
   id: string
@@ -549,6 +549,7 @@ export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
   return rows.map((r) => ({
     workos_user_id: r.workos_user_id,
     email: r.email,
+    nit: (r.nit ?? null) as string | null,
     nit_laboratorio: (r.nit_laboratorio ?? null) as string | null,
     correo_laboratorio: (r.correo_laboratorio ?? null) as string | null,
     ficha_estado: (r.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
@@ -566,6 +567,76 @@ export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
       estado_enlace: (ronda.estado_enlace ?? 'reclamado') as 'pendiente' | 'reclamado',
     })),
   }))
+}
+
+export type DirectorioParticipante = {
+  id: string
+  nit: string
+  correo: string
+  nombre_laboratorio: string | null
+  nombre_responsable: string | null
+  cargo: string | null
+  ciudad: string | null
+  departamento: string | null
+  telefono: string | null
+  workos_user_id: string | null
+  created_at: string
+  updated_at: string
+}
+
+export async function listDirectorioParticipantes(): Promise<DirectorioParticipante[]> {
+  const rows = await fetchQuery(api.rondas.listDirectorioParticipantes, {})
+  return rows.map((row) => ({
+    id: row.id,
+    nit: row.nit,
+    correo: row.correo,
+    nombre_laboratorio: row.nombre_laboratorio ?? null,
+    nombre_responsable: row.nombre_responsable ?? null,
+    cargo: row.cargo ?? null,
+    ciudad: row.ciudad ?? null,
+    departamento: row.departamento ?? null,
+    telefono: row.telefono ?? null,
+    workos_user_id: row.workos_user_id ?? null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }))
+}
+
+export async function getDirectorioParticipanteByLookup(
+  lookup: { nit?: string; correo?: string }
+): Promise<DirectorioParticipante | null> {
+  const row = await fetchQuery(api.rondas.getDirectorioParticipanteByLookup, {
+    lookup: lookup.nit?.trim() || lookup.correo?.trim() || '',
+  })
+  if (!row) return null
+  return {
+    id: row.id,
+    nit: row.nit,
+    correo: row.correo,
+    nombre_laboratorio: row.nombre_laboratorio ?? null,
+    nombre_responsable: row.nombre_responsable ?? null,
+    cargo: row.cargo ?? null,
+    ciudad: row.ciudad ?? null,
+    departamento: row.departamento ?? null,
+    telefono: row.telefono ?? null,
+    workos_user_id: row.workos_user_id ?? null,
+    created_at: row.created_at,
+    updated_at: row.updated_at,
+  }
+}
+
+export async function upsertDirectorioParticipante(args: {
+  nit: string
+  correo: string
+  nombreLaboratorio?: string | null
+  nombreResponsable?: string | null
+  cargo?: string | null
+  ciudad?: string | null
+  departamento?: string | null
+  telefono?: string | null
+  workosUserId?: string | null
+}): Promise<void> {
+  await fetchMutation(api.rondas.upsertDirectorioParticipante, args)
 }
 
 function normalizeOptionalId(value: unknown): string | null {
@@ -710,7 +781,7 @@ export async function updateRondaBasicInfo(
 
 export async function transitionRondaEstado(
   rondaId: string,
-  nextState: 'activa' | 'cerrada'
+  nextState: 'activa' | 'documentacion_pendiente' | 'cerrada'
 ): Promise<void> {
   await fetchMutation(api.rondas.transitionRondaEstado, {
     id: rondaId as Id<'rondas'>,
@@ -797,6 +868,7 @@ export type RondaParticipanteAsignada = Ronda & {
 export type ParticipanteGlobal = {
   workos_user_id: string
   email: string
+  nit: string | null
   nit_laboratorio: string | null
   correo_laboratorio: string | null
   ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'

@@ -14,12 +14,37 @@ const contaminante = v.union(
 
 export default defineSchema({
   // -------------------------------------------------------------------------
+  // directorio_participantes
+  // -------------------------------------------------------------------------
+  directorioParticipantes: defineTable({
+    nit:                  v.string(),
+    correo:               v.string(),
+    nombreLaboratorio:    v.optional(v.union(v.string(), v.null())),
+    nombreResponsable:    v.optional(v.union(v.string(), v.null())),
+    cargo:                v.optional(v.union(v.string(), v.null())),
+    ciudad:               v.optional(v.union(v.string(), v.null())),
+    departamento:         v.optional(v.union(v.string(), v.null())),
+    telefono:             v.optional(v.union(v.string(), v.null())),
+    workosUserId:         v.optional(v.union(v.string(), v.null())),
+    createdAt:            v.number(),
+    updatedAt:            v.number(),
+  })
+    .index('by_nit', ['nit'])
+    .index('by_correo', ['correo'])
+    .index('by_workos_user', ['workosUserId']),
+
+  // -------------------------------------------------------------------------
   // rondas
   // -------------------------------------------------------------------------
   rondas: defineTable({
     codigo:    v.string(),
     nombre:    v.string(),
-    estado:    v.union(v.literal('borrador'), v.literal('activa'), v.literal('cerrada')),
+    estado:    v.union(
+      v.literal('borrador'),
+      v.literal('activa'),
+      v.literal('documentacion_pendiente'),
+      v.literal('cerrada')
+    ),
     createdAt: v.number(), // Unix ms
   })
     .index('by_codigo', ['codigo']),
@@ -43,6 +68,7 @@ export default defineSchema({
     rondaId:           v.id('rondas'),
     workosUserId:      v.string(),
     email:             v.string(),
+    directorioParticipanteId: v.optional(v.union(v.id('directorioParticipantes'), v.null())),
     invitadoAt:        v.number(),
     participantProfile: v.union(v.literal('member'), v.literal('member_special')),
     participantCode:   v.optional(v.union(v.string(), v.null())),
@@ -131,6 +157,7 @@ export default defineSchema({
   // -------------------------------------------------------------------------
   fichasRegistro: defineTable({
     rondaParticipanteId:  v.id('rondaParticipantes'),
+    directorioParticipanteId: v.optional(v.union(v.id('directorioParticipantes'), v.null())),
     // Sección 2: Datos del participante
     nitLaboratorio:       v.optional(v.union(v.string(), v.null())),
     nombreLaboratorio:    v.optional(v.union(v.string(), v.null())),
@@ -204,4 +231,139 @@ export default defineSchema({
     cantidad:    v.number(),
   })
     .index('by_ficha', ['fichaId']),
+
+  sgcPlanRonda: defineTable({
+    rondaId: v.id('rondas'),
+    estado: v.union(v.literal('borrador'), v.literal('finalizado'), v.literal('requiere_revision')),
+    bloques: v.record(v.string(), v.string()),
+    camposEstructurados: v.record(v.string(), v.string()),
+    motivoRevision: v.optional(v.union(v.string(), v.null())),
+    finalizadoAt: v.optional(v.union(v.number(), v.null())),
+    finalizadoBy: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId']),
+
+  sgcRevisionDatos: defineTable({
+    rondaId: v.id('rondas'),
+    estado: v.union(v.literal('borrador'), v.literal('finalizado'), v.literal('requiere_revision')),
+    checks: v.record(v.string(), v.object({
+      cumple: v.boolean(),
+      observacion: v.union(v.string(), v.null()),
+      updatedAt: v.number(),
+      updatedBy: v.string(),
+    })),
+    metricas: v.record(v.string(), v.union(v.string(), v.number(), v.boolean(), v.null())),
+    finalizadoAt: v.optional(v.union(v.number(), v.null())),
+    finalizadoBy: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId']),
+
+  sgcHitosRonda: defineTable({
+    rondaId: v.id('rondas'),
+    codigo: v.string(),
+    nombre: v.string(),
+    fase: v.string(),
+    fechaObjetivo: v.optional(v.union(v.string(), v.null())),
+    fechaReal: v.optional(v.union(v.string(), v.null())),
+    estado: v.union(
+      v.literal('pendiente'),
+      v.literal('en_progreso'),
+      v.literal('completado'),
+      v.literal('vencido'),
+      v.literal('cancelado'),
+      v.literal('no_aplica')
+    ),
+    responsable: v.string(),
+    visibleParticipante: v.boolean(),
+    bloqueaCierre: v.boolean(),
+    formatoRelacionado: v.optional(v.union(v.string(), v.null())),
+    notas: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_estado', ['rondaId', 'estado']),
+
+  sgcJustificaciones: defineTable({
+    rondaId: v.id('rondas'),
+    formato: v.string(),
+    alcance: v.string(),
+    razon: v.string(),
+    estado: v.union(v.literal('vigente'), v.literal('reemplazada'), v.literal('retirada')),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_formato', ['rondaId', 'formato'])
+    .index('by_rondaId_and_formato_and_estado', ['rondaId', 'formato', 'estado']),
+
+  sgcEvidenciaSeries: defineTable({
+    rondaId: v.id('rondas'),
+    formato: v.string(),
+    seccion: v.optional(v.union(v.string(), v.null())),
+    nombre: v.string(),
+    requerida: v.boolean(),
+    publicaParticipante: v.boolean(),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_formato', ['rondaId', 'formato']),
+
+  sgcEvidenciaVersiones: defineTable({
+    serieId: v.id('sgcEvidenciaSeries'),
+    rondaId: v.id('rondas'),
+    storageId: v.id('_storage'),
+    version: v.number(),
+    estado: v.union(v.literal('vigente'), v.literal('reemplazada'), v.literal('retirada')),
+    fileName: v.string(),
+    contentType: v.string(),
+    size: v.number(),
+    hash: v.optional(v.union(v.string(), v.null())),
+    motivoRetiro: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_serieId', ['serieId'])
+    .index('by_serieId_and_estado', ['serieId', 'estado']),
+
+  sgcRegistroSnapshots: defineTable({
+    rondaId: v.id('rondas'),
+    tipoRegistro: v.string(),
+    registroId: v.string(),
+    version: v.number(),
+    payload: v.any(),
+    createdAt: v.number(),
+    createdBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_tipoRegistro', ['rondaId', 'tipoRegistro']),
+
+  sgcAuditLog: defineTable({
+    rondaId: v.id('rondas'),
+    actor: v.string(),
+    evento: v.string(),
+    detalle: v.optional(v.union(v.string(), v.null())),
+    targetTipo: v.optional(v.union(v.string(), v.null())),
+    targetId: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+  })
+    .index('by_rondaId', ['rondaId']),
 })

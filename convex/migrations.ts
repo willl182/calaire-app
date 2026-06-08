@@ -7,6 +7,7 @@ const PARTICIPANT_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
 const PARTICIPANT_CODE_MAX_ATTEMPTS = 20
 
 const TABLES = [
+  'directorioParticipantes',
   'fichasInstrumentos',
   'fichasAnalizadores',
   'fichasAcompanantes',
@@ -159,7 +160,12 @@ export const insertRonda = mutation({
   args: {
     codigo: v.string(),
     nombre: v.string(),
-    estado: v.union(v.literal('borrador'), v.literal('activa'), v.literal('cerrada')),
+    estado: v.union(
+      v.literal('borrador'),
+      v.literal('activa'),
+      v.literal('documentacion_pendiente'),
+      v.literal('cerrada')
+    ),
     createdAt: v.number(),
   },
   handler: async (ctx, args) => ctx.db.insert('rondas', args),
@@ -180,6 +186,7 @@ export const insertRondaParticipante = mutation({
     rondaId: v.id('rondas'),
     workosUserId: v.string(),
     email: v.string(),
+    directorioParticipanteId: v.optional(v.union(v.id('directorioParticipantes'), v.null())),
     invitadoAt: v.number(),
     participantProfile: v.union(v.literal('member'), v.literal('member_special')),
     participantCode: v.optional(v.string()),
@@ -187,6 +194,23 @@ export const insertRondaParticipante = mutation({
     claimedAt: v.optional(v.number()),
   },
   handler: async (ctx, args) => ctx.db.insert('rondaParticipantes', clean(args)),
+})
+
+export const insertDirectorioParticipante = mutation({
+  args: {
+    nit: v.string(),
+    correo: v.string(),
+    nombreLaboratorio: v.optional(v.union(v.string(), v.null())),
+    nombreResponsable: v.optional(v.union(v.string(), v.null())),
+    cargo: v.optional(v.union(v.string(), v.null())),
+    ciudad: v.optional(v.union(v.string(), v.null())),
+    departamento: v.optional(v.union(v.string(), v.null())),
+    telefono: v.optional(v.union(v.string(), v.null())),
+    workosUserId: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  },
+  handler: async (ctx, args) => ctx.db.insert('directorioParticipantes', clean(args)),
 })
 
 export const insertRondaPtItem = mutation({

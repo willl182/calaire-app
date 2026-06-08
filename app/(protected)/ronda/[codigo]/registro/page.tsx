@@ -46,7 +46,10 @@ export default async function RegistroPage({ params }: Props) {
   const ficha = await getFichaByRondaParticipante(rp.id)
   if (!ficha) notFound()
 
-  const soloLectura = ficha.estado === 'enviado' || ronda.estado === 'cerrada'
+  const soloLectura =
+    ficha.estado === 'enviado' ||
+    ronda.estado === 'documentacion_pendiente' ||
+    ronda.estado === 'cerrada'
 
   return (
     <FormularioRegistro

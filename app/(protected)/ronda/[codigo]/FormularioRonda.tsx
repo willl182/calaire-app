@@ -178,7 +178,7 @@ export default function FormularioRonda({
   const [globalK, setGlobalK] = useState('2')
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
-  const cerrada = ronda.estado === 'cerrada'
+  const cerrada = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
   const soloLectura = cerrada || submitDone
   const hasPTConfig = ptItems.length > 0 && sampleGroups.length > 0
   const hasParticipantCodes = Boolean(participantCode) && replicateCode != null
@@ -350,7 +350,7 @@ export default function FormularioRonda({
               className={`self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
                 ronda.estado === 'activa'
                   ? 'bg-emerald-100 text-emerald-800'
-                  : ronda.estado === 'cerrada'
+                  : cerrada
                     ? 'bg-slate-200 text-slate-700'
                     : 'bg-amber-100 text-amber-800'
               }`}

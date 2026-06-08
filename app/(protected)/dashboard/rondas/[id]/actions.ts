@@ -4,7 +4,8 @@ import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
 
 import { requireAuth, isAdmin } from '@/lib/auth'
-import { getRonda, transitionRondaEstado, reabrirRonda } from '@/lib/rondas'
+import { getRonda, transitionRondaEstado } from '@/lib/rondas'
+import { pasarADocumentacionPendiente, reabrirRondaSgc } from '@/lib/sgc'
 
 function pageUrl(rondaId: string) {
   return `/dashboard/rondas/${rondaId}`
@@ -56,7 +57,7 @@ export async function activarRondaAction(formData: FormData) {
 }
 
 export async function cerrarRondaAction(formData: FormData) {
-  await requireAdmin()
+  const auth = await requireAdmin()
 
   const rondaId = parseText(formData, 'ronda_id')
   const confirm = parseText(formData, 'confirm')
@@ -73,13 +74,13 @@ export async function cerrarRondaAction(formData: FormData) {
     const ronda = await getRonda(rondaId)
     if (!ronda) throw new Error('Ronda no encontrada.')
     if (ronda.estado !== 'activa') {
-      throw new Error('Solo se puede cerrar una ronda activa.')
+      throw new Error('Solo una ronda activa puede pasar a documentacion pendiente.')
     }
 
-    await transitionRondaEstado(rondaId, 'cerrada')
+    await pasarADocumentacionPendiente(rondaId, auth.user?.email ?? auth.user?.id ?? 'admin')
 
     revalidatePath(pageUrl(rondaId))
-    targetUrl = successUrl(rondaId, 'Ronda cerrada correctamente.')
+    targetUrl = successUrl(rondaId, 'Ronda enviada a documentacion pendiente.')
   } catch (err) {
     const msg = err instanceof Error ? err.message : 'Error al cerrar la ronda.'
     targetUrl = errorUrl(rondaId, msg)
@@ -89,7 +90,7 @@ export async function cerrarRondaAction(formData: FormData) {
 }
 
 export async function reabrirRondaAction(formData: FormData) {
-  await requireAdmin()
+  const auth = await requireAdmin()
 
   const rondaId = parseText(formData, 'ronda_id')
   const confirm = parseText(formData, 'confirm')
@@ -109,7 +110,7 @@ export async function reabrirRondaAction(formData: FormData) {
       throw new Error('Solo se puede reabrir una ronda cerrada.')
     }
 
-    await reabrirRonda(rondaId)
+    await reabrirRondaSgc(rondaId, auth.user?.email ?? auth.user?.id ?? 'admin', 'Reapertura solicitada desde resumen de ronda.')
 
     revalidatePath(pageUrl(rondaId))
     targetUrl = successUrl(rondaId, 'Ronda reabierta correctamente.')

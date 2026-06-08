@@ -14,6 +14,31 @@ async function getLatestFichaByRondaParticipante(
   return fichas[0] ?? null
 }
 
+async function getDirectorioById(
+  ctx: QueryCtx | MutationCtx,
+  directorioParticipanteId: Id<'directorioParticipantes'> | null | undefined
+) {
+  if (!directorioParticipanteId) return null
+  return ctx.db.get(directorioParticipanteId)
+}
+
+async function getDirectorioByLookup(
+  ctx: QueryCtx | MutationCtx,
+  lookup: string
+) {
+  const normalized = lookup.trim().toLowerCase()
+  if (!normalized) return null
+  const byNit = await ctx.db
+    .query('directorioParticipantes')
+    .withIndex('by_nit', (q) => q.eq('nit', lookup.trim()))
+    .first()
+  if (byNit) return byNit
+  return ctx.db
+    .query('directorioParticipantes')
+    .withIndex('by_correo', (q) => q.eq('correo', normalized))
+    .first()
+}
+
 function normalizeLookupValue(value: string) {
   return value.trim().toLowerCase()
 }
@@ -46,6 +71,25 @@ export const getFichaByRondaParticipante = query({
     instrumentos.sort((a, b) => a.sortOrder - b.sortOrder)
 
     return { ...ficha, acompanantes, analizadores, instrumentos }
+  },
+})
+
+export const getFichaDirectorioPreview = query({
+  args: { lookup: v.string() },
+  handler: async (ctx, { lookup }) => {
+    const directorio = await getDirectorioByLookup(ctx, lookup)
+    if (!directorio) return null
+    return {
+      id: directorio._id,
+      nit: directorio.nit,
+      correo: directorio.correo,
+      nombre_laboratorio: directorio.nombreLaboratorio ?? null,
+      nombre_responsable: directorio.nombreResponsable ?? null,
+      cargo: directorio.cargo ?? null,
+      ciudad: directorio.ciudad ?? null,
+      departamento: directorio.departamento ?? null,
+      telefono: directorio.telefono ?? null,
+    }
   },
 })
 
@@ -136,12 +180,25 @@ export const listFichaResumenesByRonda = query({
 export const getOrCreateFicha = mutation({
   args: { rondaParticipanteId: v.id('rondaParticipantes') },
   handler: async (ctx, { rondaParticipanteId }) => {
+    const participante = await ctx.db.get(rondaParticipanteId)
+    if (!participante) throw new Error('Participante no encontrado.')
+
     const existing = await getLatestFichaByRondaParticipante(ctx, rondaParticipanteId)
     if (existing) return existing._id
 
+    const directorio = await getDirectorioById(ctx, participante.directorioParticipanteId)
     const now = Date.now()
     const insertedId = await ctx.db.insert('fichasRegistro', {
       rondaParticipanteId,
+      directorioParticipanteId: participante.directorioParticipanteId ?? null,
+      nitLaboratorio: directorio?.nit ?? null,
+      correoLaboratorio: directorio?.correo ?? participante.email ?? null,
+      nombreLaboratorio: directorio?.nombreLaboratorio ?? null,
+      nombreResponsable: directorio?.nombreResponsable ?? null,
+      cargo: directorio?.cargo ?? null,
+      ciudad: directorio?.ciudad ?? null,
+      departamento: directorio?.departamento ?? null,
+      telefono: directorio?.telefono ?? null,
       estacionamiento: false,
       decDatosCorrectos: false,
       decAceptaCondiciones: false,
@@ -197,6 +254,34 @@ export const upsertFichaScalar = mutation({
 
     const value = valueBoolean !== undefined ? valueBoolean : valueString
     await ctx.db.patch(fichaId, { [field]: value, updatedAt: Date.now() })
+
+    if ([
+      'nitLaboratorio',
+      'correoLaboratorio',
+      'nombreLaboratorio',
+      'nombreResponsable',
+      'cargo',
+      'ciudad',
+      'departamento',
+      'telefono',
+    ].includes(field)) {
+      const directorio = await getDirectorioById(ctx, ficha.directorioParticipanteId)
+      if (directorio) {
+        const patch: Record<string, string | null> = {}
+        if (field === 'nitLaboratorio' && typeof value === 'string') patch.nit = value.trim()
+        if (field === 'correoLaboratorio' && typeof value === 'string') patch.correo = value.trim().toLowerCase()
+        if (field === 'nombreLaboratorio') patch.nombreLaboratorio = value as string | null
+        if (field === 'nombreResponsable') patch.nombreResponsable = value as string | null
+        if (field === 'cargo') patch.cargo = value as string | null
+        if (field === 'ciudad') patch.ciudad = value as string | null
+        if (field === 'departamento') patch.departamento = value as string | null
+        if (field === 'telefono') patch.telefono = value as string | null
+        await ctx.db.patch(directorio._id, {
+          ...patch,
+          updatedAt: Date.now(),
+        } as never)
+      }
+    }
   },
 })
 
