@@ -1,34 +1,26 @@
-# Session State: calaire-app
+# Session State: SGC Round Plan Blocks Integration (calaire-app)
 
-**Last Updated**: 2026-06-09 22:31 America/Bogota
+**Last Updated**: 2026-06-09 22:45
 
 ## Session Objective
 
-Complete FT2 Expediente SGC validation, fix Convex deployment mismatch, and verify in production.
+Ensure the native Round Plan (`F-PPSEA-03` / `F-PSEA-06`) page displays and allows editing/printing of all blocks from `a` to `u` in the SGC interface, aligning with the real-world planning template `Planificacion_R1_PP (1).md`.
 
 ## Current State
 
-- [x] Restored context with the `continue` skill.
-- [x] Confirmed `convex/rondas.ts` exports `getRonda`; the prior `FunctionPathNotFound` was deployment/runtime mismatch, not missing source code.
-- [x] Ran `pnpm exec convex dev --once`; local Convex functions synced, but local E2E needs a long-running Convex process because `.env.local` points to `127.0.0.1:3212`.
-- [x] Ran `pnpm lint`, `pnpm exec tsc --noEmit`, and `pnpm build` successfully.
-- [x] Deployed Convex production to `https://steady-kiwi-725.convex.cloud`.
-- [x] Deployed Vercel production and aliased `https://calaire-app.vercel.app`.
-- [x] Fixed `tests/e2e/sgc-fase2.auth.spec.ts` to use existing production ronda `kd77ck9jqbeafg5g61c7cw0vrh8756qr` instead of stale `kd7b0emdk7cmzp1vn34f2bfv7986bb77`.
-- [x] Verified production with `PLAYWRIGHT_BASE_URL=https://calaire-app.vercel.app pnpm test:e2e tests/e2e/sgc-fase2.auth.spec.ts`: 2 passed.
+- [x] Align SGC panel and `/dashboard/sgc` layout to match the base dashboard.
+- [x] Create a scrollable form viewport to edit all blocks from `a` to `u` dynamically inside `app/(protected)/dashboard/rondas/[id]/sgc/page.tsx`.
+- [x] Implement formal template labels on the printable page (`app/(protected)/dashboard/rondas/[id]/sgc/plan/print/page.tsx`) mapping all 21 blocks from `a` to `u`.
+- [x] Verify local build (`pnpm build`) and code linting (`pnpm lint`).
+- [x] Run and pass Playwright E2E tests (`pnpm test:e2e:start tests/e2e/sgc-cobertura.auth.spec.ts --workers=1`).
 
 ## Critical Technical Context
 
-- This project uses Next.js 16.2.4; read local docs in `node_modules/next/dist/docs/` before future Next changes.
-- This project uses Convex; read `convex/_generated/ai/guidelines.md` before Convex edits.
-- Package manager is `pnpm`.
-- Playwright must use `/usr/bin/chromium`; the repo config already sets that executable for projects.
-- Production Convex target is `steady-kiwi-725` / `https://steady-kiwi-725.convex.cloud`.
-- Production app alias is `https://calaire-app.vercel.app`.
-- `pnpm exec convex dev --once` can update `.env.local` to a local Convex URL but does not leave the local Convex HTTP service running for E2E.
-- To run local E2E against `.env.local`, keep `pnpm exec convex dev` running while `pnpm test:e2e:start ...` starts Next.
+- The plan blocks are retrieved and saved via `guardarPlanRondaAction` in `actions.ts`.
+- The UI controls are styled to scroll vertically up to `max-h-[500px]` to keep visual consistency.
+- Relevant files are `app/(protected)/dashboard/rondas/[id]/sgc/page.tsx` and `app/(protected)/dashboard/rondas/[id]/sgc/plan/print/page.tsx`.
 
 ## Next Steps
 
-1. Commit the E2E fixture update and session logs if preserving this validation state in git.
-2. For future SGC tests, prefer resolving a valid ronda from Convex or using a stable seeded fixture instead of hardcoding a stale ID.
+1. Keep future additions to structured plan forms inside scrollable containers to preserve layout symmetry.
+2. If new blocks are added to the schema in the future, ensure they are registered in both `PLAN_BLOQUES_INFO` (page.tsx) and `BLOQUE_LABELS` (print/page.tsx).
