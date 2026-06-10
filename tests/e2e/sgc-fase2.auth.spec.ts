@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const rondaId = 'kd7b0emdk7cmzp1vn34f2bfv7986bb77'
+const rondaId = 'kd77ck9jqbeafg5g61c7cw0vrh8756qr'
 
 test('shows SGC phase 2 sections in the round panel', async ({ page }) => {
   await page.goto(`/dashboard/rondas/${rondaId}/sgc`)

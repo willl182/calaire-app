@@ -1,30 +1,34 @@
-# Session State: SGC Layout Alignment (calaire-app)
+# Session State: calaire-app
 
-**Last Updated**: 2026-06-09 06:41
+**Last Updated**: 2026-06-09 22:31 America/Bogota
 
 ## Session Objective
 
-Align `/dashboard/sgc` to the same dashboard base layout as the other admin views and keep the width identical to `Participantes`.
+Complete FT2 Expediente SGC validation, fix Convex deployment mismatch, and verify in production.
 
 ## Current State
 
-- [x] Reuse the same `header-bar` identity block used by the other dashboard views.
-- [x] Move SGC into the same `max-w-7xl` page wrapper and keep the internal tabs as content, not as a separate layout shell.
-- [x] Add SGC KPI cards and keep the summary section ordering consistent with the rest of the dashboard.
-- [x] Fix the accessible label for the coverage filter checkbox so the authenticated Playwright spec keeps passing.
-- [x] Verify locally with `pnpm lint` and `pnpm build`.
-- [x] Deploy the layout correction to Vercel production.
-- [x] Verify the production alias passes the authenticated SGC Playwright spec.
-- [x] Measure the rendered width of `/dashboard/sgc` against `/dashboard?tab=participantes` in production.
+- [x] Restored context with the `continue` skill.
+- [x] Confirmed `convex/rondas.ts` exports `getRonda`; the prior `FunctionPathNotFound` was deployment/runtime mismatch, not missing source code.
+- [x] Ran `pnpm exec convex dev --once`; local Convex functions synced, but local E2E needs a long-running Convex process because `.env.local` points to `127.0.0.1:3212`.
+- [x] Ran `pnpm lint`, `pnpm exec tsc --noEmit`, and `pnpm build` successfully.
+- [x] Deployed Convex production to `https://steady-kiwi-725.convex.cloud`.
+- [x] Deployed Vercel production and aliased `https://calaire-app.vercel.app`.
+- [x] Fixed `tests/e2e/sgc-fase2.auth.spec.ts` to use existing production ronda `kd77ck9jqbeafg5g61c7cw0vrh8756qr` instead of stale `kd7b0emdk7cmzp1vn34f2bfv7986bb77`.
+- [x] Verified production with `PLAYWRIGHT_BASE_URL=https://calaire-app.vercel.app pnpm test:e2e tests/e2e/sgc-fase2.auth.spec.ts`: 2 passed.
 
 ## Critical Technical Context
 
-- The production alias is `https://calaire-app.vercel.app`.
-- The SGC layout now matches the base dashboard wrapper and measures the same as `Participantes`: `x=275`, `width=1280`, `right=1555` at desktop width `1830`.
-- The authenticated Playwright spec `tests/e2e/sgc-cobertura.auth.spec.ts` passes against production.
-- The relevant files are `app/(protected)/dashboard/sgc/page.tsx`, `app/(protected)/dashboard/sgc/layout.tsx`, `app/(protected)/dashboard/sgc/SgcResumenClient.tsx`, `app/(protected)/dashboard/sgc/SgcTabs.tsx`, and `app/(protected)/dashboard/sgc/TableroCoberturaRondas.tsx`.
+- This project uses Next.js 16.2.4; read local docs in `node_modules/next/dist/docs/` before future Next changes.
+- This project uses Convex; read `convex/_generated/ai/guidelines.md` before Convex edits.
+- Package manager is `pnpm`.
+- Playwright must use `/usr/bin/chromium`; the repo config already sets that executable for projects.
+- Production Convex target is `steady-kiwi-725` / `https://steady-kiwi-725.convex.cloud`.
+- Production app alias is `https://calaire-app.vercel.app`.
+- `pnpm exec convex dev --once` can update `.env.local` to a local Convex URL but does not leave the local Convex HTTP service running for E2E.
+- To run local E2E against `.env.local`, keep `pnpm exec convex dev` running while `pnpm test:e2e:start ...` starts Next.
 
 ## Next Steps
 
-1. Keep future SGC UI changes inside the shared dashboard width and wrapper pattern.
-2. If a later visual tweak touches the tabs or board table, re-run the width measurement against `/dashboard?tab=participantes`.
+1. Commit the E2E fixture update and session logs if preserving this validation state in git.
+2. For future SGC tests, prefer resolving a valid ronda from Convex or using a stable seeded fixture instead of hardcoding a stale ID.
