@@ -6,6 +6,8 @@ test('shows SGC phase 2 sections in the round panel', async ({ page }) => {
   await page.goto(`/dashboard/rondas/${rondaId}/sgc`)
 
   await expect(page.getByRole('heading', { name: 'Panel SGC' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Expediente SGC' })).toBeVisible()
+  await expect(page.getByTestId('expediente-sgc-item')).toHaveCount(12)
   await expect(page.getByRole('heading', { name: 'Comentarios de participantes' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Notificaciones in-app' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Resultados pt_app' })).toBeVisible()
@@ -22,4 +24,14 @@ test('shows SGC phase 2 sections in the round panel', async ({ page }) => {
     path: 'docs/screenshots/fase-2/04-casos-sgc-unificados.png',
     fullPage: true,
   })
+})
+
+test('focuses the selected SGC format from the coverage board URL', async ({ page }) => {
+  await page.goto(`/dashboard/rondas/${rondaId}/sgc?formato=F-PSEA-10`)
+
+  const selected = page.locator('#formato-F-PSEA-10')
+  await expect(selected).toBeVisible()
+  await expect(selected).toHaveAttribute('open', '')
+  await expect(selected.getByText('Procesamiento estadistico')).toBeVisible()
+  await expect(selected.getByText(/Subir evidencia|Reemplazar evidencia/)).toBeVisible()
 })

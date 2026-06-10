@@ -35,8 +35,10 @@ function pageUrl(rondaId: string) {
   return `/dashboard/rondas/${rondaId}/sgc`
 }
 
-function redirectWith(rondaId: string, key: 'success' | 'error', message: string): never {
-  redirect(`${pageUrl(rondaId)}?${key}=${encodeURIComponent(message)}`)
+function redirectWith(rondaId: string, key: 'success' | 'error', message: string, formatoFocus?: string): never {
+  const params = new URLSearchParams({ [key]: message })
+  if (formatoFocus) params.set('formato', formatoFocus)
+  redirect(`${pageUrl(rondaId)}?${params.toString()}`)
 }
 
 function parseText(formData: FormData, key: string) {
@@ -241,6 +243,7 @@ export async function actualizarHitoRondaAction(formData: FormData) {
 export async function subirEvidenciaAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
+  const formatoFocus = parseText(formData, 'formato_focus')
   try {
     const serieId = parseText(formData, 'serie_id')
     const file = formData.get('archivo')
@@ -262,29 +265,31 @@ export async function subirEvidenciaAction(formData: FormData) {
       hash: null,
     })
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Evidencia registrada.')
+    redirectWith(rondaId, 'success', 'Evidencia registrada.', formatoFocus)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la evidencia.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la evidencia.', formatoFocus)
   }
 }
 
 export async function retirarEvidenciaAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
+  const formatoFocus = parseText(formData, 'formato_focus')
   try {
     const evidenciaVersionId = parseText(formData, 'evidencia_version_id')
     await assertEvidenciaVersionBelongsToRonda(evidenciaVersionId, rondaId)
     await retirarEvidenciaVersion(evidenciaVersionId, parseText(formData, 'motivo'))
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Evidencia retirada.')
+    redirectWith(rondaId, 'success', 'Evidencia retirada.', formatoFocus)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible retirar la evidencia.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible retirar la evidencia.', formatoFocus)
   }
 }
 
 export async function guardarJustificacionAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
+  const formatoFocus = parseText(formData, 'formato_focus')
   try {
     await guardarJustificacionSgc(
       rondaId,
@@ -293,38 +298,41 @@ export async function guardarJustificacionAction(formData: FormData) {
       parseText(formData, 'razon')
     )
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Justificacion SGC registrada.')
+    redirectWith(rondaId, 'success', 'Justificacion SGC registrada.', formatoFocus)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la justificacion.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la justificacion.', formatoFocus)
   }
 }
 
 export async function retirarJustificacionAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
+  const formatoFocus = parseText(formData, 'formato_focus')
   try {
     await retirarJustificacionSgc(parseText(formData, 'justificacion_id'), parseText(formData, 'motivo'))
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Justificacion SGC retirada.')
+    redirectWith(rondaId, 'success', 'Justificacion SGC retirada.', formatoFocus)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible retirar la justificacion.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible retirar la justificacion.', formatoFocus)
   }
 }
 
 export async function descargarEvidenciaAction(formData: FormData) {
   const rondaId = parseText(formData, 'ronda_id')
+  const formatoFocus = parseText(formData, 'formato_focus')
   await requireAdmin()
+  let url: string | null = null
   try {
     const evidenciaVersionId = parseText(formData, 'evidencia_version_id')
     await assertEvidenciaVersionBelongsToRonda(evidenciaVersionId, rondaId)
-    const url = await getSgcDownloadUrl(evidenciaVersionId)
+    url = await getSgcDownloadUrl(evidenciaVersionId)
     if (!url) {
-      redirectWith(rondaId, 'error', 'No fue posible generar la URL de descarga.')
+      redirectWith(rondaId, 'error', 'No fue posible generar la URL de descarga.', formatoFocus)
     }
-    redirect(url)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible generar la URL de descarga.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible generar la URL de descarga.', formatoFocus)
   }
+  redirect(url)
 }
 
 export async function transicionSgcAction(formData: FormData) {

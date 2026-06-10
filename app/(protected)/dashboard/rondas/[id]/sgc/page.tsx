@@ -4,30 +4,26 @@ import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { getRonda } from '@/lib/rondas'
-import { SGC_LEYENDA_CODIGO_PROVISIONAL } from '@/lib/sgc/catalog'
+import { SGC_FORMATOS_FASE_1, SGC_LEYENDA_CODIGO_PROVISIONAL, type SgcFormatoCodigo } from '@/lib/sgc/catalog'
 import { getPanelSgc, inicializarPanelSgc, listPublicaciones } from '@/lib/sgc'
 import { RondaContextNav } from '../RondaContextNav'
+import { ExpedienteSgc } from './ExpedienteSgc'
 import {
   actualizarHitoRondaAction,
   actualizarCasoSgcAction,
   crearCasoSgcAction,
   crearHitoRondaAction,
   crearPublicacionAction,
-  descargarEvidenciaAction,
   eliminarPublicacionAction,
   finalizarPlanRondaAction,
   finalizarRevisionDatosAction,
   finalizarRevisionHomogeneidadAction,
-  guardarJustificacionAction,
   guardarPlanRondaAction,
   guardarRevisionDatosAction,
   guardarRevisionHomogeneidadAction,
-  retirarJustificacionAction,
-  retirarEvidenciaAction,
   responderComentarioAction,
   crearNotificacionAction,
   guardarResultadoPtAppAction,
-  subirEvidenciaAction,
   transicionSgcAction,
 } from './actions'
 
@@ -145,6 +141,11 @@ function fmtMetric(value: string | number | boolean | null | undefined) {
   return String(value)
 }
 
+function parseSelectedFormato(value: string | string[] | undefined): SgcFormatoCodigo | null {
+  const formato = getParam(value)
+  return SGC_FORMATOS_FASE_1.some((item) => item.codigo === formato) ? formato as SgcFormatoCodigo : null
+}
+
 export default async function SgcRondaPage({ params, searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
@@ -163,6 +164,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
   const success = getParam(query.success)
   const error = getParam(query.error)
+  const selectedFormato = parseSelectedFormato(query.formato)
   const progreso = panel.checklist.length === 0
     ? 0
     : Math.round((panel.checklist.filter((item) => item.estado === 'completo' || item.estado === 'no_aplica').length / panel.checklist.length) * 100)
@@ -207,6 +209,8 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
+
+        <ExpedienteSgc panel={panel} rondaId={id} selectedFormato={selectedFormato} />
 
         <section className="card p-6">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Acciones de cierre</h2>
@@ -293,41 +297,8 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           </div>
         </section>
 
-        <section className="card p-6">
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">Justificaciones SGC</h2>
-          <form action={guardarJustificacionAction} className="mt-4 grid gap-3 md:grid-cols-4">
-            <input type="hidden" name="ronda_id" value={id} />
-            <select className="input" name="formato" defaultValue="F-PSEA-05">
-              <option value="F-PSEA-05">F-PSEA-05</option>
-              <option value="F-PSEA-05A">F-PSEA-05A</option>
-              <option value="F-PSEA-12">F-PSEA-12</option>
-            </select>
-            <input className="input" name="alcance" placeholder="Alcance: ronda, participante, envio" />
-            <input className="input md:col-span-2" name="razon" placeholder="Razon documentada" />
-            <button className="btn-primary md:col-span-4" type="submit">Registrar justificativo</button>
-          </form>
-          <div className="mt-4 grid gap-2">
-            {panel.justificaciones.map((justificacion) => (
-              <div key={justificacion._id} className="grid gap-3 rounded-lg border border-[var(--border)] p-3 text-sm md:grid-cols-5">
-                <div className="font-semibold">{justificacion.formato}</div>
-                <div>{justificacion.estado}</div>
-                <div>{justificacion.alcance}</div>
-                <div className="text-[var(--foreground-muted)]">{justificacion.razon}</div>
-                {justificacion.estado === 'vigente' && (
-                  <form action={retirarJustificacionAction} className="flex flex-col gap-2">
-                    <input type="hidden" name="ronda_id" value={id} />
-                    <input type="hidden" name="justificacion_id" value={justificacion._id} />
-                    <input className="input" name="motivo" placeholder="Motivo de retiro" />
-                    <button className="btn-outline" type="submit">Retirar</button>
-                  </form>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-
         <div className="grid gap-6 lg:grid-cols-2">
-          <section className="card p-6">
+          <section id="plan-ronda" className="card p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">Plan de ronda</h2>
@@ -354,7 +325,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
             </form>
           </section>
 
-          <section className="card p-6">
+          <section id="f-psea-13" className="card p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-13</h2>
@@ -397,7 +368,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           </section>
         </div>
 
-        <section className="card p-6">
+        <section id="f-psea-08" className="card p-6">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-08</h2>
@@ -451,42 +422,6 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
             <input type="hidden" name="ronda_id" value={id} />
             <button className="btn-outline" type="submit">Finalizar F-PSEA-08 y crear snapshot</button>
           </form>
-        </section>
-
-        <section className="card p-6">
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">Evidencias</h2>
-          <div className="mt-4 grid gap-4 md:grid-cols-2">
-            {panel.series.map((serie) => {
-              const vigente = panel.versiones.find((version) => version.serieId === serie._id)?.vigente
-              return (
-                <div key={serie._id} className="rounded-lg border border-[var(--border)] p-4">
-                  <div className="font-semibold">{serie.formato}</div>
-                  <div className="text-sm text-[var(--foreground-muted)]">{vigente ? `V${vigente.version} ${vigente.fileName}` : 'Sin evidencia vigente'}</div>
-                  {vigente && (
-                    <div className="mt-3 space-y-2">
-                      <form action={descargarEvidenciaAction}>
-                        <input type="hidden" name="ronda_id" value={id} />
-                        <input type="hidden" name="evidencia_version_id" value={vigente._id} />
-                        <button className="btn-outline" type="submit">Descargar vigente</button>
-                      </form>
-                      <form action={retirarEvidenciaAction} className="flex flex-col gap-2">
-                        <input type="hidden" name="ronda_id" value={id} />
-                        <input type="hidden" name="evidencia_version_id" value={vigente._id} />
-                        <input className="input" name="motivo" placeholder="Motivo obligatorio de retiro" />
-                        <button className="btn-outline" type="submit">Retirar vigente</button>
-                      </form>
-                    </div>
-                  )}
-                  <form action={subirEvidenciaAction} className="mt-3 space-y-2">
-                    <input type="hidden" name="ronda_id" value={id} />
-                    <input type="hidden" name="serie_id" value={serie._id} />
-                    <input className="input" name="archivo" type="file" accept=".pdf,.docx,.xlsx,.csv,.png,.jpg,.jpeg" />
-                    <button className="btn-outline" type="submit">Registrar version</button>
-                  </form>
-                </div>
-              )
-            })}
-          </div>
         </section>
 
         <section className="card p-6">
