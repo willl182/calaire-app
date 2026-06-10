@@ -1,32 +1,30 @@
 # Session State: CALAIRE App
 
-**Last Updated**: 2026-06-09 23:36 -05
+**Last Updated**: 2026-06-10 00:06 -05
 
 ## Session Objective
 
-Organizar el ruido del repositorio sin tocar el aplicativo.
+Guardar un plan de refactorizacion por etapas para reducir riesgos de mantenibilidad sin romper el aplicativo.
 
 ## Current State
 
-- [x] Revisada la raiz del repo y separada la app real del material de trabajo.
-- [x] Creada la carpeta `_workspace/` para planes, guias, reportes, analisis SGC y revisiones internas.
-- [x] Movidos Markdown sueltos de raiz hacia `_workspace/` usando `git mv`.
-- [x] Movida la carpeta `grills/` hacia `_workspace/grills/`.
-- [x] Conservada `logs/` como carpeta interna propia en la raiz, por decision del usuario.
-- [x] Conservados `AGENTS.md` y `CLAUDE.md` en la raiz.
-- [x] Movido el duplicado `guia-participante-cargue-datos.html` a `_workspace/guides/`; la app sigue usando `public/guia.html`.
-- [x] Creado `_workspace/README.md` para explicar el criterio de organizacion.
+- [x] Identificados modulos de alto riesgo por tamano: `convex/sgc.ts`, `convex/agent.ts`, `app/(protected)/dashboard/page.tsx`, `convex/rondas.ts` y `lib/rondas.ts`.
+- [x] Propuesto roadmap incremental con targets de reduccion por archivo.
+- [x] Incluidas validaciones por fase: `pnpm lint`, `pnpm build`, tests unitarios, Playwright y capturas donde aplique.
+- [x] Guardada copia completa en `_workspace/plans/plan_refactorizacion_mantenibilidad.md`.
+- [x] Guardado registro del plan en `logs/plans/260610_0006_plan_refactorizacion-mantenibilidad.md`.
 
 ## Critical Technical Context
 
-- No se tocaron `app/`, `convex/`, `lib/`, `tests/`, `public/`, ni configuracion de runtime.
-- La app tiene referencias activas a `/guia.html` desde:
-  - `app/(protected)/ParticipantTopNav.tsx`
-  - `app/(protected)/mi-dashboard/page.tsx`
-- `public/guia.html` permanece en su lugar y no fue modificado.
-- Esta sesion produjo principalmente renames/moves de documentacion y material interno.
+- Este es un plan documental; no cambia codigo runtime.
+- El refactor propuesto mantiene fachadas publicas para evitar romper referencias Convex como `api.rondas.*`, `api.sgc.*` y `api.agent.*`.
+- Antes de tocar Convex se debe leer `convex/_generated/ai/guidelines.md`.
+- El proyecto usa `pnpm`; evitar `npm`/`npx` salvo excepcion justificada.
+- Hay tests e2e Playwright existentes, incluyendo specs autenticadas y capturas SGC por fase.
+- Existe un cambio no relacionado en `_workspace/reports/reporte_avances_proyecto.md` que no pertenece a este plan.
 
 ## Next Steps
 
-1. Revisar si `skills-lock.json`, `next-env.d.ts` y `tsconfig.tsbuildinfo` deben seguir trackeados o salir del repositorio.
-2. Luego abordar limpieza arquitectonica del aplicativo: modulos grandes en `convex/sgc.ts`, `convex/agent.ts`, `convex/rondas.ts`, `lib/rondas.ts` y `app/(protected)/dashboard/page.tsx`.
+1. Ejecutar Fase 0: baseline con `pnpm lint`, `pnpm build` y Playwright.
+2. Tomar capturas baseline en `docs/screenshots/refactor-baseline/`.
+3. Iniciar Fase 1 agregando tests de caracterizacion antes de mover implementacion.
