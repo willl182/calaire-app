@@ -1,34 +1,32 @@
-# Session State: FT2 Expediente SGC Closed at MVP
+# Session State: CALAIRE App
 
-**Last Updated**: 2026-06-09 22:50 America/Bogota
+**Last Updated**: 2026-06-09 23:36 -05
 
 ## Session Objective
 
-Stop FT2 work at the completed MVP boundary, preserving what is done and what remains for post-MVP Etapa 9.
+Organizar el ruido del repositorio sin tocar el aplicativo.
 
 ## Current State
 
-- [x] FT2 `plan_ft2.md` MVP is implemented.
-- [x] `roadmap_ft2.md` is complete through Etapa 8 / Milestone 3.
-- [x] Production Convex and Vercel deployments were completed in prior commits.
-- [x] Focused production E2E for the SGC expediente passed in prior validation.
-- [x] Native SGC round plan blocks `a` through `u` were integrated and committed in `9bf1d7c`.
-- [x] User confirmed we can stop at the current scope boundary.
+- [x] Revisada la raiz del repo y separada la app real del material de trabajo.
+- [x] Creada la carpeta `_workspace/` para planes, guias, reportes, analisis SGC y revisiones internas.
+- [x] Movidos Markdown sueltos de raiz hacia `_workspace/` usando `git mv`.
+- [x] Movida la carpeta `grills/` hacia `_workspace/grills/`.
+- [x] Conservada `logs/` como carpeta interna propia en la raiz, por decision del usuario.
+- [x] Conservados `AGENTS.md` y `CLAUDE.md` en la raiz.
+- [x] Movido el duplicado `guia-participante-cargue-datos.html` a `_workspace/guides/`; la app sigue usando `public/guia.html`.
+- [x] Creado `_workspace/README.md` para explicar el criterio de organizacion.
 
 ## Critical Technical Context
 
-- Current branch is `main`.
-- Working tree was clean before this saver update.
-- Latest relevant commits:
-  - `9bf1d7c feat: implement blocks a-u in SGC round plan editor and print layout`
-  - `cfa5a36 Validate SGC expediente in production`
-  - `b755610 Implement SGC expediente`
-- Production app alias: `https://calaire-app.vercel.app`.
-- Production Convex target: `steady-kiwi-725` / `https://steady-kiwi-725.convex.cloud`.
-- Etapa 9 remains post-MVP and intentionally unimplemented.
+- No se tocaron `app/`, `convex/`, `lib/`, `tests/`, `public/`, ni configuracion de runtime.
+- La app tiene referencias activas a `/guia.html` desde:
+  - `app/(protected)/ParticipantTopNav.tsx`
+  - `app/(protected)/mi-dashboard/page.tsx`
+- `public/guia.html` permanece en su lugar y no fue modificado.
+- Esta sesion produjo principalmente renames/moves de documentacion y material interno.
 
 ## Next Steps
 
-1. If work resumes, start with Etapa 9 only after selecting one concrete improvement with acceptance criteria.
-2. Recommended Etapa 9 order: historial expandible por formato, export del expediente documental, progreso de carga, filtros internos, drag and drop, vista participante solo lectura.
-3. For future E2E hardening, replace hardcoded production ronda IDs with seeded or dynamically discovered fixtures.
+1. Revisar si `skills-lock.json`, `next-env.d.ts` y `tsconfig.tsbuildinfo` deben seguir trackeados o salir del repositorio.
+2. Luego abordar limpieza arquitectonica del aplicativo: modulos grandes en `convex/sgc.ts`, `convex/agent.ts`, `convex/rondas.ts`, `lib/rondas.ts` y `app/(protected)/dashboard/page.tsx`.
