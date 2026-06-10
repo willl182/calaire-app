@@ -7,6 +7,8 @@ import { LogoUnal } from '@/app/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { listRondasParticipante, type Ronda, type RondaParticipanteAsignada } from '@/lib/rondas'
+import { getHitosVisibleParticipante, getEvidenciasPublicas, listPublicacionesParticipante, listMisComentariosRonda, listMisNotificaciones } from '@/lib/sgc'
+import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from './actions'
 
 function estadoParticipanteBadge(estado: Ronda['estado']) {
   if (estado === 'activa') return 'bg-emerald-100 text-emerald-800'
@@ -36,7 +38,15 @@ function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estad
   )
 }
 
-function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) {
+type SgcDatosParticipante = {
+  hitos: Awaited<ReturnType<typeof getHitosVisibleParticipante>>
+  evidencias: Awaited<ReturnType<typeof getEvidenciasPublicas>>
+  publicaciones: Awaited<ReturnType<typeof listPublicacionesParticipante>>
+  comentarios: Awaited<ReturnType<typeof listMisComentariosRonda>>
+  notificaciones: Awaited<ReturnType<typeof listMisNotificaciones>>
+}
+
+function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignada; sgc?: SgcDatosParticipante }) {
   const esActiva = ronda.estado === 'activa'
   const fichaEnviada = ronda.ficha_estado === 'enviado'
   const fichaLabel =
@@ -46,6 +56,7 @@ function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) 
         ? 'Continuar ficha'
         : 'Diligenciar ficha'
   const puedeCargarDatos = esActiva && fichaEnviada
+  const mostrarSgc = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
 
   return (
     <article className="card grid gap-4 p-6">
@@ -108,6 +119,118 @@ function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) 
           ))}
         </div>
       )}
+
+      {mostrarSgc && sgc && (
+        <div className="mt-2 space-y-4 rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] p-4">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
+            Informacion de cierre documental
+          </p>
+
+          {sgc.hitos.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-[var(--foreground)]">Hitos visibles</p>
+              <div className="grid gap-2">
+                {sgc.hitos.map((hito) => (
+                  <div key={hito._id} className="flex items-center justify-between rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
+                    <div>
+                      <span className="font-medium">{hito.nombre}</span>
+                      <span className="ml-2 text-[var(--foreground-muted)]">{hito.estado}</span>
+                    </div>
+                    <span className="text-xs text-[var(--foreground-muted)]">
+                      {hito.fechaObjetivo ?? 'Sin fecha objetivo'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sgc.evidencias.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-[var(--foreground)]">Evidencias publicadas</p>
+              <div className="grid gap-2">
+                {sgc.evidencias.map(({ serie, vigente }) => (
+                  <div key={serie._id} className="flex items-center justify-between rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
+                    <div>
+                      <span className="font-medium">{serie.nombre}</span>
+                      {vigente && (
+                        <span className="ml-2 text-[var(--foreground-muted)]">{vigente.fileName}</span>
+                      )}
+                    </div>
+                    <span className="text-xs text-[var(--foreground-muted)]">
+                      {vigente ? 'Vigente' : 'Sin version vigente'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sgc.publicaciones.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-[var(--foreground)]">Publicaciones</p>
+              <div className="grid gap-2">
+                {sgc.publicaciones.map((pub) => (
+                  <div key={pub._id} className="rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
+                    <div className="font-medium">{pub.titulo}</div>
+                    <div className="mt-1 whitespace-pre-wrap text-[var(--foreground-muted)]">{pub.contenido}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {sgc.notificaciones.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-[var(--foreground)]">Notificaciones</p>
+              <div className="grid gap-2">
+                {sgc.notificaciones.map((notificacion) => (
+                  <div key={notificacion._id} className="rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-medium">{notificacion.titulo}</div>
+                        <div className="mt-1 whitespace-pre-wrap text-[var(--foreground-muted)]">{notificacion.mensaje}</div>
+                      </div>
+                      {!notificacion.leidaAt && (
+                        <form action={marcarNotificacionLeidaAction}>
+                          <input type="hidden" name="notificacion_id" value={notificacion._id} />
+                          <button className="btn-outline text-xs" type="submit">Leida</button>
+                        </form>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-2">
+            <p className="text-sm font-medium text-[var(--foreground)]">Comentarios</p>
+            <form action={crearComentarioParticipanteAction} className="grid gap-2">
+              <input type="hidden" name="ronda_id" value={ronda.id} />
+              <textarea className="input min-h-20" name="mensaje" placeholder="Escriba un comentario para el equipo SGC" required />
+              <button className="btn-primary justify-self-start" type="submit">Enviar comentario</button>
+            </form>
+            <div className="grid gap-2">
+              {sgc.comentarios.map((comentario) => (
+                <div key={comentario._id} className="rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
+                  <div className="font-medium">{comentario.estado}</div>
+                  <div className="mt-1 whitespace-pre-wrap text-[var(--foreground-muted)]">{comentario.mensaje}</div>
+                  {comentario.respuestaAdmin && (
+                    <div className="mt-2 rounded border border-[var(--border)] bg-[var(--surface-muted)] p-2 text-[var(--foreground-muted)]">{comentario.respuestaAdmin}</div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {sgc.hitos.length === 0 && sgc.evidencias.length === 0 && sgc.publicaciones.length === 0 && sgc.notificaciones.length === 0 && sgc.comentarios.length === 0 && (
+            <p className="text-sm text-[var(--foreground-muted)]">
+              No hay informacion publicada visible en este momento.
+            </p>
+          )}
+        </div>
+      )}
     </article>
   )
 }
@@ -165,6 +288,25 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const success = getParamValue(params.success)
   const error = getParamValue(params.error)
   const rondas = await listRondasParticipante(auth.user.id)
+  const rondasSgc = new Map<string, SgcDatosParticipante>()
+  await Promise.all(
+    rondas.map(async (r) => {
+      if (r.estado === 'documentacion_pendiente' || r.estado === 'cerrada') {
+        try {
+          const [hitos, evidencias, publicaciones, comentarios, notificaciones] = await Promise.all([
+            getHitosVisibleParticipante(r.id),
+            getEvidenciasPublicas(r.id),
+            listPublicacionesParticipante(r.id),
+            listMisComentariosRonda(r.id),
+            listMisNotificaciones(r.id),
+          ])
+          rondasSgc.set(r.id, { hitos, evidencias, publicaciones, comentarios, notificaciones })
+        } catch {
+          // Si no hay acceso, simplemente no mostrar datos SGC
+        }
+      }
+    })
+  )
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -231,7 +373,10 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
                 </a>
               </div>
 
-              {rondas.map((r) => <RondaParticipanteCard key={r.id} ronda={r} />)}
+              {rondas.map((r) => {
+                const sgcDatos = rondasSgc.get(r.id)
+                return <RondaParticipanteCard key={r.id} ronda={r} sgc={sgcDatos} />
+              })}
             </>
           )}
         </section>

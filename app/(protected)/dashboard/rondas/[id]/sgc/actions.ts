@@ -5,21 +5,30 @@ import { redirect } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import {
   actualizarHitoRonda,
+  actualizarCasoSgc,
   cerrarDocumentalmente,
+  crearCasoSgc,
   crearHitoRonda,
+  createPublicacion,
+  deletePublicacion,
   finalizarPlanRonda,
   finalizarRevisionDatos,
+  finalizarRevisionHomogeneidad,
   getEvidenciaVersionContext,
   getSgcDownloadUrl,
   generateSgcUploadUrl,
   guardarJustificacionSgc,
   guardarPlanRonda,
   guardarRevisionDatos,
+  guardarRevisionHomogeneidad,
   pasarADocumentacionPendiente,
   registrarEvidenciaVersion,
   retirarJustificacionSgc,
   retirarEvidenciaVersion,
   reabrirRondaSgc,
+  responderComentarioRonda,
+  upsertResultadoPtApp,
+  crearNotificacion,
 } from '@/lib/sgc'
 
 function pageUrl(rondaId: string) {
@@ -44,6 +53,27 @@ function parseHitoEstado(value: string) {
 function parseFormatoJustificable(value: string) {
   if (value === 'F-PSEA-05' || value === 'F-PSEA-05A' || value === 'F-PSEA-12') return value
   throw new Error('Formato no justificable en Fase 1.')
+}
+
+function parseCasoTipo(value: string) {
+  if (['consulta', 'desviacion', 'queja', 'apelacion', 'nc_capa', 'otro'].includes(value)) {
+    return value as 'consulta' | 'desviacion' | 'queja' | 'apelacion' | 'nc_capa' | 'otro'
+  }
+  return 'otro'
+}
+
+function parseCasoSeveridad(value: string) {
+  if (['baja', 'media', 'alta', 'critica'].includes(value)) {
+    return value as 'baja' | 'media' | 'alta' | 'critica'
+  }
+  return 'media'
+}
+
+function parseCasoEstado(value: string) {
+  if (['abierto', 'en_revision', 'esperando_participante', 'resuelto', 'cerrado'].includes(value)) {
+    return value as 'abierto' | 'en_revision' | 'esperando_participante' | 'resuelto' | 'cerrado'
+  }
+  return 'abierto'
 }
 
 async function requireAdmin() {
@@ -123,6 +153,38 @@ export async function finalizarRevisionDatosAction(formData: FormData) {
     redirectWith(rondaId, 'success', 'F-PSEA-13 finalizado.')
   } catch (error) {
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible finalizar F-PSEA-13.')
+  }
+}
+
+export async function guardarRevisionHomogeneidadAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    const keys = String(formData.get('homogeneidad_check_keys') ?? '').split(',').filter(Boolean)
+    const checks: Record<string, { cumple: boolean; observacion: string | null }> = {}
+    for (const key of keys) {
+      checks[key] = {
+        cumple: formData.get(`homogeneidad_check_${key}`) === 'on',
+        observacion: parseText(formData, `homogeneidad_obs_${key}`) || null,
+      }
+    }
+    await guardarRevisionHomogeneidad(rondaId, checks, {}, parseText(formData, 'homogeneidad_conclusiones') || null)
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Revision F-PSEA-08 guardada.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible guardar F-PSEA-08.')
+  }
+}
+
+export async function finalizarRevisionHomogeneidadAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await finalizarRevisionHomogeneidad(rondaId)
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'F-PSEA-08 finalizado.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible finalizar F-PSEA-08.')
   }
 }
 
@@ -279,5 +341,144 @@ export async function transicionSgcAction(formData: FormData) {
     redirectWith(rondaId, 'success', 'Estado SGC actualizado.')
   } catch (error) {
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar el estado.')
+  }
+}
+
+export async function crearPublicacionAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    const visibleDesde = parseText(formData, 'visible_desde')
+    const visibleHasta = parseText(formData, 'visible_hasta')
+    await createPublicacion({
+      rondaId,
+      titulo: parseText(formData, 'titulo'),
+      contenido: parseText(formData, 'contenido'),
+      tipo: parseText(formData, 'tipo') as 'resultado' | 'comunicado' | 'cronograma' | 'evidencia',
+      visibleDesde: visibleDesde ? new Date(visibleDesde).getTime() : Date.now(),
+      visibleHasta: visibleHasta ? new Date(visibleHasta).getTime() : null,
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Publicacion creada.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible crear la publicacion.')
+  }
+}
+
+export async function eliminarPublicacionAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await deletePublicacion(parseText(formData, 'publicacion_id'))
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Publicacion eliminada.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible eliminar la publicacion.')
+  }
+}
+
+export async function responderComentarioAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await responderComentarioRonda(
+      parseText(formData, 'comentario_id'),
+      parseText(formData, 'respuesta'),
+      formData.get('cerrar') === 'on'
+    )
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Comentario respondido.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible responder el comentario.')
+  }
+}
+
+export async function crearNotificacionAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    const tipo = parseText(formData, 'tipo')
+    await crearNotificacion({
+      rondaId,
+      rondaParticipanteId: parseText(formData, 'ronda_participante_id') || null,
+      destinatarioEmail: parseText(formData, 'destinatario_email'),
+      titulo: parseText(formData, 'titulo'),
+      mensaje: parseText(formData, 'mensaje'),
+      tipo: ['recordatorio', 'cronograma', 'resultado', 'sgc', 'otro'].includes(tipo)
+        ? tipo as 'recordatorio' | 'cronograma' | 'resultado' | 'sgc' | 'otro'
+        : 'sgc',
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Notificacion publicada.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible crear la notificacion.')
+  }
+}
+
+export async function guardarResultadoPtAppAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    const tipoResultado = parseText(formData, 'tipo_resultado')
+    const estado = parseText(formData, 'estado')
+    await upsertResultadoPtApp({
+      rondaId,
+      tipoResultado: ['homogeneidad', 'estabilidad', 'estadistico'].includes(tipoResultado)
+        ? tipoResultado as 'homogeneidad' | 'estabilidad' | 'estadistico'
+        : 'estadistico',
+      evidenciaSerieId: parseText(formData, 'serie_id'),
+      evidenciaVersionId: parseText(formData, 'version_id') || null,
+      estado: ['pendiente', 'cargado', 'en_revision', 'aprobado', 'rechazado'].includes(estado)
+        ? estado as 'pendiente' | 'cargado' | 'en_revision' | 'aprobado' | 'rechazado'
+        : 'pendiente',
+      observaciones: parseText(formData, 'observaciones') || null,
+      fechaCalculo: parseText(formData, 'fecha_calculo') || null,
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Resultado pt_app actualizado.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar el resultado pt_app.')
+  }
+}
+
+export async function crearCasoSgcAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await crearCasoSgc({
+      rondaId,
+      rondaParticipanteId: parseText(formData, 'ronda_participante_id') || null,
+      tipo: parseCasoTipo(parseText(formData, 'tipo')),
+      severidad: parseCasoSeveridad(parseText(formData, 'severidad')),
+      titulo: parseText(formData, 'titulo'),
+      descripcion: parseText(formData, 'descripcion'),
+      responsable: parseText(formData, 'responsable') || 'Coordinacion SGC',
+      formatoRelacionado: parseText(formData, 'formato_relacionado') || null,
+      evidenciaSerieId: parseText(formData, 'evidencia_serie_id') || null,
+      fechaObjetivo: parseText(formData, 'fecha_objetivo') || null,
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Caso SGC creado.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible crear el caso SGC.')
+  }
+}
+
+export async function actualizarCasoSgcAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await actualizarCasoSgc({
+      casoId: parseText(formData, 'caso_id'),
+      estado: parseCasoEstado(parseText(formData, 'estado')),
+      severidad: parseCasoSeveridad(parseText(formData, 'severidad')),
+      responsable: parseText(formData, 'responsable') || 'Coordinacion SGC',
+      fechaObjetivo: parseText(formData, 'fecha_objetivo') || null,
+      resolucion: parseText(formData, 'resolucion') || null,
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Caso SGC actualizado.')
+  } catch (error) {
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar el caso SGC.')
   }
 }

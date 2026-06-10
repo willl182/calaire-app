@@ -20,6 +20,7 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'Registros',     href: '/dashboard?tab=registros',    tabKey: 'registros' },
   { label: 'Participantes', href: '/dashboard?tab=participantes', tabKey: 'participantes' },
   { label: 'Resultados',    href: '/dashboard?tab=resultados',   tabKey: 'resultados' },
+  { label: 'SGC',           href: '/dashboard/sgc',              tabKey: '__sgc__' },
   { label: 'Herramienta PT', href: PT_APP_URL, tabKey: '__external__', external: true },
 ]
 
@@ -75,6 +76,7 @@ function TopNavInner() {
   function isActive(item: NavItem): boolean {
     if (item.external) return false
     if (item.tabKey === null) return pathname === '/dashboard' && !tab
+    if (item.tabKey === '__sgc__') return pathname.startsWith('/dashboard/sgc')
     if (item.tabKey === 'registros') return tab === 'registros'
     return tab === item.tabKey
   }

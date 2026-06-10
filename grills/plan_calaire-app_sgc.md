@@ -713,14 +713,24 @@ Mitigacion: mantener tablas separadas para evidencias, snapshots, registros nati
 
 ### Fase 3
 
-- matriz documental maestra;
-- `documentosSgc`;
-- `documentoSgcVersiones`;
-- importacion CSV;
-- vista por procesos;
-- control documental global;
-- auditoria formal;
-- integracion estructurada con `pt_app`.
+Completado:
+
+- [x] matriz documental maestra (`documentosSgc` + `documentoSgcVersiones`);
+- [x] queries/mutations de control documental (crear, versionar, retirar);
+- [x] helpers en `lib/sgc/index.ts` para consumir la matriz;
+- [x] ruta `/dashboard/sgc` con resumen global, formularios de alta y versionado;
+- [x] test Playwright y capturas de pantalla de Fase 3.
+
+Pendiente:
+
+- [ ] vista por procesos interactiva (filtrado dinamico por proceso, navegacion entre documentos, busqueda).
+
+Descartado (decision 2026-06-08):
+
+- ~~importacion CSV~~ (no hay datos CSV disponibles);
+- ~~control documental global extendido~~ (obsoletizacion automatica, alertas de revision);
+- ~~auditoria formal completa~~ (registro de lecturas/descargas);
+- ~~integracion estructurada con `pt_app`~~ (vinculacion de documentos maestros a reportes de ronda).
 
 ## 11. Primer hito exitoso
 

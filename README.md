@@ -48,12 +48,15 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
 NEXT_PUBLIC_CONVEX_SITE_URL=
+RESEND_API_KEY=
+MAIL_FROM=wilsonsalasc@gmail.com
 ```
 
 Notas:
 
 - `WORKOS_COOKIE_PASSWORD` debe ser un secreto fuerte.
 - `NEXT_PUBLIC_APP_URL` se usa para construir enlaces formales de acceso por participante.
+- `RESEND_API_KEY` y `MAIL_FROM` habilitan el envio transaccional de enlaces de claim para agentes. Sin `RESEND_API_KEY`, el flujo dev devuelve el enlace en la respuesta JSON y omite el correo. Para envio normal con Resend, `MAIL_FROM` debe pertenecer a un dominio verificado.
 - No commitear `.env.local`; solo `.env.example` debe versionarse.
 
 ### 3. Configurar WorkOS
@@ -104,7 +107,38 @@ pnpm lint
 pnpm build
 pnpm start
 pnpm release -- "mensaje del commit"
+pnpm test:e2e
 ```
+
+### Playwright local
+
+Para correr solo el smoke público, deja activo `pnpm dev` y ejecuta:
+
+```bash
+pnpm test:e2e
+```
+
+Para probar rutas autenticadas en local, usa un usuario WorkOS sin MFA/captcha:
+
+```bash
+E2E_AUTH_EMAIL="usuario@example.com" E2E_AUTH_PASSWORD="..." pnpm test:e2e
+```
+
+Si prefieres hacer login manual una sola vez:
+
+```bash
+pnpm test:e2e:auth:manual
+pnpm test:e2e
+```
+
+Ambos flujos guardan la sesión local en `.auth/workos.json`, ignorado por git.
+
+Notas para WorkOS/AuthKit en este entorno:
+
+- Usa `http://localhost:3000`, no `http://127.0.0.1:3000`. El redirect URI de WorkOS está configurado con `localhost`; mezclar hosts puede terminar en `Couldn't sign in`.
+- Para renovar la sesión manual de WorkOS, usa Chromium de sistema: `/usr/bin/chromium`. El Chromium empaquetado por Playwright puede ser rechazado por Google/WorkOS.
+- Si automatizas el login manual, lanza `/usr/bin/chromium` visible con `--disable-blink-features=AutomationControlled` y guarda el estado en `.auth/workos.json`.
+- En esta máquina, los lanzamientos de Chromium/Playwright necesitan ejecutarse fuera del sandbox; dentro del sandbox falla Chromium con `sandbox_host_linux.cc`.
 
 Antes de desplegar, correr al menos:
 

@@ -266,6 +266,26 @@ export default defineSchema({
   })
     .index('by_rondaId', ['rondaId']),
 
+  sgcRevisionHomogeneidad: defineTable({
+    rondaId: v.id('rondas'),
+    estado: v.union(v.literal('borrador'), v.literal('finalizado'), v.literal('requiere_revision')),
+    checks: v.record(v.string(), v.object({
+      cumple: v.boolean(),
+      observacion: v.union(v.string(), v.null()),
+      updatedAt: v.number(),
+      updatedBy: v.string(),
+    })),
+    metricas: v.record(v.string(), v.union(v.string(), v.number(), v.boolean(), v.null())),
+    conclusiones: v.optional(v.union(v.string(), v.null())),
+    finalizadoAt: v.optional(v.union(v.number(), v.null())),
+    finalizadoBy: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId']),
+
   sgcHitosRonda: defineTable({
     rondaId: v.id('rondas'),
     codigo: v.string(),
@@ -366,4 +386,194 @@ export default defineSchema({
     createdAt: v.number(),
   })
     .index('by_rondaId', ['rondaId']),
+
+  sgcComunicaciones: defineTable({
+    rondaId: v.id('rondas'),
+    tipo: v.union(v.literal('email'), v.literal('llamada'), v.literal('reunion'), v.literal('otro')),
+    destinatario: v.string(),
+    asunto: v.string(),
+    notas: v.optional(v.union(v.string(), v.null())),
+    fecha: v.string(),
+    responsable: v.string(),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_tipo', ['rondaId', 'tipo']),
+
+  agentAuthClaims: defineTable({
+    claimTokenHash: v.string(),
+    claimViewTokenHash: v.string(),
+    email: v.string(),
+    status: v.union(
+      v.literal('pending'),
+      v.literal('claimed'),
+      v.literal('revoked')
+    ),
+    otpHash: v.optional(v.union(v.string(), v.null())),
+    otpExpiresAt: v.optional(v.union(v.number(), v.null())),
+    claimExpiresAt: v.number(),
+    claimedAt: v.optional(v.union(v.number(), v.null())),
+    apiKeyHash: v.optional(v.union(v.string(), v.null())),
+    apiKeyExpiresAt: v.optional(v.union(v.number(), v.null())),
+    scopes: v.array(v.string()),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_claim_token_hash', ['claimTokenHash'])
+    .index('by_claim_view_token_hash', ['claimViewTokenHash'])
+    .index('by_api_key_hash', ['apiKeyHash'])
+    .index('by_email', ['email']),
+
+  agentApiKeys: defineTable({
+    apiKeyHash: v.string(),
+    claimId: v.id('agentAuthClaims'),
+    email: v.string(),
+    scopes: v.array(v.string()),
+    expiresAt: v.number(),
+    revokedAt: v.optional(v.union(v.number(), v.null())),
+    createdAt: v.number(),
+  })
+    .index('by_api_key_hash', ['apiKeyHash'])
+    .index('by_email', ['email'])
+    .index('by_claim_id', ['claimId']),
+
+  sgcPublicaciones: defineTable({
+    rondaId: v.id('rondas'),
+    titulo: v.string(),
+    contenido: v.string(),
+    tipo: v.union(v.literal('resultado'), v.literal('comunicado'), v.literal('cronograma'), v.literal('evidencia')),
+    visibleDesde: v.number(),
+    visibleHasta: v.optional(v.union(v.number(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_visible', ['rondaId', 'visibleDesde']),
+
+  sgcComentariosRonda: defineTable({
+    rondaId: v.id('rondas'),
+    rondaParticipanteId: v.id('rondaParticipantes'),
+    autorNombre: v.string(),
+    autorEmail: v.string(),
+    mensaje: v.string(),
+    estado: v.union(v.literal('abierto'), v.literal('respondido'), v.literal('cerrado')),
+    respuestaAdmin: v.optional(v.union(v.string(), v.null())),
+    respondidoAt: v.optional(v.union(v.number(), v.null())),
+    respondidoBy: v.optional(v.union(v.string(), v.null())),
+    cerradoAt: v.optional(v.union(v.number(), v.null())),
+    cerradoBy: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_estado', ['rondaId', 'estado'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId']),
+
+  sgcNotificaciones: defineTable({
+    rondaId: v.id('rondas'),
+    rondaParticipanteId: v.optional(v.union(v.id('rondaParticipantes'), v.null())),
+    destinatarioEmail: v.string(),
+    titulo: v.string(),
+    mensaje: v.string(),
+    tipo: v.union(v.literal('recordatorio'), v.literal('cronograma'), v.literal('resultado'), v.literal('sgc'), v.literal('otro')),
+    estado: v.union(v.literal('publicada'), v.literal('archivada')),
+    leidaAt: v.optional(v.union(v.number(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId'])
+    .index('by_destinatarioEmail', ['destinatarioEmail']),
+
+  sgcResultadosPtApp: defineTable({
+    rondaId: v.id('rondas'),
+    tipoResultado: v.union(v.literal('homogeneidad'), v.literal('estabilidad'), v.literal('estadistico')),
+    evidenciaSerieId: v.id('sgcEvidenciaSeries'),
+    evidenciaVersionId: v.optional(v.union(v.id('sgcEvidenciaVersiones'), v.null())),
+    estado: v.union(v.literal('pendiente'), v.literal('cargado'), v.literal('en_revision'), v.literal('aprobado'), v.literal('rechazado')),
+    observaciones: v.optional(v.union(v.string(), v.null())),
+    version: v.number(),
+    origen: v.literal('pt_app'),
+    fechaCalculo: v.optional(v.union(v.string(), v.null())),
+    aprobadoAt: v.optional(v.union(v.number(), v.null())),
+    aprobadoBy: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_tipoResultado', ['rondaId', 'tipoResultado'])
+    .index('by_evidenciaSerieId', ['evidenciaSerieId']),
+
+  sgcCasos: defineTable({
+    rondaId: v.id('rondas'),
+    rondaParticipanteId: v.optional(v.union(v.id('rondaParticipantes'), v.null())),
+    codigo: v.string(),
+    tipo: v.union(v.literal('consulta'), v.literal('desviacion'), v.literal('queja'), v.literal('apelacion'), v.literal('nc_capa'), v.literal('otro')),
+    severidad: v.union(v.literal('baja'), v.literal('media'), v.literal('alta'), v.literal('critica')),
+    estado: v.union(v.literal('abierto'), v.literal('en_revision'), v.literal('esperando_participante'), v.literal('resuelto'), v.literal('cerrado')),
+    titulo: v.string(),
+    descripcion: v.string(),
+    responsable: v.string(),
+    formatoRelacionado: v.optional(v.union(v.string(), v.null())),
+    evidenciaSerieId: v.optional(v.union(v.id('sgcEvidenciaSeries'), v.null())),
+    fechaObjetivo: v.optional(v.union(v.string(), v.null())),
+    resolucion: v.optional(v.union(v.string(), v.null())),
+    cerradoAt: v.optional(v.union(v.number(), v.null())),
+    cerradoBy: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_estado', ['rondaId', 'estado'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId']),
+
+  documentosSgc: defineTable({
+    codigo: v.string(),
+    nombre: v.string(),
+    proceso: v.string(),
+    tipo: v.union(v.literal('formato'), v.literal('procedimiento'), v.literal('instructivo'), v.literal('plantilla'), v.literal('registro'), v.literal('otro')),
+    estado: v.union(v.literal('borrador'), v.literal('vigente'), v.literal('obsoleto'), v.literal('en_revision')),
+    propietario: v.string(),
+    criticidad: v.union(v.literal('baja'), v.literal('media'), v.literal('alta')),
+    retencion: v.optional(v.union(v.string(), v.null())),
+    ubicacionFuente: v.optional(v.union(v.string(), v.null())),
+    notas: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_codigo', ['codigo'])
+    .index('by_proceso', ['proceso'])
+    .index('by_estado', ['estado'])
+    .index('by_proceso_and_estado', ['proceso', 'estado']),
+
+  documentoSgcVersiones: defineTable({
+    documentoId: v.id('documentosSgc'),
+    version: v.number(),
+    estado: v.union(v.literal('vigente'), v.literal('reemplazada'), v.literal('retirada')),
+    fechaVigencia: v.optional(v.union(v.string(), v.null())),
+    cambioResumen: v.string(),
+    storageId: v.optional(v.union(v.id('_storage'), v.null())),
+    fileName: v.optional(v.union(v.string(), v.null())),
+    contentType: v.optional(v.union(v.string(), v.null())),
+    size: v.optional(v.union(v.number(), v.null())),
+    hash: v.optional(v.union(v.string(), v.null())),
+    motivoRetiro: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_documentoId', ['documentoId'])
+    .index('by_documentoId_and_estado', ['documentoId', 'estado']),
 })
