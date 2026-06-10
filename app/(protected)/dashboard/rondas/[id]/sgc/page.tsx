@@ -4,7 +4,7 @@ import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { getRonda } from '@/lib/rondas'
-import { SGC_FORMATOS_FASE_1, SGC_LEYENDA_CODIGO_PROVISIONAL, type SgcFormatoCodigo } from '@/lib/sgc/catalog'
+import { SGC_FORMATOS_FASE_1, SGC_PLAN_BLOQUES, SGC_LEYENDA_CODIGO_PROVISIONAL, type SgcFormatoCodigo } from '@/lib/sgc/catalog'
 import { getPanelSgc, inicializarPanelSgc, listPublicaciones } from '@/lib/sgc'
 import { RondaContextNav } from '../RondaContextNav'
 import { ExpedienteSgc } from './ExpedienteSgc'
@@ -114,30 +114,6 @@ const CASO_ESTADO_LABELS: Record<string, string> = {
   resuelto: 'Resuelto',
   cerrado: 'Cerrado',
 }
-
-const PLAN_BLOQUES_INFO = [
-  { key: 'a', label: 'a) Personal involucrado en el diseño y la operación del programa de EA.' },
-  { key: 'b', label: 'b) Actividades de los proveedores externos de productos y servicios y sus datos de contacto.' },
-  { key: 'c', label: 'c) Criterios que deben cumplirse para participar en el programa de EA.' },
-  { key: 'd', label: 'd) Número y tipo de participantes esperados.' },
-  { key: 'e', label: 'e) Descripción de las actividades a realizar y los resultados que deben informar los participantes.' },
-  { key: 'f', label: 'f) Descripción del rango de valores o características esperadas de los ítems de EA.' },
-  { key: 'g', label: 'g) Principales fuentes potenciales de errores relacionadas con el área técnica del EA.' },
-  { key: 'h', label: 'h) Requisitos para la producción, control de calidad, almacenamiento y distribución de los ítems de EA.' },
-  { key: 'i', label: 'i) Disposiciones para evitar colusión o falsificación de resultados entre participantes.' },
-  { key: 'j', label: 'j) Descripción de la información a suministrar a los participantes y cronograma de actividades.' },
-  { key: 'k', label: 'k) Para EA continuos: frecuencia de distribución de ítems, fechas límite para reporte de resultados y fechas para la ejecución de las mediciones.' },
-  { key: 'l', label: 'l) Información sobre métodos o procedimientos que los participantes deben utilizar para almacenar, manipular, preparar, enviar o desechar los ítems, así como para realizar mediciones.' },
-  { key: 'm', label: 'm) Procedimientos de medición o métodos de ensayo para las pruebas de homogeneidad y estabilidad de los ítems.' },
-  { key: 'n', label: 'n) Preparación de formatos normalizados de informe que deben utilizar los participantes.' },
-  { key: 'o', label: 'o) Descripción detallada del análisis estadístico a utilizar.' },
-  { key: 'p', label: 'p) Origen, trazabilidad metrológica e incertidumbre de los valores asignados.' },
-  { key: 'q', label: 'q) Tratamiento de resultados obtenidos por diferentes métodos de medición que permitan evaluación comparable.' },
-  { key: 'r', label: 'r) Criterios para la evaluación del desempeño de los participantes.' },
-  { key: 's', label: 's) Descripción de los datos, informes provisionales o información a devolver a los participantes.' },
-  { key: 't', label: 't) Descripción del grado en que los resultados serán públicos y las conclusiones basadas en ellos.' },
-  { key: 'u', label: 'u) Procedimientos en caso de pérdida, deterioro o daño de los ítems de EA.' },
-]
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
@@ -337,7 +313,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
                 <input className="input" name="fecha_plan" type="date" defaultValue={planCampos.fecha_plan ?? ''} />
               </div>
               <div className="max-h-[500px] overflow-y-auto pr-2 space-y-4 border border-[var(--border)] rounded-lg p-4 bg-slate-50/50">
-                {PLAN_BLOQUES_INFO.map(({ key, label }) => (
+                {SGC_PLAN_BLOQUES.map(({ key, label }) => (
                   <div key={key} className="space-y-1.5">
                     <label className="text-xs font-semibold text-[var(--foreground-muted)] uppercase tracking-wide">
                       {label}

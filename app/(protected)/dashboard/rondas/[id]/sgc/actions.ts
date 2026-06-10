@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/lib/auth'
+import { SGC_PLAN_BLOQUES, type SgcPlanBloques } from '@/lib/sgc/catalog'
 import {
   actualizarHitoRonda,
   actualizarCasoSgc,
@@ -94,8 +95,8 @@ export async function guardarPlanRondaAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
   try {
-    const bloques: Record<string, string> = {}
-    for (const key of 'abcdefghijklmnopqrstu'.split('')) {
+    const bloques: SgcPlanBloques = {}
+    for (const { key } of SGC_PLAN_BLOQUES) {
       bloques[key] = parseText(formData, `bloque_${key}`)
     }
     await guardarPlanRonda(
