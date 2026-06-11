@@ -194,8 +194,10 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
             title="Datos del participante"
             description="Información del laboratorio responsable de los ensayos."
           />
-          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:grid-cols-2">
             {([
+              ['nit_laboratorio', 'NIT del laboratorio'],
+              ['correo_laboratorio', 'Correo del laboratorio'],
               ['nombre_laboratorio', 'Nombre del laboratorio'],
               ['nombre_responsable', 'Nombre del responsable'],
               ['cargo', 'Cargo'],
