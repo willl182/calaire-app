@@ -1,11 +1,11 @@
-# Guía del Participante para el Cargue de Datos de la Ronda
+# Instructivo de Reporte de Resultados y Cargue de Datos
 
-**Código:** GL-PT-002
+**Código:** I-PSEA-10
 **Versión:** 0.1
 **Fecha:** 2026-05-21
-**Responsable:** Calaire — Laboratorio de Ensayos de Aptitud
-**Audiencia:** Laboratorios participantes de rondas de ensayo de aptitud
-**Alcance:** Uso del aplicativo para registro de ficha y cargue de resultados
+**Responsable:** Calaire
+**Audiencia:** Laboratorios participantes
+**Alcance:** Registro y cargue de resultados en CALAIRE-APP
 
 ---
 
@@ -13,7 +13,7 @@
 
 | Versión | Fecha      | Descripción                                                  |
 |---------|------------|--------------------------------------------------------------|
-| 0.1     | 2026-05-21 | Creación inicial. Guía operativa derivada de GL-PT-001 v1.1. |
+| 0.1     | 2026-05-21 | Creación inicial del instructivo I-PSEA-10 para reporte de resultados y cargue de datos. |
 
 ---
 
@@ -65,7 +65,11 @@ Los siguientes términos se utilizan a lo largo de esta guía y aparecen en las 
 3. Si recibió un enlace de invitación, ábralo con la misma cuenta que usará durante toda la ronda.
 4. Verifique que la aplicación muestre la pantalla principal **Mi dashboard**.
 
-[Captura: Pantalla de inicio de sesión o acceso a Mi dashboard]
+![Pantalla inicial de CALAIRE APP](../../public/docs/screenshots/login-app.png)
+
+![Pantalla de autenticación WorkOS](../../public/docs/screenshots/login-authkit-email.png)
+
+![Selección de cuenta de Google para continuar a WorkOS](../../public/docs/screenshots/login-google-account.png)
 
 Si no aparecen rondas asignadas, revise que haya ingresado con la cuenta correcta. Si el problema continúa, contacte al coordinador de Calaire.
 

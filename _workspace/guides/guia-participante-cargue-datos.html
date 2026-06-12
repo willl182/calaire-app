@@ -7,7 +7,7 @@
   <style>
     @font-face {
       font-family: "Droid Sans";
-      src: url("./public/fonts/DroidSans-Regular.ttf") format("truetype");
+      src: url("./fonts/DroidSans-Regular.ttf") format("truetype");
       font-weight: 400;
       font-style: normal;
       font-display: swap;
@@ -15,7 +15,7 @@
 
     @font-face {
       font-family: "Droid Sans";
-      src: url("./public/fonts/DroidSans-Bold.ttf") format("truetype");
+      src: url("./fonts/DroidSans-Bold.ttf") format("truetype");
       font-weight: 700;
       font-style: normal;
       font-display: swap;
@@ -483,10 +483,14 @@
       box-shadow: 0 8px 22px rgba(17, 24, 39, .07);
     }
     .screenshot-frame iframe,
+    .screenshot-frame img,
     .screenshot-frame .mockup {
       display: block;
       width: 100%;
       border: 0;
+    }
+    .screenshot-frame img {
+      height: auto;
     }
     .screenshot-caption {
       padding: .5rem .75rem;
@@ -645,7 +649,7 @@
   <div class="document-shell">
     <aside class="sidebar" aria-label="Navegación de la guía">
       <div class="brand">
-        <img src="./public/logo.png" alt="Logo Universidad Nacional de Colombia">
+        <img src="./logo-unal.png" alt="Logo Universidad Nacional de Colombia">
         <div>
           <strong>CALAIRE-APP</strong>
           <span>Instructivo de Reporte de Resultados y Cargue de Datos por Participante</span>
@@ -762,8 +766,20 @@
           <div class="flow-step"><span>3</span><strong>Acepte invitación</strong><p>Si recibió enlace de invitación, ábralo con la misma cuenta de trabajo.</p></div>
           <div class="flow-step"><span>4</span><strong>Verifique</strong><p>Confirme que la aplicación muestre <strong>Mi dashboard</strong>.</p></div>
         </div>
+        <figure class="screenshot-frame">
+          <img src="./docs/screenshots/login-app.png" alt="Pantalla de ingreso de CALAIRE APP con el botón Ingresar con correo electrónico">
+          <figcaption class="screenshot-caption">Pantalla inicial de CALAIRE APP: seleccione <strong>Ingresar con correo electrónico</strong>.</figcaption>
+        </figure>
+        <figure class="screenshot-frame">
+          <img src="./docs/screenshots/login-authkit-email.png" alt="Pantalla de autenticación WorkOS con campo de correo electrónico y opciones de proveedor">
+          <figcaption class="screenshot-caption">Pantalla de autenticación: ingrese el correo autorizado o seleccione el proveedor correspondiente.</figcaption>
+        </figure>
+        <figure class="screenshot-frame">
+          <img src="./docs/screenshots/login-google-account.png" alt="Pantalla de selección de cuenta de Google para continuar a WorkOS">
+          <figcaption class="screenshot-caption">Selección de cuenta: use la cuenta autorizada para la ronda.</figcaption>
+        </figure>
         <div class="screenshot-note">
-          <strong>Captura externa:</strong> la pantalla de inicio de sesión pertenece al proveedor de identidad (WorkOS). Esta guía incluye el mockup del <strong>Mi dashboard</strong> en la siguiente sección.
+          <strong>Nota:</strong> las pantallas de autenticación pueden cambiar porque pertenecen al proveedor de identidad. El flujo esperado es el mismo: ingresar con la cuenta autorizada y volver a CALAIRE APP.
         </div>
         <p>Si no aparecen rondas asignadas, revise que haya ingresado con la cuenta correcta. Si el problema continúa, contacte al coordinador de Calaire.</p>
       </section>

@@ -4,7 +4,14 @@ export default authkitProxy({
   // Redirige a /login si el usuario no está autenticado al acceder a rutas protegidas
   middlewareAuth: {
     enabled: true,
-    unauthenticatedPaths: ['/login', '/auth/callback', '/denied', '/'],
+    unauthenticatedPaths: [
+      '/',
+      '/login',
+      '/auth/callback',
+      '/denied',
+      '/guia.html',
+      '/docs/screenshots/:path*',
+    ],
   },
 })
 
