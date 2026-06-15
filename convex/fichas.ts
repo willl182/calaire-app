@@ -70,7 +70,16 @@ export const getFichaByRondaParticipante = query({
     analizadores.sort((a, b) => a.sortOrder - b.sortOrder)
     instrumentos.sort((a, b) => a.sortOrder - b.sortOrder)
 
-    return { ...ficha, acompanantes, analizadores, instrumentos }
+    const acompanantesConUrl = await Promise.all(
+      acompanantes.map(async (acompanante) => ({
+        ...acompanante,
+        seguridadSocialArlUrl: acompanante.seguridadSocialArlStorageId
+          ? await ctx.storage.getUrl(acompanante.seguridadSocialArlStorageId)
+          : null,
+      }))
+    )
+
+    return { ...ficha, acompanantes: acompanantesConUrl, analizadores, instrumentos }
   },
 })
 
@@ -134,7 +143,23 @@ export const findFichaTemplateByLookup = query({
     analizadores.sort((a, b) => a.sortOrder - b.sortOrder)
     instrumentos.sort((a, b) => a.sortOrder - b.sortOrder)
 
-    return { ...ficha, acompanantes, analizadores, instrumentos }
+    const acompanantesConUrl = await Promise.all(
+      acompanantes.map(async (acompanante) => ({
+        ...acompanante,
+        seguridadSocialArlUrl: acompanante.seguridadSocialArlStorageId
+          ? await ctx.storage.getUrl(acompanante.seguridadSocialArlStorageId)
+          : null,
+      }))
+    )
+
+    return { ...ficha, acompanantes: acompanantesConUrl, analizadores, instrumentos }
+  },
+})
+
+export const generateFichaUploadUrl = mutation({
+  args: {},
+  handler: async (ctx) => {
+    return ctx.storage.generateUploadUrl()
   },
 })
 
@@ -335,7 +360,13 @@ export const replaceAcompanantes = mutation({
       sortOrder:          v.number(),
       nombreCompleto:     v.string(),
       documentoIdentidad: v.string(),
+      correo:             v.optional(v.union(v.string(), v.null())),
+      telefono:           v.optional(v.union(v.string(), v.null())),
       rol:                v.string(),
+      seguridadSocialArlStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+      seguridadSocialArlFileName:  v.optional(v.union(v.string(), v.null())),
+      seguridadSocialArlContentType: v.optional(v.union(v.string(), v.null())),
+      seguridadSocialArlSize:      v.optional(v.union(v.number(), v.null())),
     })),
   },
   handler: async (ctx, { fichaId, items }) => {
@@ -359,7 +390,13 @@ export const adminReplaceAcompanantes = mutation({
       sortOrder:          v.number(),
       nombreCompleto:     v.string(),
       documentoIdentidad: v.string(),
+      correo:             v.optional(v.union(v.string(), v.null())),
+      telefono:           v.optional(v.union(v.string(), v.null())),
       rol:                v.string(),
+      seguridadSocialArlStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+      seguridadSocialArlFileName:  v.optional(v.union(v.string(), v.null())),
+      seguridadSocialArlContentType: v.optional(v.union(v.string(), v.null())),
+      seguridadSocialArlSize:      v.optional(v.union(v.number(), v.null())),
     })),
   },
   handler: async (ctx, { fichaId, items }) => {

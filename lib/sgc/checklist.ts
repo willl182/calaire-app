@@ -66,7 +66,7 @@ export function calcularChecklistSgc(input: SgcCoverageInput): SgcChecklistItem[
     let ultimaActualizacion: string | null = null
     const justificacion = input.justificacionesVigentes[formato.codigo]
 
-    if (formato.codigo === 'F-PPSEA-03' || formato.codigo === 'F-PSEA-06') {
+    if (formato.codigo === 'F-PSEA-03' || formato.codigo === 'F-PSEA-06') {
       const completo = input.planFinalizado && input.snapshotsPlan > 0
       estado = completo ? 'completo' : 'pendiente'
       vinculo = 'Plan de ronda'

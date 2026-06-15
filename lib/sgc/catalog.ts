@@ -1,5 +1,5 @@
 export type SgcFormatoCodigo =
-  | 'F-PPSEA-03'
+  | 'F-PSEA-03'
   | 'F-PSEA-05'
   | 'F-PSEA-05A'
   | 'F-PSEA-06'
@@ -56,7 +56,7 @@ export const SGC_LEYENDA_CODIGO_PROVISIONAL =
 
 export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
   {
-    codigo: 'F-PPSEA-03',
+    codigo: 'F-PSEA-03',
     nombre: 'Plan de ronda',
     fase: 'planeacion',
     modo: 'nativo',

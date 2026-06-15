@@ -197,7 +197,13 @@ export default defineSchema({
     sortOrder:          v.number(),
     nombreCompleto:     v.string(),
     documentoIdentidad: v.string(),
+    correo:             v.optional(v.union(v.string(), v.null())),
+    telefono:           v.optional(v.union(v.string(), v.null())),
     rol:                v.string(),
+    seguridadSocialArlStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    seguridadSocialArlFileName:  v.optional(v.union(v.string(), v.null())),
+    seguridadSocialArlContentType: v.optional(v.union(v.string(), v.null())),
+    seguridadSocialArlSize:      v.optional(v.union(v.number(), v.null())),
   })
     .index('by_ficha', ['fichaId']),
 

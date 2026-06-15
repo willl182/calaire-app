@@ -8,6 +8,7 @@ import type { EstadoRonda } from '@/lib/rondas'
 import {
   guardarCampoFichaAction,
   guardarListasAction,
+  cargarPdfAcompananteAction,
   enviarFichaFinalAction,
   cerrarSesionParticipanteAction,
 } from './actions'
@@ -42,13 +43,27 @@ function SectionHeader({ title, description }: { title: string; description?: st
   )
 }
 
+function isAffirmative(value: string) {
+  return ['si', 'sí', 'true', '1', 'yes'].includes(value.trim().toLowerCase())
+}
+
 export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEstado, participanteCodigo, participanteEmail, ficha: fichaInicial, soloLectura }: Props) {
   const [fieldStates, setFieldStates] = useState<Record<string, SaveState>>({})
 
   // Dynamic lists
   const [acompanantes, setAcompanantes] = useState<AcompananteInput[]>(
-    fichaInicial.acompanantes.map(({ sort_order, nombre_completo, documento_identidad, rol }) => ({
-      sort_order, nombre_completo, documento_identidad, rol,
+    fichaInicial.acompanantes.map((acompanante) => ({
+      sort_order: acompanante.sort_order,
+      nombre_completo: acompanante.nombre_completo,
+      documento_identidad: acompanante.documento_identidad,
+      correo: acompanante.correo,
+      telefono: acompanante.telefono,
+      rol: acompanante.rol,
+      seguridad_social_arl_storage_id: acompanante.seguridad_social_arl_storage_id,
+      seguridad_social_arl_file_name: acompanante.seguridad_social_arl_file_name,
+      seguridad_social_arl_content_type: acompanante.seguridad_social_arl_content_type,
+      seguridad_social_arl_size: acompanante.seguridad_social_arl_size,
+      seguridad_social_arl_url: acompanante.seguridad_social_arl_url,
     }))
   )
   const [analizadores, setAnalizadores] = useState<AnalizadorInput[]>(
@@ -102,6 +117,29 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
     setListSaving(false)
     if (result.ok) setListSaved(true)
     else setListError(result.error ?? 'Error al guardar listas')
+  }
+
+  const handleAcompanantePdfChange = async (idx: number, file: File | null) => {
+    if (!file || disabled) return
+    setListSaving(true)
+    setListError(null)
+    const formData = new FormData()
+    formData.append('archivo', file)
+    const result = await cargarPdfAcompananteAction(codigoRonda, formData)
+    setListSaving(false)
+    if (!result.ok || !result.archivo) {
+      setListError(result.error ?? 'No fue posible subir el PDF')
+      return
+    }
+    setAcompanantes((prev) => prev.map((a, i) => i === idx ? {
+      ...a,
+      seguridad_social_arl_storage_id: result.archivo!.storageId,
+      seguridad_social_arl_file_name: result.archivo!.fileName,
+      seguridad_social_arl_content_type: result.archivo!.contentType,
+      seguridad_social_arl_size: result.archivo!.size,
+      seguridad_social_arl_url: null,
+    } : a))
+    setListSaved(false)
   }
 
   const handleEnviar = async () => {
@@ -261,6 +299,32 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                   />
                 </label>
                 <label className={labelClass}>
+                  <span>Correo</span>
+                  <input
+                    type="email"
+                    className={inputClass}
+                    value={item.correo ?? ''}
+                    disabled={disabled}
+                    onChange={(e) => {
+                      setAcompanantes((prev) => prev.map((a, i) => i === idx ? { ...a, correo: e.target.value } : a))
+                      setListSaved(false)
+                    }}
+                  />
+                </label>
+                <label className={labelClass}>
+                  <span>Teléfono</span>
+                  <input
+                    type="tel"
+                    className={inputClass}
+                    value={item.telefono ?? ''}
+                    disabled={disabled}
+                    onChange={(e) => {
+                      setAcompanantes((prev) => prev.map((a, i) => i === idx ? { ...a, telefono: e.target.value } : a))
+                      setListSaved(false)
+                    }}
+                  />
+                </label>
+                <label className={labelClass}>
                   <span className="flex items-center justify-between">
                     Rol
                     {!disabled && (
@@ -287,6 +351,25 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                     }}
                   />
                 </label>
+                <label className={`${labelClass} md:col-span-2`}>
+                  <span>PDF seguridad social y ARL</span>
+                  <input
+                    type="file"
+                    accept="application/pdf,.pdf"
+                    className={inputClass}
+                    disabled={disabled}
+                    onChange={(e) => handleAcompanantePdfChange(idx, e.target.files?.[0] ?? null)}
+                  />
+                  {item.seguridad_social_arl_file_name && (
+                    <span className="text-xs text-[var(--foreground-muted)]">
+                      {item.seguridad_social_arl_url ? (
+                        <a className="underline" href={item.seguridad_social_arl_url} target="_blank" rel="noreferrer">
+                          {item.seguridad_social_arl_file_name}
+                        </a>
+                      ) : item.seguridad_social_arl_file_name}
+                    </span>
+                  )}
+                </label>
               </div>
             ))}
           </div>
@@ -295,7 +378,19 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               type="button"
               className="btn-outline self-start"
               onClick={() => {
-                setAcompanantes((prev) => [...prev, { sort_order: prev.length + 1, nombre_completo: '', documento_identidad: '', rol: '' }])
+                setAcompanantes((prev) => [...prev, {
+                  sort_order: prev.length + 1,
+                  nombre_completo: '',
+                  documento_identidad: '',
+                  correo: '',
+                  telefono: '',
+                  rol: '',
+                  seguridad_social_arl_storage_id: null,
+                  seguridad_social_arl_file_name: null,
+                  seguridad_social_arl_content_type: null,
+                  seguridad_social_arl_size: null,
+                  seguridad_social_arl_url: null,
+                }])
                 setListSaved(false)
               }}
             >
@@ -380,9 +475,23 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                       onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, tipo_verificacion: e.target.value } : a)); setListSaved(false) }} />
                   </label>
                   <label className={labelClass}>
-                    <span>Incertidumbre declarada</span>
-                    <input type="text" className={inputClass} value={item.incertidumbre_declarada} disabled={disabled}
-                      onChange={(e) => { setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, incertidumbre_declarada: e.target.value } : a)); setListSaved(false) }} />
+                    <span>Incertidumbre estimada</span>
+                    <span className={`${inputClass} flex items-center justify-between ${disabled ? '' : 'cursor-pointer hover:border-[var(--pt-primary)]'}`}>
+                      <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={isAffirmative(item.incertidumbre_declarada)}
+                        disabled={disabled}
+                        onChange={(e) => {
+                          setAnalizadores((prev) => prev.map((a, i) => i === idx ? { ...a, incertidumbre_declarada: e.target.checked ? 'si' : 'no' } : a))
+                          setListSaved(false)
+                        }}
+                      />
+                      <span className="text-[var(--foreground-muted)]">Seleccionar</span>
+                      <span className={`min-w-10 rounded-full px-2.5 py-0.5 text-center text-xs font-semibold ${isAffirmative(item.incertidumbre_declarada) ? 'bg-emerald-100 text-emerald-800' : 'bg-[var(--surface-muted)] text-[var(--foreground-muted)]'}`}>
+                        {isAffirmative(item.incertidumbre_declarada) ? 'Sí' : 'No'}
+                      </span>
+                    </span>
                   </label>
                   <label className={labelClass}>
                     <span>Unidad de salida</span>
@@ -400,7 +509,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               onClick={() => {
                 setAnalizadores((prev) => [
                   ...prev,
-                  { sort_order: prev.length + 1, analito: '', fabricante: '', modelo: '', numero_serie: '', metodo_epa: '', fecha_ultima_calibracion: null, tipo_verificacion: '', incertidumbre_declarada: '', unidad_salida: '' },
+                  { sort_order: prev.length + 1, analito: '', fabricante: '', modelo: '', numero_serie: '', metodo_epa: '', fecha_ultima_calibracion: null, tipo_verificacion: '', incertidumbre_declarada: 'no', unidad_salida: '' },
                 ])
                 setListSaved(false)
               }}
@@ -507,17 +616,6 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                 onBlur={(e) => handleBlur('hora_llegada', e.target.value)} />
             </label>
           </div>
-          <label className="inline-flex items-center gap-3 text-sm text-[var(--foreground)]">
-            <input
-              type="checkbox"
-              className="h-4 w-4 rounded border-[var(--border)]"
-              defaultChecked={fichaInicial.estacionamiento}
-              disabled={disabled}
-              onChange={(e) => handleCheckboxChange('estacionamiento', e.target.checked)}
-            />
-            <span>Requiere estacionamiento</span>
-            <FieldSaveIndicator state={fieldStates['estacionamiento'] ?? 'idle'} />
-          </label>
           <label className={labelClass}>
             <span className="flex items-center justify-between">
               Observaciones de logística

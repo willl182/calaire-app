@@ -38,7 +38,14 @@ export type Acompanante = {
   sort_order: number
   nombre_completo: string
   documento_identidad: string
+  correo: string | null
+  telefono: string | null
   rol: string
+  seguridad_social_arl_storage_id: string | null
+  seguridad_social_arl_file_name: string | null
+  seguridad_social_arl_content_type: string | null
+  seguridad_social_arl_size: number | null
+  seguridad_social_arl_url: string | null
 }
 
 export type Analizador = {
@@ -174,7 +181,14 @@ function mapAcompananteDoc(a: any): Acompanante {
     sort_order: a.sortOrder as number,
     nombre_completo: a.nombreCompleto as string,
     documento_identidad: a.documentoIdentidad as string,
+    correo: (a.correo ?? null) as string | null,
+    telefono: (a.telefono ?? null) as string | null,
     rol: a.rol as string,
+    seguridad_social_arl_storage_id: (a.seguridadSocialArlStorageId ?? null) as string | null,
+    seguridad_social_arl_file_name: (a.seguridadSocialArlFileName ?? null) as string | null,
+    seguridad_social_arl_content_type: (a.seguridadSocialArlContentType ?? null) as string | null,
+    seguridad_social_arl_size: (a.seguridadSocialArlSize ?? null) as number | null,
+    seguridad_social_arl_url: (a.seguridadSocialArlUrl ?? null) as string | null,
   }
 }
 
@@ -348,7 +362,13 @@ export async function replaceAcompanantes(
       sortOrder:          item.sort_order,
       nombreCompleto:     item.nombre_completo,
       documentoIdentidad: item.documento_identidad,
+      correo:             item.correo,
+      telefono:           item.telefono,
       rol:                item.rol,
+      seguridadSocialArlStorageId: item.seguridad_social_arl_storage_id as Id<'_storage'> | null,
+      seguridadSocialArlFileName: item.seguridad_social_arl_file_name,
+      seguridadSocialArlContentType: item.seguridad_social_arl_content_type,
+      seguridadSocialArlSize: item.seguridad_social_arl_size,
     })),
   })
 }
@@ -363,9 +383,19 @@ export async function adminReplaceAcompanantes(
       sortOrder:          item.sort_order,
       nombreCompleto:     item.nombre_completo,
       documentoIdentidad: item.documento_identidad,
+      correo:             item.correo,
+      telefono:           item.telefono,
       rol:                item.rol,
+      seguridadSocialArlStorageId: item.seguridad_social_arl_storage_id as Id<'_storage'> | null,
+      seguridadSocialArlFileName: item.seguridad_social_arl_file_name,
+      seguridadSocialArlContentType: item.seguridad_social_arl_content_type,
+      seguridadSocialArlSize: item.seguridad_social_arl_size,
     })),
   })
+}
+
+export async function generateFichaUploadUrl(): Promise<string> {
+  return fetchMutation(api.fichas.generateFichaUploadUrl, {})
 }
 
 export async function replaceAnalizadores(

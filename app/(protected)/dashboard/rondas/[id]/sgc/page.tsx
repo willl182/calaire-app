@@ -301,7 +301,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           <section id="plan-ronda" className="card p-6">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h2 className="text-lg font-semibold text-[var(--foreground)]">Plan de ronda</h2>
+                <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-03 — Plan de ronda</h2>
                 <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.plan?.estado ?? 'borrador'}</p>
               </div>
               <Link className="btn-outline" href={`/dashboard/rondas/${id}/sgc/plan/print`}>Vista imprimible</Link>

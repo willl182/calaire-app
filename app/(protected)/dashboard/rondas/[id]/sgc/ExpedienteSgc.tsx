@@ -28,7 +28,7 @@ const FORMATOS_ARCHIVO: SgcFormatoCodigo[] = ['F-PSEA-08', 'F-PSEA-09', 'F-PSEA-
 const FORMATOS_JUSTIFICABLES: SgcFormatoCodigo[] = ['F-PSEA-05', 'F-PSEA-05A', 'F-PSEA-12']
 
 const FORMATO_ANCHORS: Partial<Record<SgcFormatoCodigo, string>> = {
-  'F-PPSEA-03': '#plan-ronda',
+  'F-PSEA-03': '#plan-ronda',
   'F-PSEA-06': '#plan-ronda',
   'F-PSEA-05': 'participantes',
   'F-PSEA-05A': 'participantes',
@@ -40,7 +40,7 @@ const FORMATO_ANCHORS: Partial<Record<SgcFormatoCodigo, string>> = {
 }
 
 const ACTION_LABELS: Record<SgcFormatoCodigo, string> = {
-  'F-PPSEA-03': 'Completar plan',
+  'F-PSEA-03': 'Completar plan',
   'F-PSEA-05': 'Gestionar participantes',
   'F-PSEA-05A': 'Revisar fichas',
   'F-PSEA-06': 'Completar plan operativo',

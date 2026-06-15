@@ -32,7 +32,7 @@ export const DOCUMENTO_SGC_CONTENT_TYPES = [
 ] as const
 
 export const formatoValidator = v.union(
-  v.literal('F-PPSEA-03'),
+  v.literal('F-PSEA-03'),
   v.literal('F-PSEA-05'),
   v.literal('F-PSEA-05A'),
   v.literal('F-PSEA-06'),
@@ -368,7 +368,7 @@ export function collectChecklistFaltantes(coverage: Awaited<ReturnType<typeof co
     hasJustificacion(coverage, 'F-PSEA-12')
   const f11Ok = coverage.fPsea11NoAplica && Boolean(coverage.fPsea11Razon?.trim())
 
-  if (!planOk) faltantes.push('F-PPSEA-03/F-PSEA-06 plan finalizado con snapshot')
+  if (!planOk) faltantes.push('F-PSEA-03/F-PSEA-06 plan finalizado con snapshot')
   if (!f05Ok) faltantes.push('F-PSEA-05 participantes reclamados o justificados')
   if (!f05aOk) faltantes.push('F-PSEA-05A fichas enviadas o justificadas')
   if (!f07Ok) faltantes.push('F-PSEA-07 codigos unicos y no provisionales')

@@ -82,7 +82,7 @@ export const transitionRondaToDocumentacionPendienteConfig = {
     if (coverage.participantesEsperados === 0) throw new Error('Debe identificar participantes esperados.')
     const faltantes = collectChecklistFaltantes(coverage).filter((faltante) =>
       [
-        'F-PPSEA-03/F-PSEA-06 plan finalizado con snapshot',
+        'F-PSEA-03/F-PSEA-06 plan finalizado con snapshot',
         'F-PSEA-05 participantes reclamados o justificados',
         'F-PSEA-05A fichas enviadas o justificadas',
         'F-PSEA-07 codigos unicos y no provisionales',

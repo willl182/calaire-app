@@ -22,7 +22,7 @@ export default async function PlanRondaPrintPage({ params }: PageProps) {
 
   return (
     <main className="mx-auto max-w-4xl bg-white px-8 py-10 text-slate-950 print:px-0">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">F-PPSEA-03 / F-PSEA-06</p>
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">F-PSEA-03 / F-PSEA-06</p>
       <h1 className="mt-2 text-3xl font-semibold">Plan de ronda {ronda.codigo}</h1>
       <p className="mt-1 text-slate-600">{ronda.nombre}</p>
       <div className="mt-6 grid gap-3 border-y border-slate-200 py-4 text-sm sm:grid-cols-2">
