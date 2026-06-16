@@ -673,7 +673,6 @@
         <a href="#envio-final">15. Envío final PT</a>
         <a href="#problemas">16. Problemas frecuentes</a>
         <a href="#soporte">17. Soporte</a>
-        <a href="#anexos">Anexos</a>
       </nav>
     </aside>
 
@@ -685,7 +684,6 @@
           <p>Instrucciones prácticas para registrar la ficha del laboratorio, cargar resultados por contaminante y enviar el informe final de la ronda en CALAIRE-APP Ensayos de Aptitud.</p>
           <div class="toolbar" aria-label="Acciones del documento">
             <button class="button" type="button" onclick="window.print()">Imprimir o guardar PDF</button>
-            <a class="button secondary" href="#checklist-final">Ir al checklist final</a>
           </div>
         </div>
       </header>
@@ -1068,59 +1066,9 @@
         </ul>
       </section>
 
-      <section id="anexos" class="content-section">
-        <span class="section-kicker">Referencia</span>
-        <h2>Anexos</h2>
-        <h3>Anexo A: campos de la pantalla y responsabilidades</h3>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>Campo en pantalla</th><th>¿Lo diligencia el participante?</th><th>Descripción</th></tr></thead>
-            <tbody>
-              <tr><td>Contaminante</td><td>No</td><td>Configurado por Calaire.</td></tr>
-              <tr><td>Corrida</td><td>No</td><td>Configurado por Calaire.</td></tr>
-              <tr><td>Grupo</td><td>No</td><td>Configurado por Calaire. Solo visible cuando hay más de un grupo.</td></tr>
-              <tr><td>Estado</td><td>No</td><td>Indicador automático de la aplicación.</td></tr>
-              <tr><td>Dato 1</td><td><strong>Sí</strong></td><td>Primer dato/promedio resumido.</td></tr>
-              <tr><td>Dato 2</td><td><strong>Sí</strong></td><td>Segundo dato/promedio resumido, cuando aplica.</td></tr>
-              <tr><td>Dato 3</td><td><strong>Sí</strong></td><td>Tercer dato/promedio resumido, cuando aplica.</td></tr>
-              <tr><td>Promedio</td><td><strong>Sí</strong></td><td>Valor medio reportado (<code>xi</code>).</td></tr>
-              <tr><td>Desv. Est.</td><td><strong>Sí</strong></td><td>Desviación estándar de los datos reportados.</td></tr>
-              <tr><td>u(x)</td><td><strong>Sí</strong></td><td>Incertidumbre estándar del valor medio.</td></tr>
-              <tr><td>k</td><td><strong>Sí</strong></td><td>Factor de cobertura individual o grupal.</td></tr>
-              <tr><td>U(X)</td><td><strong>Sí</strong></td><td>Incertidumbre expandida del valor medio. Campo manual.</td></tr>
-              <tr><td>OK</td><td>No</td><td>Indicador automático de completitud. No es un campo de entrada.</td></tr>
-            </tbody>
-          </table>
-        </div>
-
-        <h3>Anexo B: guía resumida de cálculo de resultados</h3>
-        <div class="callout info">Esta sección resume expectativas sobre los valores que el participante debe calcular antes de ingresar a la aplicación. No prescribe una metodología única.</div>
-        <p><strong>Datos/promedios:</strong> para niveles distintos de cero se requieren tres datos/promedios; para nivel cero, uno solo. Cada dato/promedio exige al menos 75 % de datos válidos en una hora.</p>
-        <p><strong>Valor medio:</strong> para niveles distintos de cero, es el promedio de los tres datos/promedios válidos. Para nivel cero, corresponde al único dato/promedio reportado en <code>Dato 1</code>.</p>
-        <p><strong>Desviación estándar:</strong> refleja la dispersión de los datos/promedios reportados por el participante.</p>
-        <p><strong>Incertidumbre estándar u(x):</strong> se estima siguiendo el procedimiento interno del laboratorio. Para nivel cero, el componente de repetibilidad debe estimarse a partir de datos minutales o del procedimiento interno.</p>
-        <p><strong>Factor de cobertura k:</strong> se define según el procedimiento de estimación de incertidumbre.</p>
-        <p><strong>Incertidumbre expandida U(X):</strong> se calcula como <code>U(X) = k × u(x)</code>. La aplicación no la calcula automáticamente; el participante debe ingresarla manualmente.</p>
-
-        <h3 id="checklist-final">Anexo C: checklist final del participante</h3>
-        <ul class="checklist">
-          <li>Ingresó con la cuenta correcta.</li>
-          <li>La ronda aparece en <strong>Mi dashboard</strong> y está en estado <code>activa</code>.</li>
-          <li>La Hoja de Registro fue diligenciada y enviada.</li>
-          <li>El botón <strong>Cargar datos</strong> estuvo habilitado.</li>
-          <li>El código PT y la réplica son visibles en el encabezado de cargue.</li>
-          <li>Todos los contaminantes fueron revisados y sus combinaciones están completas.</li>
-          <li><code>Dato 1</code>, <code>Dato 2</code> y <code>Dato 3</code> fueron diligenciados donde estaban habilitados.</li>
-          <li><code>Promedio</code> y <code>Desv. Est.</code> fueron ingresados para cada combinación.</li>
-          <li><code>u(x)</code> fue ingresada para cada combinación.</li>
-          <li><code>k</code> fue definido y revisado.</li>
-          <li><code>U(X)</code> fue ingresada manualmente y es coherente con <code>u(x)</code> y <code>k</code>.</li>
-          <li>La completitud es 100 % y las observaciones son 0.</li>
-          <li>No hay celdas con error ni guardados pendientes.</li>
-          <li>El informe final PT fue enviado exitosamente.</li>
-          <li>Los datos crudos y cálculos internos están conservados y trazables.</li>
-        </ul>
-
+      <section id="cierre" class="content-section">
+        <span class="section-kicker">Cierre</span>
+        <h2>Nota final</h2>
         <p class="footer-note">Guía de uso de CALAIRE-APP para laboratorios participantes.</p>
       </section>
     </main>
