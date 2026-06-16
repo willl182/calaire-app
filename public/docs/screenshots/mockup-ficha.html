@@ -34,13 +34,14 @@
   }
 
   .min-h-screen { min-height: 100vh; }
-  .px-4 { padding-left: 1rem; padding-right: 1rem; }
+  .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
   .py-8 { padding-top: 2rem; padding-bottom: 2rem; }
   .mx-auto { margin-left: auto; margin-right: auto; }
   .max-w-7xl { max-width: 80rem; }
   .flex { display: flex; }
   .flex-col { flex-direction: column; }
   .gap-1 { gap: 0.25rem; }
+  .gap-2 { gap: 0.5rem; }
   .gap-3 { gap: 0.75rem; }
   .gap-4 { gap: 1rem; }
   .gap-5 { gap: 1.25rem; }
@@ -49,6 +50,7 @@
   .items-end { align-items: flex-end; }
   .items-start { align-items: flex-start; }
   .justify-between { justify-content: space-between; }
+  .justify-end { justify-content: flex-end; }
   .self-start { align-self: flex-start; }
   .w-full { width: 100%; }
   .w-fit { width: fit-content; }
@@ -59,11 +61,15 @@
   .md-grid-cols-4 { grid-template-columns: repeat(4, 1fr); }
   .md-flex-row { flex-direction: row; }
   .md-items-center { align-items: center; }
+  .md-justify-end { justify-content: flex-end; }
+  .md-justify-between { justify-content: space-between; }
+  .md-col-span-2 { grid-column: span 2 / span 2; }
   .shrink-0 { flex-shrink: 0; }
   .mt-0-5 { margin-top: 0.125rem; }
   .mt-2 { margin-top: 0.5rem; }
   .mt-4 { margin-top: 1rem; }
-  .mt-6 { margin-top: 1.5rem; }
+  .mb-2 { margin-bottom: 0.5rem; }
+  .space-y-0-5 > * + * { margin-top: 0.125rem; }
   .space-y-1 > * + * { margin-top: 0.25rem; }
   .text-xs { font-size: 0.75rem; }
   .text-sm { font-size: 0.875rem; }
@@ -74,31 +80,41 @@
   .font-semibold { font-weight: 600; }
   .font-bold { font-weight: 700; }
   .uppercase { text-transform: uppercase; }
-  .tracking-wide { letter-spacing: 0.14em; }
+  .tracking-wide { letter-spacing: 0.12em; }
   .tracking-wider { letter-spacing: 0.2em; }
   .text-foreground { color: var(--foreground); }
   .text-foreground-muted { color: var(--foreground-muted); }
   .text-pt-primary-dark { color: var(--pt-primary-dark); }
   .text-emerald-600 { color: #059669; }
+  .text-emerald-700 { color: #047857; }
   .text-emerald-800 { color: #065F46; }
   .text-rose-500 { color: #EF4444; }
   .text-rose-700 { color: #B91C1C; }
+  .bg-emerald-50 { background-color: #ECFDF5; }
   .bg-emerald-100 { background-color: #D1FAE5; }
+  .bg-rose-50 { background-color: #FFF1F2; }
+  .bg-rose-100 { background-color: #FFE4E6; }
   .bg-surface-muted { background-color: var(--surface-muted); }
+  .border-emerald-200 { border-color: #A7F3D0; }
+  .border-rose-200 { border-color: #FECDD3; }
   .resize-none { resize: none; }
   .rounded-full { border-radius: 9999px; }
   .rounded-lg { border-radius: 0.5rem; }
   .rounded-xl { border-radius: 0.75rem; }
   .border { border-width: 1px; border-style: solid; }
-  .border-border { border-color: var(--border); }
+  .p-3 { padding: 0.75rem; }
   .p-4 { padding: 1rem; }
   .p-6 { padding: 1.5rem; }
   .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .px-4 { padding-left: 1rem; padding-right: 1rem; }
+  .px-8 { padding-left: 2rem; padding-right: 2rem; }
   .py-1 { padding-top: 0.25rem; padding-bottom: 0.25rem; }
   .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-  .px-8 { padding-left: 2rem; padding-right: 2rem; }
+  .py-3 { padding-top: 0.75rem; padding-bottom: 0.75rem; }
   .py-6 { padding-top: 1.5rem; padding-bottom: 1.5rem; }
   .pb-3 { padding-bottom: 0.75rem; }
+  .list-inside { list-style-position: inside; }
+  .list-disc { list-style-type: disc; }
 
   @media (min-width: 768px) {
     .md-grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
@@ -108,6 +124,7 @@
     .md-items-center { align-items: center; }
     .md-items-end { align-items: flex-end; }
     .md-justify-between { justify-content: space-between; }
+    .md-justify-end { justify-content: flex-end; }
     .md-col-span-2 { grid-column: span 2 / span 2; }
   }
 
@@ -210,7 +227,7 @@
     font-family: var(--font-sans), system-ui, sans-serif;
   }
   .input:disabled, .select:disabled, .textarea:disabled, .checkbox:disabled {
-    opacity: 0.7;
+    opacity: 0.6;
     background: var(--surface-muted);
     cursor: not-allowed;
   }
@@ -230,7 +247,6 @@
     border: 1px solid var(--border);
     border-radius: 0.5rem;
     background: var(--surface);
-    cursor: pointer;
   }
   .toggle-pill {
     min-width: 2.5rem;
@@ -249,17 +265,48 @@
     padding: 1rem;
   }
   .save-indicator { font-size: 0.6875rem; color: #059669; }
+  .alert {
+    border-radius: 0.75rem;
+    border-width: 1px;
+    border-style: solid;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .alert-success {
+    background: #ECFDF5;
+    border-color: #A7F3D0;
+    color: #065F46;
+  }
+  .alert-error {
+    background: #FFF1F2;
+    border-color: #FECDD3;
+    color: #B91C1C;
+  }
+  .btn-disabled {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--border);
+    background: var(--surface-muted);
+    color: var(--foreground-muted);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
 </style>
 </head>
 <body>
-  <div class="min-h-screen px-4 py-8">
+  <div class="min-h-screen px-6 py-8">
     <div class="mx-auto flex max-w-7xl flex-col gap-6">
 
       <header class="header-bar px-8 py-6">
-        <div class="flex flex-col gap-4 md-flex-row md-items-center justify-between">
+        <div class="flex flex-col gap-4 md-flex-row md-items-center md-justify-between">
           <div class="flex items-center gap-6">
             <img src="../../logo-unal.png" alt="Universidad Nacional de Colombia" width="150" height="64">
-            <div class="space-y-1">
+            <div class="space-y-0-5">
               <h1 class="text-xl font-bold text-foreground">
                 CALAIRE-APP <span class="font-medium text-foreground-muted">Ensayos de Aptitud</span>
               </h1>
@@ -276,24 +323,10 @@
           <p class="kicker">F-PSEA-05A v0.1</p>
           <h2 class="text-lg font-semibold text-foreground">Hoja de Registro del Participante</h2>
           <p class="text-sm font-medium text-pt-primary-dark">Ronda: RON-2026A-CO · Participante: PT-042</p>
-          <div class="mt-2">
-            <span class="badge">Ficha enviada ✓</span>
-          </div>
         </div>
-      </section>
-
-      <!-- Reutilizar datos -->
-      <section class="card grid gap-4 p-6">
-        <div class="section-header">
-          <h3 class="section-title">Reutilizar datos</h3>
-          <p class="section-desc">Busca una ficha previa por NIT o correo del participante y copia la sección de datos del participante.</p>
-        </div>
-        <div class="flex flex-col gap-3 md-flex-row md-items-end">
-          <label class="field w-full">
-            <span class="field-label"><span>NIT o correo</span></span>
-            <input class="input" type="text" value="900123456-7" disabled>
-          </label>
-          <button type="button" class="btn-outline w-fit">Reutilizar datos</button>
+        <div class="flex flex-wrap items-center gap-2 md-justify-end">
+          <span class="btn-disabled">Cargar datos</span>
+          <button type="button" class="btn-outline">Cerrar sesión</button>
         </div>
       </section>
 
@@ -306,35 +339,35 @@
         <div class="grid gap-4 md-grid-cols-2">
           <label class="field">
             <span class="field-label"><span>NIT del laboratorio</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="900123456-7" disabled>
+            <input class="input" type="text" value="900123456-7">
           </label>
           <label class="field">
             <span class="field-label"><span>Correo del laboratorio</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="lab.calaire@unal.edu.co" disabled>
+            <input class="input" type="text" value="lab.calaire@unal.edu.co">
           </label>
           <label class="field">
             <span class="field-label"><span>Nombre del laboratorio</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="Laboratorio de Calidad del Aire UNAL" disabled>
+            <input class="input" type="text" value="Laboratorio de Calidad del Aire UNAL">
           </label>
           <label class="field">
             <span class="field-label"><span>Nombre del responsable</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="Dra. María Fernanda López" disabled>
+            <input class="input" type="text" value="Dra. María Fernanda López">
           </label>
           <label class="field">
             <span class="field-label"><span>Cargo</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="Coordinadora metrológica" disabled>
+            <input class="input" type="text" value="Coordinadora metrológica">
           </label>
           <label class="field">
             <span class="field-label"><span>Ciudad</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="Medellín" disabled>
+            <input class="input" type="text" value="Medellín">
           </label>
           <label class="field">
             <span class="field-label"><span>Departamento</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="Antioquia" disabled>
+            <input class="input" type="text" value="Antioquia">
           </label>
           <label class="field">
             <span class="field-label"><span>Teléfono</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="text" value="+57 604 123 4567" disabled>
+            <input class="input" type="text" value="+57 604 123 4567">
           </label>
         </div>
       </section>
@@ -343,59 +376,60 @@
       <section class="card grid gap-5 p-6">
         <div class="section-header">
           <h3 class="section-title">Personal acompañante</h3>
+          <p class="section-desc">Personas adicionales que participarán en la ronda de ensayo.</p>
         </div>
 
         <div class="subcard grid gap-3 md-grid-cols-3">
           <label class="field">
             <span>Nombre completo</span>
-            <input class="input" type="text" value="Ing. Carlos Martínez" disabled>
+            <input class="input" type="text" value="Ing. Carlos Martínez">
           </label>
           <label class="field">
             <span>Documento de identidad</span>
-            <input class="input" type="text" value="12.345.678" disabled>
+            <input class="input" type="text" value="12.345.678">
           </label>
           <label class="field">
-            <span class="field-label"><span>Correo</span></span>
-            <input class="input" type="email" value="carlos.martinez@unal.edu.co" disabled>
+            <span>Correo</span>
+            <input class="input" type="email" value="carlos.martinez@unal.edu.co">
           </label>
           <label class="field">
             <span>Teléfono</span>
-            <input class="input" type="tel" value="+57 300 123 4567" disabled>
+            <input class="input" type="tel" value="+57 300 123 4567">
           </label>
           <label class="field md-col-span-2">
             <span class="field-label"><span>Rol</span><span class="text-rose-500 text-xs">Quitar</span></span>
-            <input class="input" type="text" value="Asistente técnico" disabled>
+            <input class="input" type="text" value="Asistente técnico">
           </label>
           <label class="field md-col-span-2">
             <span>PDF seguridad social y ARL</span>
-            <input class="input" type="text" value="seguridad_social_carlos_martinez.pdf" disabled>
+            <input class="input" type="text" value="seguridad_social_carlos_martinez.pdf">
           </label>
         </div>
 
         <div class="subcard grid gap-3 md-grid-cols-3">
           <label class="field">
             <span>Nombre completo</span>
-            <input class="input" type="text" value="Qca. Ana Patricia Ruiz" disabled>
+            <input class="input" type="text" value="Qca. Ana Patricia Ruiz">
           </label>
           <label class="field">
             <span>Documento de identidad</span>
-            <input class="input" type="text" value="87.654.321" disabled>
+            <input class="input" type="text" value="87.654.321">
           </label>
           <label class="field">
-            <span class="field-label"><span>Correo</span></span>
-            <input class="input" type="email" value="ana.ruiz@unal.edu.co" disabled>
+            <span>Correo</span>
+            <input class="input" type="email" value="ana.ruiz@unal.edu.co">
           </label>
           <label class="field">
             <span>Teléfono</span>
-            <input class="input" type="tel" value="+57 310 987 6543" disabled>
+            <input class="input" type="tel" value="+57 310 987 6543">
           </label>
           <label class="field md-col-span-2">
             <span class="field-label"><span>Rol</span><span class="text-rose-500 text-xs">Quitar</span></span>
-            <input class="input" type="text" value="Responsable de muestreo" disabled>
+            <input class="input" type="text" value="Responsable de muestreo">
           </label>
           <label class="field md-col-span-2">
             <span>PDF seguridad social y ARL</span>
-            <input class="input" type="text" value="arl_ana_patricia_ruiz.pdf" disabled>
+            <input class="input" type="text" value="arl_ana_patricia_ruiz.pdf">
           </label>
         </div>
 
@@ -406,6 +440,7 @@
       <section class="card grid gap-5 p-6">
         <div class="section-header">
           <h3 class="section-title">Analizadores declarados</h3>
+          <p class="section-desc">Equipos analizadores que se utilizarán durante la ronda.</p>
         </div>
 
         <div class="subcard grid gap-3">
@@ -416,33 +451,33 @@
           <div class="grid gap-3 md-grid-cols-2">
             <label class="field">
               <span>Analito</span>
-              <select class="select" disabled>
+              <select class="select">
                 <option selected>CO</option>
               </select>
             </label>
             <label class="field">
               <span>Fabricante</span>
-              <input class="input" type="text" value="Thermo Fisher Scientific" disabled>
+              <input class="input" type="text" value="Thermo Fisher Scientific">
             </label>
             <label class="field">
               <span>Modelo</span>
-              <input class="input" type="text" value="48i" disabled>
+              <input class="input" type="text" value="48i">
             </label>
             <label class="field">
               <span>Número de serie</span>
-              <input class="input" type="text" value="SN-CO-2024-001" disabled>
+              <input class="input" type="text" value="SN-CO-2024-001">
             </label>
             <label class="field">
               <span>Método EPA</span>
-              <input class="input" type="text" value="40 CFR Part 50 Appendix C" disabled>
+              <input class="input" type="text" value="40 CFR Part 50 Appendix C">
             </label>
             <label class="field">
               <span>Fecha última calibración</span>
-              <input class="input" type="date" value="2026-04-15" disabled>
+              <input class="input" type="date" value="2026-04-15">
             </label>
             <label class="field">
               <span>Tipo de verificación</span>
-              <input class="input" type="text" value="Certificación PERM" disabled>
+              <input class="input" type="text" value="Certificación PERM">
             </label>
             <label class="field">
               <span>Incertidumbre estimada</span>
@@ -453,7 +488,7 @@
             </label>
             <label class="field">
               <span>Unidad de salida</span>
-              <input class="input" type="text" value="ppb" disabled>
+              <input class="input" type="text" value="ppb">
             </label>
           </div>
         </div>
@@ -466,33 +501,33 @@
           <div class="grid gap-3 md-grid-cols-2">
             <label class="field">
               <span>Analito</span>
-              <select class="select" disabled>
+              <select class="select">
                 <option selected>NO2</option>
               </select>
             </label>
             <label class="field">
               <span>Fabricante</span>
-              <input class="input" type="text" value="Thermo Fisher Scientific" disabled>
+              <input class="input" type="text" value="Thermo Fisher Scientific">
             </label>
             <label class="field">
               <span>Modelo</span>
-              <input class="input" type="text" value="42i" disabled>
+              <input class="input" type="text" value="42i">
             </label>
             <label class="field">
               <span>Número de serie</span>
-              <input class="input" type="text" value="SN-NO2-2024-008" disabled>
+              <input class="input" type="text" value="SN-NO2-2024-008">
             </label>
             <label class="field">
               <span>Método EPA</span>
-              <input class="input" type="text" value="40 CFR Part 50 Appendix F" disabled>
+              <input class="input" type="text" value="40 CFR Part 50 Appendix F">
             </label>
             <label class="field">
               <span>Fecha última calibración</span>
-              <input class="input" type="date" value="2026-03-20" disabled>
+              <input class="input" type="date" value="2026-03-20">
             </label>
             <label class="field">
               <span>Tipo de verificación</span>
-              <input class="input" type="text" value="Verificación periódica" disabled>
+              <input class="input" type="text" value="Verificación periódica">
             </label>
             <label class="field">
               <span>Incertidumbre estimada</span>
@@ -503,7 +538,7 @@
             </label>
             <label class="field">
               <span>Unidad de salida</span>
-              <input class="input" type="text" value="ppb" disabled>
+              <input class="input" type="text" value="ppb">
             </label>
           </div>
         </div>
@@ -515,43 +550,44 @@
       <section class="card grid gap-5 p-6">
         <div class="section-header">
           <h3 class="section-title">Instrumentos auxiliares</h3>
+          <p class="section-desc">Equipos de apoyo utilizados en la ronda.</p>
         </div>
 
         <div class="subcard grid gap-3 md-grid-cols-4">
           <label class="field">
             <span>Equipo</span>
-            <input class="input" type="text" value="Calibrador de gases" disabled>
+            <input class="input" type="text" value="Calibrador de gases">
           </label>
           <label class="field">
             <span>Marca / Modelo</span>
-            <input class="input" type="text" value="Environics 6100" disabled>
+            <input class="input" type="text" value="Environics 6100">
           </label>
           <label class="field">
             <span>Número de serie</span>
-            <input class="input" type="text" value="ENV-6100-4521" disabled>
+            <input class="input" type="text" value="ENV-6100-4521">
           </label>
           <label class="field">
             <span class="field-label"><span>Cantidad</span><span class="text-rose-500 text-xs">Quitar</span></span>
-            <input class="input" type="number" value="1" disabled>
+            <input class="input" type="number" value="1">
           </label>
         </div>
 
         <div class="subcard grid gap-3 md-grid-cols-4">
           <label class="field">
             <span>Equipo</span>
-            <input class="input" type="text" value="Barómetro digital" disabled>
+            <input class="input" type="text" value="Barómetro digital">
           </label>
           <label class="field">
             <span>Marca / Modelo</span>
-            <input class="input" type="text" value="Vaisala PTB330" disabled>
+            <input class="input" type="text" value="Vaisala PTB330">
           </label>
           <label class="field">
             <span>Número de serie</span>
-            <input class="input" type="text" value="VAIS-PTB-7789" disabled>
+            <input class="input" type="text" value="VAIS-PTB-7789">
           </label>
           <label class="field">
             <span class="field-label"><span>Cantidad</span><span class="text-rose-500 text-xs">Quitar</span></span>
-            <input class="input" type="number" value="1" disabled>
+            <input class="input" type="number" value="1">
           </label>
         </div>
 
@@ -566,26 +602,27 @@
         <div class="grid gap-4 md-grid-cols-2">
           <label class="field">
             <span class="field-label"><span>Tipo de transporte</span><span class="save-indicator">✓ Guardado</span></span>
-            <select class="select" disabled>
+            <select class="select">
               <option selected>Propio</option>
             </select>
           </label>
           <label class="field">
             <span class="field-label"><span>Día de llegada de equipos</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="date" value="2026-06-20" disabled>
+            <input class="input" type="date" value="2026-06-20">
+            <span class="text-xs text-foreground-muted">Aplica para equipos fuera de Medellín</span>
           </label>
           <label class="field">
             <span class="field-label"><span>Hora estimada de llegada</span><span class="save-indicator">✓ Guardado</span></span>
-            <input class="input" type="time" value="08:00" disabled>
+            <input class="input" type="time" value="08:00">
           </label>
         </div>
         <label class="field">
           <span class="field-label"><span>Observaciones de logística</span><span class="save-indicator">✓ Guardado</span></span>
-          <textarea class="input textarea resize-none" rows="3" disabled>Se coordinará la entrada por la portería principal de la Universidad Nacional, sede Medellín.</textarea>
+          <textarea class="input textarea resize-none" rows="3">Se coordinará la entrada por la portería principal de la Universidad Nacional, sede Medellín.</textarea>
         </label>
         <label class="field">
           <span class="field-label"><span>Justificación de cambio de equipo</span><span class="save-indicator">✓ Guardado</span></span>
-          <textarea class="input textarea resize-none" rows="3" disabled>No aplica. Se utilizará el mismo equipo declarado en la ronda anterior.</textarea>
+          <textarea class="input textarea resize-none" rows="3">No aplica. Se utilizará el mismo equipo declarado en la ronda anterior.</textarea>
         </label>
       </section>
 
@@ -593,55 +630,67 @@
       <section class="card grid gap-5 p-6">
         <div class="section-header">
           <h3 class="section-title">Declaraciones</h3>
+          <p class="section-desc">El participante declara y acepta las siguientes condiciones.</p>
         </div>
         <div class="grid gap-4">
           <label class="flex items-start gap-3 text-sm text-foreground">
-            <input type="checkbox" class="checkbox mt-0-5" checked disabled>
+            <input type="checkbox" class="checkbox mt-0-5" checked>
             <span class="flex-1">Los datos consignados en esta ficha son correctos y verificables.</span>
             <span class="save-indicator">✓ Guardado</span>
           </label>
           <label class="flex items-start gap-3 text-sm text-foreground">
-            <input type="checkbox" class="checkbox mt-0-5" checked disabled>
-            <span class="flex-1">Acepta las condiciones de participación en la ronda de ensayo de aptitud.</span>
+            <input type="checkbox" class="checkbox mt-0-5" checked>
+            <span class="flex-1">Acepto las condiciones de participación en la ronda de ensayo de aptitud.</span>
             <span class="save-indicator">✓ Guardado</span>
           </label>
           <label class="flex items-start gap-3 text-sm text-foreground">
-            <input type="checkbox" class="checkbox mt-0-5" checked disabled>
-            <span class="flex-1">Se compromete a seguir los procedimientos establecidos durante el ensayo.</span>
+            <input type="checkbox" class="checkbox mt-0-5" checked>
+            <span class="flex-1">Me comprometo a seguir los procedimientos establecidos durante el ensayo.</span>
             <span class="save-indicator">✓ Guardado</span>
           </label>
           <label class="flex items-start gap-3 text-sm text-foreground">
-            <input type="checkbox" class="checkbox mt-0-5" checked disabled>
-            <span class="flex-1">Seguirá los procedimientos internos de Calaire para el desarrollo de la prueba de aptitud.</span>
+            <input type="checkbox" class="checkbox mt-0-5" checked>
+            <span class="flex-1">Seguiré los procedimientos internos de Calaire para el desarrollo de la prueba de aptitud.</span>
             <span class="save-indicator">✓ Guardado</span>
           </label>
           <label class="flex items-start gap-3 text-sm text-foreground">
-            <input type="checkbox" class="checkbox mt-0-5" checked disabled>
+            <input type="checkbox" class="checkbox mt-0-5" checked>
             <span class="flex-1">El responsable registrado está autorizado por la dirección del laboratorio.</span>
             <span class="save-indicator">✓ Guardado</span>
           </label>
         </div>
         <label class="field" style="max-width: 360px;">
           <span class="field-label"><span>Nombre del responsable autorizado</span><span class="save-indicator">✓ Guardado</span></span>
-          <input class="input" type="text" value="Dra. María Fernanda López" disabled>
+          <input class="input" type="text" value="Dra. María Fernanda López">
         </label>
       </section>
 
-      <!-- Guardar listas -->
-      <section class="card grid gap-4 p-6">
+      <!-- Acciones -->
+      <section class="card grid gap-5 p-6">
         <div class="section-header">
-          <h3 class="section-title">Guardar listas</h3>
-          <p class="section-desc">Guarda los cambios en acompañantes, analizadores e instrumentos.</p>
+          <h3 class="section-title">Acciones</h3>
         </div>
+
         <div class="flex flex-wrap items-center gap-4">
           <button type="button" class="btn-outline">Guardar datos temporalmente</button>
           <span class="text-sm text-emerald-600">✓ Listas guardadas</span>
         </div>
-      </section>
 
-      <div>
-        <a href="#" class="btn-outline">← Volver a participantes</a>
-      </div>
+        <div class="grid gap-4">
+          <div class="alert alert-error">
+            <p class="mb-2">Complete los siguientes campos obligatorios:</p>
+            <ul class="list-inside list-disc space-y-1 font-medium">
+              <li>NIT del laboratorio</li>
+              <li>Correo del laboratorio</li>
+              <li>Nombre del responsable</li>
+            </ul>
+          </div>
+          <div class="flex flex-wrap items-center gap-4">
+            <button type="button" class="btn-primary">Enviar ficha →</button>
+            <p class="text-xs text-foreground-muted">El envío confirma que los datos son correctos y habilita la carga de resultados.</p>
+          </div>
+        </div>
+      </section>
 
     </div>
   </div>
