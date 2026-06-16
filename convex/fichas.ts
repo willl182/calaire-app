@@ -43,6 +43,23 @@ function normalizeLookupValue(value: string) {
   return value.trim().toLowerCase()
 }
 
+async function getRondaByFichaId(
+  ctx: QueryCtx | MutationCtx,
+  fichaId: Id<'fichasRegistro'>
+) {
+  const ficha = await ctx.db.get(fichaId)
+  if (!ficha) return null
+  const rp = await ctx.db.get(ficha.rondaParticipanteId)
+  if (!rp) return null
+  return ctx.db.get(rp.rondaId)
+}
+
+function assertRondaAbierta(ronda: Doc<'rondas'> | null) {
+  if (ronda?.estado === 'cerrada') {
+    throw new Error('La ronda está cerrada y no admite edición')
+  }
+}
+
 // ---------------------------------------------------------------------------
 // Fichas — read
 // ---------------------------------------------------------------------------
@@ -269,7 +286,10 @@ export const upsertFichaScalar = mutation({
   },
   handler: async (ctx, { fichaId, field, valueString, valueBoolean }) => {
     const ficha = await ctx.db.get(fichaId)
-    if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no editable')
+    if (!ficha) throw new Error('Ficha no encontrada')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaAbierta(ronda)
 
     const hasValue = valueBoolean !== undefined || valueString !== undefined
     if (!hasValue) {
@@ -371,7 +391,10 @@ export const replaceAcompanantes = mutation({
   },
   handler: async (ctx, { fichaId, items }) => {
     const ficha = await ctx.db.get(fichaId)
-    if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no editable')
+    if (!ficha) throw new Error('Ficha no encontrada')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaAbierta(ronda)
 
     const existing = await ctx.db
       .query('fichasAcompanantes')
@@ -431,7 +454,10 @@ export const replaceAnalizadores = mutation({
   },
   handler: async (ctx, { fichaId, items }) => {
     const ficha = await ctx.db.get(fichaId)
-    if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no editable')
+    if (!ficha) throw new Error('Ficha no encontrada')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaAbierta(ronda)
 
     const existing = await ctx.db
       .query('fichasAnalizadores')
@@ -486,7 +512,10 @@ export const replaceInstrumentos = mutation({
   },
   handler: async (ctx, { fichaId, items }) => {
     const ficha = await ctx.db.get(fichaId)
-    if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no editable')
+    if (!ficha) throw new Error('Ficha no encontrada')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaAbierta(ronda)
 
     const existing = await ctx.db
       .query('fichasInstrumentos')
@@ -527,7 +556,12 @@ export const submitFicha = mutation({
   args: { fichaId: v.id('fichasRegistro') },
   handler: async (ctx, { fichaId }) => {
     const ficha = await ctx.db.get(fichaId)
-    if (!ficha || ficha.estado !== 'borrador') throw new Error('Ficha no en estado borrador')
+    if (!ficha) throw new Error('Ficha no encontrada')
+    if (ficha.estado !== 'borrador') throw new Error('Ficha no en estado borrador')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaAbierta(ronda)
+
     await ctx.db.patch(fichaId, { estado: 'enviado', updatedAt: Date.now() })
   },
 })

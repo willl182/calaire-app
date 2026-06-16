@@ -75,6 +75,8 @@ export async function guardarCampoFichaAction(
     return { error: 'Campo no permitido' }
   }
 
+  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite edición' }
+
   const ficha = await getOrCreateFicha(result.rp.id)
   await upsertFichaScalars(ficha.id, field as FichaScalarField, value)
   return { ok: true }
@@ -89,8 +91,9 @@ export async function guardarListasAction(
   const result = await resolveRondaParticipante(codigoRonda)
   if ('error' in result) return { error: result.error }
 
+  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite edición' }
+
   const ficha = await getOrCreateFicha(result.rp.id)
-  if (ficha.estado !== 'borrador') return { error: 'La ficha ya fue enviada y no puede modificarse' }
 
   await Promise.all([
     replaceAcompanantes(ficha.id, acompanantes),
@@ -112,8 +115,7 @@ export async function cargarPdfAcompananteAction(
   const result = await resolveRondaParticipante(codigoRonda)
   if ('error' in result) return { error: result.error }
 
-  const ficha = await getOrCreateFicha(result.rp.id)
-  if (ficha.estado !== 'borrador') return { error: 'La ficha ya fue enviada y no puede modificarse' }
+  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite edición' }
 
   const file = formData.get('archivo')
   if (!(file instanceof File) || file.size === 0) return { error: 'Seleccione un PDF.' }
@@ -130,6 +132,8 @@ export async function enviarFichaFinalAction(
 ): Promise<{ ok?: boolean; error?: string; errores?: string[] }> {
   const result = await resolveRondaParticipante(codigoRonda)
   if ('error' in result) return { error: result.error }
+
+  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite envíos' }
 
   const ficha = await getFichaByRondaParticipante(result.rp.id)
   if (!ficha) return { error: 'No existe la ficha de registro' }

@@ -86,7 +86,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
   const [submitErrores, setSubmitErrores] = useState<string[]>([])
   const [enviado, setEnviado] = useState(fichaInicial.estado === 'enviado')
 
-  const disabled = soloLectura || enviado
+  const disabled = soloLectura
   const puedeCargarDatos = rondaEstado === 'activa' && enviado
 
   const handleBlur = useCallback(
@@ -692,25 +692,23 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
             <SectionHeader title="Acciones" />
 
             {/* Guardar listas */}
-            {!enviado && (
-              <div className="flex flex-wrap items-center gap-4">
-                <button
-                  type="button"
-                  className="btn-outline"
-                  disabled={listSaving}
-                  onClick={handleGuardarListas}
-                >
-                  {listSaving ? 'Guardando…' : 'Guardar datos temporalmente'}
-                </button>
-                {listSaved && <span className="text-sm text-emerald-600">✓ Listas guardadas</span>}
-                {listError && <span className="text-sm text-rose-600">{listError}</span>}
-              </div>
-            )}
+            <div className="flex flex-wrap items-center gap-4">
+              <button
+                type="button"
+                className="btn-outline"
+                disabled={listSaving}
+                onClick={handleGuardarListas}
+              >
+                {listSaving ? 'Guardando…' : 'Guardar datos temporalmente'}
+              </button>
+              {listSaved && <span className="text-sm text-emerald-600">✓ Listas guardadas</span>}
+              {listError && <span className="text-sm text-rose-600">{listError}</span>}
+            </div>
 
             {/* Submit */}
             {enviado ? (
               <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
-                Ficha enviada correctamente. Todos los campos están bloqueados.
+                Ficha enviada correctamente. Puede seguir editando mientras la ronda esté abierta.
               </div>
             ) : (
               <div className="grid gap-4">
@@ -737,7 +735,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                     {submitting ? 'Enviando…' : 'Enviar ficha →'}
                   </button>
                   <p className="text-xs text-[var(--foreground-muted)]">
-                    El envío bloqueará el formulario de forma permanente.
+                    El envío confirma que los datos son correctos y habilita la carga de resultados.
                   </p>
                 </div>
               </div>
