@@ -1,6 +1,9 @@
 import type { ReactNode } from 'react'
+import Link from 'next/link'
 
 import { LogoUnal } from '@/app/components/LogoUnal'
+
+const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
 export function SgcHeader({
   title,
@@ -28,7 +31,15 @@ export function SgcHeader({
           </div>
         </div>
 
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+        <div className="flex flex-wrap items-center gap-3">
+          <Link className="btn-outline" href="/dashboard">
+            Gestión de ronda
+          </Link>
+          <a className="btn-outline" href={PT_APP_URL} target="_blank" rel="noopener noreferrer">
+            pt_app ↗
+          </a>
+          {actions}
+        </div>
       </div>
     </header>
   )
