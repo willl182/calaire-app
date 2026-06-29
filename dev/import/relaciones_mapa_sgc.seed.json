@@ -10,7 +10,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Gobierno maestro",
@@ -23,7 +23,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Gobierno maestro",
@@ -36,7 +36,7 @@
     "externalSystem": "pt_app",
     "externalUrl": "https://w421.shinyapps.io/pt_app/",
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -49,7 +49,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Gobierno maestro",
@@ -62,7 +62,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Gobierno maestro",
@@ -75,7 +75,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -88,7 +88,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -101,7 +101,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -114,7 +114,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -127,7 +127,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Gobierno maestro",
@@ -140,7 +140,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -153,7 +153,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -166,7 +166,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -179,7 +179,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -192,7 +192,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -205,7 +205,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -218,7 +218,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -231,7 +231,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -244,7 +244,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -257,7 +257,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -270,7 +270,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -283,7 +283,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -296,7 +296,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -309,7 +309,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -322,7 +322,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Aplicativos e instructivos",
@@ -335,7 +335,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Aplicativos e instructivos",
@@ -348,7 +348,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Aplicativos e instructivos",
@@ -361,7 +361,7 @@
     "externalSystem": "pt_app",
     "externalUrl": "https://w421.shinyapps.io/pt_app/",
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Aplicativos e instructivos",
@@ -374,7 +374,7 @@
     "externalSystem": "pt_app",
     "externalUrl": "https://w421.shinyapps.io/pt_app/",
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -387,7 +387,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -400,7 +400,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -413,7 +413,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -426,7 +426,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -439,7 +439,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -452,7 +452,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -465,7 +465,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -478,7 +478,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -491,7 +491,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -504,7 +504,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -517,7 +517,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -530,7 +530,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -543,7 +543,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -556,7 +556,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -569,7 +569,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -582,7 +582,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -595,7 +595,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -608,7 +608,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -621,7 +621,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -634,7 +634,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -647,7 +647,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Formatos y registros",
@@ -660,7 +660,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -673,7 +673,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "pendiente",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -686,7 +686,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -699,7 +699,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -712,7 +712,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -725,7 +725,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -738,7 +738,7 @@
     "externalSystem": "pt_app",
     "externalUrl": "https://w421.shinyapps.io/pt_app/",
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -751,7 +751,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -764,7 +764,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -777,7 +777,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -790,7 +790,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -803,7 +803,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -816,7 +816,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -829,7 +829,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -842,7 +842,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -855,7 +855,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -868,7 +868,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -881,7 +881,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -894,7 +894,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -907,7 +907,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -920,7 +920,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -933,7 +933,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -946,7 +946,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -959,7 +959,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -972,7 +972,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -985,7 +985,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -998,7 +998,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -1011,7 +1011,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -1024,7 +1024,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -1037,7 +1037,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -1050,7 +1050,7 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   },
   {
     "bloque": "Rutas criticas",
@@ -1063,6 +1063,6 @@
     "externalSystem": null,
     "externalUrl": null,
     "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
+    "origenFuente": "data/sgc/mapa_navegacion_sgc_pea.html"
   }
 ]

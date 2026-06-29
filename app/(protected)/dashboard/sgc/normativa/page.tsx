@@ -37,6 +37,15 @@ function buildRelacionarHref(params: Record<string, string | string[] | undefine
   return `/dashboard/sgc/normativa?${query.toString()}`
 }
 
+function buildNormaHref(params: Record<string, string | string[] | undefined>, norma: string | null) {
+  const query = new URLSearchParams()
+  const estado = firstParam(params.estado)
+  if (norma) query.set('norma', norma)
+  if (estado) query.set('estado', estado)
+  const suffix = query.toString()
+  return suffix ? `/dashboard/sgc/normativa?${suffix}` : '/dashboard/sgc/normativa'
+}
+
 export default async function NormativaSgcPage({ searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
@@ -53,6 +62,16 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
     listSgcMaestro(),
   ])
   const canEdit = canEditSgcMaestro(auth)
+  const normaCards = data.normas.map((norma) => {
+    const rows = data.rows.filter(({ requisito }) => requisito.norma === norma)
+    return {
+      norma,
+      requisitos: rows.length,
+      cubiertos: rows.filter(({ relaciones }) => aggregateCoverage(relaciones) === 'cubierto').length,
+      parciales: rows.filter(({ relaciones }) => aggregateCoverage(relaciones) === 'parcial').length,
+      pendientes: rows.filter(({ relaciones }) => aggregateCoverage(relaciones) === 'pendiente').length,
+    }
+  })
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -71,6 +90,32 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
         <div className="card-accent border-l-emerald-500 bg-emerald-50/40 px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Cubiertos</div><div className="mt-2 text-3xl font-semibold">{data.resumen.cubiertos}</div></div>
         <div className="card-accent border-l-amber-500 bg-amber-50/40 px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Parciales</div><div className="mt-2 text-3xl font-semibold">{data.resumen.parciales}</div></div>
         <div className="card-accent border-l-rose-500 bg-rose-50/40 px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Pendientes</div><div className="mt-2 text-3xl font-semibold">{data.resumen.pendientes}</div></div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-3">
+        {normaCards.map((card) => {
+          const isSelected = selectedNorma === card.norma
+          return (
+            <Link
+              key={card.norma}
+              className={`card-accent px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-md ${isSelected ? 'border-l-[var(--pt-primary)] bg-amber-50/50' : 'bg-white/80'}`}
+              href={buildNormaHref(params, card.norma)}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Norma</div>
+                  <div className="mt-2 text-xl font-semibold">{card.norma}</div>
+                </div>
+                <div className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{card.requisitos}</div>
+              </div>
+              <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+                <div><div className="font-semibold text-emerald-700">{card.cubiertos}</div><div className="text-[var(--foreground-muted)]">cubiertos</div></div>
+                <div><div className="font-semibold text-amber-700">{card.parciales}</div><div className="text-[var(--foreground-muted)]">parciales</div></div>
+                <div><div className="font-semibold text-rose-700">{card.pendientes}</div><div className="text-[var(--foreground-muted)]">pendientes</div></div>
+              </div>
+            </Link>
+          )
+        })}
       </section>
 
       <section className="card p-5">

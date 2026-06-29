@@ -159,9 +159,10 @@ export const listNormativaSgcConfig = {
   args: listNormativaSgcArgs,
   handler: async (ctx, args) => {
     const access = await requireSgcViewerAccess(ctx)
+    const activeRequisitos = await ctx.db.query('requisitosNormativos').withIndex('by_estado', (q) => q.eq('estado', 'activo')).collect()
     const requisitos = args.norma?.trim()
-      ? await ctx.db.query('requisitosNormativos').withIndex('by_norma', (q) => q.eq('norma', args.norma!.trim())).collect()
-      : await ctx.db.query('requisitosNormativos').collect()
+      ? activeRequisitos.filter((requisito) => requisito.norma === args.norma?.trim())
+      : activeRequisitos
     requisitos.sort((a, b) => a.norma.localeCompare(b.norma) || a.clausula.localeCompare(b.clausula, undefined, { numeric: true }))
     const rows = await Promise.all(
       requisitos.map(async (requisito) => {

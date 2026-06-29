@@ -134,7 +134,7 @@ function splitRequirementBullets(markdown, norma, versionNorma, source) {
       clausula: `${section}.${counter}`,
       titulo: sectionTitle.replace(/^[0-9.]+\s*/, ''),
       descripcion,
-      ambito: norma.includes('17043') ? 'PEA / ISO 17043' : 'Estadistica / ISO 13528',
+      ambito: ambitoFromNorma(norma),
       criticidad: descripcion.toLowerCase().includes('debe') ? 'media' : 'pendiente',
       estado: 'activo',
       origenFuente: source,
@@ -143,27 +143,24 @@ function splitRequirementBullets(markdown, norma, versionNorma, source) {
   return requisitos
 }
 
+function ambitoFromNorma(norma) {
+  if (norma.includes('17043')) return 'PEA / ISO 17043'
+  if (norma.includes('13528')) return 'Estadistica / ISO 13528'
+  if (norma.includes('17025')) return 'Laboratorio / ISO 17025'
+  return 'SGC'
+}
+
 async function extractRequirements() {
   const sources = [
-    { path: 'dev/req_17043.md', norma: 'ISO/IEC 17043', versionNorma: '2023' },
-    { path: 'dev/req_13528.md', norma: 'ISO 13528', versionNorma: '2022' },
+    { path: 'req_17043.md', norma: 'ISO/IEC 17043', versionNorma: '2023' },
+    { path: 'req_13528.md', norma: 'ISO 13528', versionNorma: '2022' },
+    { path: 'req_17025.md', norma: 'ISO/IEC 17025', versionNorma: '2017' },
   ]
   const requisitos = []
   for (const source of sources) {
     const markdown = await readFile(join(root, source.path), 'utf8')
     requisitos.push(...splitRequirementBullets(markdown, source.norma, source.versionNorma, source.path))
   }
-  requisitos.push({
-    norma: 'ISO/IEC 17025',
-    versionNorma: '2017',
-    clausula: 'placeholder',
-    titulo: 'Requisitos pendientes de fuente operativa',
-    descripcion: 'Placeholder controlado hasta cargar una fuente equivalente a req_17043.md y req_13528.md.',
-    ambito: 'Laboratorio / ISO 17025',
-    criticidad: 'pendiente',
-    estado: 'placeholder',
-    origenFuente: 'dev/plan-protv2.md',
-  })
   return requisitos
 }
 
@@ -175,7 +172,10 @@ function blockForCode(code) {
 }
 
 async function extractMapRelations(documentos) {
-  const source = 'public/sgc/mapa_navegacion_sgc_pea.html'
+  const source = await firstExistingPath([
+    'public/sgc/mapa_navegacion_sgc_pea.html',
+    'data/sgc/mapa_navegacion_sgc_pea.html',
+  ])
   const html = await readFile(join(root, source), 'utf8')
   const knownCodes = documentos.map((doc) => doc.codigo)
   const found = Array.from(new Set(html.match(/\b(?:DG|P|I|F)-PSEA-\d+[A-Z]?\b/g) ?? [])).map(normalizeCode)
@@ -221,6 +221,18 @@ async function extractMapRelations(documentos) {
     }
   }
   return relations
+}
+
+async function firstExistingPath(paths) {
+  for (const path of paths) {
+    try {
+      await stat(join(root, path))
+      return path
+    } catch {
+      // Try the next known source path.
+    }
+  }
+  return paths[0]
 }
 
 async function main() {
