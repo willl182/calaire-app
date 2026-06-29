@@ -124,11 +124,12 @@
     }
 
     button {
-      min-height: 36px;
-      border: 1px solid #bdc7c1;
+      min-height: 32px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
       background: #fff;
       color: var(--ink);
-      font: 700 13px/1 "Aptos", "Segoe UI", sans-serif;
+      font: 700 12px/1 "Aptos", "Segoe UI", sans-serif;
       cursor: pointer;
       transition: transform .16s ease, background .16s ease, color .16s ease;
     }
@@ -140,16 +141,17 @@
       color: var(--ink);
     }
 
-    .chip { padding: 0 12px; }
+    .chip { padding: 0 10px; }
 
     .link-chip {
       display: inline-flex;
-      min-height: 36px;
+      min-height: 32px;
       align-items: center;
-      border: 1px solid #bdc7c1;
+      border: 1px solid var(--line);
+      border-radius: 8px;
       background: #fff;
       color: var(--ink);
-      font: 700 13px/1 "Aptos", "Segoe UI", sans-serif;
+      font: 700 12px/1 "Aptos", "Segoe UI", sans-serif;
       text-decoration: none;
       transition: transform .16s ease, background .16s ease, color .16s ease;
     }
@@ -206,19 +208,19 @@
     }
 
     .toolbar {
-      display: none;
+      display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
       justify-content: space-between;
-      padding: 10px 14px;
+      padding: 8px 10px;
       border-bottom: 1px solid var(--line);
       background: rgba(255,253,250,.96);
     }
 
     .toolbar .hint {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .audit-strip {
@@ -266,7 +268,7 @@
 
     .diagram-shell {
       position: relative;
-      min-height: calc(100vh - 35px);
+      min-height: calc(100vh - 74px);
       overflow: auto;
       background:
         linear-gradient(90deg, rgba(17,24,39,.035) 1px, transparent 1px),
@@ -278,7 +280,7 @@
     svg {
       display: block;
       width: 100%;
-      min-width: 1540px;
+      min-width: 1280px;
       height: auto;
       aspect-ratio: 1540 / 1385;
     }
