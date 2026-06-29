@@ -1,40 +1,36 @@
 # Session State: calaire-app
 
-**Last Updated**: 2026-06-29 11:14
+**Last Updated**: 2026-06-29 11:30
 
 ## Session Objective
 
-Implementar los 15 hallazgos de la revisión de código `cr-rev2.md` (CodeRabbit Review) en la rama feature/sgc-maestro-protv2.
+Iniciar la migración estructural del repo a layout T3 según `PLAN_MIGRACION_T3.md`, siguiendo `workflow_t3.md` y validando `targets_t3.md`.
 
 ## Current State
 
-- [x] Derivar siguiente número de versión en `scripts/upload-sgc-document-versions.mjs`
-- [x] Manejar errores de lanzamiento de `spawnSync`
-- [x] Alinear denominador de `completado` en `convex/sgc/maestro.ts`
-- [x] Computar resumen de normativa desde relaciones no filtradas
-- [x] Resaltar sección SGC activa en `app/(protected)/sgc/layout.tsx`
-- [x] Limpiar campo legacy `cambioResumen` y backfilling de `resumenCambios`
-- [x] Marcar motivos de retiro como `required`
-- [x] Usar `ronda.codigo` en lugar de `EA-PP-2026-R1`
-- [x] Agregar `encType="multipart/form-data"` al formulario de evidencia
-- [x] Incluir estado `disponible` en cálculo de progreso
-- [x] Evitar hardcode de `EA-PP-2026-R1` en `ExpedienteSgc.tsx`
-- [x] Mover mapa SGC fuera de `public/` a ruta protegida
-- [x] Verificar UI de filtros del mapa (ya visible, sin `display: none`)
-- [x] Proteger entradas SGC en `SidebarNav.tsx` con `canViewSgcMaestro`
-- [x] No renderizar árbol sin providers en `app/providers.tsx`
-- [x] `pnpm build` exitoso
-- [x] `pnpm lint` exitoso
-- [x] Actualizar `cr-rev2.md` con marcador `[completed]` en cada hallazgo
+- [x] Commiteados cambios pendientes de cr-rev2 en `main`.
+- [x] Rama `feature/t3-estructura-segura` creada desde `main` limpio.
+- [ ] Fase 0: Preparación (deps, carpetas, inventarios).
+- [ ] Fase 1: Andamiaje mínimo (`src/env.js`, `src/lib/utils.ts`).
+- [ ] Fase 2: `app/` → `src/app/`.
+- [ ] Fase 3: `lib/` → `src/server/<dominio>/`.
+- [ ] Fase 4: `proxy.ts` → `src/middleware.ts`.
+- [ ] Fase 5: `convex/` por dominios.
+- [ ] Fase 6: `process.env.X!` → `env.X`.
+- [ ] Fase 7: UI primitivos en `src/components/ui/`.
+- [ ] Fase 8: Limpieza final y documentación.
 
 ## Critical Technical Context
 
 - Proyecto Next.js 16.2.4 + React 19 + Convex + Tailwind v4 + pnpm.
-- El mapa SGC ahora se sirve desde `app/(protected)/dashboard/sgc/mapa/embed/route.ts` leyendo `data/sgc/mapa_navegacion_sgc_pea.html`, con validación `canViewSgcMaestro`.
-- `app/(protected)/sgc/layout.tsx` se convirtió a cliente (`'use client'`) para usar `usePathname` y marcar la navegación activa.
-- `DocumentoSgcVersion` ya no expone `cambioResumen`; las versiones se normalizan en `collectDocumentBundle` para garantizar `resumenCambios`.
+- Layout actual: `app/`, `lib/`, `convex/`, `proxy.ts` en raíz.
+- Objetivo T3: `src/app/`, `src/server/<modulo>/`, `src/components/`, `src/lib/`, `src/middleware.ts`, `src/env.js`.
+- **No se introduce tRPC**; se mantienen Server Actions + hooks Convex.
+- Alias único: `@/* -> ./src/*`.
+- Estrategia: copiar antes de borrar, puentes temporales, build verde al final de cada fase.
 
 ## Next Steps
 
-1. Desplegar/verificar en entorno de integración.
-2. Continuar con próximos issues o revisiones pendientes de `cr-rev2.md` si los hay.
+1. Ejecutar Fase 0: instalar deps, crear carpetas, generar inventarios de seguridad.
+2. Commitear Fase 0 verificada con `pnpm build` verde.
+3. Continuar con Fase 1.

@@ -8,6 +8,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:auth:manual": "PLAYWRIGHT_AUTH_MODE=manual playwright test --project=manual-auth",
     "test:e2e:start": "PLAYWRIGHT_START_SERVER=1 playwright test",
@@ -28,6 +30,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.60.0",
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -35,7 +38,9 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.9",
+    "zod": "^4.4.3"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
