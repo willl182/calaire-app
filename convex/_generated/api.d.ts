@@ -44,6 +44,7 @@ import type * as sgc_comunicaciones from "../sgc/comunicaciones.js";
 import type * as sgc_documentos from "../sgc/documentos.js";
 import type * as sgc_evidencias from "../sgc/evidencias.js";
 import type * as sgc_hitos from "../sgc/hitos.js";
+import type * as sgc_maestro from "../sgc/maestro.js";
 import type * as sgc_notificaciones from "../sgc/notificaciones.js";
 import type * as sgc_panel from "../sgc/panel.js";
 import type * as sgc_plan from "../sgc/plan.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   "sgc/documentos": typeof sgc_documentos;
   "sgc/evidencias": typeof sgc_evidencias;
   "sgc/hitos": typeof sgc_hitos;
+  "sgc/maestro": typeof sgc_maestro;
   "sgc/notificaciones": typeof sgc_notificaciones;
   "sgc/panel": typeof sgc_panel;
   "sgc/plan": typeof sgc_plan;

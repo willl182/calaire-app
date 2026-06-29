@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { DOCUMENTO_SGC_CONTENT_TYPES, requireSgcAdmin, writeGlobalAudit, normalizeCodigoDocumento, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { canReadDocumentoSgc, DOCUMENTO_SGC_CONTENT_TYPES, requireSgcAdmin, requireSgcViewerAccess, writeGlobalAudit, normalizeCodigoDocumento, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listDocumentosSgcArgs = {
     proceso: v.optional(v.union(v.string(), v.null())),
@@ -10,20 +10,22 @@ const listDocumentosSgcArgs = {
 export const listDocumentosSgcConfig = {
   args: listDocumentosSgcArgs,
   handler: async (ctx, args) => {
-    await requireSgcAdmin(ctx)
+    const access = await requireSgcViewerAccess(ctx)
+    const visible = <T extends { visibilidad?: 'interna' | 'participantes' | 'publica' | null }>(documentos: T[]) =>
+      documentos.filter((documento) => canReadDocumentoSgc(documento, access))
     if (args.proceso?.trim() && args.estado) {
-      return ctx.db
+      return visible(await ctx.db
         .query('documentosSgc')
         .withIndex('by_proceso_and_estado', (q) => q.eq('proceso', args.proceso!.trim()).eq('estado', args.estado!))
-        .collect()
+        .collect())
     }
     if (args.proceso?.trim()) {
-      return ctx.db.query('documentosSgc').withIndex('by_proceso', (q) => q.eq('proceso', args.proceso!.trim())).collect()
+      return visible(await ctx.db.query('documentosSgc').withIndex('by_proceso', (q) => q.eq('proceso', args.proceso!.trim())).collect())
     }
     if (args.estado) {
-      return ctx.db.query('documentosSgc').withIndex('by_estado', (q) => q.eq('estado', args.estado!)).collect()
+      return visible(await ctx.db.query('documentosSgc').withIndex('by_estado', (q) => q.eq('estado', args.estado!)).collect())
     }
-    return ctx.db.query('documentosSgc').collect()
+    return visible(await ctx.db.query('documentosSgc').collect())
   },
 } satisfies SgcQueryConfig<typeof listDocumentosSgcArgs>
 
@@ -32,8 +34,9 @@ const listMatrizDocumentalSgcArgs = {}
 export const listMatrizDocumentalSgcConfig = {
   args: listMatrizDocumentalSgcArgs,
   handler: async (ctx) => {
+    const access = await requireSgcViewerAccess(ctx)
     try {
-      const documentos = await ctx.db.query('documentosSgc').collect()
+      const documentos = (await ctx.db.query('documentosSgc').collect()).filter((documento) => canReadDocumentoSgc(documento, access))
       const versiones = await Promise.all(
         documentos.map(async (documento) => {
           const vigente = await ctx.db
@@ -76,7 +79,11 @@ const listDocumentoSgcVersionesArgs = { documentoId: v.id('documentosSgc'), pagi
 export const listDocumentoSgcVersionesConfig = {
   args: listDocumentoSgcVersionesArgs,
   handler: async (ctx, { documentoId, paginationOpts }) => {
-    await requireSgcAdmin(ctx)
+    const access = await requireSgcViewerAccess(ctx)
+    const documento = await ctx.db.get(documentoId)
+    if (!documento || !canReadDocumentoSgc(documento, access)) {
+      return { page: [], isDone: true, continueCursor: '' }
+    }
     return ctx.db
       .query('documentoSgcVersiones')
       .withIndex('by_documentoId', (q) => q.eq('documentoId', documentoId))
@@ -85,13 +92,19 @@ export const listDocumentoSgcVersionesConfig = {
   },
 } satisfies SgcQueryConfig<typeof listDocumentoSgcVersionesArgs>
 
-const getDocumentoSgcDownloadUrlArgs = { versionId: v.id('documentoSgcVersiones') }
+const getDocumentoSgcDownloadUrlArgs = {
+  documentoId: v.id('documentosSgc'),
+  versionId: v.id('documentoSgcVersiones'),
+}
 
 export const getDocumentoSgcDownloadUrlConfig = {
   args: getDocumentoSgcDownloadUrlArgs,
-  handler: async (ctx, { versionId }) => {
-    await requireSgcAdmin(ctx)
+  handler: async (ctx, { documentoId, versionId }) => {
+    const access = await requireSgcViewerAccess(ctx)
+    const documento = await ctx.db.get(documentoId)
+    if (!documento || !canReadDocumentoSgc(documento, access)) return null
     const version = await ctx.db.get(versionId)
+    if (!version || version.documentoId !== documentoId) return null
     if (!version?.storageId) return null
     return ctx.storage.getUrl(version.storageId)
   },
@@ -158,7 +171,7 @@ export const upsertDocumentoSgcConfig = {
 const registrarDocumentoSgcVersionArgs = {
     documentoId: v.id('documentosSgc'),
     fechaVigencia: v.union(v.string(), v.null()),
-    cambioResumen: v.string(),
+    resumenCambios: v.string(),
     storageId: v.union(v.id('_storage'), v.null()),
     fileName: v.union(v.string(), v.null()),
     contentType: v.union(v.string(), v.null()),
@@ -172,7 +185,7 @@ export const registrarDocumentoSgcVersionConfig = {
     const actor = await requireSgcAdmin(ctx)
     const documento = await ctx.db.get(args.documentoId)
     if (!documento) throw new Error('Documento SGC no encontrado.')
-    const resumen = args.cambioResumen.trim()
+    const resumen = args.resumenCambios.trim()
     if (!resumen) throw new Error('Registrar una version exige resumen de cambios.')
     if (args.storageId) {
       if (!args.fileName || !args.contentType || !args.size) throw new Error('El archivo de version exige nombre, tipo y tamano.')
@@ -195,6 +208,7 @@ export const registrarDocumentoSgcVersionConfig = {
       estado: 'vigente',
       fechaVigencia: args.fechaVigencia,
       cambioResumen: resumen,
+      resumenCambios: resumen,
       storageId: args.storageId,
       fileName: args.fileName,
       contentType: args.contentType,
@@ -225,4 +239,3 @@ export const retirarDocumentoSgcVersionConfig = {
     await writeGlobalAudit(ctx, { actor, evento: 'sgc.documento.version_retirada', detalle: motivo, targetTipo: 'documentoSgcVersiones', targetId: versionId })
   },
 } satisfies SgcMutationConfig<typeof retirarDocumentoSgcVersionArgs>
-

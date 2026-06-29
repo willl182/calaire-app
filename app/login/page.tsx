@@ -5,7 +5,7 @@ import { LogoUnal } from '@/app/components/LogoUnal'
 
 export default async function LoginPage() {
   const { user } = await withAuth()
-  if (user) redirect('/dashboard')
+  if (user) redirect('/inicio')
 
   return (
     <div

@@ -173,9 +173,9 @@ export async function guardarRevisionHomogeneidadAction(formData: FormData) {
     }
     await guardarRevisionHomogeneidad(rondaId, checks, {}, parseText(formData, 'homogeneidad_conclusiones') || null)
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Revision F-PSEA-08 guardada.')
+    redirectWith(rondaId, 'success', 'Revision F-PSEA-11 guardada.')
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible guardar F-PSEA-08.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible guardar F-PSEA-11.')
   }
 }
 
@@ -185,9 +185,9 @@ export async function finalizarRevisionHomogeneidadAction(formData: FormData) {
   try {
     await finalizarRevisionHomogeneidad(rondaId)
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'F-PSEA-08 finalizado.')
+    redirectWith(rondaId, 'success', 'F-PSEA-11 finalizado.')
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible finalizar F-PSEA-08.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible finalizar F-PSEA-11.')
   }
 }
 

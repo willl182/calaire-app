@@ -1,39 +1,40 @@
-# Session State: CALAIRE App
+# Session State: calaire-app
 
-**Last Updated**: 2026-06-10 11:47 -05
+**Last Updated**: 2026-06-29 11:14
 
 ## Session Objective
 
-Implementar el plan de refactorizacion de mantenibilidad, preservar las fachadas publicas de Next/Convex, commitear, desplegar a produccion y dejar memoria del hito.
+Implementar los 15 hallazgos de la revisión de código `cr-rev2.md` (CodeRabbit Review) en la rama feature/sgc-maestro-protv2.
 
 ## Current State
 
-- [x] Fase 1 parcial: agregados tests de caracterizacion para helpers criticos de `lib/rondas`.
-- [x] Fase 2: `lib/rondas.ts` quedo como fachada; implementacion extraida a `lib/rondas/**`.
-- [x] Fase 3: `app/(protected)/dashboard/page.tsx` quedo como server component orquestador; UI/data/view-model extraidos a modulos del dashboard.
-- [x] Fase 4: `convex/rondas.ts` quedo como fachada de `api.rondas.*`; implementacion extraida a `convex/rondas/**`.
-- [x] Fase 5: `convex/sgc.ts` quedo como fachada de `api.sgc.*`; implementacion extraida a `convex/sgc/**`.
-- [x] Fase 6: `convex/agent.ts` quedo como fachada de `api.agent.*`; implementacion extraida a `convex/agent/**`.
-- [x] Fase 7: documentada estructura en `docs/architecture.md`.
-- [x] Commit local y remoto: `d4b13b3 -- Refactor maintainability modules`.
-- [x] Produccion desplegada en Vercel y Convex.
+- [x] Derivar siguiente número de versión en `scripts/upload-sgc-document-versions.mjs`
+- [x] Manejar errores de lanzamiento de `spawnSync`
+- [x] Alinear denominador de `completado` en `convex/sgc/maestro.ts`
+- [x] Computar resumen de normativa desde relaciones no filtradas
+- [x] Resaltar sección SGC activa en `app/(protected)/sgc/layout.tsx`
+- [x] Limpiar campo legacy `cambioResumen` y backfilling de `resumenCambios`
+- [x] Marcar motivos de retiro como `required`
+- [x] Usar `ronda.codigo` en lugar de `EA-PP-2026-R1`
+- [x] Agregar `encType="multipart/form-data"` al formulario de evidencia
+- [x] Incluir estado `disponible` en cálculo de progreso
+- [x] Evitar hardcode de `EA-PP-2026-R1` en `ExpedienteSgc.tsx`
+- [x] Mover mapa SGC fuera de `public/` a ruta protegida
+- [x] Verificar UI de filtros del mapa (ya visible, sin `display: none`)
+- [x] Proteger entradas SGC en `SidebarNav.tsx` con `canViewSgcMaestro`
+- [x] No renderizar árbol sin providers en `app/providers.tsx`
+- [x] `pnpm build` exitoso
+- [x] `pnpm lint` exitoso
+- [x] Actualizar `cr-rev2.md` con marcador `[completed]` en cada hallazgo
 
 ## Critical Technical Context
 
-- Branch actual: `main`; `HEAD` y `origin/main` apuntan a `d4b13b3f02822e7511464de6591a83cba94538f5`.
-- URL produccion: `https://calaire-app.vercel.app`.
-- Deployment Vercel: `https://calaire-zr2x4chb4-will-salas-projects.vercel.app`.
-- Inspector Vercel: `https://vercel.com/will-salas-projects/calaire-app/F1r5c62Y2U3kdqVr8yjZhXpBMasW`.
-- Convex deployment: `https://steady-kiwi-725.convex.cloud`.
-- Verificacion HTTP final: `curl -I https://calaire-app.vercel.app/login` respondio `HTTP/2 200`.
-- `pnpm lint`, `pnpm build`, `pnpm exec convex codegen` y `node --test lib/referencia-csv.test.ts lib/rondas/rondas.test.ts` pasaron.
-- Playwright final: `pnpm test:e2e:start` dejo 5 pruebas pasando y 3 fallando en `sgc-fase2*`; las fallas se asocian a rutas de ronda especifica SGC que intentan consultar Convex local en `127.0.0.1:3212`.
-- Las fachadas publicas preservadas son `lib/rondas.ts`, `convex/rondas.ts`, `convex/sgc.ts` y `convex/agent.ts`.
-- `convex/_generated/api.d.ts` fue actualizado por `convex codegen` para registrar modulos internos nuevos.
-- El release mostro aviso de Convex AI files desactualizados; no se actualizo en esta sesion.
+- Proyecto Next.js 16.2.4 + React 19 + Convex + Tailwind v4 + pnpm.
+- El mapa SGC ahora se sirve desde `app/(protected)/dashboard/sgc/mapa/embed/route.ts` leyendo `data/sgc/mapa_navegacion_sgc_pea.html`, con validación `canViewSgcMaestro`.
+- `app/(protected)/sgc/layout.tsx` se convirtió a cliente (`'use client'`) para usar `usePathname` y marcar la navegación activa.
+- `DocumentoSgcVersion` ya no expone `cambioResumen`; las versiones se normalizan en `collectDocumentBundle` para garantizar `resumenCambios`.
 
 ## Next Steps
 
-1. Si se necesita cerrar el e2e completo, levantar o configurar Convex local para `127.0.0.1:3212` y rerun `pnpm test:e2e:start`.
-2. Revisar si conviene actualizar Convex AI files con el comando recomendado por Convex.
-3. En una pasada futura, reducir modulos internos aun grandes: `lib/rondas/client.ts`, `convex/sgc/shared.ts` y `convex/agent/sgcMutations.ts`.
+1. Desplegar/verificar en entorno de integración.
+2. Continuar con próximos issues o revisiones pendientes de `cr-rev2.md` si los hay.
