@@ -1,32 +1,58 @@
 import { expect, test } from '@playwright/test'
 
-test('shows the round coverage board and switches to the document matrix', async ({ page }) => {
+test('shows the SGC master dashboard separated from round expedientes', async ({ page }) => {
   await page.goto('/dashboard/sgc')
 
-  await expect(page.getByRole('tab', { name: /Cobertura por Ronda/i })).toHaveAttribute(
-    'aria-selected',
-    'true',
-  )
-  await expect(page.getByRole('heading', { name: /Cobertura por Ronda/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /SGC Maestro/i })).toBeVisible()
+  await expect(page.getByText(/Repositorio global de documentos, versiones, requisitos y mapa documental/i)).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Centro documental', exact: true })).toBeVisible()
+  await expect(page.locator('a[href="/dashboard/sgc/normativa"]').first()).toBeVisible()
+  await expect(page.locator('a[href="/dashboard/sgc/mapa"]').first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Prototipo' })).toHaveCount(0)
+
+  await expect(page.getByRole('heading', { name: 'Dashboard documental por ronda' })).toBeVisible()
+  await expect(page.getByText(/Es otro dashboard/i)).toBeVisible()
+
+  await page.getByRole('link', { name: 'Abrir expedientes de ronda' }).click()
+  await expect(page).toHaveURL(/\/dashboard\/rondas\/expedientes$/)
+  await expect(page.getByRole('heading', { name: 'Expedientes de ronda' })).toBeVisible()
+  await expect(page.getByText(/No es el dashboard SGC maestro global/i)).toBeVisible()
+})
+
+test('opens the SGC document center and a document detail', async ({ page }) => {
+  await page.goto('/dashboard/sgc/documentos')
+  await expect(page.getByRole('heading', { name: 'Centro documental' })).toBeVisible()
   await expect(page.getByRole('table')).toBeVisible()
+  await expect(page.getByPlaceholder('Codigo o nombre')).toBeVisible()
 
-  const rows = page.getByRole('table').locator('tbody tr')
-  const rowCount = await rows.count()
-  if (rowCount > 0) {
-    await expect(rows.first()).toBeVisible()
-  } else {
-    await expect(page.getByText('No hay rondas que coincidan con el filtro.')).toBeVisible()
-  }
+  const firstDocument = page.locator('tbody a[href^="/dashboard/sgc/documentos/"]').first()
+  await expect(firstDocument).toBeVisible()
+  await firstDocument.click()
+  await expect(page.getByText(/Versiones oficiales/i)).toBeVisible()
+  await expect(page.getByText(/Fuente editable/i)).toBeVisible()
+})
 
-  const closedToggle = page.getByLabel('Ocultar rondas cerradas')
-  await closedToggle.check()
-  await expect(closedToggle).toBeChecked()
+test('opens the SGC normative matrix from persisted requirements', async ({ page }) => {
+  await page.goto('/dashboard/sgc/normativa')
+  await expect(page.getByRole('heading', { name: 'Matriz normativa' })).toBeVisible()
+  await expect(page.getByRole('table')).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Norma' })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Cobertura' })).toBeVisible()
+  await expect(page.getByRole('columnheader', { name: 'Documentos' })).toBeVisible()
+})
 
-  const searchInput = page.getByPlaceholder('Buscar por código o nombre de ronda')
-  await searchInput.fill('ZZZ-SIN-RESULTADOS')
-  await expect(page.getByText('No hay rondas que coincidan con el filtro.')).toBeVisible()
+test('opens the live SGC map from persisted relationships', async ({ page }) => {
+  await page.goto('/dashboard/sgc/mapa')
+  await expect(page.getByRole('heading', { name: 'Mapa SGC vivo' })).toBeVisible()
+  await expect(page.getByRole('link', { name: /Abrir HTML original/i })).toBeVisible()
+  await expect(page.getByText('Relaciones', { exact: true }).first()).toBeVisible()
+  await expect(page.getByText('Bloques', { exact: true }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: /pt_app externo/i }).first()).toBeVisible()
+})
 
-  await page.getByRole('tab', { name: /Documentos/i }).click()
-  await expect(page.getByRole('heading', { name: /Matriz Documental Maestra/i })).toBeVisible()
-  await expect(page.getByText(/Control global interactivo de documentos SGC/i)).toBeVisible()
+test('keeps the legacy SGC expedientes URL as a compatibility redirect', async ({ page }) => {
+  await page.goto('/dashboard/sgc/expedientes')
+
+  await expect(page).toHaveURL(/\/dashboard\/rondas\/expedientes$/)
+  await expect(page.getByRole('heading', { name: 'Expedientes de ronda' })).toBeVisible()
 })

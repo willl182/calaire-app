@@ -545,13 +545,27 @@ export default defineSchema({
   documentosSgc: defineTable({
     codigo: v.string(),
     nombre: v.string(),
+    familia: v.optional(v.union(v.literal('DG'), v.literal('P'), v.literal('I'), v.literal('F'), v.literal('OTRO'))),
+    ambito: v.optional(v.union(v.string(), v.null())),
     proceso: v.string(),
+    subproceso: v.optional(v.union(v.string(), v.null())),
     tipo: v.union(v.literal('formato'), v.literal('procedimiento'), v.literal('instructivo'), v.literal('plantilla'), v.literal('registro'), v.literal('otro')),
     estado: v.union(v.literal('borrador'), v.literal('vigente'), v.literal('obsoleto'), v.literal('en_revision')),
+    modoDiligenciamiento: v.optional(v.union(v.literal('no_diligenciable'), v.literal('solo_archivo'), v.literal('ui_nativo'), v.literal('ui_nativo_exportable'))),
+    visibilidad: v.optional(v.union(v.literal('interna'), v.literal('participantes'), v.literal('publica'))),
+    modoControl: v.optional(v.union(v.literal('app_oficial'), v.literal('externo_referenciado'), v.literal('mixto'))),
+    fuenteEditableUrl: v.optional(v.union(v.string(), v.null())),
+    versionVigenteId: v.optional(v.union(v.id('documentoSgcVersiones'), v.null())),
+    responsable: v.optional(v.union(v.string(), v.null())),
     propietario: v.string(),
     criticidad: v.union(v.literal('baja'), v.literal('media'), v.literal('alta')),
     retencion: v.optional(v.union(v.string(), v.null())),
     ubicacionFuente: v.optional(v.union(v.string(), v.null())),
+    origenFuente: v.optional(v.union(v.string(), v.null())),
+    externalSystem: v.optional(v.union(v.literal('pt_app'), v.null())),
+    externalRef: v.optional(v.union(v.string(), v.null())),
+    externalUrl: v.optional(v.union(v.string(), v.null())),
+    externalLabel: v.optional(v.union(v.string(), v.null())),
     notas: v.optional(v.union(v.string(), v.null())),
     createdAt: v.number(),
     createdBy: v.string(),
@@ -559,8 +573,11 @@ export default defineSchema({
     updatedBy: v.string(),
   })
     .index('by_codigo', ['codigo'])
+    .index('by_familia', ['familia'])
+    .index('by_ambito', ['ambito'])
     .index('by_proceso', ['proceso'])
     .index('by_estado', ['estado'])
+    .index('by_modoDiligenciamiento', ['modoDiligenciamiento'])
     .index('by_proceso_and_estado', ['proceso', 'estado']),
 
   documentoSgcVersiones: defineTable({
@@ -569,11 +586,18 @@ export default defineSchema({
     estado: v.union(v.literal('vigente'), v.literal('reemplazada'), v.literal('retirada')),
     fechaVigencia: v.optional(v.union(v.string(), v.null())),
     cambioResumen: v.string(),
+    resumenCambios: v.optional(v.union(v.string(), v.null())),
     storageId: v.optional(v.union(v.id('_storage'), v.null())),
     fileName: v.optional(v.union(v.string(), v.null())),
     contentType: v.optional(v.union(v.string(), v.null())),
     size: v.optional(v.union(v.number(), v.null())),
     hash: v.optional(v.union(v.string(), v.null())),
+    elaboradoPor: v.optional(v.union(v.string(), v.null())),
+    revisadoPor: v.optional(v.union(v.string(), v.null())),
+    aprobadoPor: v.optional(v.union(v.string(), v.null())),
+    fechaRevision: v.optional(v.union(v.string(), v.null())),
+    fechaAprobacion: v.optional(v.union(v.string(), v.null())),
+    motivoObsolescencia: v.optional(v.union(v.string(), v.null())),
     motivoRetiro: v.optional(v.union(v.string(), v.null())),
     createdAt: v.number(),
     createdBy: v.string(),
@@ -582,4 +606,107 @@ export default defineSchema({
   })
     .index('by_documentoId', ['documentoId'])
     .index('by_documentoId_and_estado', ['documentoId', 'estado']),
+
+  documentoSgcAnexos: defineTable({
+    documentoId: v.id('documentosSgc'),
+    versionId: v.optional(v.union(v.id('documentoSgcVersiones'), v.null())),
+    storageId: v.id('_storage'),
+    fileName: v.string(),
+    contentType: v.string(),
+    size: v.number(),
+    descripcion: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+  })
+    .index('by_documentoId', ['documentoId'])
+    .index('by_versionId', ['versionId']),
+
+  requisitosNormativos: defineTable({
+    norma: v.string(),
+    versionNorma: v.string(),
+    clausula: v.string(),
+    titulo: v.string(),
+    descripcion: v.string(),
+    ambito: v.string(),
+    criticidad: v.union(v.literal('baja'), v.literal('media'), v.literal('alta'), v.literal('pendiente')),
+    estado: v.union(v.literal('activo'), v.literal('placeholder'), v.literal('retirado')),
+    origenFuente: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_norma', ['norma'])
+    .index('by_norma_and_clausula', ['norma', 'clausula'])
+    .index('by_estado', ['estado']),
+
+  documentoRequisitos: defineTable({
+    documentoId: v.id('documentosSgc'),
+    requisitoId: v.id('requisitosNormativos'),
+    tipoCobertura: v.union(v.literal('cubre'), v.literal('apoya'), v.literal('evidencia'), v.literal('no_aplica_justificado')),
+    estadoCobertura: v.union(v.literal('cubierto'), v.literal('parcial'), v.literal('pendiente'), v.literal('no_aplica')),
+    responsable: v.optional(v.union(v.string(), v.null())),
+    observacion: v.optional(v.union(v.string(), v.null())),
+    fechaRevision: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_documentoId', ['documentoId'])
+    .index('by_requisitoId', ['requisitoId'])
+    .index('by_requisitoId_and_estadoCobertura', ['requisitoId', 'estadoCobertura']),
+
+  registrosSgc: defineTable({
+    documentoId: v.id('documentosSgc'),
+    versionBaseId: v.optional(v.union(v.id('documentoSgcVersiones'), v.null())),
+    codigo: v.string(),
+    nombre: v.string(),
+    estado: v.union(v.literal('borrador'), v.literal('vigente'), v.literal('cerrado'), v.literal('anulado')),
+    visibilidad: v.union(v.literal('interna'), v.literal('participantes'), v.literal('publica')),
+    entidadTipo: v.union(v.literal('ronda'), v.literal('equipo'), v.literal('proveedor'), v.literal('auditoria'), v.literal('caso'), v.literal('transversal')),
+    rondaId: v.optional(v.union(v.id('rondas'), v.null())),
+    entidadRef: v.optional(v.union(v.string(), v.null())),
+    storageId: v.optional(v.union(v.id('_storage'), v.null())),
+    fileName: v.optional(v.union(v.string(), v.null())),
+    contentType: v.optional(v.union(v.string(), v.null())),
+    size: v.optional(v.union(v.number(), v.null())),
+    externalSystem: v.optional(v.union(v.literal('pt_app'), v.null())),
+    externalRef: v.optional(v.union(v.string(), v.null())),
+    externalUrl: v.optional(v.union(v.string(), v.null())),
+    externalLabel: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_documentoId', ['documentoId'])
+    .index('by_rondaId', ['rondaId'])
+    .index('by_entidadTipo', ['entidadTipo'])
+    .index('by_documentoId_and_estado', ['documentoId', 'estado']),
+
+  mapaSgcRelaciones: defineTable({
+    bloque: v.string(),
+    rutaCritica: v.optional(v.union(v.string(), v.null())),
+    origenCodigo: v.string(),
+    destinoCodigo: v.optional(v.union(v.string(), v.null())),
+    documentoOrigenId: v.optional(v.union(v.id('documentosSgc'), v.null())),
+    documentoDestinoId: v.optional(v.union(v.id('documentosSgc'), v.null())),
+    requisitoId: v.optional(v.union(v.id('requisitosNormativos'), v.null())),
+    tipoRelacion: v.union(v.literal('define'), v.literal('usa'), v.literal('genera'), v.literal('evidencia'), v.literal('referencia'), v.literal('externo')),
+    ambito: v.string(),
+    destinoTipo: v.union(v.literal('documento'), v.literal('requisito'), v.literal('registro'), v.literal('gestion'), v.literal('externo'), v.literal('pendiente')),
+    externalSystem: v.optional(v.union(v.literal('pt_app'), v.null())),
+    externalUrl: v.optional(v.union(v.string(), v.null())),
+    estadoResolucion: v.union(v.literal('resuelto'), v.literal('pendiente')),
+    origenFuente: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_bloque', ['bloque'])
+    .index('by_origenCodigo', ['origenCodigo'])
+    .index('by_documentoOrigenId', ['documentoOrigenId'])
+    .index('by_estadoResolucion', ['estadoResolucion']),
 })

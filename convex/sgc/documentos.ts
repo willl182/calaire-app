@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { DOCUMENTO_SGC_CONTENT_TYPES, requireSgcAdmin, writeGlobalAudit, normalizeCodigoDocumento, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { DOCUMENTO_SGC_CONTENT_TYPES, requireSgcAdmin, requireSgcViewer, writeGlobalAudit, normalizeCodigoDocumento, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listDocumentosSgcArgs = {
     proceso: v.optional(v.union(v.string(), v.null())),
@@ -10,7 +10,7 @@ const listDocumentosSgcArgs = {
 export const listDocumentosSgcConfig = {
   args: listDocumentosSgcArgs,
   handler: async (ctx, args) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcViewer(ctx)
     if (args.proceso?.trim() && args.estado) {
       return ctx.db
         .query('documentosSgc')
@@ -76,7 +76,7 @@ const listDocumentoSgcVersionesArgs = { documentoId: v.id('documentosSgc'), pagi
 export const listDocumentoSgcVersionesConfig = {
   args: listDocumentoSgcVersionesArgs,
   handler: async (ctx, { documentoId, paginationOpts }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcViewer(ctx)
     return ctx.db
       .query('documentoSgcVersiones')
       .withIndex('by_documentoId', (q) => q.eq('documentoId', documentoId))
@@ -90,7 +90,7 @@ const getDocumentoSgcDownloadUrlArgs = { versionId: v.id('documentoSgcVersiones'
 export const getDocumentoSgcDownloadUrlConfig = {
   args: getDocumentoSgcDownloadUrlArgs,
   handler: async (ctx, { versionId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcViewer(ctx)
     const version = await ctx.db.get(versionId)
     if (!version?.storageId) return null
     return ctx.storage.getUrl(version.storageId)
@@ -225,4 +225,3 @@ export const retirarDocumentoSgcVersionConfig = {
     await writeGlobalAudit(ctx, { actor, evento: 'sgc.documento.version_retirada', detalle: motivo, targetTipo: 'documentoSgcVersiones', targetId: versionId })
   },
 } satisfies SgcMutationConfig<typeof retirarDocumentoSgcVersionArgs>
-

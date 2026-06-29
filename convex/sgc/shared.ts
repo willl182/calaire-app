@@ -95,8 +95,19 @@ export function identityRoles(identity: unknown): string[] {
 export async function requireSgcAdmin(ctx: SgcAuthCtx) {
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Autenticacion requerida para operar SGC.')
-  if (!identityRoles(identity).includes('admin')) {
+  const roles = identityRoles(identity)
+  if (!roles.some((role) => ['admin', 'admin_sgc', 'coordinador_proceso'].includes(role))) {
     throw new Error('Permisos insuficientes para operar SGC.')
+  }
+  return identity.email ?? identity.name ?? identity.tokenIdentifier
+}
+
+export async function requireSgcViewer(ctx: SgcAuthCtx) {
+  const identity = await ctx.auth.getUserIdentity()
+  if (!identity) throw new Error('Autenticacion requerida para consultar SGC.')
+  const roles = identityRoles(identity)
+  if (!roles.some((role) => ['admin', 'admin_sgc', 'coordinador_proceso', 'consulta'].includes(role))) {
+    throw new Error('Permisos insuficientes para consultar SGC.')
   }
   return identity.email ?? identity.name ?? identity.tokenIdentifier
 }

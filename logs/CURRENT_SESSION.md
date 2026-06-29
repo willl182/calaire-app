@@ -1,39 +1,99 @@
 # Session State: CALAIRE App
 
-**Last Updated**: 2026-06-10 11:47 -05
+**Last Updated**: 2026-06-28 21:21 -0500
 
 ## Session Objective
 
-Implementar el plan de refactorizacion de mantenibilidad, preservar las fachadas publicas de Next/Convex, commitear, desplegar a produccion y dejar memoria del hito.
+Implementar `dev/plan-protv2.md` siguiendo `dev/workflow-protv2.md` y `dev/targets-protv2.md`, con una separacion correcta entre el dashboard SGC maestro global y el dashboard documental operativo por ronda.
 
 ## Current State
 
-- [x] Fase 1 parcial: agregados tests de caracterizacion para helpers criticos de `lib/rondas`.
-- [x] Fase 2: `lib/rondas.ts` quedo como fachada; implementacion extraida a `lib/rondas/**`.
-- [x] Fase 3: `app/(protected)/dashboard/page.tsx` quedo como server component orquestador; UI/data/view-model extraidos a modulos del dashboard.
-- [x] Fase 4: `convex/rondas.ts` quedo como fachada de `api.rondas.*`; implementacion extraida a `convex/rondas/**`.
-- [x] Fase 5: `convex/sgc.ts` quedo como fachada de `api.sgc.*`; implementacion extraida a `convex/sgc/**`.
-- [x] Fase 6: `convex/agent.ts` quedo como fachada de `api.agent.*`; implementacion extraida a `convex/agent/**`.
-- [x] Fase 7: documentada estructura en `docs/architecture.md`.
-- [x] Commit local y remoto: `d4b13b3 -- Refactor maintainability modules`.
-- [x] Produccion desplegada en Vercel y Convex.
+- [x] Schema Convex extendido para SGC maestro:
+  - `documentosSgc` ampliado con familia, ambito, modo de diligenciamiento, fuente editable, version vigente y referencias externas.
+  - Nuevas tablas: `documentoSgcAnexos`, `requisitosNormativos`, `documentoRequisitos`, `registrosSgc`, `mapaSgcRelaciones`.
+- [x] API Convex SGC maestro creada en `convex/sgc/maestro.ts` y exportada desde `convex/sgc.ts`.
+- [x] Seeds auditables creados con `scripts/extract-sgc-seeds.mjs`.
+- [x] Seeds importados a Convex con `scripts/import-sgc-seeds.mjs`.
+- [x] Conteos verificados en Convex:
+  - 52 documentos SGC.
+  - 713 requisitos normativos.
+  - 83 relaciones de mapa.
+  - 1 ronda real.
+- [x] Rutas SGC maestro global implementadas:
+  - `/dashboard/sgc`
+  - `/dashboard/sgc/documentos`
+  - `/dashboard/sgc/documentos/[id]`
+  - `/dashboard/sgc/normativa`
+  - `/dashboard/sgc/mapa`
+- [x] Dashboard documental por ronda separado:
+  - `/dashboard/rondas/expedientes`
+  - `/dashboard/rondas/[id]/sgc`
+  - `/dashboard/sgc/expedientes` queda solo como redireccion de compatibilidad.
+- [x] Navegacion principal separa `SGC`, `Gestion` y `Sistemas externos`.
+- [x] `pt_app` tratado como referencia externa (`externalSystem: "pt_app"`), no como modulo interno.
+- [x] Componentes legacy del antiguo resumen SGC removidos:
+  - `SgcResumenClient.tsx`
+  - `SgcTabs.tsx`
+  - `TableroCoberturaRondas.tsx`
+  - `MatrizInteractiva.tsx`
+  - `app/(protected)/dashboard/sgc/actions.ts`
+- [x] Descarga de version oficial agregada en `/dashboard/sgc/documentos/[id]/versiones/[versionId]/download`.
+- [x] Matriz normativa permite relacionar documento-requisito desde UI para roles editores.
+  - El formulario pesado de relacion queda bajo demanda por fila seleccionada para evitar renderizar 713 formularios x 52 documentos.
+- [x] Registro derivado trazable creado para el MVP:
+  - Documento: `F-PSEA-13`.
+  - Ronda: `R1`.
+  - Registro: `F-PSEA-13-R1-MVP`.
+- [x] Permisos MVP basicos agregados:
+  - `consulta` puede leer y descargar.
+  - `admin_sgc` y `coordinador_proceso` pueden editar.
+  - acciones de edicion ocultas para solo consulta.
+- [x] `pnpm lint` pasa limpio.
+- [x] `pnpm build` pasa.
+- [x] Smoke Playwright autenticado SGC pasa:
+  - portada SGC maestro separada de expedientes de ronda.
+  - centro documental y detalle de documento.
+  - matriz normativa persistida.
+  - mapa SGC persistido con `pt_app` externo.
+  - redireccion `/dashboard/sgc/expedientes` hacia `/dashboard/rondas/expedientes`.
 
 ## Critical Technical Context
 
-- Branch actual: `main`; `HEAD` y `origin/main` apuntan a `d4b13b3f02822e7511464de6591a83cba94538f5`.
-- URL produccion: `https://calaire-app.vercel.app`.
-- Deployment Vercel: `https://calaire-zr2x4chb4-will-salas-projects.vercel.app`.
-- Inspector Vercel: `https://vercel.com/will-salas-projects/calaire-app/F1r5c62Y2U3kdqVr8yjZhXpBMasW`.
-- Convex deployment: `https://steady-kiwi-725.convex.cloud`.
-- Verificacion HTTP final: `curl -I https://calaire-app.vercel.app/login` respondio `HTTP/2 200`.
-- `pnpm lint`, `pnpm build`, `pnpm exec convex codegen` y `node --test lib/referencia-csv.test.ts lib/rondas/rondas.test.ts` pasaron.
-- Playwright final: `pnpm test:e2e:start` dejo 5 pruebas pasando y 3 fallando en `sgc-fase2*`; las fallas se asocian a rutas de ronda especifica SGC que intentan consultar Convex local en `127.0.0.1:3212`.
-- Las fachadas publicas preservadas son `lib/rondas.ts`, `convex/rondas.ts`, `convex/sgc.ts` y `convex/agent.ts`.
-- `convex/_generated/api.d.ts` fue actualizado por `convex codegen` para registrar modulos internos nuevos.
-- El release mostro aviso de Convex AI files desactualizados; no se actualizo en esta sesion.
+- Regla corregida por el usuario: el SGC maestro global y el SGC/expediente de rondas son dos dashboards distintos.
+- No volver a listar `/dashboard/sgc/expedientes` como ruta real del SGC maestro; es solo compatibilidad.
+- Clasificacion correcta:
+  - SGC maestro global: `/dashboard/sgc`, `/dashboard/sgc/documentos`, `/dashboard/sgc/documentos/[id]`, `/dashboard/sgc/normativa`, `/dashboard/sgc/mapa`.
+  - Dashboard documental por ronda: `/dashboard/rondas/expedientes`, `/dashboard/rondas/[id]/sgc`.
+- La portada `/dashboard/sgc` ya no debe renderizar resumen de cierre documental de rondas.
+- Componentes legacy del resumen SGC global fueron eliminados para evitar que se vuelva a mezclar cierre documental de rondas con SGC maestro.
+- Las rutas nuevas son server-rendered y usan `params/searchParams` como `Promise`, siguiendo Next 16 local.
+- Convex fue regenerado con `pnpm exec convex codegen`.
+- Para pruebas locales autenticadas deben estar corriendo ambos servicios:
+  - `pnpm dev` en `http://localhost:3000`.
+  - `pnpm exec convex dev` porque `.env.local` apunta `NEXT_PUBLIC_CONVEX_URL=http://127.0.0.1:3212`.
+- Si Convex local no esta arriba, el dashboard falla con `Runtime TypeError: fetch failed` desde `ConvexHttpClient.queryInner`.
+
+## Known Pending Work
+
+- [x] Verificar si `app/(protected)/dashboard/sgc/SgcResumenClient.tsx`, `SgcTabs.tsx`, `TableroCoberturaRondas.tsx` y `MatrizInteractiva.tsx` siguen siendo necesarios o deben moverse/eliminarse para evitar confusion.
+- [x] Completar acciones/UI para relacionar documentos con requisitos desde la matriz normativa.
+- [x] Completar descarga de version oficial desde detalle de documento.
+- [x] Mejorar permisos MVP: distinguir `admin_sgc`, `coordinador_proceso`, `consulta` en UI y backend, no solo admin general.
+- [x] Documentos `dev/plan-protv2.md`, `dev/workflow-protv2.md`, `dev/targets-protv2.md` actualizados con la separacion corregida:
+  - SGC maestro global no incluye expedientes de ronda.
+  - Expedientes vive bajo Gestion/Rondas.
+- [x] Revisado que `/dashboard/rondas/expedientes` es el listado agregado operativo y `/dashboard/sgc/expedientes` solo redirige.
+- [x] Smoke UI autenticado agregado/actualizado en `tests/e2e/sgc-cobertura.auth.spec.ts`.
+- [x] Decision final MVP del prototipo: `/dashboard/sgc/prototype` se conserva temporalmente por URL directa, sin enlace en portada productiva.
+
+## Validation
+
+- `pnpm lint`: pasa limpio.
+- `pnpm build`: pasa.
+- `pnpm exec playwright test tests/e2e/sgc-cobertura.auth.spec.ts --project=authenticated-chromium --workers=1 --timeout=30000 --reporter=list`: 5 passed.
+- Smoke Convex de conteos: documentos 52, requisitos 713, mapa 83, rondas 1, registros derivados 1.
 
 ## Next Steps
 
-1. Si se necesita cerrar el e2e completo, levantar o configurar Convex local para `127.0.0.1:3212` y rerun `pnpm test:e2e:start`.
-2. Revisar si conviene actualizar Convex AI files con el comando recomendado por Convex.
-3. En una pasada futura, reducir modulos internos aun grandes: `lib/rondas/client.ts`, `convex/sgc/shared.ts` y `convex/agent/sgcMutations.ts`.
+1. Objetivo protv2 cerrado para MVP.
+2. Mantener `pnpm dev` y `pnpm exec convex dev` activos al repetir smoke local autenticado.

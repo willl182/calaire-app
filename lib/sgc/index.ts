@@ -182,13 +182,27 @@ export type DocumentoSgc = {
   _id: string
   codigo: string
   nombre: string
+  familia?: 'DG' | 'P' | 'I' | 'F' | 'OTRO'
+  ambito?: string | null
   proceso: string
+  subproceso?: string | null
   tipo: 'formato' | 'procedimiento' | 'instructivo' | 'plantilla' | 'registro' | 'otro'
   estado: 'borrador' | 'vigente' | 'obsoleto' | 'en_revision'
+  modoDiligenciamiento?: 'no_diligenciable' | 'solo_archivo' | 'ui_nativo' | 'ui_nativo_exportable'
+  visibilidad?: 'interna' | 'participantes' | 'publica'
+  modoControl?: 'app_oficial' | 'externo_referenciado' | 'mixto'
+  fuenteEditableUrl?: string | null
+  versionVigenteId?: string | null
+  responsable?: string | null
   propietario: string
   criticidad: 'baja' | 'media' | 'alta'
   retencion?: string | null
   ubicacionFuente?: string | null
+  origenFuente?: string | null
+  externalSystem?: 'pt_app' | null
+  externalRef?: string | null
+  externalUrl?: string | null
+  externalLabel?: string | null
   notas?: string | null
   updatedAt: number
   updatedBy: string
@@ -201,9 +215,139 @@ export type DocumentoSgcVersion = {
   estado: 'vigente' | 'reemplazada' | 'retirada'
   fechaVigencia?: string | null
   cambioResumen: string
+  resumenCambios?: string | null
   fileName?: string | null
+  contentType?: string | null
+  size?: number | null
+  elaboradoPor?: string | null
+  revisadoPor?: string | null
+  aprobadoPor?: string | null
+  fechaRevision?: string | null
+  fechaAprobacion?: string | null
   createdAt: number
   createdBy: string
+}
+
+export type RegistroSgc = {
+  _id: string
+  documentoId: string
+  versionBaseId?: string | null
+  codigo: string
+  nombre: string
+  estado: 'borrador' | 'vigente' | 'cerrado' | 'anulado'
+  entidadTipo: 'ronda' | 'equipo' | 'proveedor' | 'auditoria' | 'caso' | 'transversal'
+  rondaId?: string | null
+  entidadRef?: string | null
+  externalSystem?: 'pt_app' | null
+  externalRef?: string | null
+  externalUrl?: string | null
+  externalLabel?: string | null
+  updatedAt: number
+  updatedBy: string
+}
+
+export type RequisitoNormativo = {
+  _id: string
+  norma: string
+  versionNorma: string
+  clausula: string
+  titulo: string
+  descripcion: string
+  ambito: string
+  criticidad: 'baja' | 'media' | 'alta' | 'pendiente'
+  estado: 'activo' | 'placeholder' | 'retirado'
+  origenFuente?: string | null
+}
+
+export type DocumentoRequisito = {
+  _id: string
+  documentoId: string
+  requisitoId: string
+  tipoCobertura: 'cubre' | 'apoya' | 'evidencia' | 'no_aplica_justificado'
+  estadoCobertura: 'cubierto' | 'parcial' | 'pendiente' | 'no_aplica'
+  responsable?: string | null
+  observacion?: string | null
+  fechaRevision?: string | null
+}
+
+export type SgcMaestroList = {
+  documentos: DocumentoSgc[]
+  versiones: Array<{
+    documentoId: string
+    vigente: DocumentoSgcVersion | null
+    registros: number
+    coberturas: number
+  }>
+  ambitos: string[]
+  familias: Array<NonNullable<DocumentoSgc['familia']>>
+  resumen: {
+    total: number
+    vigentes: number
+    enRevision: number
+    sinVersion: number
+  }
+}
+
+export type DocumentoMaestroDetalle = {
+  documento: DocumentoSgc
+  versiones: DocumentoSgcVersion[]
+  versionVigente: DocumentoSgcVersion | null
+  registros: RegistroSgc[]
+  requisitos: Array<{
+    relacion: DocumentoRequisito
+    requisito: RequisitoNormativo
+  }>
+} | null
+
+export type NormativaSgc = {
+  normas: string[]
+  rows: Array<{
+    requisito: RequisitoNormativo
+    relaciones: DocumentoRequisito[]
+    documentos: DocumentoSgc[]
+  }>
+  resumen: {
+    requisitos: number
+    cubiertos: number
+    parciales: number
+    pendientes: number
+  }
+}
+
+export type MapaSgc = {
+  relaciones: Array<{
+    _id: string
+    bloque: string
+    rutaCritica?: string | null
+    origenCodigo: string
+    destinoCodigo?: string | null
+    documentoOrigenId?: string | null
+    documentoDestinoId?: string | null
+    tipoRelacion: 'define' | 'usa' | 'genera' | 'evidencia' | 'referencia' | 'externo'
+    ambito: string
+    destinoTipo: 'documento' | 'requisito' | 'registro' | 'gestion' | 'externo' | 'pendiente'
+    externalSystem?: 'pt_app' | null
+    externalUrl?: string | null
+    estadoResolucion: 'resuelto' | 'pendiente'
+  }>
+  documentos: DocumentoSgc[]
+  bloques: string[]
+  ambitos: string[]
+  pendientes: number
+}
+
+export type ExpedienteSgcResumen = {
+  ronda: {
+    _id: string
+    codigo: string
+    nombre: string
+    estado: string
+  }
+  progreso: number
+  registros: number
+  evidenciasVigentes: number
+  faltantesCriticos: string[]
+  externalRefs: Array<{ label: string; url?: string | null }>
 }
 
 export type MatrizDocumentalSgc = {
@@ -286,6 +430,131 @@ export async function inicializarPanelSgc(rondaId: string) {
 export async function listMatrizDocumentalSgc(): Promise<MatrizDocumentalSgc> {
   const token = await sgcToken()
   return fetchQuery(api.sgc.listMatrizDocumentalSgc, {}, { token }) as Promise<MatrizDocumentalSgc>
+}
+
+export async function listSgcMaestro(filters: {
+  ambito?: string | null
+  familia?: DocumentoSgc['familia'] | null
+  estado?: DocumentoSgc['estado'] | null
+  modoDiligenciamiento?: DocumentoSgc['modoDiligenciamiento'] | null
+  texto?: string | null
+} = {}): Promise<SgcMaestroList> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.listSgcMaestro, filters, { token }) as Promise<SgcMaestroList>
+}
+
+export async function getDocumentoMaestro(documentoId: string): Promise<DocumentoMaestroDetalle> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.getDocumentoMaestro, {
+    documentoId: documentoId as Id<'documentosSgc'>,
+  }, { token }) as Promise<DocumentoMaestroDetalle>
+}
+
+export async function listNormativaSgc(filters: {
+  norma?: string | null
+  estadoCobertura?: DocumentoRequisito['estadoCobertura'] | null
+} = {}): Promise<NormativaSgc> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.listNormativaSgc, filters, { token }) as Promise<NormativaSgc>
+}
+
+export async function listMapaSgc(filters: { ambito?: string | null } = {}): Promise<MapaSgc> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.listMapaSgc, filters, { token }) as Promise<MapaSgc>
+}
+
+export async function listExpedientesSgc(): Promise<ExpedienteSgcResumen[]> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.listExpedientesSgc, {}, { token }) as Promise<ExpedienteSgcResumen[]>
+}
+
+export async function upsertDocumentoMaestro(args: {
+  documentoId: string | null
+  codigo: string
+  nombre: string
+  familia: NonNullable<DocumentoSgc['familia']>
+  ambito: string
+  proceso: string
+  subproceso: string | null
+  estado: DocumentoSgc['estado']
+  modoDiligenciamiento: NonNullable<DocumentoSgc['modoDiligenciamiento']>
+  visibilidad: NonNullable<DocumentoSgc['visibilidad']>
+  modoControl: NonNullable<DocumentoSgc['modoControl']>
+  fuenteEditableUrl: string | null
+  responsable: string
+  retencion: string | null
+  ubicacionFuente: string | null
+  notas: string | null
+}) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.upsertDocumentoMaestro, {
+    ...args,
+    documentoId: args.documentoId as Id<'documentosSgc'> | null,
+  }, { token })
+}
+
+export async function registrarVersionOficial(args: {
+  documentoId: string
+  version: number | null
+  estado: DocumentoSgcVersion['estado']
+  storageId: string
+  fileName: string
+  contentType: string
+  size: number
+  hash: string | null
+  resumenCambios: string
+  elaboradoPor: string | null
+  revisadoPor: string | null
+  aprobadoPor: string | null
+  fechaRevision: string | null
+  fechaAprobacion: string | null
+  fechaVigencia: string | null
+}) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.registrarVersionOficial, {
+    ...args,
+    documentoId: args.documentoId as Id<'documentosSgc'>,
+    storageId: args.storageId as Id<'_storage'>,
+  }, { token })
+}
+
+export async function crearRegistroSgc(args: {
+  documentoId: string
+  versionBaseId: string | null
+  codigo: string
+  nombre: string
+  entidadTipo: RegistroSgc['entidadTipo']
+  rondaId: string | null
+  entidadRef: string | null
+  externalSystem?: 'pt_app' | null
+  externalRef?: string | null
+  externalUrl?: string | null
+  externalLabel?: string | null
+}) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.crearRegistroSgc, {
+    ...args,
+    documentoId: args.documentoId as Id<'documentosSgc'>,
+    versionBaseId: args.versionBaseId as Id<'documentoSgcVersiones'> | null,
+    rondaId: args.rondaId as Id<'rondas'> | null,
+  }, { token })
+}
+
+export async function upsertDocumentoRequisito(args: {
+  documentoId: string
+  requisitoId: string
+  tipoCobertura: DocumentoRequisito['tipoCobertura']
+  estadoCobertura: DocumentoRequisito['estadoCobertura']
+  responsable: string | null
+  observacion: string | null
+  fechaRevision: string | null
+}) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.upsertDocumentoRequisito, {
+    ...args,
+    documentoId: args.documentoId as Id<'documentosSgc'>,
+    requisitoId: args.requisitoId as Id<'requisitosNormativos'>,
+  }, { token })
 }
 
 export async function upsertDocumentoSgc(args: {
