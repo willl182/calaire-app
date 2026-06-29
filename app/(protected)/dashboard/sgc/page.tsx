@@ -26,8 +26,8 @@ export default async function SgcResumenPage() {
         email={auth.user.email}
         actions={
           <>
-            <Link href="/dashboard/sgc/documentos" className="btn-primary">
-              Centro documental
+            <Link href="/dashboard/rondas/nueva" className="btn-primary">
+              ＋ Nueva ronda
             </Link>
             <form
               action={async () => {

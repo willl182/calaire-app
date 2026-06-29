@@ -73,12 +73,47 @@ function NavLink({
   )
 }
 
+function AreaLink({
+  item,
+  isActive,
+}: {
+  item: NavItem
+  isActive: boolean
+}) {
+  const className =
+    'inline-flex h-9 items-center justify-center rounded-md px-3 text-sm font-semibold whitespace-nowrap transition-colors duration-150 ' +
+    (isActive
+      ? 'bg-[var(--pt-primary)] text-[var(--foreground)] shadow-sm'
+      : 'text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]')
+
+  if (item.external) {
+    return (
+      <a href={item.href} target="_blank" rel="noopener noreferrer" className={`${className} gap-1`}>
+        {item.label}
+        <span className="text-[9px] opacity-60" aria-hidden="true">↗</span>
+        <span className="sr-only">(abre en nueva pestaña)</span>
+      </a>
+    )
+  }
+
+  return (
+    <Link href={item.href} className={className}>
+      {item.label}
+    </Link>
+  )
+}
+
 function TopNavInner() {
   const pathname   = usePathname()
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab')
   const isSgcDashboard = pathname.startsWith('/dashboard/sgc')
   const navItems = isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
+  const areaItems: NavItem[] = [
+    { label: 'Gestión de rondas', href: '/dashboard', tabKey: '__gestion__' },
+    { label: 'SGC', href: '/dashboard/sgc', tabKey: '__sgc__' },
+    { label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true },
+  ]
 
   function isActive(item: NavItem): boolean {
     if (item.external) return false
@@ -93,7 +128,7 @@ function TopNavInner() {
 
   return (
     <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)]" style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}>
-      <div className="flex items-stretch gap-6 px-6 max-w-screen-2xl mx-auto">
+      <div className="flex items-stretch gap-5 px-6 max-w-screen-2xl mx-auto">
         {/* Brand */}
         <div className="flex items-center gap-3 pr-6 border-r border-[var(--border-soft)] py-4">
           <LogoUnal height={32} />
@@ -105,6 +140,16 @@ function TopNavInner() {
           </span>
         </div>
 
+        <nav className="flex items-center gap-1 border-r border-[var(--border-soft)] pr-5" aria-label="Áreas principales">
+          {areaItems.map((item) => (
+            <AreaLink
+              key={item.label}
+              item={item}
+              isActive={!item.external && (item.tabKey === '__sgc__' ? isSgcDashboard : !isSgcDashboard)}
+            />
+          ))}
+        </nav>
+
         <nav
           className="flex min-w-0 flex-1 items-stretch gap-5 overflow-x-auto"
           aria-label={isSgcDashboard ? 'Secciones SGC' : 'Secciones gestión de ronda'}
@@ -112,7 +157,6 @@ function TopNavInner() {
           {navItems.map((item) => (
             <NavLink key={item.label} item={item} isActive={isActive(item)} />
           ))}
-          {!isSgcDashboard && <NavLink item={{ label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true }} isActive={false} />}
         </nav>
       </div>
     </header>
