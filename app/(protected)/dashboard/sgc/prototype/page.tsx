@@ -200,6 +200,8 @@ function parseVariant(value: string | string[] | undefined): Variant {
 function stateClass(state: string) {
   if (state === 'vigente' || state === 'cubierto' || state === 'completo') return 'bg-emerald-100 text-emerald-800'
   if (state === 'en_revision' || state === 'parcial' || state === 'en_progreso') return 'bg-amber-100 text-amber-800'
+  if (state === 'activa') return 'bg-sky-100 text-sky-800'
+  if (state === 'cerrada') return 'bg-slate-200 text-slate-700'
   if (state === 'obsoleto' || state === 'no_aplica') return 'bg-slate-200 text-slate-700'
   return 'bg-rose-100 text-rose-800'
 }
@@ -691,7 +693,7 @@ export default async function SgcMasterPrototypePage({ searchParams }: PageProps
   const variant = parseVariant(query.v)
 
   return (
-    <div className="grid gap-6">
+    <div className="grid gap-6 pb-24">
       <PrototypeHeader variant={variant} />
 
       <section className="grid gap-3 rounded-lg border border-[var(--border)] bg-white/60 p-4 text-sm md:grid-cols-4">

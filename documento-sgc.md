@@ -301,7 +301,7 @@ Durante las fases posteriores, el sistema documental activo pasó a concentrarse
 - `01_bloque_general/04_formatos_maestros`
 - `01_bloque_general/05_matrices_inventarios`
 - `01_bloque_general/02_procedimientos`
-- `02_prueba_piloto_rondas`
+- `02_despliegue_rondas`
 
 El historial Git registra hitos como:
 

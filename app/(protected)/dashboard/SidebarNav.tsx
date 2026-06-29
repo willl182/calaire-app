@@ -87,10 +87,10 @@ function TopNavInner() {
   function isActive(item: NavItem): boolean {
     if (item.external) return false
     if (item.tabKey === null) return pathname === '/dashboard' && !tab
-    if (item.tabKey === '__sgc_home__') return pathname === '/dashboard/sgc'
     if (item.tabKey === '__sgc_documentos__') return pathname.startsWith('/dashboard/sgc/documentos')
     if (item.tabKey === '__sgc_normativa__') return pathname.startsWith('/dashboard/sgc/normativa')
     if (item.tabKey === '__sgc_mapa__') return pathname.startsWith('/dashboard/sgc/mapa')
+    if (item.tabKey === '__sgc_home__') return pathname === '/dashboard/sgc' || pathname.startsWith('/dashboard/sgc/')
     if (item.tabKey === '__ronda_expedientes__') return pathname.startsWith('/dashboard/rondas/expedientes')
     if (item.tabKey === 'registros') return tab === 'registros'
     return tab === item.tabKey

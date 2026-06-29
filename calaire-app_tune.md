@@ -103,12 +103,12 @@ Pero no existe archivo maestro `F-PSEA-03` en `01_bloque_general/04_formatos_mae
 
 Impacto: queda incompleta la trazabilidad participante -> confirmacion -> equipos/datos -> exportacion oficial.
 
-Accion recomendada:
+Accion recomendada, condicionada a cerrar primero la decision de formato de `F-PSEA-03`:
 
-- Crear `F-PSEA-03 Registro de participacion.md` y, si aplica, `.xlsx`.
-- Agregarlo a `plantilla_checklist_ronda.md`.
-- Agregarlo como nodo del mapa y conectarlo con `DG-PSEA-02`, `I-PSEA-02`, `I-PSEA-03`, `F-PSEA-04`, `F-PSEA-08` y `F-PSEA-09`.
-- Actualizar inventario y `P-PSEA-02` para retirar el estado "maestro pendiente".
+- Si se aprueba como formato independiente, crear `F-PSEA-03 Registro de participacion.md` y, si aplica, `.xlsx`.
+- Si se aprueba como formato independiente, agregarlo a `plantilla_checklist_ronda.md`.
+- Si se aprueba como formato independiente, agregarlo como nodo del mapa y conectarlo con `DG-PSEA-02`, `I-PSEA-02`, `I-PSEA-03`, `F-PSEA-04`, `F-PSEA-08` y `F-PSEA-09`.
+- Actualizar inventario y `P-PSEA-02` para retirar el estado "maestro pendiente" solo despues de esa decision.
 
 ### H2. Faltan formatos de ronda que `calaire-app` deberia producir o alimentar
 

@@ -40,9 +40,9 @@ export async function relacionarDocumentoRequisitoAction(formData: FormData) {
       observacion: parseText(formData, 'observacion') || null,
       fechaRevision: parseText(formData, 'fecha_revision') || null,
     })
-    revalidatePath('/dashboard/sgc/normativa')
-    redirect('/dashboard/sgc/normativa?success=Relacion%20documento-requisito%20guardada')
   } catch (error) {
     redirect(`/dashboard/sgc/normativa?error=${encodeURIComponent(error instanceof Error ? error.message : 'No fue posible guardar la relacion.')}`)
   }
+  revalidatePath('/dashboard/sgc/normativa')
+  redirect('/dashboard/sgc/normativa?success=Relacion%20documento-requisito%20guardada')
 }

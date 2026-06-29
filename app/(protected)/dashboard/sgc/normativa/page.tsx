@@ -19,6 +19,13 @@ function coverageTone(state: string) {
   return 'bg-rose-100 text-rose-800'
 }
 
+function aggregateCoverage(relaciones: Array<{ estadoCobertura: string }>) {
+  if (relaciones.some((relacion) => relacion.estadoCobertura === 'cubierto')) return 'cubierto'
+  if (relaciones.some((relacion) => relacion.estadoCobertura === 'parcial')) return 'parcial'
+  if (relaciones.length > 0 && relaciones.every((relacion) => relacion.estadoCobertura === 'no_aplica')) return 'no_aplica'
+  return 'pendiente'
+}
+
 function buildRelacionarHref(params: Record<string, string | string[] | undefined>, requisitoId: string) {
   const query = new URLSearchParams()
   const norma = firstParam(params.norma)
@@ -99,7 +106,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
             </thead>
             <tbody className="divide-y divide-[var(--border-soft)]">
               {data.rows.map(({ requisito, relaciones, documentos }) => {
-                const coverage = relaciones[0]?.estadoCobertura ?? 'pendiente'
+                const coverage = aggregateCoverage(relaciones)
                 const isSelectedForRelation = selectedRelacionarId === requisito._id
                 return (
                   <tr key={requisito._id} className="align-top hover:bg-white/60">

@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { canViewSgcMaestro, requireAuth } from '@/lib/auth'
+import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listMapaSgc } from '@/lib/sgc'
 
 type PageProps = {
@@ -73,6 +74,7 @@ export default async function MapaSgcPage({ searchParams }: PageProps) {
                 {relaciones.map((relacion) => {
                   const origin = relacion.documentoOrigenId ? docsById.get(relacion.documentoOrigenId) : null
                   const target = relacion.documentoDestinoId ? docsById.get(relacion.documentoDestinoId) : null
+                  const externalUrl = normalizeHttpUrl(relacion.externalUrl)
                   return (
                     <div key={relacion._id} className={`rounded-lg border p-4 ${relationTone(relacion.tipoRelacion)}`}>
                       <div className="flex flex-wrap items-center gap-2 text-sm">
@@ -84,8 +86,10 @@ export default async function MapaSgcPage({ searchParams }: PageProps) {
                         <span className="text-xs uppercase tracking-[0.12em] opacity-70">{relacion.tipoRelacion}</span>
                         {target ? (
                           <Link className="font-semibold underline-offset-4 hover:underline" href={`/dashboard/sgc/documentos/${target._id}`}>{target.codigo}</Link>
+                        ) : relacion.externalSystem === 'pt_app' && externalUrl ? (
+                          <a className="font-semibold underline-offset-4 hover:underline" href={externalUrl} target="_blank" rel="noreferrer">pt_app externo ↗</a>
                         ) : relacion.externalSystem === 'pt_app' ? (
-                          <a className="font-semibold underline-offset-4 hover:underline" href={relacion.externalUrl ?? '#'} target="_blank" rel="noreferrer">pt_app externo ↗</a>
+                          <span className="font-semibold">pt_app externo</span>
                         ) : relacion.destinoCodigo ? (
                           <span className="font-semibold">{relacion.destinoCodigo}</span>
                         ) : (

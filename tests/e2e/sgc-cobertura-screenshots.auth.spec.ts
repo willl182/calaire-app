@@ -24,6 +24,7 @@ test('captures SGC coverage board screenshots', async ({ page }) => {
 
   await page.goto('/dashboard/sgc/documentos')
   await expect(page.getByRole('heading', { name: 'Centro documental' })).toBeVisible()
+  await expect(page.getByRole('table')).toBeVisible()
   await page.screenshot({
     path: `${screenshotDir}/07-centro-documental.png`,
     fullPage: false,

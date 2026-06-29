@@ -214,7 +214,7 @@ export type DocumentoSgcVersion = {
   version: number
   estado: 'vigente' | 'reemplazada' | 'retirada'
   fechaVigencia?: string | null
-  cambioResumen: string
+  cambioResumen?: string | null
   resumenCambios?: string | null
   fileName?: string | null
   contentType?: string | null
@@ -753,9 +753,10 @@ export async function getSgcDownloadUrl(evidenciaVersionId: string) {
   }, { token })
 }
 
-export async function getDocumentoSgcDownloadUrl(versionId: string) {
+export async function getDocumentoSgcDownloadUrl(documentoId: string, versionId: string) {
   const token = await sgcToken()
   return fetchQuery(api.sgc.getDocumentoSgcDownloadUrl, {
+    documentoId: documentoId as Id<'documentosSgc'>,
     versionId: versionId as Id<'documentoSgcVersiones'>
   }, { token })
 }

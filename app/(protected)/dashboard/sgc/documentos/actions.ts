@@ -3,6 +3,7 @@
 import { revalidatePath } from 'next/cache'
 import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, requireAuth } from '@/lib/auth'
+import { requireHttpUrl } from '@/lib/safe-url'
 import {
   crearRegistroSgc,
   generateSgcUploadUrl,
@@ -68,8 +69,9 @@ function redirectDocument(documentoId: string, key: 'success' | 'error', message
 export async function guardarDocumentoMaestroAction(formData: FormData) {
   await requireSgcEditor()
   const documentoId = parseNullable(formData, 'documento_id')
+  let id: string
   try {
-    const id = await upsertDocumentoMaestro({
+    id = String(await upsertDocumentoMaestro({
       documentoId,
       codigo: parseText(formData, 'codigo'),
       nombre: parseText(formData, 'nombre'),
@@ -81,24 +83,25 @@ export async function guardarDocumentoMaestroAction(formData: FormData) {
       modoDiligenciamiento: parseModo(parseText(formData, 'modo_diligenciamiento')),
       visibilidad: parseVisibilidad(parseText(formData, 'visibilidad')),
       modoControl: parseModoControl(parseText(formData, 'modo_control')),
-      fuenteEditableUrl: parseNullable(formData, 'fuente_editable_url'),
+      fuenteEditableUrl: requireHttpUrl(parseNullable(formData, 'fuente_editable_url'), 'La URL editable externa'),
       responsable: parseText(formData, 'responsable') || 'Coordinacion SGC',
       retencion: parseNullable(formData, 'retencion'),
       ubicacionFuente: parseNullable(formData, 'ubicacion_fuente'),
       notas: parseNullable(formData, 'notas'),
-    })
-    revalidatePath('/dashboard/sgc/documentos')
-    redirectDocument(String(id), 'success', 'Documento maestro guardado.')
+    }))
   } catch (error) {
     if (documentoId) redirectDocument(documentoId, 'error', error instanceof Error ? error.message : 'No fue posible guardar el documento.')
     redirect(`/dashboard/sgc/documentos?error=${encodeURIComponent(error instanceof Error ? error.message : 'No fue posible guardar el documento.')}`)
   }
+  revalidatePath('/dashboard/sgc/documentos')
+  redirectDocument(id, 'success', 'Documento maestro guardado.')
 }
 
 export async function registrarVersionOficialAction(formData: FormData) {
   await requireSgcEditor()
   const documentoId = parseText(formData, 'documento_id')
   try {
+    if (!documentoId) throw new Error('Selecciona un documento.')
     const file = formData.get('archivo')
     if (!(file instanceof File) || file.size === 0) throw new Error('La version oficial exige archivo.')
     const uploadUrl = await generateSgcUploadUrl()
@@ -126,17 +129,19 @@ export async function registrarVersionOficialAction(formData: FormData) {
       fechaAprobacion: parseNullable(formData, 'fecha_aprobacion'),
       fechaVigencia: parseNullable(formData, 'fecha_vigencia'),
     })
-    revalidatePath(`/dashboard/sgc/documentos/${documentoId}`)
-    redirectDocument(documentoId, 'success', 'Version oficial registrada.')
   } catch (error) {
-    redirectDocument(documentoId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la version oficial.')
+    if (documentoId) redirectDocument(documentoId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la version oficial.')
+    redirect(`/dashboard/sgc/documentos?error=${encodeURIComponent(error instanceof Error ? error.message : 'No fue posible registrar la version oficial.')}`)
   }
+  revalidatePath(`/dashboard/sgc/documentos/${documentoId}`)
+  redirectDocument(documentoId, 'success', 'Version oficial registrada.')
 }
 
 export async function crearRegistroDerivadoAction(formData: FormData) {
   await requireSgcEditor()
   const documentoId = parseText(formData, 'documento_id')
   try {
+    if (!documentoId) throw new Error('Selecciona un documento.')
     await crearRegistroSgc({
       documentoId,
       versionBaseId: parseNullable(formData, 'version_base_id'),
@@ -147,12 +152,13 @@ export async function crearRegistroDerivadoAction(formData: FormData) {
       entidadRef: parseNullable(formData, 'entidad_ref'),
       externalSystem: parseText(formData, 'external_system') === 'pt_app' ? 'pt_app' : null,
       externalRef: parseNullable(formData, 'external_ref'),
-      externalUrl: parseNullable(formData, 'external_url'),
+      externalUrl: requireHttpUrl(parseNullable(formData, 'external_url'), 'La URL externa contextual'),
       externalLabel: parseNullable(formData, 'external_label'),
     })
-    revalidatePath(`/dashboard/sgc/documentos/${documentoId}`)
-    redirectDocument(documentoId, 'success', 'Registro derivado creado.')
   } catch (error) {
-    redirectDocument(documentoId, 'error', error instanceof Error ? error.message : 'No fue posible crear el registro derivado.')
+    if (documentoId) redirectDocument(documentoId, 'error', error instanceof Error ? error.message : 'No fue posible crear el registro derivado.')
+    redirect(`/dashboard/sgc/documentos?error=${encodeURIComponent(error instanceof Error ? error.message : 'No fue posible crear el registro derivado.')}`)
   }
+  revalidatePath(`/dashboard/sgc/documentos/${documentoId}`)
+  redirectDocument(documentoId, 'success', 'Registro derivado creado.')
 }

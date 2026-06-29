@@ -1,99 +1,93 @@
 # Session State: CALAIRE App
 
-**Last Updated**: 2026-06-28 21:21 -0500
+**Last Updated**: 2026-06-28 23:21 -0500
 
 ## Session Objective
 
-Implementar `dev/plan-protv2.md` siguiendo `dev/workflow-protv2.md` y `dev/targets-protv2.md`, con una separacion correcta entre el dashboard SGC maestro global y el dashboard documental operativo por ronda.
+Implementar los hallazgos de `cr-rev.md` sobre el PR SGC Maestro protv2, preservando la separacion entre SGC maestro global y dashboard documental por ronda.
 
 ## Current State
 
-- [x] Schema Convex extendido para SGC maestro:
-  - `documentosSgc` ampliado con familia, ambito, modo de diligenciamiento, fuente editable, version vigente y referencias externas.
-  - Nuevas tablas: `documentoSgcAnexos`, `requisitosNormativos`, `documentoRequisitos`, `registrosSgc`, `mapaSgcRelaciones`.
-- [x] API Convex SGC maestro creada en `convex/sgc/maestro.ts` y exportada desde `convex/sgc.ts`.
-- [x] Seeds auditables creados con `scripts/extract-sgc-seeds.mjs`.
-- [x] Seeds importados a Convex con `scripts/import-sgc-seeds.mjs`.
-- [x] Conteos verificados en Convex:
-  - 52 documentos SGC.
-  - 713 requisitos normativos.
-  - 83 relaciones de mapa.
-  - 1 ronda real.
-- [x] Rutas SGC maestro global implementadas:
-  - `/dashboard/sgc`
-  - `/dashboard/sgc/documentos`
-  - `/dashboard/sgc/documentos/[id]`
-  - `/dashboard/sgc/normativa`
-  - `/dashboard/sgc/mapa`
-- [x] Dashboard documental por ronda separado:
-  - `/dashboard/rondas/expedientes`
-  - `/dashboard/rondas/[id]/sgc`
-  - `/dashboard/sgc/expedientes` queda solo como redireccion de compatibilidad.
-- [x] Navegacion principal separa `SGC`, `Gestion` y `Sistemas externos`.
-- [x] `pt_app` tratado como referencia externa (`externalSystem: "pt_app"`), no como modulo interno.
-- [x] Componentes legacy del antiguo resumen SGC removidos:
-  - `SgcResumenClient.tsx`
-  - `SgcTabs.tsx`
-  - `TableroCoberturaRondas.tsx`
-  - `MatrizInteractiva.tsx`
-  - `app/(protected)/dashboard/sgc/actions.ts`
-- [x] Descarga de version oficial agregada en `/dashboard/sgc/documentos/[id]/versiones/[versionId]/download`.
-- [x] Matriz normativa permite relacionar documento-requisito desde UI para roles editores.
-  - El formulario pesado de relacion queda bajo demanda por fila seleccionada para evitar renderizar 713 formularios x 52 documentos.
-- [x] Registro derivado trazable creado para el MVP:
-  - Documento: `F-PSEA-13`.
-  - Ronda: `R1`.
-  - Registro: `F-PSEA-13-R1-MVP`.
-- [x] Permisos MVP basicos agregados:
-  - `consulta` puede leer y descargar.
-  - `admin_sgc` y `coordinador_proceso` pueden editar.
-  - acciones de edicion ocultas para solo consulta.
-- [x] `pnpm lint` pasa limpio.
-- [x] `pnpm build` pasa.
-- [x] Smoke Playwright autenticado SGC pasa:
-  - portada SGC maestro separada de expedientes de ronda.
-  - centro documental y detalle de documento.
-  - matriz normativa persistida.
-  - mapa SGC persistido con `pt_app` externo.
-  - redireccion `/dashboard/sgc/expedientes` hacia `/dashboard/rondas/expedientes`.
+- [x] Review de `cr-rev.md` implementado localmente.
+- [x] No se hizo commit ni push, por instruccion explicita del usuario.
+- [x] Server actions SGC corregidas:
+  - `redirect()` de exito queda fuera de `try/catch`.
+  - `documento_id` se valida antes de subir archivo oficial.
+  - URLs editables/externas se validan como `http(s)` antes de persistir.
+- [x] Seguridad de URLs agregada:
+  - Nuevo helper `lib/safe-url.ts`.
+  - Render de `fuenteEditableUrl` y `externalUrl` evita links para valores no `http(s)`.
+- [x] Convex SGC endurecido:
+  - Indice version-aware `by_norma_and_versionNorma_and_clausula`.
+  - Imports de requisitos usan norma + version + clausula.
+  - Validacion de existencia de documento/requisito en `documentoRequisitos`.
+  - Validacion de pertenencia `versionBaseId` -> documento.
+  - Versiones oficiales deben ser enteras positivas y no duplicarse por documento.
+  - Registros derivados rechazan codigo/nombre vacios.
+  - Filtro `pendiente` conserva requisitos sin relacion.
+  - Conteo de registros deja de usar `take(50)` como total.
+  - Imports de mapa no borran relaciones curadas en import generico y son idempotentes por clave natural.
+  - Relaciones de mapa a `requisito` se rechazan hasta que puedan resolverse con `requisitoId`.
+- [x] Visibilidad SGC aplicada en backend:
+  - `admin`, `admin_sgc`, `coordinador_proceso` leen todo.
+  - `consulta` solo recibe documentos `publica`.
+  - Descargas de versiones heredan la misma regla y validan documento + version.
+- [x] UI y accesibilidad:
+  - Formularios del detalle de documento tienen nombres accesibles.
+  - Matriz normativa calcula cobertura agregada, no `relaciones[0]`.
+  - Mapa y detalle no renderizan links inseguros.
+  - Fallback activo de navegacion SGC para subrutas no listadas.
+  - Prototype ajusta estados `activa`/`cerrada` y padding inferior.
+  - HTML estatico del mapa responde a Space y Enter.
+- [x] Tests screenshot esperan tabla antes de capturar.
+- [x] Docs/logs ajustados para no listar expedientes como ruta real del SGC maestro.
+- [x] Validaciones ejecutadas:
+  - `pnpm exec convex codegen`: pasa.
+  - `pnpm lint`: pasa limpio.
+  - `pnpm build`: pasa.
+  - `git diff --check`: pasa.
+- [x] Follow-up review de `convex/sgc/documentos.ts` resuelto:
+  - Helper `visible` ahora es generico y preserva el tipo completo de fila.
+  - `requireSgcViewerAccess(ctx)` queda fuera del `try` de matriz documental para no ocultar fallos de autorizacion.
+  - Revalidado con `pnpm exec convex codegen`, `pnpm lint` y `pnpm build`.
 
 ## Critical Technical Context
 
-- Regla corregida por el usuario: el SGC maestro global y el SGC/expediente de rondas son dos dashboards distintos.
-- No volver a listar `/dashboard/sgc/expedientes` como ruta real del SGC maestro; es solo compatibilidad.
-- Clasificacion correcta:
-  - SGC maestro global: `/dashboard/sgc`, `/dashboard/sgc/documentos`, `/dashboard/sgc/documentos/[id]`, `/dashboard/sgc/normativa`, `/dashboard/sgc/mapa`.
-  - Dashboard documental por ronda: `/dashboard/rondas/expedientes`, `/dashboard/rondas/[id]/sgc`.
-- La portada `/dashboard/sgc` ya no debe renderizar resumen de cierre documental de rondas.
-- Componentes legacy del resumen SGC global fueron eliminados para evitar que se vuelva a mezclar cierre documental de rondas con SGC maestro.
-- Las rutas nuevas son server-rendered y usan `params/searchParams` como `Promise`, siguiendo Next 16 local.
-- Convex fue regenerado con `pnpm exec convex codegen`.
-- Para pruebas locales autenticadas deben estar corriendo ambos servicios:
-  - `pnpm dev` en `http://localhost:3000`.
-  - `pnpm exec convex dev` porque `.env.local` apunta `NEXT_PUBLIC_CONVEX_URL=http://127.0.0.1:3212`.
-- Si Convex local no esta arriba, el dashboard falla con `Runtime TypeError: fetch failed` desde `ConvexHttpClient.queryInner`.
+- Instruccion vigente del usuario: **no hacer commit ni push**.
+- Rama local sigue con cambios sin commitear.
+- `cr-rev.md` sigue sin trackear y contiene la salida de review.
+- `logs/history/260628_2231_problems.md` tambien sigue sin trackear desde la sesion anterior.
+- Nuevo archivo sin trackear creado por esta tanda: `lib/safe-url.ts`.
+- Smoke Playwright autenticado no se ejecuto porque no habia servicios locales respondiendo en:
+  - `http://localhost:3000`
+  - `http://127.0.0.1:3212`
+- Para repetir smoke autenticado, levantar:
+  - `pnpm dev`
+  - `pnpm exec convex dev`
+- Next local sigue en 16.2.4; antes de tocar rutas Next hay que consultar `node_modules/next/dist/docs/`.
+- Antes de tocar Convex hay que leer `convex/_generated/ai/guidelines.md`.
 
-## Known Pending Work
+## Key Files Changed
 
-- [x] Verificar si `app/(protected)/dashboard/sgc/SgcResumenClient.tsx`, `SgcTabs.tsx`, `TableroCoberturaRondas.tsx` y `MatrizInteractiva.tsx` siguen siendo necesarios o deben moverse/eliminarse para evitar confusion.
-- [x] Completar acciones/UI para relacionar documentos con requisitos desde la matriz normativa.
-- [x] Completar descarga de version oficial desde detalle de documento.
-- [x] Mejorar permisos MVP: distinguir `admin_sgc`, `coordinador_proceso`, `consulta` en UI y backend, no solo admin general.
-- [x] Documentos `dev/plan-protv2.md`, `dev/workflow-protv2.md`, `dev/targets-protv2.md` actualizados con la separacion corregida:
-  - SGC maestro global no incluye expedientes de ronda.
-  - Expedientes vive bajo Gestion/Rondas.
-- [x] Revisado que `/dashboard/rondas/expedientes` es el listado agregado operativo y `/dashboard/sgc/expedientes` solo redirige.
-- [x] Smoke UI autenticado agregado/actualizado en `tests/e2e/sgc-cobertura.auth.spec.ts`.
-- [x] Decision final MVP del prototipo: `/dashboard/sgc/prototype` se conserva temporalmente por URL directa, sin enlace en portada productiva.
-
-## Validation
-
-- `pnpm lint`: pasa limpio.
-- `pnpm build`: pasa.
-- `pnpm exec playwright test tests/e2e/sgc-cobertura.auth.spec.ts --project=authenticated-chromium --workers=1 --timeout=30000 --reporter=list`: 5 passed.
-- Smoke Convex de conteos: documentos 52, requisitos 713, mapa 83, rondas 1, registros derivados 1.
+- `lib/safe-url.ts`
+- `app/(protected)/dashboard/sgc/documentos/actions.ts`
+- `app/(protected)/dashboard/sgc/documentos/[id]/page.tsx`
+- `app/(protected)/dashboard/sgc/documentos/[id]/versiones/[versionId]/download/route.ts`
+- `app/(protected)/dashboard/sgc/documentos/page.tsx`
+- `app/(protected)/dashboard/sgc/mapa/page.tsx`
+- `app/(protected)/dashboard/sgc/normativa/actions.ts`
+- `app/(protected)/dashboard/sgc/normativa/page.tsx`
+- `convex/schema.ts`
+- `convex/sgc/documentos.ts`
+- `convex/sgc/maestro.ts`
+- `convex/sgc/shared.ts`
+- `lib/sgc/index.ts`
+- `tests/e2e/sgc-cobertura-screenshots.auth.spec.ts`
+- `tests/e2e/sgc-fase3-screenshots.auth.spec.ts`
 
 ## Next Steps
 
-1. Objetivo protv2 cerrado para MVP.
-2. Mantener `pnpm dev` y `pnpm exec convex dev` activos al repetir smoke local autenticado.
+1. Revisar el diff completo antes de commit.
+2. Si se quiere smoke UI, levantar `pnpm dev` y `pnpm exec convex dev`, luego correr:
+   `pnpm exec playwright test tests/e2e/sgc-cobertura.auth.spec.ts --project=authenticated-chromium --workers=1 --timeout=30000 --reporter=list`
+3. Solo cuando el usuario autorice, crear commit con los fixes del review.

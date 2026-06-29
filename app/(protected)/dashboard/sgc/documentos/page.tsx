@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/lib/auth'
+import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listSgcMaestro, type DocumentoSgc } from '@/lib/sgc'
 import { guardarDocumentoMaestroAction } from './actions'
 
@@ -111,6 +112,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <tbody className="divide-y divide-[var(--border-soft)]">
               {data.documentos.map((doc) => {
                 const version = versionFor(doc, data.versiones)
+                const fuenteEditableUrl = normalizeHttpUrl(doc.fuenteEditableUrl)
                 return (
                   <tr key={doc._id} className="align-top hover:bg-white/60">
                     <td className="px-4 py-3 font-semibold text-[var(--foreground)]">
@@ -125,7 +127,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                     <td className="px-4 py-3"><span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoTone(doc.estado)}`}>{doc.estado}</span></td>
                     <td className="px-4 py-3 text-[var(--foreground-muted)]">{doc.modoDiligenciamiento ?? 'no_diligenciable'}</td>
                     <td className="px-4 py-3">
-                      {doc.fuenteEditableUrl ? <a className="text-[var(--pt-primary-dark)] underline" href={doc.fuenteEditableUrl} target="_blank" rel="noreferrer">Editar externo</a> : <span className="text-[var(--foreground-muted)]">No registrada</span>}
+                      {fuenteEditableUrl ? <a className="text-[var(--pt-primary-dark)] underline" href={fuenteEditableUrl} target="_blank" rel="noreferrer">Editar externo</a> : <span className="text-[var(--foreground-muted)]">{doc.fuenteEditableUrl ? 'URL no valida' : 'No registrada'}</span>}
                     </td>
                     <td className="px-4 py-3">
                       {version?.vigente ? `v${version.vigente.version} · ${version.vigente.fileName ?? 'archivo oficial'}` : <span className="text-rose-700">Sin version</span>}

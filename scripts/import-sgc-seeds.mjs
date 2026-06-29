@@ -27,6 +27,7 @@ function runConvex(functionName, args, push = false) {
     stdio: 'inherit',
   })
   if (result.status !== 0) {
+    if (result.error) console.error(result.error)
     process.exit(result.status ?? 1)
   }
 }

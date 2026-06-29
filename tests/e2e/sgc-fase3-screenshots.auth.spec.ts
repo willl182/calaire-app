@@ -12,7 +12,7 @@ test('captures SGC phase 3 document matrix screenshots', async ({ page }) => {
 
   await page.goto('/dashboard/sgc/documentos')
   await expect(page.getByRole('heading', { name: 'Centro documental' })).toBeVisible()
-  await page.screenshot({ path: `${screenshotDir}/02-matriz-documental-maestra.png`, fullPage: false })
   await expect(page.getByRole('table')).toBeVisible()
+  await page.screenshot({ path: `${screenshotDir}/02-matriz-documental-maestra.png`, fullPage: false })
   await page.screenshot({ path: `${screenshotDir}/03-tabla-documental-sgc.png`, fullPage: false })
 })

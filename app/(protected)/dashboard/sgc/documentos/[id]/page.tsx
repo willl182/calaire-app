@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/lib/auth'
+import { normalizeHttpUrl } from '@/lib/safe-url'
 import { getDocumentoMaestro } from '@/lib/sgc'
 import { crearRegistroDerivadoAction, guardarDocumentoMaestroAction, registrarVersionOficialAction } from '../actions'
 
@@ -29,6 +30,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
   if (!detalle) notFound()
   const { documento, versionVigente, versiones, registros, requisitos } = detalle
   const canEdit = canEditSgcMaestro(auth)
+  const fuenteEditableUrl = normalizeHttpUrl(documento.fuenteEditableUrl)
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -65,8 +67,10 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-lg border border-[var(--border-soft)] bg-white p-4">
               <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Fuente editable</div>
-              {documento.fuenteEditableUrl ? (
-                <a className="mt-2 inline-flex text-sm font-semibold text-[var(--pt-primary-dark)] underline" href={documento.fuenteEditableUrl} target="_blank" rel="noreferrer">Abrir Drive/SharePoint</a>
+              {fuenteEditableUrl ? (
+                <a className="mt-2 inline-flex text-sm font-semibold text-[var(--pt-primary-dark)] underline" href={fuenteEditableUrl} target="_blank" rel="noreferrer">Abrir Drive/SharePoint</a>
+              ) : documento.fuenteEditableUrl ? (
+                <p className="mt-2 text-sm text-[var(--foreground-muted)] break-all">{documento.fuenteEditableUrl}</p>
               ) : (
                 <p className="mt-2 text-sm text-[var(--foreground-muted)]">No registrada. Esto no afecta la version oficial congelada.</p>
               )}
@@ -94,33 +98,33 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
           <h2 className="text-lg font-semibold">Actualizar metadatos</h2>
           <form action={guardarDocumentoMaestroAction} className="mt-4 grid gap-3">
             <input type="hidden" name="documento_id" value={documento._id} />
-            <input className="input" name="codigo" defaultValue={documento.codigo} required />
-            <input className="input" name="nombre" defaultValue={documento.nombre} required />
+            <input className="input" name="codigo" defaultValue={documento.codigo} aria-label="Codigo del documento" required />
+            <input className="input" name="nombre" defaultValue={documento.nombre} aria-label="Nombre del documento" required />
             <div className="grid gap-3 sm:grid-cols-2">
-              <select className="input" name="familia" defaultValue={documento.familia ?? 'OTRO'}>
+              <select className="input" name="familia" defaultValue={documento.familia ?? 'OTRO'} aria-label="Familia documental">
                 <option value="DG">DG</option><option value="P">P</option><option value="I">I</option><option value="F">F</option><option value="OTRO">OTRO</option>
               </select>
-              <select className="input" name="estado" defaultValue={documento.estado}>
+              <select className="input" name="estado" defaultValue={documento.estado} aria-label="Estado del documento">
                 <option value="borrador">Borrador</option><option value="en_revision">En revision</option><option value="vigente">Vigente</option><option value="obsoleto">Obsoleto</option>
               </select>
             </div>
-            <input className="input" name="ambito" defaultValue={documento.ambito ?? ''} />
-            <input className="input" name="proceso" defaultValue={documento.proceso} />
-            <input className="input" name="responsable" defaultValue={documento.responsable ?? documento.propietario} />
-            <select className="input" name="modo_diligenciamiento" defaultValue={documento.modoDiligenciamiento ?? 'no_diligenciable'}>
+            <input className="input" name="ambito" defaultValue={documento.ambito ?? ''} aria-label="Ambito del documento" />
+            <input className="input" name="proceso" defaultValue={documento.proceso} aria-label="Proceso del documento" />
+            <input className="input" name="responsable" defaultValue={documento.responsable ?? documento.propietario} aria-label="Responsable del documento" />
+            <select className="input" name="modo_diligenciamiento" defaultValue={documento.modoDiligenciamiento ?? 'no_diligenciable'} aria-label="Modo de diligenciamiento">
               <option value="no_diligenciable">No diligenciable</option><option value="solo_archivo">Solo archivo</option><option value="ui_nativo">UI nativo</option><option value="ui_nativo_exportable">UI nativo exportable</option>
             </select>
-            <select className="input" name="visibilidad" defaultValue={documento.visibilidad ?? 'interna'}>
+            <select className="input" name="visibilidad" defaultValue={documento.visibilidad ?? 'interna'} aria-label="Visibilidad del documento">
               <option value="interna">Interna</option><option value="participantes">Participantes</option><option value="publica">Publica</option>
             </select>
-            <select className="input" name="modo_control" defaultValue={documento.modoControl ?? 'app_oficial'}>
+            <select className="input" name="modo_control" defaultValue={documento.modoControl ?? 'app_oficial'} aria-label="Modo de control documental">
               <option value="app_oficial">App oficial</option><option value="mixto">Mixto</option><option value="externo_referenciado">Externo referenciado</option>
             </select>
-            <input className="input" name="fuente_editable_url" defaultValue={documento.fuenteEditableUrl ?? ''} placeholder="URL editable externa" />
-            <input className="input" name="ubicacion_fuente" defaultValue={documento.ubicacionFuente ?? ''} placeholder="Ubicacion / control original" />
+            <input className="input" name="fuente_editable_url" defaultValue={documento.fuenteEditableUrl ?? ''} placeholder="URL editable externa" aria-label="URL editable externa" />
+            <input className="input" name="ubicacion_fuente" defaultValue={documento.ubicacionFuente ?? ''} placeholder="Ubicacion / control original" aria-label="Ubicacion o control original" />
             <input type="hidden" name="subproceso" value={documento.subproceso ?? ''} />
             <input type="hidden" name="retencion" value={documento.retencion ?? ''} />
-            <textarea className="input" name="notas" defaultValue={documento.notas ?? ''} rows={3} />
+            <textarea className="input" name="notas" defaultValue={documento.notas ?? ''} rows={3} aria-label="Notas del documento" />
             <button className="btn-primary justify-self-start" type="submit">Guardar metadatos</button>
           </form>
         </div>}
@@ -132,24 +136,24 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
           <form action={registrarVersionOficialAction} className="mt-4 grid gap-3" encType="multipart/form-data">
             <input type="hidden" name="documento_id" value={documento._id} />
             <div className="grid gap-3 sm:grid-cols-2">
-              <input className="input" name="version" type="number" min="1" placeholder={`Sugerida ${versiones.length + 1}`} />
-              <select className="input" name="estado" defaultValue="vigente">
+              <input className="input" name="version" type="number" min="1" placeholder={`Sugerida ${versiones.length + 1}`} aria-label="Numero de version oficial" />
+              <select className="input" name="estado" defaultValue="vigente" aria-label="Estado de la version oficial">
                 <option value="vigente">Vigente</option>
                 <option value="reemplazada">Historica</option>
                 <option value="retirada">Retirada</option>
               </select>
             </div>
-            <input className="input" type="file" name="archivo" required />
-            <textarea className="input" name="resumen_cambios" placeholder="Resumen de cambios" rows={3} required />
+            <input className="input" type="file" name="archivo" aria-label="Archivo oficial" required />
+            <textarea className="input" name="resumen_cambios" placeholder="Resumen de cambios" rows={3} aria-label="Resumen de cambios" required />
             <div className="grid gap-3 sm:grid-cols-3">
-              <input className="input" name="elaborado_por" placeholder="Elaborado por" />
-              <input className="input" name="revisado_por" placeholder="Revisado por" />
-              <input className="input" name="aprobado_por" placeholder="Aprobado por" />
+              <input className="input" name="elaborado_por" placeholder="Elaborado por" aria-label="Elaborado por" />
+              <input className="input" name="revisado_por" placeholder="Revisado por" aria-label="Revisado por" />
+              <input className="input" name="aprobado_por" placeholder="Aprobado por" aria-label="Aprobado por" />
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <input className="input" name="fecha_revision" type="date" />
-              <input className="input" name="fecha_aprobacion" type="date" />
-              <input className="input" name="fecha_vigencia" type="date" />
+              <input className="input" name="fecha_revision" type="date" aria-label="Fecha de revision" />
+              <input className="input" name="fecha_aprobacion" type="date" aria-label="Fecha de aprobacion" />
+              <input className="input" name="fecha_vigencia" type="date" aria-label="Fecha de vigencia" />
             </div>
             <button className="btn-primary justify-self-start" type="submit">Subir version oficial</button>
           </form>
@@ -161,24 +165,24 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
           <form action={crearRegistroDerivadoAction} className="mt-4 grid gap-3">
             <input type="hidden" name="documento_id" value={documento._id} />
             <input type="hidden" name="version_base_id" value={versionVigente?._id ?? ''} />
-            <input className="input" name="codigo" placeholder="Codigo del registro" required />
-            <input className="input" name="nombre" placeholder="Nombre del registro" required />
+            <input className="input" name="codigo" placeholder="Codigo del registro" aria-label="Codigo del registro" required />
+            <input className="input" name="nombre" placeholder="Nombre del registro" aria-label="Nombre del registro" required />
             <div className="grid gap-3 sm:grid-cols-2">
-              <select className="input" name="entidad_tipo" defaultValue="ronda">
+              <select className="input" name="entidad_tipo" defaultValue="ronda" aria-label="Tipo de entidad del registro">
                 <option value="ronda">Ronda</option><option value="equipo">Equipo</option><option value="proveedor">Proveedor</option><option value="auditoria">Auditoria</option><option value="caso">Caso</option><option value="transversal">Transversal</option>
               </select>
-              <input className="input" name="ronda_id" placeholder="Id ronda si aplica" />
+              <input className="input" name="ronda_id" placeholder="Id ronda si aplica" aria-label="Id de ronda si aplica" />
             </div>
-            <input className="input" name="entidad_ref" placeholder="Referencia operacional" />
+            <input className="input" name="entidad_ref" placeholder="Referencia operacional" aria-label="Referencia operacional" />
             <div className="grid gap-3 sm:grid-cols-2">
-              <select className="input" name="external_system" defaultValue="">
+              <select className="input" name="external_system" defaultValue="" aria-label="Sistema externo">
                 <option value="">Sin sistema externo</option>
                 <option value="pt_app">pt_app externo</option>
               </select>
-              <input className="input" name="external_label" placeholder="Etiqueta externa" />
+              <input className="input" name="external_label" placeholder="Etiqueta externa" aria-label="Etiqueta externa" />
             </div>
-            <input className="input" name="external_url" placeholder="URL externa contextual" />
-            <input className="input" name="external_ref" placeholder="Referencia externa" />
+            <input className="input" name="external_url" placeholder="URL externa contextual" aria-label="URL externa contextual" />
+            <input className="input" name="external_ref" placeholder="Referencia externa" aria-label="Referencia externa" />
             <button className="btn-primary justify-self-start" type="submit">Crear registro</button>
           </form>
         </div>
@@ -216,9 +220,17 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
           <div className="mt-4 space-y-3">
             {registros.map((registro) => (
               <div key={registro._id} className="rounded-lg border border-[var(--border-soft)] bg-white p-4">
+                {(() => {
+                  const externalUrl = normalizeHttpUrl(registro.externalUrl)
+                  return (
+                    <>
                 <div className="font-semibold">{registro.codigo}</div>
                 <div className="text-sm text-[var(--foreground-muted)]">{registro.nombre} · {registro.entidadTipo} · {registro.estado}</div>
-                {registro.externalSystem === 'pt_app' && <a className="mt-2 inline-flex text-sm text-[var(--pt-primary-dark)] underline" href={registro.externalUrl ?? '#'} target="_blank" rel="noreferrer">pt_app externo</a>}
+                {registro.externalSystem === 'pt_app' && externalUrl && <a className="mt-2 inline-flex text-sm text-[var(--pt-primary-dark)] underline" href={externalUrl} target="_blank" rel="noreferrer">pt_app externo</a>}
+                {registro.externalSystem === 'pt_app' && !externalUrl && <span className="mt-2 inline-flex text-sm text-[var(--foreground-muted)]">pt_app externo</span>}
+                    </>
+                  )
+                })()}
               </div>
             ))}
             {registros.length === 0 && <p className="text-sm text-[var(--foreground-muted)]">Sin registros derivados.</p>}

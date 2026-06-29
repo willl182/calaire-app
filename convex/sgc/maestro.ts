@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import type { Id } from '../_generated/dataModel'
 import type { QueryCtx } from '../_generated/server'
-import { DOCUMENTO_SGC_CONTENT_TYPES, normalizeCodigoDocumento, requireSgcAdmin, requireSgcViewer, SgcMutationConfig, SgcQueryConfig, writeGlobalAudit } from './shared'
+import { canReadDocumentoSgc, DOCUMENTO_SGC_CONTENT_TYPES, normalizeCodigoDocumento, requireSgcAdmin, requireSgcViewer, requireSgcViewerAccess, SgcMutationConfig, SgcQueryConfig, writeGlobalAudit } from './shared'
 
 const familiaValidator = v.union(v.literal('DG'), v.literal('P'), v.literal('I'), v.literal('F'), v.literal('OTRO'))
 const estadoDocumentoValidator = v.union(v.literal('borrador'), v.literal('vigente'), v.literal('obsoleto'), v.literal('en_revision'))
@@ -19,6 +19,40 @@ function normalizeNullable(value: string | null | undefined) {
   return trimmed ? trimmed : null
 }
 
+function normalizeHttpUrl(value: string | null | undefined) {
+  const trimmed = value?.trim()
+  if (!trimmed) return null
+  try {
+    const url = new URL(trimmed)
+    if (url.protocol === 'http:' || url.protocol === 'https:') return url.toString()
+  } catch {
+    return null
+  }
+  return null
+}
+
+function mapRelationKey(item: {
+  bloque: string
+  rutaCritica?: string | null
+  origenCodigo: string
+  destinoCodigo?: string | null
+  tipoRelacion: string
+  ambito: string
+  destinoTipo: string
+  origenFuente?: string | null
+}) {
+  return [
+    item.bloque.trim(),
+    item.rutaCritica?.trim() ?? '',
+    normalizeCodigoDocumento(item.origenCodigo),
+    item.destinoCodigo ? normalizeCodigoDocumento(item.destinoCodigo) : '',
+    item.tipoRelacion,
+    item.ambito.trim(),
+    item.destinoTipo,
+    item.origenFuente?.trim() ?? '',
+  ].join('|')
+}
+
 function inferTipoFromFamilia(familia: string) {
   if (familia === 'F') return 'formato'
   if (familia === 'P') return 'procedimiento'
@@ -27,9 +61,10 @@ function inferTipoFromFamilia(familia: string) {
   return 'otro'
 }
 
-async function collectDocumentBundle(ctx: QueryCtx, documentoId: Id<'documentosSgc'>) {
+async function collectDocumentBundle(ctx: QueryCtx, documentoId: Id<'documentosSgc'>, access: { canReadInternal: boolean }) {
   const documento = await ctx.db.get(documentoId)
   if (!documento) return null
+  if (!canReadDocumentoSgc(documento, access)) return null
   const [versiones, registros, relaciones] = await Promise.all([
     ctx.db.query('documentoSgcVersiones').withIndex('by_documentoId', (q) => q.eq('documentoId', documentoId)).order('desc').collect(),
     ctx.db.query('registrosSgc').withIndex('by_documentoId', (q) => q.eq('documentoId', documentoId)).order('desc').collect(),
@@ -61,8 +96,8 @@ const listSgcMaestroArgs = {
 export const listSgcMaestroConfig = {
   args: listSgcMaestroArgs,
   handler: async (ctx, args) => {
-    await requireSgcViewer(ctx)
-    let documentos = await ctx.db.query('documentosSgc').collect()
+    const access = await requireSgcViewerAccess(ctx)
+    let documentos = (await ctx.db.query('documentosSgc').collect()).filter((doc) => canReadDocumentoSgc(doc, access))
     if (args.ambito?.trim()) documentos = documentos.filter((doc) => doc.ambito === args.ambito?.trim())
     if (args.familia) documentos = documentos.filter((doc) => doc.familia === args.familia)
     if (args.estado) documentos = documentos.filter((doc) => doc.estado === args.estado)
@@ -78,7 +113,7 @@ export const listSgcMaestroConfig = {
           .query('documentoSgcVersiones')
           .withIndex('by_documentoId_and_estado', (q) => q.eq('documentoId', documento._id).eq('estado', 'vigente'))
           .first()
-        const registros = await ctx.db.query('registrosSgc').withIndex('by_documentoId', (q) => q.eq('documentoId', documento._id)).take(50)
+        const registros = await ctx.db.query('registrosSgc').withIndex('by_documentoId', (q) => q.eq('documentoId', documento._id)).collect()
         const coberturas = await ctx.db.query('documentoRequisitos').withIndex('by_documentoId', (q) => q.eq('documentoId', documento._id)).collect()
         return { documentoId: documento._id, vigente, registros: registros.length, coberturas: coberturas.length }
       })
@@ -105,8 +140,8 @@ const getDocumentoMaestroArgs = { documentoId: v.id('documentosSgc') }
 export const getDocumentoMaestroConfig = {
   args: getDocumentoMaestroArgs,
   handler: async (ctx, { documentoId }) => {
-    await requireSgcViewer(ctx)
-    return collectDocumentBundle(ctx, documentoId)
+    const access = await requireSgcViewerAccess(ctx)
+    return collectDocumentBundle(ctx, documentoId, access)
   },
 } satisfies SgcQueryConfig<typeof getDocumentoMaestroArgs>
 
@@ -118,26 +153,32 @@ const listNormativaSgcArgs = {
 export const listNormativaSgcConfig = {
   args: listNormativaSgcArgs,
   handler: async (ctx, args) => {
-    await requireSgcViewer(ctx)
+    const access = await requireSgcViewerAccess(ctx)
     const requisitos = args.norma?.trim()
       ? await ctx.db.query('requisitosNormativos').withIndex('by_norma', (q) => q.eq('norma', args.norma!.trim())).collect()
       : await ctx.db.query('requisitosNormativos').collect()
     requisitos.sort((a, b) => a.norma.localeCompare(b.norma) || a.clausula.localeCompare(b.clausula, undefined, { numeric: true }))
     const rows = await Promise.all(
       requisitos.map(async (requisito) => {
-        let relaciones = await ctx.db.query('documentoRequisitos').withIndex('by_requisitoId', (q) => q.eq('requisitoId', requisito._id)).collect()
-        if (args.estadoCobertura) relaciones = relaciones.filter((relacion) => relacion.estadoCobertura === args.estadoCobertura)
+        const todasRelaciones = await ctx.db.query('documentoRequisitos').withIndex('by_requisitoId', (q) => q.eq('requisitoId', requisito._id)).collect()
+        const relaciones = args.estadoCobertura ? todasRelaciones.filter((relacion) => relacion.estadoCobertura === args.estadoCobertura) : todasRelaciones
         const documentos = await Promise.all(relaciones.map((relacion) => ctx.db.get(relacion.documentoId)))
+        const visibleDocumentos = documentos.filter((documento): documento is NonNullable<typeof documento> => documento !== null && canReadDocumentoSgc(documento, access))
+        const visibleRelaciones = relaciones.filter((relacion) => visibleDocumentos.some((documento) => documento._id === relacion.documentoId))
         return {
           requisito,
-          relaciones,
-          documentos: documentos.filter((documento): documento is NonNullable<typeof documento> => documento !== null),
+          relaciones: visibleRelaciones,
+          matchesEstadoCobertura:
+            !args.estadoCobertura ||
+            visibleRelaciones.length > 0 ||
+            (args.estadoCobertura === 'pendiente' && todasRelaciones.length === 0),
+          documentos: visibleDocumentos,
         }
       })
     )
     return {
       normas: Array.from(new Set(requisitos.map((requisito) => requisito.norma))).sort(),
-      rows: rows.filter((row) => !args.estadoCobertura || row.relaciones.length > 0),
+      rows: rows.filter((row) => row.matchesEstadoCobertura),
       resumen: {
         requisitos: requisitos.length,
         cubiertos: rows.filter((row) => row.relaciones.some((relacion) => relacion.estadoCobertura === 'cubierto')).length,
@@ -153,7 +194,7 @@ const listMapaSgcArgs = { ambito: v.optional(v.union(v.string(), v.null())) }
 export const listMapaSgcConfig = {
   args: listMapaSgcArgs,
   handler: async (ctx, args) => {
-    await requireSgcViewer(ctx)
+    const access = await requireSgcViewerAccess(ctx)
     let relaciones = await ctx.db.query('mapaSgcRelaciones').collect()
     if (args.ambito?.trim()) relaciones = relaciones.filter((relacion) => relacion.ambito === args.ambito?.trim())
     relaciones.sort((a, b) => a.bloque.localeCompare(b.bloque) || (a.rutaCritica ?? '').localeCompare(b.rutaCritica ?? '') || a.origenCodigo.localeCompare(b.origenCodigo))
@@ -161,7 +202,7 @@ export const listMapaSgcConfig = {
     const documentos = await Promise.all(documentoIds.map((id) => ctx.db.get(id)))
     return {
       relaciones,
-      documentos: documentos.filter((documento): documento is NonNullable<typeof documento> => documento !== null),
+      documentos: documentos.filter((documento): documento is NonNullable<typeof documento> => documento !== null && canReadDocumentoSgc(documento, access)),
       bloques: Array.from(new Set(relaciones.map((relacion) => relacion.bloque))).sort(),
       ambitos: Array.from(new Set(relaciones.map((relacion) => relacion.ambito))).sort(),
       pendientes: relaciones.filter((relacion) => relacion.estadoResolucion === 'pendiente').length,
@@ -252,7 +293,7 @@ export const upsertDocumentoMaestroConfig = {
       modoDiligenciamiento: args.modoDiligenciamiento,
       visibilidad: args.visibilidad,
       modoControl: args.modoControl,
-      fuenteEditableUrl: normalizeNullable(args.fuenteEditableUrl),
+      fuenteEditableUrl: normalizeHttpUrl(args.fuenteEditableUrl),
       responsable: args.responsable.trim() || actor,
       propietario: args.responsable.trim() || actor,
       criticidad: 'media' as const,
@@ -300,6 +341,9 @@ export const registrarVersionOficialConfig = {
     if (!DOCUMENTO_SGC_CONTENT_TYPES.includes(args.contentType as (typeof DOCUMENTO_SGC_CONTENT_TYPES)[number])) throw new Error('Tipo de archivo no permitido para documento SGC.')
     const anteriores = await ctx.db.query('documentoSgcVersiones').withIndex('by_documentoId', (q) => q.eq('documentoId', args.documentoId)).collect()
     const now = Date.now()
+    const version = args.version ?? Math.max(0, ...anteriores.map((item) => item.version ?? 0)) + 1
+    if (!Number.isInteger(version) || version < 1) throw new Error('La version debe ser un entero positivo.')
+    if (anteriores.some((item) => item.version === version)) throw new Error('Ya existe una version con ese numero para este documento.')
     if (args.estado === 'vigente') {
       for (const vigente of anteriores.filter((version) => version.estado === 'vigente')) {
         await ctx.db.patch(vigente._id, { estado: 'reemplazada', updatedAt: now, updatedBy: actor })
@@ -307,7 +351,7 @@ export const registrarVersionOficialConfig = {
     }
     const id = await ctx.db.insert('documentoSgcVersiones', {
       documentoId: args.documentoId,
-      version: args.version ?? anteriores.length + 1,
+      version,
       estado: args.estado,
       fechaVigencia: normalizeNullable(args.fechaVigencia),
       cambioResumen: args.resumenCambios.trim(),
@@ -357,12 +401,21 @@ export const crearRegistroSgcConfig = {
     const actor = await requireSgcAdmin(ctx)
     const documento = await ctx.db.get(args.documentoId)
     if (!documento) throw new Error('Documento SGC no encontrado.')
+    if (args.versionBaseId) {
+      const versionBase = await ctx.db.get(args.versionBaseId)
+      if (!versionBase || versionBase.documentoId !== args.documentoId) {
+        throw new Error('La version base no pertenece al documento SGC seleccionado.')
+      }
+    }
+    const codigo = normalizeCodigoDocumento(args.codigo)
+    const nombre = args.nombre.trim()
+    if (!codigo || !nombre) throw new Error('Codigo y nombre son obligatorios.')
     const now = Date.now()
     const id = await ctx.db.insert('registrosSgc', {
       documentoId: args.documentoId,
       versionBaseId: args.versionBaseId,
-      codigo: normalizeCodigoDocumento(args.codigo),
-      nombre: args.nombre.trim(),
+      codigo,
+      nombre,
       estado: 'borrador',
       visibilidad: 'interna',
       entidadTipo: args.entidadTipo,
@@ -374,7 +427,7 @@ export const crearRegistroSgcConfig = {
       size: null,
       externalSystem: args.externalSystem ?? null,
       externalRef: normalizeNullable(args.externalRef),
-      externalUrl: normalizeNullable(args.externalUrl),
+      externalUrl: normalizeHttpUrl(args.externalUrl),
       externalLabel: normalizeNullable(args.externalLabel),
       createdAt: now,
       createdBy: actor,
@@ -400,6 +453,12 @@ export const upsertDocumentoRequisitoConfig = {
   args: upsertDocumentoRequisitoArgs,
   handler: async (ctx, args) => {
     const actor = await requireSgcAdmin(ctx)
+    const [documento, requisito] = await Promise.all([
+      ctx.db.get(args.documentoId),
+      ctx.db.get(args.requisitoId),
+    ])
+    if (!documento) throw new Error('Documento SGC no encontrado.')
+    if (!requisito) throw new Error('Requisito normativo no encontrado.')
     const existing = await ctx.db
       .query('documentoRequisitos')
       .withIndex('by_requisitoId', (q) => q.eq('requisitoId', args.requisitoId))
@@ -509,7 +568,7 @@ export const importarSeedSgcConfig = {
         origenFuente: item.origenFuente,
         externalSystem: item.externalSystem,
         externalRef: item.externalRef,
-        externalUrl: item.externalUrl,
+        externalUrl: normalizeHttpUrl(item.externalUrl),
         externalLabel: item.externalLabel,
         notas: null,
         updatedAt: now,
@@ -528,7 +587,7 @@ export const importarSeedSgcConfig = {
     for (const item of args.requisitos) {
       const existing = await ctx.db
         .query('requisitosNormativos')
-        .withIndex('by_norma_and_clausula', (q) => q.eq('norma', item.norma).eq('clausula', item.clausula))
+        .withIndex('by_norma_and_versionNorma_and_clausula', (q) => q.eq('norma', item.norma).eq('versionNorma', item.versionNorma).eq('clausula', item.clausula))
         .first()
       const patch = {
         norma: item.norma,
@@ -548,14 +607,14 @@ export const importarSeedSgcConfig = {
       requisitosUpserted += 1
     }
     const existingRelaciones = await ctx.db.query('mapaSgcRelaciones').collect()
-    for (const relacion of existingRelaciones) {
-      await ctx.db.delete(relacion._id)
-    }
+    const existingByKey = new Map(existingRelaciones.map((relacion) => [mapRelationKey(relacion), relacion]))
     let mapaInserted = 0
     for (const item of args.mapa) {
+      if (item.destinoTipo === 'requisito') throw new Error('Las relaciones de mapa a requisito deben resolverse con requisitoId antes de importarse.')
       const documentoOrigenId = documentIds.get(normalizeCodigoDocumento(item.origenCodigo)) ?? null
       const documentoDestinoId = item.destinoCodigo ? documentIds.get(normalizeCodigoDocumento(item.destinoCodigo)) ?? null : null
-      await ctx.db.insert('mapaSgcRelaciones', {
+      const existing = existingByKey.get(mapRelationKey(item))
+      const patch = {
         bloque: item.bloque,
         rutaCritica: item.rutaCritica,
         origenCodigo: normalizeCodigoDocumento(item.origenCodigo),
@@ -567,14 +626,14 @@ export const importarSeedSgcConfig = {
         ambito: item.ambito,
         destinoTipo: item.destinoTipo,
         externalSystem: item.externalSystem,
-        externalUrl: item.externalUrl,
+        externalUrl: normalizeHttpUrl(item.externalUrl),
         estadoResolucion: documentoOrigenId && (documentoDestinoId || item.destinoTipo !== 'documento') ? 'resuelto' : item.estadoResolucion,
         origenFuente: item.origenFuente,
-        createdAt: now,
-        createdBy: actor,
         updatedAt: now,
         updatedBy: actor,
-      })
+      }
+      if (existing) await ctx.db.patch(existing._id, patch)
+      else await ctx.db.insert('mapaSgcRelaciones', { ...patch, createdAt: now, createdBy: actor })
       mapaInserted += 1
     }
     await writeGlobalAudit(ctx, { actor, evento: 'sgc.maestro.seed_importado', detalle: `${documentosUpserted} docs, ${requisitosUpserted} requisitos, ${mapaInserted} relaciones` })
@@ -614,7 +673,7 @@ export const importarDocumentosSeedSgcConfig = {
         origenFuente: item.origenFuente,
         externalSystem: item.externalSystem,
         externalRef: item.externalRef,
-        externalUrl: item.externalUrl,
+        externalUrl: normalizeHttpUrl(item.externalUrl),
         externalLabel: item.externalLabel,
         notas: null,
         updatedAt: now,
@@ -640,7 +699,7 @@ export const importarRequisitosSeedSgcConfig = {
     for (const item of args.requisitos) {
       const existing = await ctx.db
         .query('requisitosNormativos')
-        .withIndex('by_norma_and_clausula', (q) => q.eq('norma', item.norma).eq('clausula', item.clausula))
+        .withIndex('by_norma_and_versionNorma_and_clausula', (q) => q.eq('norma', item.norma).eq('versionNorma', item.versionNorma).eq('clausula', item.clausula))
         .first()
       const patch = {
         norma: item.norma,
@@ -681,10 +740,14 @@ export const importarMapaSeedSgcConfig = {
       for (const relacion of existingRelaciones) await ctx.db.delete(relacion._id)
     }
     let mapaInserted = 0
+    const existingRelaciones = args.reemplazar ? [] : await ctx.db.query('mapaSgcRelaciones').collect()
+    const existingByKey = new Map(existingRelaciones.map((relacion) => [mapRelationKey(relacion), relacion]))
     for (const item of args.mapa) {
+      if (item.destinoTipo === 'requisito') throw new Error('Las relaciones de mapa a requisito deben resolverse con requisitoId antes de importarse.')
       const documentoOrigenId = documentIds.get(normalizeCodigoDocumento(item.origenCodigo)) ?? null
       const documentoDestinoId = item.destinoCodigo ? documentIds.get(normalizeCodigoDocumento(item.destinoCodigo)) ?? null : null
-      await ctx.db.insert('mapaSgcRelaciones', {
+      const existing = existingByKey.get(mapRelationKey(item))
+      const patch = {
         bloque: item.bloque,
         rutaCritica: item.rutaCritica,
         origenCodigo: normalizeCodigoDocumento(item.origenCodigo),
@@ -696,14 +759,14 @@ export const importarMapaSeedSgcConfig = {
         ambito: item.ambito,
         destinoTipo: item.destinoTipo,
         externalSystem: item.externalSystem,
-        externalUrl: item.externalUrl,
+        externalUrl: normalizeHttpUrl(item.externalUrl),
         estadoResolucion: documentoOrigenId && (documentoDestinoId || item.destinoTipo !== 'documento') ? 'resuelto' : item.estadoResolucion,
         origenFuente: item.origenFuente,
-        createdAt: now,
-        createdBy: actor,
         updatedAt: now,
         updatedBy: actor,
-      })
+      }
+      if (existing) await ctx.db.patch(existing._id, patch)
+      else await ctx.db.insert('mapaSgcRelaciones', { ...patch, createdAt: now, createdBy: actor })
       mapaInserted += 1
     }
     await writeGlobalAudit(ctx, { actor, evento: 'sgc.maestro.seed_mapa_importado', detalle: `${mapaInserted} relaciones` })

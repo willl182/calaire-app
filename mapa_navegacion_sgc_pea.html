@@ -692,7 +692,12 @@
           <text class="small" x="${n.x + 14}" y="${n.y + 44}">${escapeText(n.label, 25)}</text>
         `;
         g.addEventListener("click", () => selectNode(n.id));
-        g.addEventListener("keydown", e => { if (e.key === "Enter") selectNode(n.id); });
+        g.addEventListener("keydown", e => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            selectNode(n.id);
+          }
+        });
         svg.appendChild(g);
       });
       update();

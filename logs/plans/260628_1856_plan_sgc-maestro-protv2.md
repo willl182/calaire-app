@@ -33,8 +33,9 @@ Transformar el prototipo `/dashboard/sgc/prototype` en una implementacion real d
 | # | Archivo | Accion | Notas |
 |---|---------|--------|-------|
 | 2.1 | `node_modules/next/dist/docs/` | Leer | Obligatorio antes de tocar Next.js. |
-| 2.2 | Rutas SGC | Implementar | Centro documental, detalle, normativa, expedientes, mapa. |
-| 2.3 | Navegacion dashboard | Ajustar | SGC y Gestion internos; `pt_app` externo. |
+| 2.2 | Rutas SGC | Implementar | Centro documental, detalle, normativa, mapa. |
+| 2.3 | Dashboard documental por ronda | Implementar | Expedientes bajo `/dashboard/rondas/expedientes`. |
+| 2.4 | Navegacion dashboard | Ajustar | SGC y Gestion internos; `pt_app` externo. |
 
 ## Log de Ejecucion
 

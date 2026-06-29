@@ -638,6 +638,7 @@ export default defineSchema({
   })
     .index('by_norma', ['norma'])
     .index('by_norma_and_clausula', ['norma', 'clausula'])
+    .index('by_norma_and_versionNorma_and_clausula', ['norma', 'versionNorma', 'clausula'])
     .index('by_estado', ['estado']),
 
   documentoRequisitos: defineTable({

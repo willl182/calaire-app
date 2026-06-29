@@ -4,9 +4,9 @@
    Fecha: 2026-06-28
    Fuente compilada desde:
 
-   - `/root/agent-files/openclaw-claw.md`
-   - `/root/agent-files/hermes.md`
-   - `/root/agent-files/hermes-claw.md`
+   - `dev/sources/openclaw-claw.md`
+   - `dev/sources/hermes.md`
+   - `dev/sources/hermes-claw.md`
 
    ---
 

@@ -15,7 +15,7 @@ export async function GET(_request: Request, { params }: RouteContext) {
   if (!canViewSgcMaestro(auth)) redirect('/denied?reason=role')
 
   const { id, versionId } = await params
-  const url = await getDocumentoSgcDownloadUrl(versionId)
+  const url = await getDocumentoSgcDownloadUrl(id, versionId)
   if (!url) redirect(`/dashboard/sgc/documentos/${id}?error=${encodeURIComponent('La version no tiene archivo oficial disponible.')}`)
   redirect(url)
 }
