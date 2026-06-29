@@ -47,12 +47,6 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         accent="Inventario maestro de documentos SGC"
         description="Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos."
         email={auth.user.email}
-        actions={
-          <>
-            <Link className="btn-outline" href="/dashboard/sgc/normativa">Matriz normativa</Link>
-            <Link className="btn-outline" href="/dashboard/sgc/mapa">Mapa SGC</Link>
-          </>
-        }
       />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

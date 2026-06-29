@@ -3,6 +3,6 @@ import { withAuth } from '@workos-inc/authkit-nextjs'
 
 export default async function Home() {
   const { user } = await withAuth()
-  if (user) redirect('/dashboard')
+  if (user) redirect('/inicio')
   redirect('/login')
 }

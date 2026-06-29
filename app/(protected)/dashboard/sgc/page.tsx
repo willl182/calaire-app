@@ -1,8 +1,6 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { signOut } from '@workos-inc/authkit-nextjs'
 
-import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { canViewSgcMaestro, requireAuth } from '@/lib/auth'
 import { listMapaSgc, listNormativaSgc, listSgcMaestro } from '@/lib/sgc'
 import { SgcHeader } from './SgcHeader'
@@ -24,23 +22,6 @@ export default async function SgcResumenPage() {
         accent="Repositorio global de documentos, versiones, requisitos y mapa documental"
         description="Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín"
         email={auth.user.email}
-        actions={
-          <>
-            <Link href="/dashboard/rondas/nueva" className="btn-primary">
-              ＋ Nueva ronda
-            </Link>
-            <form
-              action={async () => {
-                'use server'
-                await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
-              }}
-            >
-              <button type="submit" className="btn-outline">
-                Cerrar sesión
-              </button>
-            </form>
-          </>
-        }
       />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -111,7 +111,7 @@ function TopNavInner() {
   const navItems = isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
   const areaItems: NavItem[] = [
     { label: 'Gestión de rondas', href: '/dashboard', tabKey: '__gestion__' },
-    { label: 'SGC', href: '/dashboard/sgc', tabKey: '__sgc__' },
+    { label: 'SGC', href: '/sgc', tabKey: '__sgc__' },
     { label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true },
   ]
 
