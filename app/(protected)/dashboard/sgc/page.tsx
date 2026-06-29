@@ -92,18 +92,6 @@ export default async function SgcResumenPage() {
           </Link>
         ))}
       </section>
-
-      <section className="card p-5">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h2 className="text-lg font-semibold">Dashboard documental por ronda</h2>
-            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-              Es otro dashboard: consulta el expediente operativo de rondas de Gestion y no forma parte del SGC maestro global.
-            </p>
-          </div>
-          <Link className="btn-outline" href="/dashboard/rondas/expedientes">Abrir expedientes de ronda</Link>
-        </div>
-      </section>
     </div>
   )
 }

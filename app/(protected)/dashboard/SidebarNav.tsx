@@ -11,28 +11,22 @@ type NavItem = {
   label: string
   href: string
   tabKey: string | null
-  group: 'sgc' | 'gestion' | 'externos'
   external?: boolean
 }
 
-const NAV_ITEMS: NavItem[] = [
-  { label: 'Inicio',        href: '/dashboard',                  tabKey: null, group: 'gestion' },
-  { label: 'Rondas',        href: '/dashboard?tab=rondas',       tabKey: 'rondas', group: 'gestion' },
-  { label: 'Expedientes',   href: '/dashboard/rondas/expedientes', tabKey: '__ronda_expedientes__', group: 'gestion' },
-  { label: 'Registros',     href: '/dashboard?tab=registros',    tabKey: 'registros', group: 'gestion' },
-  { label: 'Participantes', href: '/dashboard?tab=participantes', tabKey: 'participantes', group: 'gestion' },
-  { label: 'Resultados',    href: '/dashboard?tab=resultados',   tabKey: 'resultados', group: 'gestion' },
-  { label: 'SGC inicio',    href: '/dashboard/sgc',              tabKey: '__sgc_home__', group: 'sgc' },
-  { label: 'Documentos',    href: '/dashboard/sgc/documentos',   tabKey: '__sgc_documentos__', group: 'sgc' },
-  { label: 'Normativa',     href: '/dashboard/sgc/normativa',    tabKey: '__sgc_normativa__', group: 'sgc' },
-  { label: 'Mapa',          href: '/dashboard/sgc/mapa',         tabKey: '__sgc_mapa__', group: 'sgc' },
-  { label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', group: 'externos', external: true },
+const GESTION_NAV_ITEMS: NavItem[] = [
+  { label: 'Inicio', href: '/dashboard', tabKey: null },
+  { label: 'Rondas', href: '/dashboard?tab=rondas', tabKey: 'rondas' },
+  { label: 'Registros', href: '/dashboard?tab=registros', tabKey: 'registros' },
+  { label: 'Participantes', href: '/dashboard?tab=participantes', tabKey: 'participantes' },
+  { label: 'Resultados', href: '/dashboard?tab=resultados', tabKey: 'resultados' },
 ]
 
-const NAV_GROUPS: Array<{ key: NavItem['group']; label: string }> = [
-  { key: 'sgc', label: 'SGC' },
-  { key: 'gestion', label: 'Gestion' },
-  { key: 'externos', label: 'Sistemas externos' },
+const SGC_NAV_ITEMS: NavItem[] = [
+  { label: 'Inicio SGC', href: '/dashboard/sgc', tabKey: '__sgc_home__' },
+  { label: 'Documentos', href: '/dashboard/sgc/documentos', tabKey: '__sgc_documentos__' },
+  { label: 'Normativa', href: '/dashboard/sgc/normativa', tabKey: '__sgc_normativa__' },
+  { label: 'Mapa', href: '/dashboard/sgc/mapa', tabKey: '__sgc_mapa__' },
 ]
 
 function NavLink({
@@ -83,6 +77,8 @@ function TopNavInner() {
   const pathname   = usePathname()
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab')
+  const isSgcDashboard = pathname.startsWith('/dashboard/sgc')
+  const navItems = isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
 
   function isActive(item: NavItem): boolean {
     if (item.external) return false
@@ -90,8 +86,7 @@ function TopNavInner() {
     if (item.tabKey === '__sgc_documentos__') return pathname.startsWith('/dashboard/sgc/documentos')
     if (item.tabKey === '__sgc_normativa__') return pathname.startsWith('/dashboard/sgc/normativa')
     if (item.tabKey === '__sgc_mapa__') return pathname.startsWith('/dashboard/sgc/mapa')
-    if (item.tabKey === '__sgc_home__') return pathname === '/dashboard/sgc' || pathname.startsWith('/dashboard/sgc/')
-    if (item.tabKey === '__ronda_expedientes__') return pathname.startsWith('/dashboard/rondas/expedientes')
+    if (item.tabKey === '__sgc_home__') return pathname === '/dashboard/sgc'
     if (item.tabKey === 'registros') return tab === 'registros'
     return tab === item.tabKey
   }
@@ -110,21 +105,23 @@ function TopNavInner() {
           </span>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex items-stretch gap-6 overflow-x-auto" aria-label="Navegación principal">
-          {NAV_GROUPS.map((group) => (
-            <div key={group.key} className="flex items-stretch gap-3">
-              <div className="flex items-center text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--foreground-muted)]">
-                {group.label}
-              </div>
-              <div className="flex items-stretch gap-4">
-                {NAV_ITEMS.filter((item) => item.group === group.key).map((item) => (
-                  <NavLink key={item.label} item={item} isActive={isActive(item)} />
-                ))}
-              </div>
+        <div className="flex min-w-0 flex-1 items-stretch justify-between gap-8">
+          <nav className="flex shrink-0 items-stretch gap-5" aria-label="Vistas principales de CALAIRE-APP">
+            <NavLink item={{ label: 'Gestión de ronda', href: '/dashboard', tabKey: null }} isActive={!isSgcDashboard} />
+            <NavLink item={{ label: 'SGC', href: '/dashboard/sgc', tabKey: '__sgc_home__' }} isActive={isSgcDashboard} />
+          </nav>
+
+          <div className="flex min-w-0 flex-1 items-stretch justify-end gap-6">
+            <nav className="flex min-w-0 items-stretch gap-4 overflow-x-auto" aria-label={isSgcDashboard ? 'Secciones SGC' : 'Secciones gestión de ronda'}>
+              {navItems.map((item) => (
+                <NavLink key={item.label} item={item} isActive={isActive(item)} />
+              ))}
+            </nav>
+            <div className="flex shrink-0 items-stretch">
+              <NavLink item={{ label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true }} isActive={false} />
             </div>
-          ))}
-        </nav>
+          </div>
+        </div>
       </div>
     </header>
   )
