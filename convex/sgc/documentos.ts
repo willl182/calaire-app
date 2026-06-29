@@ -171,7 +171,7 @@ export const upsertDocumentoSgcConfig = {
 const registrarDocumentoSgcVersionArgs = {
     documentoId: v.id('documentosSgc'),
     fechaVigencia: v.union(v.string(), v.null()),
-    cambioResumen: v.string(),
+    resumenCambios: v.string(),
     storageId: v.union(v.id('_storage'), v.null()),
     fileName: v.union(v.string(), v.null()),
     contentType: v.union(v.string(), v.null()),
@@ -185,7 +185,7 @@ export const registrarDocumentoSgcVersionConfig = {
     const actor = await requireSgcAdmin(ctx)
     const documento = await ctx.db.get(args.documentoId)
     if (!documento) throw new Error('Documento SGC no encontrado.')
-    const resumen = args.cambioResumen.trim()
+    const resumen = args.resumenCambios.trim()
     if (!resumen) throw new Error('Registrar una version exige resumen de cambios.')
     if (args.storageId) {
       if (!args.fileName || !args.contentType || !args.size) throw new Error('El archivo de version exige nombre, tipo y tamano.')
@@ -208,6 +208,7 @@ export const registrarDocumentoSgcVersionConfig = {
       estado: 'vigente',
       fechaVigencia: args.fechaVigencia,
       cambioResumen: resumen,
+      resumenCambios: resumen,
       storageId: args.storageId,
       fileName: args.fileName,
       contentType: args.contentType,

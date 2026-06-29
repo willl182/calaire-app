@@ -103,15 +103,15 @@ function AreaLink({
   )
 }
 
-function TopNavInner() {
+function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
   const pathname   = usePathname()
   const searchParams = useSearchParams()
   const tab = searchParams.get('tab')
   const isSgcDashboard = pathname.startsWith('/dashboard/sgc')
-  const navItems = isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
+  const navItems = !canViewSgcMaestro ? [] : isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
   const areaItems: NavItem[] = [
     { label: 'Gestión de rondas', href: '/dashboard', tabKey: '__gestion__' },
-    { label: 'SGC', href: '/sgc', tabKey: '__sgc__' },
+    ...(canViewSgcMaestro ? [{ label: 'SGC', href: '/sgc', tabKey: '__sgc__' }] : []),
     { label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true },
   ]
 
@@ -163,10 +163,10 @@ function TopNavInner() {
   )
 }
 
-export function Sidebar() {
+export function Sidebar({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
   return (
     <Suspense>
-      <TopNavInner />
+      <TopNavInner canViewSgcMaestro={canViewSgcMaestro} />
     </Suspense>
   )
 }

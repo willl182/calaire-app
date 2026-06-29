@@ -38,6 +38,8 @@ const INFORME_CHECK_LABELS: Record<string, string> = {
   f_psea_11_no_aplica: 'Homogeneidad/estabilidad revisada o no aplicabilidad justificada',
 }
 
+const DOCUMENTO_ESTADOS_CUBIERTOS = new Set(['completo', 'no_aplica', 'disponible'])
+
 const HOMOGENEIDAD_CHECK_LABELS: Record<string, string> = {
   plan_muestreo_revisado: 'Plan de muestreo revisado',
   criterios_aceptacion_definidos: 'Criterios de aceptacion definidos',
@@ -96,7 +98,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   const documentos = SGC_RONDA_ETAPAS.flatMap((seccion) => seccion.documentos.map((doc) => ({ seccion, doc })))
   const cubiertos = documentos.filter(({ doc }) => {
     const estado = getDocumentoEstado(doc, checklistByCodigo)
-    return estado === 'completo' || estado === 'no_aplica'
+    return DOCUMENTO_ESTADOS_CUBIERTOS.has(estado)
   }).length
   const progreso = documentos.length === 0 ? 0 : Math.round((cubiertos / documentos.length) * 100)
 
@@ -120,7 +122,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
                 <EstadoBadge estado={ronda.estado} />
               </div>
               <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-                Expediente documental EA-PP-2026-R1 para {ronda.codigo}. Solo se muestran el mapa documental, el checklist real y los registros que se diligencian desde esta vista.
+                Expediente documental para {ronda.codigo}. Solo se muestran el mapa documental, el checklist real y los registros que se diligencian desde esta vista.
               </p>
             </div>
             <div className="min-w-48 rounded-lg border border-[var(--border)] p-4">
@@ -136,14 +138,14 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
 
-        <ExpedienteSgc panel={panel} rondaId={id} selectedFormato={selectedFormato} />
+        <ExpedienteSgc panel={panel} rondaId={id} rondaCodigo={ronda.codigo} selectedFormato={selectedFormato} />
 
         <section className="card p-6">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-[var(--foreground)]">Checklist documental real</h2>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                Lista derivada de las secciones y documentos de EA-PP-2026-R1, no del checklist operativo anterior.
+                Lista derivada de las secciones y documentos de {ronda.codigo}, no del checklist operativo anterior.
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
@@ -178,7 +180,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoClasses(estado)}`}>{estado}</span>
                       </td>
                       <td className="px-3 py-3 align-top text-[var(--foreground-muted)]">
-                        {doc.archivoBase ? `${seccion.carpeta}/${doc.archivoBase}.md y .docx` : 'Sin archivo base en EA-PP-2026-R1'}
+                        {doc.archivoBase ? `${seccion.carpeta}/${doc.archivoBase}.md y .docx` : `Sin archivo base en ${ronda.codigo}`}
                       </td>
                       <td className="px-3 py-3 align-top text-[var(--foreground-muted)]">
                         {getDocumentoObservacion(doc, checklistByCodigo)}

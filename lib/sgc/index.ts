@@ -214,7 +214,6 @@ export type DocumentoSgcVersion = {
   version: number
   estado: 'vigente' | 'reemplazada' | 'retirada'
   fechaVigencia?: string | null
-  cambioResumen?: string | null
   resumenCambios?: string | null
   fileName?: string | null
   contentType?: string | null
@@ -580,7 +579,7 @@ export async function upsertDocumentoSgc(args: {
 export async function registrarDocumentoSgcVersion(args: {
   documentoId: string
   fechaVigencia: string | null
-  cambioResumen: string
+  resumenCambios: string
   storageId: string | null
   fileName: string | null
   contentType: string | null

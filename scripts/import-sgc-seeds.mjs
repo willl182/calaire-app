@@ -9,6 +9,8 @@ const identity = JSON.stringify({
   email: 'seed@calaire.local',
   roles: ['admin_sgc'],
 })
+const deploymentArgs = process.argv.includes('--prod') ? ['--prod'] : []
+const isProd = deploymentArgs.length > 0
 
 function chunks(items, size) {
   const result = []
@@ -20,7 +22,8 @@ function chunks(items, size) {
 
 function runConvex(functionName, args, push = false) {
   const cmdArgs = ['exec', 'convex', 'run']
-  if (push) cmdArgs.push('--push')
+  cmdArgs.push(...deploymentArgs)
+  if (push && !isProd) cmdArgs.push('--push')
   cmdArgs.push(functionName, JSON.stringify(args), '--identity', identity)
   const result = spawnSync('pnpm', cmdArgs, {
     cwd: root,

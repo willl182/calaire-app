@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises'
+import { mkdir, readFile, readdir, stat, writeFile } from 'node:fs/promises'
 import { dirname, join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -46,6 +46,26 @@ function modoControlFromRow(code, location) {
   return 'app_oficial'
 }
 
+async function resolveInventoryLocation(code, location) {
+  const clean = location.replace(/`/g, '').trim()
+  if (!clean) return null
+  const absolute = join(root, 'docs', clean)
+  try {
+    const info = await stat(absolute)
+    if (!info.isDirectory()) return clean
+    const entries = await readdir(absolute)
+    const match = entries
+      .filter((entry) => entry.toUpperCase().startsWith(code))
+      .sort((a, b) => {
+        const priority = (name) => name.endsWith('.md') ? 0 : name.endsWith('.docx') ? 1 : 2
+        return priority(a) - priority(b) || a.localeCompare(b)
+      })[0]
+    return match ? `${clean.replace(/\/+$/, '')}/${match}` : clean
+  } catch {
+    return clean
+  }
+}
+
 function parseMarkdownTables(markdown) {
   const rows = []
   let currentSection = 'SGC'
@@ -61,16 +81,16 @@ function parseMarkdownTables(markdown) {
 }
 
 async function extractDocuments() {
-  const source = 'dev/Inventario Documental del SGC.md'
+  const source = 'docs/01_bloque_general/05_matrices_inventarios/Inventario Documental del SGC.md'
   const markdown = await readFile(join(root, source), 'utf8')
-  return parseMarkdownTables(markdown)
-    .filter(({ cells }) => /^[` ]*(DG|P|I|F)-/.test(cells[0]))
-    .map(({ cells }) => {
+  const documents = []
+  for (const { cells } of parseMarkdownTables(markdown)
+    .filter(({ cells }) => /^[` ]*(DG|P|I|F)-/.test(cells[0]))) {
       const codigo = normalizeCode(cells[0])
       const familia = familiaFromCode(codigo)
       const location = cells[3].replace(/`/g, '').trim()
       const isPtApp = codigo === 'DG-PSEA-03' || location.toLowerCase().includes('pt_app')
-      return {
+      documents.push({
         codigo,
         nombre: cells[1].replace(/`/g, '').trim(),
         familia,
@@ -79,14 +99,15 @@ async function extractDocuments() {
         estado: estadoFromInventory(cells[2]),
         modoDiligenciamiento: modoFromCode(codigo),
         modoControl: modoControlFromRow(codigo, location),
-        ubicacionFuente: location || null,
+        ubicacionFuente: await resolveInventoryLocation(codigo, location),
         origenFuente: source,
         externalSystem: isPtApp ? 'pt_app' : null,
         externalRef: isPtApp ? 'pt_app' : null,
         externalUrl: isPtApp ? 'https://w421.shinyapps.io/pt_app/' : null,
         externalLabel: isPtApp ? 'Herramienta externa pt_app' : null,
-      }
-    })
+      })
+  }
+  return documents
 }
 
 function splitRequirementBullets(markdown, norma, versionNorma, source) {

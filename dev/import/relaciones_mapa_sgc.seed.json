@@ -444,19 +444,6 @@
   {
     "bloque": "Formatos y registros",
     "rutaCritica": null,
-    "origenCodigo": "F-PSEA-05A",
-    "destinoCodigo": null,
-    "tipoRelacion": "referencia",
-    "ambito": "PEA / ISO 17043",
-    "destinoTipo": "documento",
-    "externalSystem": null,
-    "externalUrl": null,
-    "estadoResolucion": "resuelto",
-    "origenFuente": "public/sgc/mapa_navegacion_sgc_pea.html"
-  },
-  {
-    "bloque": "Formatos y registros",
-    "rutaCritica": null,
     "origenCodigo": "F-PSEA-06",
     "destinoCodigo": null,
     "tipoRelacion": "referencia",

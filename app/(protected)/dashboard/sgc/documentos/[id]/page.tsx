@@ -208,7 +208,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
                     )}
                   </div>
                 </div>
-                <p className="mt-2 text-sm">{version.resumenCambios ?? version.cambioResumen}</p>
+                <p className="mt-2 text-sm">{version.resumenCambios}</p>
               </div>
             ))}
             {versiones.length === 0 && <p className="text-sm text-[var(--foreground-muted)]">Sin versiones registradas.</p>}

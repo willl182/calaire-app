@@ -12,6 +12,7 @@ import {
 type Props = {
   panel: SgcPanel
   rondaId: string
+  rondaCodigo: string
   selectedFormato: SgcFormatoCodigo | null
 }
 
@@ -98,7 +99,7 @@ function EvidenciaControls({
           <button className="btn-outline text-xs" type="submit">Descargar vigente</button>
         </form>
       )}
-      <form action={subirEvidenciaAction} className="grid gap-2">
+      <form action={subirEvidenciaAction} className="grid gap-2" encType="multipart/form-data">
         <input type="hidden" name="ronda_id" value={rondaId} />
         <input type="hidden" name="formato_focus" value={doc.formatoOperativo} />
         <input type="hidden" name="serie_id" value={serie._id} />
@@ -110,7 +111,7 @@ function EvidenciaControls({
           <input type="hidden" name="ronda_id" value={rondaId} />
           <input type="hidden" name="formato_focus" value={doc.formatoOperativo} />
           <input type="hidden" name="evidencia_version_id" value={vigente._id} />
-          <input className="input" name="motivo" placeholder="Motivo obligatorio de retiro" />
+          <input className="input" name="motivo" placeholder="Motivo obligatorio de retiro" required />
           <button className="btn-outline text-xs" type="submit">Retirar</button>
         </form>
       )}
@@ -118,7 +119,7 @@ function EvidenciaControls({
   )
 }
 
-export function ExpedienteSgc({ panel, rondaId, selectedFormato }: Props) {
+export function ExpedienteSgc({ panel, rondaId, rondaCodigo, selectedFormato }: Props) {
   const checklistByCodigo = new Map(panel.checklist.map((item) => [item.codigo, item]))
   const seriesByCodigo = new Map(panel.series.map((serie) => [serie.formato, serie]))
   const versionesBySerie = new Map(panel.versiones.map((version) => [version.serieId, version.vigente]))
@@ -141,13 +142,13 @@ export function ExpedienteSgc({ panel, rondaId, selectedFormato }: Props) {
       <div className="border-b border-[var(--border)] bg-gradient-to-r from-white to-[var(--pt-primary-subtle)] px-6 py-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">EA-PP-2026-R1</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{rondaCodigo}</p>
             <h2 id="expediente-sgc-title" className="mt-1 text-xl font-semibold text-[var(--foreground)]">
               Expediente documental de la ronda
             </h2>
             <p className="mt-2 max-w-3xl text-sm text-[var(--foreground-muted)]">
               Vista organizada por secciones del expediente. Los formatos disponibles corresponden a los documentos base en
-              docs/EA-PP-2026-R1; los pendientes quedan visibles para no perder cobertura SGC.
+              docs/{rondaCodigo}; los pendientes quedan visibles para no perder cobertura SGC.
             </p>
           </div>
           <div className="grid grid-cols-3 gap-2 text-center">
@@ -291,7 +292,7 @@ export function ExpedienteSgc({ panel, rondaId, selectedFormato }: Props) {
                                 <input type="hidden" name="ronda_id" value={rondaId} />
                                 <input type="hidden" name="formato_focus" value={doc.formatoOperativo} />
                                 <input type="hidden" name="justificacion_id" value={justificacion._id} />
-                                <input className="input" name="motivo" placeholder="Motivo de retiro" />
+                                <input className="input" name="motivo" placeholder="Motivo de retiro" required />
                                 <button className="btn-outline justify-self-start text-xs" type="submit">Retirar justificacion</button>
                               </form>
                             )}

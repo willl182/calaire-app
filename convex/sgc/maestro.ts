@@ -76,10 +76,15 @@ async function collectDocumentBundle(ctx: QueryCtx, documentoId: Id<'documentosS
       return requisito ? { relacion, requisito } : null
     })
   )
+  const versionesNormalizadas = versiones.map((version) => ({
+    ...version,
+    resumenCambios: version.resumenCambios ?? (version as { cambioResumen?: string | null }).cambioResumen ?? null,
+  }))
+
   return {
     documento,
-    versiones,
-    versionVigente: versiones.find((version) => version.estado === 'vigente') ?? null,
+    versiones: versionesNormalizadas,
+    versionVigente: versionesNormalizadas.find((version) => version.estado === 'vigente') ?? null,
     registros,
     requisitos: requisitos.filter((item): item is NonNullable<typeof item> => item !== null),
   }
@@ -168,6 +173,7 @@ export const listNormativaSgcConfig = {
         return {
           requisito,
           relaciones: visibleRelaciones,
+          todasVisibles: todasRelaciones.filter((relacion) => visibleDocumentos.some((documento) => documento._id === relacion.documentoId)),
           matchesEstadoCobertura:
             !args.estadoCobertura ||
             visibleRelaciones.length > 0 ||
@@ -181,9 +187,9 @@ export const listNormativaSgcConfig = {
       rows: rows.filter((row) => row.matchesEstadoCobertura),
       resumen: {
         requisitos: requisitos.length,
-        cubiertos: rows.filter((row) => row.relaciones.some((relacion) => relacion.estadoCobertura === 'cubierto')).length,
-        parciales: rows.filter((row) => row.relaciones.some((relacion) => relacion.estadoCobertura === 'parcial')).length,
-        pendientes: rows.filter((row) => row.relaciones.length === 0 || row.relaciones.every((relacion) => relacion.estadoCobertura === 'pendiente')).length,
+        cubiertos: rows.filter((row) => row.todasVisibles.some((relacion) => relacion.estadoCobertura === 'cubierto')).length,
+        parciales: rows.filter((row) => row.todasVisibles.some((relacion) => relacion.estadoCobertura === 'parcial')).length,
+        pendientes: rows.filter((row) => row.todasVisibles.length === 0 || row.todasVisibles.every((relacion) => relacion.estadoCobertura === 'pendiente')).length,
       },
     }
   },
@@ -230,7 +236,7 @@ export const listExpedientesSgcConfig = {
           )
         )
         const totalEsperado = Math.max(series.filter((serie) => serie.requerida).length + hitos.filter((hito) => hito.bloqueaCierre).length, 1)
-        const completado = versiones.filter(Boolean).length + hitos.filter((hito) => hito.estado === 'completado' && hito.bloqueaCierre).length
+        const completado = series.filter((serie, index) => serie.requerida && versiones[index]).length + hitos.filter((hito) => hito.estado === 'completado' && hito.bloqueaCierre).length
         const faltantesCriticos = [
           ...series.filter((serie, index) => serie.requerida && !versiones[index]).map((serie) => `${serie.formato} sin evidencia vigente`),
           ...hitos.filter((hito) => hito.bloqueaCierre && hito.estado !== 'completado').map((hito) => `${hito.codigo} ${hito.nombre}`),

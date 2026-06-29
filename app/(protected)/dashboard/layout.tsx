@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-import { isAdmin, requireAuth } from '@/lib/auth'
+import { canViewSgcMaestro, isAdmin, requireAuth } from '@/lib/auth'
 
 import { Sidebar } from './SidebarNav'
 
@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <div className="flex flex-col min-h-[100%] bg-[var(--background)]">
-      <Sidebar />
+      <Sidebar canViewSgcMaestro={canViewSgcMaestro(auth)} />
       <div className="flex-1 min-w-0">
         {children}
       </div>

@@ -26,11 +26,11 @@ export function ConvexClientProvider({ children }: { children: ReactNode }) {
   const convex = useMemo(() => (mounted ? createConvexClient() : null), [mounted])
 
   useEffect(() => {
-    setMounted(true)
+    queueMicrotask(() => setMounted(true))
   }, [])
 
   if (!mounted || !convex) {
-    return <>{children}</>
+    return null
   }
 
   return (

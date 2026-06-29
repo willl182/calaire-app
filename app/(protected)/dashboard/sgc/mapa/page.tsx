@@ -33,7 +33,7 @@ export default async function MapaSgcPage() {
       <section className="overflow-hidden rounded-lg border border-[var(--border)] bg-white shadow-sm">
         <iframe
           className="h-[calc(100vh-19rem)] min-h-[680px] w-full bg-white"
-          src="/sgc/mapa_navegacion_sgc_pea.html"
+          src="/dashboard/sgc/mapa/embed"
           title="Mapa interactivo de navegación del SGC"
         />
       </section>

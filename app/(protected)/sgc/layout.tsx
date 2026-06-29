@@ -1,11 +1,23 @@
+'use client'
+
 import type { ReactNode } from 'react'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 import { LogoUnal } from '@/app/components/LogoUnal'
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
+const SGC_NAV_ITEMS = [
+  { label: 'Inicio SGC', href: '/sgc' },
+  { label: 'Documentos', href: '/sgc/documentos' },
+  { label: 'Normativa', href: '/sgc/normativa' },
+  { label: 'Mapa', href: '/sgc/mapa' },
+]
+
 export default function SgcRootLayout({ children }: { children: ReactNode }) {
+  const pathname = usePathname()
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)]" style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}>
@@ -24,10 +36,24 @@ export default function SgcRootLayout({ children }: { children: ReactNode }) {
           </nav>
 
           <nav className="flex min-w-0 flex-1 items-stretch gap-5 overflow-x-auto" aria-label="Secciones SGC">
-            <Link className="relative inline-flex items-center self-stretch px-1 text-sm font-medium text-[var(--foreground-muted)] hover:text-[var(--foreground)]" href="/sgc">Inicio SGC</Link>
-            <Link className="relative inline-flex items-center self-stretch px-1 text-sm font-medium text-[var(--foreground-muted)] hover:text-[var(--foreground)]" href="/sgc/documentos">Documentos</Link>
-            <Link className="relative inline-flex items-center self-stretch px-1 text-sm font-medium text-[var(--foreground-muted)] hover:text-[var(--foreground)]" href="/sgc/normativa">Normativa</Link>
-            <Link className="relative inline-flex items-center self-stretch px-1 text-sm font-medium text-[var(--foreground-muted)] hover:text-[var(--foreground)]" href="/sgc/mapa">Mapa</Link>
+            {SGC_NAV_ITEMS.map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/sgc' && pathname.startsWith(`${item.href}/`))
+              return (
+                <Link
+                  key={item.href}
+                  className={[
+                    'relative inline-flex items-center self-stretch px-1 text-sm font-medium transition-colors',
+                    isActive
+                      ? 'text-[var(--foreground)] after:absolute after:bottom-0 after:left-0 after:right-0 after:h-[2px] after:rounded-t-full after:bg-[var(--pt-primary)]'
+                      : 'text-[var(--foreground-muted)] hover:text-[var(--foreground)]',
+                  ].join(' ')}
+                  href={item.href}
+                  aria-current={isActive ? 'page' : undefined}
+                >
+                  {item.label}
+                </Link>
+              )
+            })}
           </nav>
         </div>
       </header>
