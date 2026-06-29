@@ -6,19 +6,17 @@
   <title>Mapa de Navegacion SGC PEA</title>
   <style>
     :root {
-      --ink: #17211d;
-      --muted: #65736d;
-      --line: #d7ded8;
-      --paper: #f7f4ec;
-      --panel: #fffdfa;
-      --sea: #0e6b63;
-      --sea-2: #dff1ec;
-      --leaf: #6d8f35;
-      --amber: #b66b1f;
-      --clay: #a74938;
-      --violet: #56508f;
-      --blue: #2d6f98;
-      --shadow: 0 18px 55px rgba(23, 33, 29, .12);
+      --ink: #111827;
+      --muted: #6b7280;
+      --line: #d1d5db;
+      --paper: #e8eaed;
+      --panel: #f5f6f7;
+      --gold: #fdb913;
+      --gold-dark: #e5a610;
+      --gold-soft: #fff7df;
+      --surface-muted: #f5f5f0;
+      --danger: #e53e3e;
+      --shadow: 0 8px 24px rgba(17, 24, 39, .10);
     }
 
     * { box-sizing: border-box; }
@@ -26,11 +24,7 @@
     body {
       margin: 0;
       color: var(--ink);
-      background:
-        linear-gradient(90deg, rgba(14,107,99,.05) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(14,107,99,.05) 1px, transparent 1px),
-        var(--paper);
-      background-size: 26px 26px;
+      background: var(--paper);
       font-family: "Aptos", "Segoe UI", sans-serif;
     }
 
@@ -50,14 +44,14 @@
       font-weight: 800;
       letter-spacing: 0;
       text-transform: uppercase;
-      color: var(--sea);
+      color: var(--gold-dark);
     }
 
     .eyebrow::before {
       content: "";
       width: 34px;
       height: 2px;
-      background: var(--sea);
+      background: var(--gold);
     }
 
     h1 {
@@ -78,9 +72,7 @@
     }
 
     main {
-      display: grid;
-      grid-template-columns: 260px minmax(0, 1fr);
-      gap: 0;
+      display: block;
       padding: 0;
       min-height: 100vh;
     }
@@ -92,13 +84,7 @@
     }
 
     aside {
-      position: sticky;
-      top: 0;
-      align-self: start;
-      max-height: 100vh;
-      overflow: auto;
-      padding: 16px;
-      border-right: 1px solid var(--line);
+      display: none;
     }
 
     .workspace {
@@ -127,8 +113,8 @@
     }
 
     input[type="search"]:focus {
-      border-color: var(--sea);
-      box-shadow: 0 0 0 3px rgba(14,107,99,.16);
+      border-color: var(--gold);
+      box-shadow: 0 0 0 3px rgba(253,185,19,.22);
     }
 
     .chips {
@@ -149,9 +135,9 @@
 
     button:hover { transform: translateY(-1px); }
     button.active {
-      background: var(--sea);
-      border-color: var(--sea);
-      color: white;
+      background: var(--gold);
+      border-color: var(--gold-dark);
+      color: var(--ink);
     }
 
     .chip { padding: 0 12px; }
@@ -220,7 +206,7 @@
     }
 
     .toolbar {
-      display: flex;
+      display: none;
       flex-wrap: wrap;
       gap: 10px;
       align-items: center;
@@ -280,22 +266,25 @@
 
     .diagram-shell {
       position: relative;
-      min-height: calc(100vh - 91px);
+      min-height: calc(100vh - 35px);
       overflow: auto;
       background:
-        radial-gradient(circle at 18% 12%, rgba(109,143,53,.13), transparent 28%),
-        radial-gradient(circle at 88% 80%, rgba(45,111,152,.12), transparent 28%),
-        rgba(255,253,250,.7);
+        linear-gradient(90deg, rgba(17,24,39,.035) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(17,24,39,.035) 1px, transparent 1px),
+        var(--surface-muted);
+      background-size: 28px 28px;
     }
 
     svg {
       display: block;
       width: 100%;
-      height: 1180px;
+      min-width: 1540px;
+      height: auto;
+      aspect-ratio: 1540 / 1385;
     }
 
     .edge {
-      stroke: #aab5ae;
+      stroke: #c9cdd3;
       stroke-width: 1.4;
       fill: none;
       opacity: .52;
@@ -303,7 +292,7 @@
     }
 
     .edge.active {
-      stroke: var(--sea);
+      stroke: var(--gold-dark);
       stroke-width: 3;
       opacity: 1;
     }
@@ -316,7 +305,7 @@
     .node rect {
       rx: 8;
       stroke-width: 1.4;
-      filter: drop-shadow(0 9px 18px rgba(23,33,29,.12));
+      filter: drop-shadow(0 8px 18px rgba(17,24,39,.10));
     }
 
     .node text {
@@ -327,7 +316,7 @@
     }
 
     .node .small {
-      fill: #51615a;
+      fill: var(--muted);
       font-size: 11px;
       font-weight: 600;
     }
@@ -335,15 +324,15 @@
     .node.dim, .edge.dim { opacity: .13; }
 
     .node.active rect {
-      stroke: #092f2b;
+      stroke: var(--gold-dark);
       stroke-width: 3;
     }
 
-    .family-dg rect { fill: #dff1ec; stroke: #0e6b63; }
-    .family-p rect { fill: #edf2d8; stroke: #6d8f35; }
-    .family-i rect { fill: #e8e7f5; stroke: #56508f; }
-    .family-f rect { fill: #fff0d8; stroke: #b66b1f; }
-    .family-out rect { fill: #f2e2df; stroke: #a74938; }
+    .family-dg rect { fill: #eef0f2; stroke: #6b7280; }
+    .family-p rect { fill: #fff7df; stroke: #e5a610; }
+    .family-i rect { fill: #f5f6f7; stroke: #9ca3af; }
+    .family-f rect { fill: #fff3c4; stroke: #fdb913; }
+    .family-out rect { fill: #fff1f2; stroke: #e53e3e; }
 
     .detail {
       position: fixed;
@@ -353,8 +342,8 @@
       max-height: calc(100vh - 36px);
       overflow: auto;
       padding: 18px;
-      border: 1px solid #bfcac3;
-      background: rgba(255,253,250,.98);
+      border: 1px solid var(--line);
+      background: rgba(245,246,247,.98);
       box-shadow: var(--shadow);
       transform: translateY(calc(100% + 30px));
       transition: transform .22s ease;
@@ -377,9 +366,9 @@
     .detail .context-note {
       margin-top: 12px;
       padding: 10px 12px;
-      border-left: 3px solid var(--sea);
-      background: #edf4f1;
-      color: #31413a;
+      border-left: 3px solid var(--gold);
+      background: var(--gold-soft);
+      color: var(--ink);
       font-size: 13px;
     }
 
@@ -510,10 +499,10 @@
         Revision actualizada al 2026-06-28: <strong>P-PSEA-02</strong> fija la arquitectura documental maestra: <code>01_bloque_general</code> es el SGC maestro y <code>02_despliegue_rondas</code> conserva registros/evidencias por ronda. <strong>EA-PP-2026-R1</strong> es una ronda, no un bloque documental independiente. Los formatos maestros viven en <code>01_bloque_general/04_formatos_maestros</code>; las copias diligenciadas viven en la etapa correspondiente de la ronda. <strong>P-PSEA-03</strong> fija una raiz limpia con <code>checklist_ronda.md</code> y siete carpetas de etapa. <strong>DG-PSEA-02</strong> y <strong>DG-PSEA-03</strong> viven ahora en carpetas documentales propias con Markdown maestro, DOCX, HTML y capturas; no se conserva <code>indice_capturas.md</code> ni carpetas tecnicas <code>dgpsea02</code>/<code>dgpsea03</code>.
       </div>
       <div class="diagram-shell">
-        <svg id="map" viewBox="0 0 1540 1385" role="img" aria-label="Mapa de navegacion documental SGC PEA">
+        <svg id="map" viewBox="0 0 1540 1385" preserveAspectRatio="xMinYMin meet" role="img" aria-label="Mapa de navegacion documental SGC PEA">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f9b94"></path>
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#9ca3af"></path>
             </marker>
           </defs>
           <text class="column-label" x="70" y="26">Procedimientos</text>
@@ -522,11 +511,11 @@
         </svg>
       </div>
       <div class="legend">
-        <span><i class="swatch" style="background:#dff1ec;color:#0e6b63"></i>Documentos generales</span>
-        <span><i class="swatch" style="background:#edf2d8;color:#6d8f35"></i>Procedimientos</span>
-        <span><i class="swatch" style="background:#e8e7f5;color:#56508f"></i>Instructivos</span>
-        <span><i class="swatch" style="background:#fff0d8;color:#b66b1f"></i>Formatos y registros</span>
-        <span><i class="swatch" style="background:#f2e2df;color:#a74938"></i>Retirado, reservado o fuera de alcance</span>
+        <span><i class="swatch" style="background:#eef0f2;color:#6b7280"></i>Documentos generales</span>
+        <span><i class="swatch" style="background:#fff7df;color:#e5a610"></i>Procedimientos</span>
+        <span><i class="swatch" style="background:#f5f6f7;color:#9ca3af"></i>Instructivos</span>
+        <span><i class="swatch" style="background:#fff3c4;color:#fdb913"></i>Formatos y registros</span>
+        <span><i class="swatch" style="background:#fff1f2;color:#e53e3e"></i>Retirado, reservado o fuera de alcance</span>
       </div>
     </section>
   </main>
