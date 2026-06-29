@@ -153,6 +153,8 @@ export const getDocumentoMaestroConfig = {
 const listNormativaSgcArgs = {
   norma: v.optional(v.union(v.string(), v.null())),
   estadoCobertura: v.optional(v.union(estadoCoberturaValidator, v.null())),
+  page: v.optional(v.number()),
+  pageSize: v.optional(v.number()),
 }
 
 export const listNormativaSgcConfig = {
@@ -164,33 +166,60 @@ export const listNormativaSgcConfig = {
       ? activeRequisitos.filter((requisito) => requisito.norma === args.norma?.trim())
       : activeRequisitos
     requisitos.sort((a, b) => a.norma.localeCompare(b.norma) || a.clausula.localeCompare(b.clausula, undefined, { numeric: true }))
-    const rows = await Promise.all(
+    const pageSize = Math.max(25, Math.min(100, Math.floor(args.pageSize ?? 75)))
+    const page = Math.max(1, Math.floor(args.page ?? 1))
+    const rowSummaries = await Promise.all(
       requisitos.map(async (requisito) => {
         const todasRelaciones = await ctx.db.query('documentoRequisitos').withIndex('by_requisitoId', (q) => q.eq('requisitoId', requisito._id)).collect()
-        const relaciones = args.estadoCobertura ? todasRelaciones.filter((relacion) => relacion.estadoCobertura === args.estadoCobertura) : todasRelaciones
-        const documentos = await Promise.all(relaciones.map((relacion) => ctx.db.get(relacion.documentoId)))
-        const visibleDocumentos = documentos.filter((documento): documento is NonNullable<typeof documento> => documento !== null && canReadDocumentoSgc(documento, access))
-        const visibleRelaciones = relaciones.filter((relacion) => visibleDocumentos.some((documento) => documento._id === relacion.documentoId))
+        const documentos = await Promise.all(todasRelaciones.map((relacion) => ctx.db.get(relacion.documentoId)))
+        const visibleDocumentoIds = new Set(
+          documentos
+            .filter((documento): documento is NonNullable<typeof documento> => documento !== null && canReadDocumentoSgc(documento, access))
+            .map((documento) => documento._id)
+        )
+        const todasVisibles = todasRelaciones.filter((relacion) => visibleDocumentoIds.has(relacion.documentoId))
         return {
           requisito,
-          relaciones: visibleRelaciones,
-          todasVisibles: todasRelaciones.filter((relacion) => visibleDocumentos.some((documento) => documento._id === relacion.documentoId)),
+          todasVisibles,
           matchesEstadoCobertura:
             !args.estadoCobertura ||
-            visibleRelaciones.length > 0 ||
+            todasVisibles.some((relacion) => relacion.estadoCobertura === args.estadoCobertura) ||
             (args.estadoCobertura === 'pendiente' && todasRelaciones.length === 0),
-          documentos: visibleDocumentos,
+        }
+      })
+    )
+    const matchingSummaries = rowSummaries.filter((row) => row.matchesEstadoCobertura)
+    const totalRows = matchingSummaries.length
+    const totalPages = Math.max(1, Math.ceil(totalRows / pageSize))
+    const safePage = Math.min(page, totalPages)
+    const pageSummaries = matchingSummaries.slice((safePage - 1) * pageSize, safePage * pageSize)
+    const rows = await Promise.all(
+      pageSummaries.map(async (row) => {
+        const relaciones = args.estadoCobertura ? row.todasVisibles.filter((relacion) => relacion.estadoCobertura === args.estadoCobertura) : row.todasVisibles
+        const documentos = await Promise.all(relaciones.map((relacion) => ctx.db.get(relacion.documentoId)))
+        return {
+          requisito: row.requisito,
+          relaciones,
+          documentos: documentos.filter((documento): documento is NonNullable<typeof documento> => documento !== null && canReadDocumentoSgc(documento, access)),
         }
       })
     )
     return {
       normas: Array.from(new Set(requisitos.map((requisito) => requisito.norma))).sort(),
-      rows: rows.filter((row) => row.matchesEstadoCobertura),
+      rows,
+      pagination: {
+        page: safePage,
+        pageSize,
+        totalRows,
+        totalPages,
+        hasPreviousPage: safePage > 1,
+        hasNextPage: safePage < totalPages,
+      },
       resumen: {
         requisitos: requisitos.length,
-        cubiertos: rows.filter((row) => row.todasVisibles.some((relacion) => relacion.estadoCobertura === 'cubierto')).length,
-        parciales: rows.filter((row) => row.todasVisibles.some((relacion) => relacion.estadoCobertura === 'parcial')).length,
-        pendientes: rows.filter((row) => row.todasVisibles.length === 0 || row.todasVisibles.every((relacion) => relacion.estadoCobertura === 'pendiente')).length,
+        cubiertos: rowSummaries.filter((row) => row.todasVisibles.some((relacion) => relacion.estadoCobertura === 'cubierto')).length,
+        parciales: rowSummaries.filter((row) => row.todasVisibles.some((relacion) => relacion.estadoCobertura === 'parcial')).length,
+        pendientes: rowSummaries.filter((row) => row.todasVisibles.length === 0 || row.todasVisibles.every((relacion) => relacion.estadoCobertura === 'pendiente')).length,
       },
     }
   },

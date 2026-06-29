@@ -305,6 +305,14 @@ export type NormativaSgc = {
     relaciones: DocumentoRequisito[]
     documentos: DocumentoSgc[]
   }>
+  pagination: {
+    page: number
+    pageSize: number
+    totalRows: number
+    totalPages: number
+    hasPreviousPage: boolean
+    hasNextPage: boolean
+  }
   resumen: {
     requisitos: number
     cubiertos: number
@@ -452,6 +460,8 @@ export async function getDocumentoMaestro(documentoId: string): Promise<Document
 export async function listNormativaSgc(filters: {
   norma?: string | null
   estadoCobertura?: DocumentoRequisito['estadoCobertura'] | null
+  page?: number
+  pageSize?: number
 } = {}): Promise<NormativaSgc> {
   const token = await sgcToken()
   return fetchQuery(api.sgc.listNormativaSgc, filters, { token }) as Promise<NormativaSgc>

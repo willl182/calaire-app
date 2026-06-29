@@ -46,6 +46,22 @@ function buildNormaHref(params: Record<string, string | string[] | undefined>, n
   return suffix ? `/dashboard/sgc/normativa?${suffix}` : '/dashboard/sgc/normativa'
 }
 
+function buildPageHref(params: Record<string, string | string[] | undefined>, page: number) {
+  const query = new URLSearchParams()
+  const norma = firstParam(params.norma)
+  const estado = firstParam(params.estado)
+  if (norma) query.set('norma', norma)
+  if (estado) query.set('estado', estado)
+  if (page > 1) query.set('page', String(page))
+  const suffix = query.toString()
+  return suffix ? `/dashboard/sgc/normativa?${suffix}` : '/dashboard/sgc/normativa'
+}
+
+function parsePage(value: string | string[] | undefined) {
+  const parsed = Number(firstParam(value) ?? '1')
+  return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 1
+}
+
 export default async function NormativaSgcPage({ searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
@@ -54,10 +70,13 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
   const estadoCobertura = firstParam(params.estado) as DocumentoRequisito['estadoCobertura'] | undefined
   const selectedNorma = firstParam(params.norma) ?? null
   const selectedRelacionarId = firstParam(params.relacionar) ?? null
+  const page = parsePage(params.page)
   const [data, documentosMaestros] = await Promise.all([
     listNormativaSgc({
       norma: selectedNorma,
       estadoCobertura: estadoCobertura ?? null,
+      page,
+      pageSize: 75,
     }),
     listSgcMaestro(),
   ])
@@ -136,6 +155,25 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
       </section>
 
       <section className="card overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-[var(--border-soft)] px-4 py-3 text-sm text-[var(--foreground-muted)] md:flex-row md:items-center md:justify-between">
+          <div>
+            Mostrando pagina <span className="font-semibold text-[var(--foreground)]">{data.pagination.page}</span> de{' '}
+            <span className="font-semibold text-[var(--foreground)]">{data.pagination.totalPages}</span>
+            {' '}({data.pagination.totalRows} requisitos filtrados)
+          </div>
+          <div className="flex gap-2">
+            {data.pagination.hasPreviousPage ? (
+              <Link className="btn-outline text-xs" href={buildPageHref(params, data.pagination.page - 1)}>Anterior</Link>
+            ) : (
+              <span className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--foreground-muted)]">Anterior</span>
+            )}
+            {data.pagination.hasNextPage ? (
+              <Link className="btn-outline text-xs" href={buildPageHref(params, data.pagination.page + 1)}>Siguiente</Link>
+            ) : (
+              <span className="rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-3 py-2 text-xs font-semibold text-[var(--foreground-muted)]">Siguiente</span>
+            )}
+          </div>
+        </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-[var(--border-soft)] text-sm">
             <thead className="bg-[var(--surface-muted)] text-left text-xs uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
