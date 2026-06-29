@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/lib/auth'
 import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listSgcMaestro, type DocumentoSgc } from '@/lib/sgc'
+import { SgcHeader } from '../SgcHeader'
 import { guardarDocumentoMaestroAction } from './actions'
 
 type PageProps = {
@@ -41,21 +42,18 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
 
   return (
     <div className="grid min-w-0 gap-6">
-      <header className="header-bar px-6 py-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">SGC CALAIRE</p>
-            <h1 className="mt-1 text-2xl font-semibold text-[var(--foreground)]">Centro documental</h1>
-            <p className="mt-1 max-w-3xl text-sm text-[var(--foreground-muted)]">
-              Inventario maestro persistido. Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos.
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
+      <SgcHeader
+        title="Centro documental"
+        accent="Inventario maestro de documentos SGC"
+        description="Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos."
+        email={auth.user.email}
+        actions={
+          <>
             <Link className="btn-outline" href="/dashboard/sgc/normativa">Matriz normativa</Link>
             <Link className="btn-outline" href="/dashboard/sgc/mapa">Mapa SGC</Link>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card-accent px-5 py-4">

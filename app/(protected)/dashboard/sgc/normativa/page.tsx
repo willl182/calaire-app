@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/lib/auth'
 import { listNormativaSgc, listSgcMaestro, type DocumentoRequisito } from '@/lib/sgc'
+import { SgcHeader } from '../SgcHeader'
 import { relacionarDocumentoRequisitoAction } from './actions'
 
 type PageProps = {
@@ -55,13 +56,12 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
 
   return (
     <div className="grid min-w-0 gap-6">
-      <header className="header-bar px-6 py-5">
-        <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">SGC CALAIRE</p>
-        <h1 className="mt-1 text-2xl font-semibold">Matriz normativa</h1>
-        <p className="mt-1 max-w-3xl text-sm text-[var(--foreground-muted)]">
-          Requisitos operativos cargados desde fuentes revisables. Las relaciones documento-requisito son explicitas y auditables.
-        </p>
-      </header>
+      <SgcHeader
+        title="Matriz normativa"
+        accent="Requisitos operativos y cobertura documental"
+        description="Las relaciones documento-requisito son explicitas y auditables."
+        email={auth.user.email}
+      />
 
       {firstParam(params.success) && <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{firstParam(params.success)}</div>}
       {firstParam(params.error) && <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{firstParam(params.error)}</div>}

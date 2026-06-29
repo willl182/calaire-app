@@ -2,10 +2,10 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { signOut } from '@workos-inc/authkit-nextjs'
 
-import { LogoUnal } from '@/app/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { canViewSgcMaestro, requireAuth } from '@/lib/auth'
 import { listMapaSgc, listNormativaSgc, listSgcMaestro } from '@/lib/sgc'
+import { SgcHeader } from './SgcHeader'
 
 export default async function SgcResumenPage() {
   const auth = await requireAuth()
@@ -19,27 +19,13 @@ export default async function SgcResumenPage() {
 
   return (
     <div className="grid min-w-0 gap-6">
-      <header className="header-bar w-full min-w-0 max-w-full px-8 py-6">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-          <div className="flex items-center gap-6">
-            <LogoUnal height={64} />
-            <div className="space-y-0.5">
-              <h1 className="text-xl font-bold text-[var(--foreground)]">
-                SGC Maestro <span className="font-medium text-[var(--foreground-muted)]">CALAIRE</span>
-              </h1>
-              <p className="text-base font-medium text-[var(--pt-primary-dark)]">
-                Repositorio global de documentos, versiones, requisitos y mapa documental
-              </p>
-              <p className="text-sm text-[var(--foreground-muted)]">
-                Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
-              </p>
-              <p className="text-sm text-[var(--foreground-muted)]">
-                {auth.user.email} · Coordinador
-              </p>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
+      <SgcHeader
+        title={<>SGC Maestro <span className="font-medium text-[var(--foreground-muted)]">CALAIRE</span></>}
+        accent="Repositorio global de documentos, versiones, requisitos y mapa documental"
+        description="Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín"
+        email={auth.user.email}
+        actions={
+          <>
             <Link href="/dashboard/sgc/documentos" className="btn-primary">
               Centro documental
             </Link>
@@ -53,9 +39,9 @@ export default async function SgcResumenPage() {
                 Cerrar sesión
               </button>
             </form>
-          </div>
-        </div>
-      </header>
+          </>
+        }
+      />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card-accent px-5 py-4">

@@ -105,23 +105,15 @@ function TopNavInner() {
           </span>
         </div>
 
-        <div className="flex min-w-0 flex-1 items-stretch justify-between gap-8">
-          <nav className="flex shrink-0 items-stretch gap-5" aria-label="Vistas principales de CALAIRE-APP">
-            <NavLink item={{ label: 'Gestión de ronda', href: '/dashboard', tabKey: null }} isActive={!isSgcDashboard} />
-            <NavLink item={{ label: 'SGC', href: '/dashboard/sgc', tabKey: '__sgc_home__' }} isActive={isSgcDashboard} />
-          </nav>
-
-          <div className="flex min-w-0 flex-1 items-stretch justify-end gap-6">
-            <nav className="flex min-w-0 items-stretch gap-4 overflow-x-auto" aria-label={isSgcDashboard ? 'Secciones SGC' : 'Secciones gestión de ronda'}>
-              {navItems.map((item) => (
-                <NavLink key={item.label} item={item} isActive={isActive(item)} />
-              ))}
-            </nav>
-            <div className="flex shrink-0 items-stretch">
-              <NavLink item={{ label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true }} isActive={false} />
-            </div>
-          </div>
-        </div>
+        <nav
+          className="flex min-w-0 flex-1 items-stretch gap-5 overflow-x-auto"
+          aria-label={isSgcDashboard ? 'Secciones SGC' : 'Secciones gestión de ronda'}
+        >
+          {navItems.map((item) => (
+            <NavLink key={item.label} item={item} isActive={isActive(item)} />
+          ))}
+          {!isSgcDashboard && <NavLink item={{ label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true }} isActive={false} />}
+        </nav>
       </div>
     </header>
   )

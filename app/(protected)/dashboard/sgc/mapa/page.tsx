@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { canViewSgcMaestro, requireAuth } from '@/lib/auth'
 import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listMapaSgc } from '@/lib/sgc'
+import { SgcHeader } from '../SgcHeader'
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -30,18 +31,15 @@ export default async function MapaSgcPage({ searchParams }: PageProps) {
 
   return (
     <div className="grid min-w-0 gap-6">
-      <header className="header-bar px-6 py-5">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">SGC CALAIRE</p>
-            <h1 className="mt-1 text-2xl font-semibold">Mapa SGC vivo</h1>
-            <p className="mt-1 max-w-3xl text-sm text-[var(--foreground-muted)]">
-              Navegacion documental alimentada por relaciones persistidas. El HTML original queda disponible como referencia visual.
-            </p>
-          </div>
+      <SgcHeader
+        title="Mapa SGC vivo"
+        accent="Navegación documental del inventario maestro"
+        description="Relaciones persistidas entre documentos, registros y sistemas externos."
+        email={auth.user.email}
+        actions={
           <a className="btn-outline" href="/sgc/mapa_navegacion_sgc_pea.html" target="_blank" rel="noreferrer">Abrir HTML original ↗</a>
-        </div>
-      </header>
+        }
+      />
 
       <section className="grid gap-4 sm:grid-cols-3">
         <div className="card-accent px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Relaciones</div><div className="mt-2 text-3xl font-semibold">{data.relaciones.length}</div></div>
