@@ -273,10 +273,18 @@ Extraer primitivos UI reutilizables a `src/components/ui/`.
 Fase 6 completada.
 
 ### Targets / Success criteria
-- [ ] Primitivos usados desde 2+ dominios identificados.
-- [ ] Cada primitivo movido a `src/components/ui/<Nombre>.tsx`.
-- [ ] Imports actualizados en todos los consumidores.
-- [ ] Ningún componente en `src/components/ui/` importa Convex ni auth.
+- [x] Primitivos usados desde 2+ dominios identificados.
+- [x] Cada primitivo movido a `src/components/ui/<Nombre>.tsx`.
+- [x] Imports actualizados en todos los consumidores.
+- [x] Ningún componente en `src/components/ui/` importa Convex ni auth.
+- [x] Primitivos presentes al cierre de la fase:
+  - `Alert.tsx` — banner inline de éxito/error, usado por dashboard, mi-dashboard, ronda pages.
+  - `ConfirmSubmitButton.tsx` — botón que pide confirmación nativa, usado en RondasTable y registro de participantes.
+  - `CopyInvitationLinkButton.tsx` — copia enlace al portapapeles, usado en participantes.
+  - `EstadoBadge.tsx` — badge semántico de estado de ronda, usado en dashboard y rondas.
+  - `SgcHeader.tsx` — cabecera con logo + acciones, usado en `/sgc/*` y `/dashboard/sgc/*`.
+  - `ConvexErrorView.tsx` — vista de error que distingue ECONNREFUSED vs error genérico, usada por todas las `error.tsx` protegidas.
+  - `BackendOfflineBanner.tsx` — banner ámbar con CTA `pnpm exec convex dev`, usado en `/dashboard` y `/sgc`.
 
 ### Exit criteria
 Los componentes UI compartidos son puros y reutilizables por props.
@@ -285,9 +293,7 @@ Los componentes UI compartidos son puros y reutilizables por props.
 ```bash
 pnpm build
 pnpm lint
-pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
-# opcional si hay auth lista:
-# pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium
+pnpm test
 ```
 
 ---

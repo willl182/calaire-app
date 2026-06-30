@@ -1,6 +1,7 @@
 import { fetchQuery, fetchMutation } from 'convex/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import { safeConvexCall } from '@/lib/convex-fallback'
 
 export type EstadoFicha = 'borrador' | 'enviado'
 
@@ -250,9 +251,13 @@ export async function getOrCreateFicha(rondaParticipanteId: string): Promise<Fic
 export async function getFichaByRondaParticipante(
   rondaParticipanteId: string
 ): Promise<FichaCompleta | null> {
-  const result = await fetchQuery(api.fichas.index.getFichaByRondaParticipante, {
-    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
-  })
+  const result = await safeConvexCall(
+    'getFichaByRondaParticipante',
+    () => fetchQuery(api.fichas.index.getFichaByRondaParticipante, {
+      rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+    }),
+    null,
+  )
   if (!result) return null
 
   return {
@@ -269,15 +274,23 @@ export async function getFichaByRondaParticipante(
 export async function getFichaResumenByRondaParticipante(
   rondaParticipanteId: string
 ): Promise<FichaResumen | null> {
-  const result = await fetchQuery(api.fichas.index.getFichaResumenByRondaParticipante, {
-    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
-  })
+  const result = await safeConvexCall(
+    'getFichaResumenByRondaParticipante',
+    () => fetchQuery(api.fichas.index.getFichaResumenByRondaParticipante, {
+      rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+    }),
+    null,
+  )
   if (!result) return null
   return mapFichaResumenFromResult(result)
 }
 
 export async function findFichaTemplateByLookup(lookup: string): Promise<FichaCompleta | null> {
-  const result = await fetchQuery(api.fichas.index.findFichaTemplateByLookup, { lookup })
+  const result = await safeConvexCall(
+    'findFichaTemplateByLookup',
+    () => fetchQuery(api.fichas.index.findFichaTemplateByLookup, { lookup }),
+    null,
+  )
   if (!result) return null
 
   return {
@@ -295,9 +308,13 @@ export async function getFichasResumenByRpIds(
   rpIds: string[]
 ): Promise<Record<string, FichaResumen>> {
   if (rpIds.length === 0) return {}
-  const result = await fetchQuery(api.fichas.index.listFichaResumenesByRpIds, {
-    rpIds: rpIds as Id<'rondaParticipantes'>[],
-  })
+  const result = await safeConvexCall(
+    'getFichasResumenByRpIds',
+    () => fetchQuery(api.fichas.index.listFichaResumenesByRpIds, {
+      rpIds: rpIds as Id<'rondaParticipantes'>[],
+    }),
+    {} as Record<string, unknown>,
+  )
   const mapped: Record<string, FichaResumen> = {}
   for (const [rpId, r] of Object.entries(result)) {
     mapped[rpId] = mapFichaResumenFromResult(r)
@@ -308,9 +325,13 @@ export async function getFichasResumenByRpIds(
 export async function listFichaResumenesByRonda(
   rondaId: string
 ): Promise<Record<string, FichaResumen>> {
-  const result = await fetchQuery(api.fichas.index.listFichaResumenesByRonda, {
-    rondaId: rondaId as Id<'rondas'>,
-  })
+  const result = await safeConvexCall(
+    'listFichaResumenesByRonda',
+    () => fetchQuery(api.fichas.index.listFichaResumenesByRonda, {
+      rondaId: rondaId as Id<'rondas'>,
+    }),
+    {} as Record<string, unknown>,
+  )
   const mapped: Record<string, FichaResumen> = {}
   for (const [rpId, r] of Object.entries(result)) {
     mapped[rpId] = mapFichaResumenFromResult(r)

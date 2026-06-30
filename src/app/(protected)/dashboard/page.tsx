@@ -6,6 +6,7 @@ import { redirect } from 'next/navigation'
 
 import { LogoUnal } from '@/components/LogoUnal'
 import { Alert } from '@/components/ui/Alert'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { buildAttentionItems } from '@/server/rondas/service'
 import type { Contaminante } from '@/server/rondas'
@@ -107,6 +108,7 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
 
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
+        {adminData?.backendOffline && <BackendOfflineBanner />}
 
         {!admin ? (
           <ParticipanteDashboard rondas={rondasParticipante} />

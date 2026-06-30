@@ -1,6 +1,7 @@
 import { fetchQuery, fetchMutation } from 'convex/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import { safeConvexCall } from '@/lib/convex-fallback'
 
 export const CONTAMINANTES = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 export const REPLICAS_OPTIONS = [2, 3] as const
@@ -496,19 +497,27 @@ function mapEnvioPTDoc(e: any): EnvioPT {
 // ---------------------------------------------------------------------------
 
 export async function getRonda(id: string): Promise<Ronda | null> {
-  const result = await fetchQuery(api.rondas.index.getRonda, { id: id as Id<'rondas'> })
+  const result = await safeConvexCall(
+    'getRonda',
+    () => fetchQuery(api.rondas.index.getRonda, { id: id as Id<'rondas'> }),
+    null,
+  )
   if (!result) return null
   return mapRondaWithContaminantes(result)
 }
 
 export async function getRondaByCodigo(codigo: string): Promise<Ronda | null> {
-  const result = await fetchQuery(api.rondas.index.getRondaByCodigo, { codigo })
+  const result = await safeConvexCall(
+    'getRondaByCodigo',
+    () => fetchQuery(api.rondas.index.getRondaByCodigo, { codigo }),
+    null,
+  )
   if (!result) return null
   return mapRondaWithContaminantes(result)
 }
 
 export async function listRondas(): Promise<Ronda[]> {
-  const results = await fetchQuery(api.rondas.index.listRondas, {})
+  const results = await safeConvexCall('listRondas', () => fetchQuery(api.rondas.index.listRondas, {}), [])
   return results.map(mapRondaWithContaminantes)
 }
 
@@ -517,21 +526,33 @@ export async function listRondas(): Promise<Ronda[]> {
 // ---------------------------------------------------------------------------
 
 export async function listParticipantes(rondaId: string): Promise<RondaParticipante[]> {
-  const rows = await fetchQuery(api.rondas.index.listParticipantes, { rondaId: rondaId as Id<'rondas'> })
+  const rows = await safeConvexCall(
+    'listParticipantes',
+    () => fetchQuery(api.rondas.index.listParticipantes, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
   return rows.map(mapParticipanteDoc)
 }
 
 export async function listParticipantesRondaResumen(
   rondaId: string
 ): Promise<ParticipanteRondaResumen[]> {
-  const rows = await fetchQuery(api.rondas.index.listParticipantesRondaResumen, {
-    rondaId: rondaId as Id<'rondas'>,
-  })
+  const rows = await safeConvexCall(
+    'listParticipantesRondaResumen',
+    () => fetchQuery(api.rondas.index.listParticipantesRondaResumen, {
+      rondaId: rondaId as Id<'rondas'>,
+    }),
+    [],
+  )
   return rows.map(mapParticipanteRondaResumenDoc)
 }
 
 export async function listRondasParticipante(userId: string): Promise<RondaParticipanteAsignada[]> {
-  const rows = await fetchQuery(api.rondas.index.listRondasParticipante, { userId })
+  const rows = await safeConvexCall(
+    'listRondasParticipante',
+    () => fetchQuery(api.rondas.index.listRondasParticipante, { userId }),
+    [],
+  )
   return rows.map((r) => ({
     ...mapRondaWithContaminantes(r),
     email: r.email as string,
@@ -545,7 +566,11 @@ export async function listRondasParticipante(userId: string): Promise<RondaParti
 }
 
 export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
-  const rows = await fetchQuery(api.rondas.index.listAllParticipantes, {})
+  const rows = await safeConvexCall(
+    'listAllParticipantes',
+    () => fetchQuery(api.rondas.index.listAllParticipantes, {}),
+    [],
+  )
   return rows.map((r) => ({
     workos_user_id: r.workos_user_id,
     email: r.email,
@@ -585,7 +610,11 @@ export type DirectorioParticipante = {
 }
 
 export async function listDirectorioParticipantes(): Promise<DirectorioParticipante[]> {
-  const rows = await fetchQuery(api.rondas.index.listDirectorioParticipantes, {})
+  const rows = await safeConvexCall(
+    'listDirectorioParticipantes',
+    () => fetchQuery(api.rondas.index.listDirectorioParticipantes, {}),
+    [],
+  )
   return rows.map((row) => ({
     id: row.id,
     nit: row.nit,
@@ -605,9 +634,13 @@ export async function listDirectorioParticipantes(): Promise<DirectorioParticipa
 export async function getDirectorioParticipanteByLookup(
   lookup: { nit?: string; correo?: string }
 ): Promise<DirectorioParticipante | null> {
-  const row = await fetchQuery(api.rondas.index.getDirectorioParticipanteByLookup, {
-    lookup: lookup.nit?.trim() || lookup.correo?.trim() || '',
-  })
+  const row = await safeConvexCall(
+    'getDirectorioParticipanteByLookup',
+    () => fetchQuery(api.rondas.index.getDirectorioParticipanteByLookup, {
+      lookup: lookup.nit?.trim() || lookup.correo?.trim() || '',
+    }),
+    null,
+  )
   if (!row) return null
   return {
     id: row.id,
@@ -644,10 +677,14 @@ function normalizeOptionalId(value: unknown): string | null {
 }
 
 export async function isInvitado(rondaId: string, userId: string): Promise<boolean> {
-  return fetchQuery(api.rondas.index.isInvitado, {
-    rondaId: rondaId as Id<'rondas'>,
-    userId,
-  })
+  return safeConvexCall(
+    'isInvitado',
+    () => fetchQuery(api.rondas.index.isInvitado, {
+      rondaId: rondaId as Id<'rondas'>,
+      userId,
+    }),
+    false,
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -655,10 +692,14 @@ export async function isInvitado(rondaId: string, userId: string): Promise<boole
 // ---------------------------------------------------------------------------
 
 export async function listEnvios(rondaId: string, userId: string): Promise<Envio[]> {
-  const rows = await fetchQuery(api.rondas.index.listEnvios, {
-    rondaId: rondaId as Id<'rondas'>,
-    userId,
-  })
+  const rows = await safeConvexCall(
+    'listEnvios',
+    () => fetchQuery(api.rondas.index.listEnvios, {
+      rondaId: rondaId as Id<'rondas'>,
+      userId,
+    }),
+    [],
+  )
   return rows.map(mapEnvioDoc)
 }
 
@@ -674,10 +715,20 @@ export async function getEstadoEnvioParticipante(
   rondaId: string,
   userId: string
 ): Promise<EstadoEnvioParticipante> {
-  return fetchQuery(api.rondas.index.getEstadoEnvioParticipante, {
-    rondaId: rondaId as Id<'rondas'>,
-    userId,
-  })
+  return safeConvexCall(
+    'getEstadoEnvioParticipante',
+    () => fetchQuery(api.rondas.index.getEstadoEnvioParticipante, {
+      rondaId: rondaId as Id<'rondas'>,
+      userId,
+    }),
+    {
+      completo: false,
+      enviado: false,
+      enviados_at: null,
+      total_esperado: 0,
+      total_guardado: 0,
+    },
+  )
 }
 
 export type CeldaParticipante = {
@@ -703,11 +754,19 @@ export type ResultadoContaminante = {
 }
 
 export async function listResultados(rondaId: string): Promise<ResultadoContaminante[]> {
-  return fetchQuery(api.rondas.index.listResultados, { rondaId: rondaId as Id<'rondas'> })
+  return safeConvexCall(
+    'listResultados',
+    () => fetchQuery(api.rondas.index.listResultados, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
 }
 
 export async function listResultadosRonda(rondaId: string): Promise<ResultadoParticipante[]> {
-  const rows = await fetchQuery(api.rondas.index.listResultadosRonda, { rondaId: rondaId as Id<'rondas'> })
+  const rows = await safeConvexCall(
+    'listResultadosRonda',
+    () => fetchQuery(api.rondas.index.listResultadosRonda, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
   return rows.map((row) => ({
     workos_user_id: row.workos_user_id,
     email: row.email,
@@ -893,12 +952,20 @@ export type ParticipanteGlobal = {
 // ---------------------------------------------------------------------------
 
 export async function listPTItems(rondaId: string): Promise<RondaPTItem[]> {
-  const rows = await fetchQuery(api.pt.index.listPTItems, { rondaId: rondaId as Id<'rondas'> })
+  const rows = await safeConvexCall(
+    'listPTItems',
+    () => fetchQuery(api.pt.index.listPTItems, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
   return rows.map(mapPTItemDoc)
 }
 
 export async function listPTSampleGroups(rondaId: string): Promise<RondaPTSampleGroup[]> {
-  const rows = await fetchQuery(api.pt.index.listPTSampleGroups, { rondaId: rondaId as Id<'rondas'> })
+  const rows = await safeConvexCall(
+    'listPTSampleGroups',
+    () => fetchQuery(api.pt.index.listPTSampleGroups, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
   return rows.map(mapPTSampleGroupDoc)
 }
 
@@ -910,16 +977,24 @@ export async function getRondaParticipantePT(
   rondaId: string,
   userId: string
 ): Promise<RondaParticipantePT | null> {
-  const row = await fetchQuery(api.pt.index.getRondaParticipantePT, {
-    rondaId: rondaId as Id<'rondas'>,
-    userId,
-  })
+  const row = await safeConvexCall(
+    'getRondaParticipantePT',
+    () => fetchQuery(api.pt.index.getRondaParticipantePT, {
+      rondaId: rondaId as Id<'rondas'>,
+      userId,
+    }),
+    null,
+  )
   if (!row) return null
   return mapParticipantePTDoc(row)
 }
 
 export async function listParticipantesPT(rondaId: string): Promise<RondaParticipantePT[]> {
-  const rows = await fetchQuery(api.pt.index.listParticipantesPT, { rondaId: rondaId as Id<'rondas'> })
+  const rows = await safeConvexCall(
+    'listParticipantesPT',
+    () => fetchQuery(api.pt.index.listParticipantesPT, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
   return rows.map(mapParticipantePTDoc)
 }
 
@@ -928,17 +1003,25 @@ export async function listParticipantesPT(rondaId: string): Promise<RondaPartici
 // ---------------------------------------------------------------------------
 
 export async function listEnviosPT(rondaId: string, userId: string): Promise<EnvioPT[]> {
-  const rows = await fetchQuery(api.pt.index.listEnviosPT, {
-    rondaId: rondaId as Id<'rondas'>,
-    userId,
-  })
+  const rows = await safeConvexCall(
+    'listEnviosPT',
+    () => fetchQuery(api.pt.index.listEnviosPT, {
+      rondaId: rondaId as Id<'rondas'>,
+      userId,
+    }),
+    [],
+  )
   return rows.map(mapEnvioPTDoc)
 }
 
 export async function listEnviosPTByParticipante(rondaParticipanteId: string): Promise<EnvioPT[]> {
-  const rows = await fetchQuery(api.pt.index.listEnviosPTByParticipante, {
-    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
-  })
+  const rows = await safeConvexCall(
+    'listEnviosPTByParticipante',
+    () => fetchQuery(api.pt.index.listEnviosPTByParticipante, {
+      rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+    }),
+    [],
+  )
   return rows.map(mapEnvioPTDoc)
 }
 
@@ -947,11 +1030,15 @@ export async function getEnvioPT(
   ptItemId: string,
   sampleGroupId: string
 ): Promise<EnvioPT | null> {
-  const row = await fetchQuery(api.pt.index.getEnvioPT, {
-    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
-    ptItemId: ptItemId as Id<'rondaPtItems'>,
-    sampleGroupId: sampleGroupId as Id<'rondaPtSampleGroups'>,
-  })
+  const row = await safeConvexCall(
+    'getEnvioPT',
+    () => fetchQuery(api.pt.index.getEnvioPT, {
+      rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+      ptItemId: ptItemId as Id<'rondaPtItems'>,
+      sampleGroupId: sampleGroupId as Id<'rondaPtSampleGroups'>,
+    }),
+    null,
+  )
   if (!row) return null
   return mapEnvioPTDoc(row)
 }
@@ -960,28 +1047,50 @@ export async function getEstadoEnvioPTParticipante(
   rondaId: string,
   userId: string
 ): Promise<EstadoEnvioParticipante> {
-  return fetchQuery(api.pt.index.getEstadoEnvioPTParticipante, {
-    rondaId: rondaId as Id<'rondas'>,
-    userId,
-  })
+  return safeConvexCall(
+    'getEstadoEnvioPTParticipante',
+    () => fetchQuery(api.pt.index.getEstadoEnvioPTParticipante, {
+      rondaId: rondaId as Id<'rondas'>,
+      userId,
+    }),
+    {
+      completo: false,
+      enviado: false,
+      enviados_at: null,
+      total_esperado: 0,
+      total_guardado: 0,
+    },
+  )
 }
 
 export async function getParticipanteRondaResumen(
   participanteId: string
 ): Promise<ParticipanteRondaResumen | null> {
-  const row = await fetchQuery(api.rondas.index.getParticipanteRondaResumen, {
-    participanteId: participanteId as Id<'rondaParticipantes'>,
-  })
+  const row = await safeConvexCall(
+    'getParticipanteRondaResumen',
+    () => fetchQuery(api.rondas.index.getParticipanteRondaResumen, {
+      participanteId: participanteId as Id<'rondaParticipantes'>,
+    }),
+    null,
+  )
   if (!row) return null
   return mapParticipanteRondaResumenDoc(row)
 }
 
 export async function listResultadosPTRonda(rondaId: string): Promise<ResultadoParticipantePT[]> {
-  return fetchQuery(api.pt.index.listResultadosPTRonda, { rondaId: rondaId as Id<'rondas'> })
+  return safeConvexCall(
+    'listResultadosPTRonda',
+    () => fetchQuery(api.pt.index.listResultadosPTRonda, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
 }
 
 export async function listEnviosPTRound(rondaId: string): Promise<EnvioPTConMetadatos[]> {
-  return fetchQuery(api.pt.index.listEnviosPTRound, { rondaId: rondaId as Id<'rondas'> })
+  return safeConvexCall(
+    'listEnviosPTRound',
+    () => fetchQuery(api.pt.index.listEnviosPTRound, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
 }
 
 // ---------------------------------------------------------------------------
@@ -1180,7 +1289,11 @@ export async function deletePTSampleGroup(rondaId: string, groupId: string): Pro
 // ---------------------------------------------------------------------------
 
 export async function listAllEnviosPT(rondaId: string): Promise<EnvioPTWithRelations[]> {
-  const rows = await fetchQuery(api.pt.index.listAllEnviosPT, { rondaId: rondaId as Id<'rondas'> })
+  const rows = await safeConvexCall(
+    'listAllEnviosPT',
+    () => fetchQuery(api.pt.index.listAllEnviosPT, { rondaId: rondaId as Id<'rondas'> }),
+    [],
+  )
 
   return rows.map(({ envio, ptItem, sampleGroup, participante }) => ({
     ...mapEnvioPTDoc(envio),
