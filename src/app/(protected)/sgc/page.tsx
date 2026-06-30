@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgc, listNormativaSgc, listSgcMaestro } from '@/server/sgc'
-import { SgcHeader } from '../dashboard/sgc/SgcHeader'
+import { SgcHeader } from '@/components/ui/SgcHeader'
 
 export default async function SgcPage() {
   const auth = await requireAuth()

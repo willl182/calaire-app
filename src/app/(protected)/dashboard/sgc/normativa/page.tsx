@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listNormativaSgc, listSgcMaestro, type DocumentoRequisito } from '@/server/sgc'
-import { SgcHeader } from '../SgcHeader'
+import { SgcHeader } from '@/components/ui/SgcHeader'
 import { relacionarDocumentoRequisitoAction } from './actions'
 
 type PageProps = {

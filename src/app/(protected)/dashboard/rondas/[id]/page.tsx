@@ -1,8 +1,8 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
-import { Alert } from '../../components/Alert'
-import { EstadoBadge } from '../../components/EstadoBadge'
+import { Alert } from '@/components/ui/Alert'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
   getRonda,

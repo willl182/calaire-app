@@ -1,4 +1,5 @@
 'use client'
+
 import { useState } from 'react'
 
 export function CopyInvitationLinkButton({ url }: { url: string }) {

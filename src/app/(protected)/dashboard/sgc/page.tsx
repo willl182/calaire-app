@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgc, listNormativaSgc, listSgcMaestro } from '@/server/sgc'
-import { SgcHeader } from './SgcHeader'
+import { SgcHeader } from '@/components/ui/SgcHeader'
 
 export default async function SgcResumenPage() {
   const auth = await requireAuth()

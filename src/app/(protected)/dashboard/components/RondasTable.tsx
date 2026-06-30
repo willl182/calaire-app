@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { ConfirmSubmitButton } from './ConfirmSubmitButton'
+import { ConfirmSubmitButton } from '@/components/ui/ConfirmSubmitButton'
 import {
   changeRondaStatusAction,
   deleteRondaAction,

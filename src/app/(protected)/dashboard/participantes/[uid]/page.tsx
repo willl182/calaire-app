@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
-import { EstadoBadge } from '../../components/EstadoBadge'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { isAdmin, requireAuth } from '@/server/auth'
 import {
   listPTItems,

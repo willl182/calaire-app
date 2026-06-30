@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listSgcMaestro, type DocumentoSgc } from '@/server/sgc'
-import { SgcHeader } from '../SgcHeader'
+import { SgcHeader } from '@/components/ui/SgcHeader'
 import { guardarDocumentoMaestroAction } from './actions'
 
 type PageProps = {

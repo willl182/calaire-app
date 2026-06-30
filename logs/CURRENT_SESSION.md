@@ -1,6 +1,6 @@
 # Session State: calaire-app
 
-**Last Updated**: 2026-06-30 13:41 -05
+**Last Updated**: 2026-06-30 13:40 -05
 
 ## Session Objective
 
@@ -41,7 +41,13 @@ Reconciliar el plan de migracion T3 con el estado real de la rama y cerrar el cl
   - `rg "process\\.env\\." src convex --glob '!src/env.ts'` no devuelve resultados.
   - Tooling alineado: `tests/e2e/env.ts` y `scripts/env.mjs` concentran las variables de entorno de Playwright y scripts.
 - [ ] `pnpm exec convex dev` bloqueado por entorno: falla autorizando con `TypeError: fetch failed`.
-- [ ] `pnpm test:e2e` bloqueado por problema previo: `config.webServer` no arranca porque Next intenta resolver `tailwindcss` desde `/home/w182/w421`.
+- [x] Fase 7 implementada funcionalmente en el working tree:
+  - Primitivos compartidos extraidos a `src/components/ui/`: `Alert`, `ConfirmSubmitButton`, `CopyInvitationLinkButton`, `EstadoBadge` y `SgcHeader`.
+  - Consumidores actualizados para importar desde `@/components/ui/*`.
+  - Eliminadas las copias antiguas en `src/app/(protected)/dashboard/components/` y `src/app/(protected)/dashboard/sgc/`.
+  - `rg "components/(Alert|ConfirmSubmitButton|CopyInvitationLinkButton|EstadoBadge)|dashboard/sgc/SgcHeader" src` en cero.
+  - `src/components/ui/` no importa Convex ni auth.
+- [ ] `pnpm test:e2e` sigue bloqueado por entorno: `PLAYWRIGHT_START_SERVER` no esta activo y Playwright intenta abrir `http://localhost:3000` sin servidor escuchando.
 - [x] Decisión posterior de auditoría: se acepta la Ruta B. Fase 5 queda documentada como cambio breaking explícito a `api.<dominio>.index.<funcion>` y `api.agent.auth.<funcion>`.
 
 ## Critical Technical Context
@@ -56,6 +62,6 @@ Reconciliar el plan de migracion T3 con el estado real de la rama y cerrar el cl
 
 ## Next Steps
 
-1. Resolver el bloqueo de Playwright/Tailwind si se requiere `pnpm test:e2e` verde para cerrar verificaciones de Fases 2, 5 y 6.
+1. Resolver o parametrizar el arranque de Playwright (`PLAYWRIGHT_START_SERVER=1` o servidor dev externo) si se requiere `pnpm test:e2e` verde para cerrar verificaciones.
 2. Reintentar `pnpm exec convex dev` cuando la autorizacion/red de Convex este disponible.
-3. Ejecutar Fase 7 (`src/components/ui/`) y luego Fase 8 (docs y limpieza final).
+3. Ejecutar Fase 8 (docs y limpieza final).

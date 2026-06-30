@@ -1,5 +1,6 @@
 export function Alert({ tone, message }: { tone: 'error' | 'success'; message?: string }) {
   if (!message) return null
+
   return (
     <div
       role={tone === 'error' ? 'alert' : 'status'}

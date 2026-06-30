@@ -10,7 +10,7 @@ import {
   type ResultadoParticipantePT,
 } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
-import { EstadoBadge } from '../../../components/EstadoBadge'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 
 type PageProps = {
   params: Promise<{ id: string }>

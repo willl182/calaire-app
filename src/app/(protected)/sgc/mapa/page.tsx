@@ -3,7 +3,7 @@ import { signOut } from '@workos-inc/authkit-nextjs'
 
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { canViewSgcMaestro, requireAuth } from '@/server/auth'
-import { SgcHeader } from '../../dashboard/sgc/SgcHeader'
+import { SgcHeader } from '@/components/ui/SgcHeader'
 
 export default async function MapaSgcPage() {
   const auth = await requireAuth()
