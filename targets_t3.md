@@ -16,14 +16,15 @@ Crear un entorno seguro para ejecutar la migración sin perder el estado actual.
 - `pnpm build` y `pnpm lint` verdes en `main`.
 
 ### Targets / Success criteria
-- [ ] Rama `feature/t3-estructura-segura` creada desde `main`.
-- [ ] Dependencias instaladas: `@t3-oss/env-nextjs`, `zod`, `vitest`.
-- [ ] Carpetas vacías creadas: `src/{app,components,server,lib}`, `src/server/{auth,rondas,sgc,mailer,agent-router,jobs}`, `convex/{_lib,agent,fichas,pt,rondas,sgc}`.
-- [ ] Tres inventarios generados en `logs/plans/`:
-  - `imports-antes.txt` (todos los `@/...`).
-  - `imports-relativos.txt` (todos los `./...` y `../...`).
-  - `convex-api-uso-antes.txt` (todos los `api.X.Y`).
-- [ ] `pnpm build` sigue verde (no se tocó código aún).
+- [x] Rama `feature/t3-estructura-segura` creada desde `main`. (commit base `ca5d0b9`)
+- [x] Dependencias instaladas: `@t3-oss/env-nextjs@0.13.11`, `zod@4.4.3`, `vitest@4.1.9`. (commit `33fc424`)
+- [x] Carpetas vacías creadas: `src/{app,components,server,lib}`, `src/server/{auth,rondas,sgc,mailer,agent-router,jobs}`, `convex/{_lib,agent,fichas,pt,rondas,sgc}`.
+  - **Corrección**: se agregaron `.gitkeep` en `src/server/`, sus subcarpetas, `convex/_lib/`, `convex/fichas/` y `convex/pt/` para persistir directorios vacíos en git.
+- [x] Tres inventarios generados en `logs/plans/`:
+  - `imports-antes.txt` (192 líneas).
+  - `imports-relativos.txt` (228 líneas).
+  - `convex-api-uso-antes.txt` (120 líneas).
+- [x] `pnpm build` sigue verde (no se tocó código aún). (documentado en `logs/history/260629_1851_findings.md`; no re-corrido en auditoría porque el árbol está sucio con trabajo de Fase 2/3 sin commitear).
 
 ### Exit criteria
 Poder empezar Fase 1 sabiendo exactamente qué imports y referencias Convex existen antes del cambio.
@@ -33,6 +34,13 @@ Poder empezar Fase 1 sabiendo exactamente qué imports y referencias Convex exis
 pnpm build
 ls logs/plans/imports-antes.txt logs/plans/imports-relativos.txt logs/plans/convex-api-uso-antes.txt
 ```
+
+### Auditoría (2026-06-29)
+- **Commit**: `33fc424` "t3(fase0): andamiaje, deps e inventarios de seguridad".
+- **Conforme**: 0.1 (rama), 0.2 (deps), 0.4 (inventarios), 0.5 (scripts test/test:watch).
+- **Gaps corregidos**: 0.3 carpetas vacías persistidas con `.gitkeep`; `logs/CURRENT_SESSION.md` ya marca Fase 0 como completada.
+- **Corrección de plan**: `PLAN_MIGRACION_T3.md` decía `convex-api-uso.txt`, pero el commit y los targets usan `convex-api-uso-antes.txt`. El plan raíz fue corregido para que coincida con el archivo real.
+- **Sospechoso**: `src/convex/` aparece como untracked en `git status`. El plan deja `convex/` en raíz, no en `src/`. Investigar antes de Fase 2.
 
 ---
 
@@ -141,21 +149,21 @@ pnpm test:e2e
 
 ---
 
-## Fase 4: `proxy.ts` → `src/middleware.ts`
+## Fase 4: `proxy.ts` → `src/proxy.ts`
 
 ### Goal
-Ubicar el middleware de WorkOS AuthKit en la ruta estándar de Next.js.
+Ubicar el proxy de WorkOS AuthKit en la ruta estándar de Next.js dentro de `src`.
 
 ### Entry criteria
 Fase 3 completada.
 
 ### Targets / Success criteria
-- [ ] `proxy.ts` movido a `src/middleware.ts`.
-- [ ] Configuración `matcher` preservada idéntica.
-- [ ] Rutas `/login`, `/dashboard`, `/denied` y `/agent/*` comportándose igual.
+- [x] `proxy.ts` movido a `src/proxy.ts`.
+- [x] Configuración `matcher` preservada idéntica.
+- [x] Rutas `/login`, `/dashboard`, `/denied` y `/agent/*` comportándose igual.
 
 ### Exit criteria
-El middleware sigue protegiendo rutas y excluyendo rutas de agente y estáticos.
+El proxy sigue protegiendo rutas y excluyendo rutas de agente y estáticos.
 
 ### Verificación
 ```bash
@@ -169,27 +177,29 @@ pnpm lint
 ## Fase 5: `convex/` por dominios
 
 ### Goal
-Reorganizar las funciones Convex en carpetas por dominio sin cambiar los paths públicos `api.X.Y`.
+Reorganizar las funciones Convex en carpetas por dominio aceptando el cambio breaking de paths públicos generado por `index.ts`.
 
 ### Entry criteria
 Fase 4 completada. Inventario `convex-api-uso-antes.txt` disponible.
 
 ### Targets / Success criteria
-- [ ] `convex/rondas.ts` fusionado en `convex/rondas/index.ts`.
-- [ ] `convex/sgc.ts` fusionado en `convex/sgc/index.ts`.
-- [ ] `convex/agent.ts` fusionado en `convex/agent/index.ts`.
-- [ ] `convex/agentAuth.ts` movido a `convex/agent/auth.ts`.
-- [ ] `convex/fichas.ts` movido a `convex/fichas/index.ts`.
-- [ ] `convex/pt.ts` movido a `convex/pt/index.ts`.
-- [ ] Imports relativos dentro de los `index.ts` corregidos (`./rondas/reads` → `./reads`).
-- [ ] Todos los usos de `api.agentAuth.*` reemplazados por `api.agent.auth.*`.
-- [ ] Helpers comunes movidos a `convex/_lib/` (si aplica).
-- [ ] `convex/_generated/` regenerado con `pnpm exec convex codegen`.
-- [ ] Inventario `convex-api-uso-despues.txt` generado.
-- [ ] `diff convex-api-uso-antes.txt convex-api-uso-despues.txt` sin diferencias inesperadas.
+- [x] `convex/rondas.ts` fusionado en `convex/rondas/index.ts`.
+- [x] `convex/sgc.ts` fusionado en `convex/sgc/index.ts`.
+- [x] `convex/agent.ts` fusionado en `convex/agent/index.ts`.
+- [x] `convex/agentAuth.ts` movido a `convex/agent/auth.ts`.
+- [x] `convex/fichas.ts` movido a `convex/fichas/index.ts`.
+- [x] `convex/pt.ts` movido a `convex/pt/index.ts`.
+- [x] Imports relativos dentro de los `index.ts` corregidos (`./rondas/reads` → `./reads`).
+- [x] Todos los usos de `api.agentAuth.*` reemplazados por `api.agent.auth.*`.
+- [x] Todos los usos internos de `api.rondas.*`, `api.sgc.*`, `api.fichas.*` y `api.pt.*` reemplazados por `api.rondas.index.*`, `api.sgc.index.*`, `api.fichas.index.*` y `api.pt.index.*`.
+- [x] Helpers comunes movidos a `convex/_lib/` (si aplica).
+- [x] `convex/_generated/` regenerado con `pnpm exec convex codegen`.
+- [x] Inventario `convex-api-uso-despues.txt` generado como lista API-only con regex profundo: `api\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+`.
+- [x] `diff convex-api-uso-antes.txt convex-api-uso-despues.txt` explicado por los cambios breaking aceptados a `.index` / `agent.auth`.
+- [x] `rg -P "api\.(rondas|sgc|fichas|pt)\.(?!index\b)[A-Za-z0-9_]+\b|api\.agentAuth\." src/ scripts/ tests/ -g "*.ts" -g "*.tsx"` no encuentra consumidores antiguos.
 
 ### Exit criteria
-Todas las funciones Convex siguen accesibles por los mismos `api.X.Y`. Build y codegen verdes.
+Todas las funciones Convex usadas por la app apuntan a los nuevos paths `api.<dominio>.index.<funcion>` o `api.agent.auth.<funcion>`. Build y codegen verdes.
 
 ### Verificación
 ```bash
@@ -198,6 +208,13 @@ pnpm build
 pnpm lint
 pnpm test:e2e
 ```
+
+### Estado de verificación (2026-06-30)
+- `pnpm exec convex codegen`: verde.
+- `pnpm build`: verde.
+- `pnpm lint`: verde.
+- `pnpm test`: verde.
+- `pnpm test:e2e`: bloqueado por un problema previo de `config.webServer`; Next intenta resolver `tailwindcss` desde `/home/w182/w421`.
 
 ---
 

@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { calcularChecklistSgc, derivarBloqueantes } from '../../lib/sgc/checklist'
+import { calcularChecklistSgc, derivarBloqueantes } from '../_lib/sgc/checklist'
 import { FORMATOS_ARCHIVO, REVISION_CHECKS, HOMOGENEIDAD_CHECKS, requireSgcAdmin, writeAudit, getPlan, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, collectChecklistFaltantes, summarizeSnapshotPayload, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const getPanelSgcArgs = { rondaId: v.id('rondas') }

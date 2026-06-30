@@ -51,7 +51,7 @@ t3(fase2): app/ -> src/app/ con copia, puentes y alias nuevo
 
 t3(fase3): lib/ -> src/server/<dominio>/ + src/lib/
 
-t3(fase4): proxy.ts -> src/middleware.ts
+t3(fase4): proxy.ts bajo src
 
 t3(fase5): convex/ por dominios, sin renombrar modulos
 
@@ -104,11 +104,13 @@ diff logs/plans/imports-antes.txt logs/plans/imports-despues.txt
 rg "@/app/" src/ || echo "OK: no hay @/app/ en src/"
 rg "@/lib/" src/app/ || echo "OK: no hay @/lib/ en src/app/"
 
-# Fase 5: verificar que api.X.Y no cambió
-diff logs/plans/convex-api-uso-antes.txt logs/plans/convex-api-uso-despues.txt
+# Fase 5: cambio breaking aceptado; verificar que solo cambió a .index / agent.auth
+rg "api\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+" src/ scripts/ tests/ -g "*.ts" -g "*.tsx" --no-filename -o | sort | uniq > logs/plans/convex-api-uso-despues.txt
+diff logs/plans/convex-api-uso-antes.txt logs/plans/convex-api-uso-despues.txt || true
+rg -P "api\.(rondas|sgc|fichas|pt)\.(?!index\b)[A-Za-z0-9_]+\b|api\.agentAuth\." src/ scripts/ tests/ -g "*.ts" -g "*.tsx" && echo "ADVERTENCIA: quedan paths Convex antiguos" || echo "OK: paths Convex antiguos migrados"
 ```
 
-Si el `diff` muestra cambios inesperados, se detiene la fase y se investiga.
+Si el `diff` muestra cambios distintos a `api.<dominio>.<fn>` → `api.<dominio>.index.<fn>` o `api.agentAuth.<fn>` → `api.agent.auth.<fn>`, se detiene la fase y se investiga.
 
 ---
 
@@ -215,3 +217,32 @@ tree -L 3 src/ convex/ --dirsfirst
 - [ ] `README.md` actualizado con la nueva estructura.
 - [ ] `AGENTS.md` actualizado con las nuevas reglas de paths.
 - [ ] `logs/CURRENT_SESSION.md` actualizado.
+
+---
+
+## 11. Auditorías por fase
+
+Registro de verificación posterior al commit de cada fase. No sustituye al `Reportar` del ciclo EDVCR; documenta conformidad y gaps detectados después.
+
+### Fase 0 — Auditoría 2026-06-29
+
+**Commit auditado**: `33fc424` "t3(fase0): andamiaje, deps e inventarios de seguridad".
+
+| Item plan | Estado | Nota |
+|---|---|---|
+| 0.1 Rama `feature/t3-estructura-segura` | OK | Creada desde `ca5d0b9` (main limpio). |
+| 0.2 Deps (`@t3-oss/env-nextjs`, `zod`, `vitest`) | OK | En devDependencies registradas con rango semver. |
+| 0.3 Carpetas vacías | OK | Persistidas con `.gitkeep` en `src/server/`, sus subcarpetas, `convex/_lib/`, `convex/fichas/` y `convex/pt/`. |
+| 0.4 Inventarios (`imports-antes`, `imports-relativos`, `convex-api-uso-antes`) | OK | 192 / 228 / 120 líneas, commiteados. Segunda revisión corrigió el plan raíz: el nombre esperado es `convex-api-uso-antes.txt`, no `convex-api-uso.txt`. |
+| 0.5 Scripts `test` / `test:watch` | OK | Agregados a `package.json`. |
+| 0.6 `pnpm build` verde | OK documentado | Documentado en `logs/history/260629_1851_findings.md`. No re-corrido en auditoría (árbol sucio con trabajo de Fase 2/3 sin commitear). |
+
+**Lección para fases siguientes**: cuando el plan pida "crear carpetas vacías", usar `.gitkeep` para que persistan en el commit. Aplica retroactivamente a Fase 0 si se quiere cerrar limpio.
+
+**Acciones pendientes tras auditoría**:
+1. Sincronizar `logs/CURRENT_SESSION.md` con el estado real (Fase 0 y 1 commiteadas). **Hecho**.
+2. Investigar `src/convex/` untracked — el plan deja `convex/` en raíz, no en `src/`. Posible trabajo de Fase 5 mal ubicado.
+3. Decidir si se agregan `.gitkeep` en las carpetas faltantes (cierre limpio de Fase 0) o se dejan para cuando Fase 3/5 cree contenido allí. **Hecho: se agregaron `.gitkeep`.**
+4. Confirmar que Fase 5 use `logs/plans/convex-api-uso-antes.txt` como baseline; el nombre incorrecto `convex-api-uso.txt` ya fue corregido en el plan raíz.
+
+### Fase 1 — pendiente de auditoría
