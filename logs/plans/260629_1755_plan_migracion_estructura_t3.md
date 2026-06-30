@@ -152,19 +152,6 @@ Para reducir el riesgo de las fases 2 y 5 se aplican dos principios:
 2. **Puentes de compatibilidad**: archivos temporales que re-exportan el contenido nuevo, para no romper imports a mitad de camino.
 3. **Inventario mecánico antes del cambio**: listar todos los `@/...` y todos los `api.X.Y` usados, para comparar antes y después.
 
-### Regla operativa para Playwright
-
-- En este repo `pnpm test:e2e` no levanta `next dev` automáticamente.
-- La verificación local con Playwright debe usar `pnpm test:e2e:start` para que `config.webServer` arranque el server.
-- `pnpm test:e2e` solo aplica si ya hay un server corriendo en `http://localhost:3000` o si el entorno es CI.
-- La suite autenticada (`*.auth.spec.ts`) requiere uno de estos prerrequisitos:
-  - `.auth/workos.json` ya generado
-  - `E2E_AUTH_EMAIL` y `E2E_AUTH_PASSWORD`
-  - `pnpm test:e2e:auth:manual` para regenerar storage state de forma interactiva
-- Separar siempre:
-  - **smoke público**: `tests/e2e/app.spec.ts`
-  - **smoke autenticado**: `tests/e2e/dashboard.auth.spec.ts` y luego SGC
-
 ## Fases (cada fase = PR aislado, build verde)
 
 ### Fase 0: Preparación
@@ -279,7 +266,7 @@ Next.js detecta `src/app/` automáticamente; no tocar `next.config.ts`.
 
 **Verificación inmediata**:
 ```bash
-pnpm build && pnpm lint && pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
+pnpm build && pnpm lint && pnpm test:e2e
 ```
 
 #### Paso 2.6: Limpieza de puentes
@@ -331,9 +318,6 @@ Una vez que Fase 3 mueva `lib/` a `src/server/`, eliminar los `src/lib/*.ts` pue
    - `@/app/components/LogoUnal` → `@/components/LogoUnal`
    - `@/app/components/Footer` → `@/components/Footer`
 3.21. **Verificación**: `pnpm build && pnpm lint && pnpm test && pnpm test:e2e` verde.
-   - Smoke público obligatorio: `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium`
-   - Smoke autenticado opcional de fase: `pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium`
-   - El smoke autenticado solo cuenta si ya existe `.auth/workos.json` o si hay credenciales `E2E_AUTH_EMAIL` / `E2E_AUTH_PASSWORD`.
 
 ---
 
@@ -468,7 +452,7 @@ rg "from ['\"]\.\./\.\./convex/(rondas|sgc|agent)['\"]" src/ || true
 ```bash
 pnpm exec convex codegen
 pnpm build
-pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
+pnpm test:e2e
 ```
 
 #### Checklist Fase 5
@@ -478,9 +462,7 @@ pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
 - [x] No quedan consumidores internos con `api.rondas.<fn>`, `api.sgc.<fn>`, `api.fichas.<fn>`, `api.pt.<fn>` ni `api.agentAuth.<fn>` fuera de los nuevos segmentos `.index`.
 - [x] `pnpm exec convex codegen` sin errores.
 - [x] `pnpm build` verde.
-- [ ] `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` pasa.
-- [ ] `pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium` pasa si hay auth lista.
-- [ ] Estado actual 2026-06-30: el repro correcto del bloqueo usa `test:e2e:start`; `config.webServer` intenta levantar `pnpm dev`, falla con `Can't resolve 'tailwindcss' in '/home/w182/w421'` y luego vence el timeout.
+- [ ] `pnpm test:e2e` pasa login + dashboard + una ronda. Bloqueado por un problema previo de `config.webServer` y resolución de `tailwindcss`.
 
 ---
 
@@ -520,7 +502,7 @@ pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
    - `pnpm lint`
    - `pnpm test`
    - `pnpm exec convex dev` (CI Convex)
-   - `pnpm test:e2e:start` (subir server, smoke público y luego dashboard/sgc si hay auth lista)
+   - `pnpm test:e2e` (subir servers, login flow, dashboard, sgc)
 8.7. Merge a `main` (squash o por fases, según política del repo).
 
 ---
@@ -552,8 +534,6 @@ pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
 | `env.js` cambia firma de vars (server vs client) | Validar con `NEXT_PUBLIC_*` solo las que el cliente usa (Convex URL). Server vars nunca en cliente. |
 | Antiguos `process.env.X!` dispersos se caen en runtime | Fase 6 reemplaza todos de un solo sweep; correr e2e que toca Resend + WorkOS. |
 | Tests e2e que dependen de rutas estáticas (`/docs/screenshots`) | `proxy.ts` matcher se mantiene idéntico en `src/proxy.ts`. |
-| La verificación e2e local se ejecuta con el comando equivocado | Usar `pnpm test:e2e:start` para local. `pnpm test:e2e` solo si ya existe server o en CI. |
-| La suite autenticada no corre en clones limpios | Documentar y preparar `.auth/workos.json`, credenciales `E2E_AUTH_*`, o el flujo `pnpm test:e2e:auth:manual`. |
 
 ---
 
@@ -568,14 +548,6 @@ pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
 - [x] Fase 6: `process.env.X!` → `env.X`. Incluye saneamiento de Playwright y scripts en `tests/e2e/env.ts` y `scripts/env.mjs`.
 - [ ] Fase 7: `src/components/ui/` con primitivos compartidos.
 - [ ] Fase 8: limpieza + docs + AGENTS.md actualizado.
-
-### Estado Playwright al 2026-06-30
-
-- `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` reproduce el bloqueo actual.
-- El fallo observado hoy es de arranque de `config.webServer`, no de descubrimiento de tests:
-  - Next intenta resolver `tailwindcss` desde `/home/w182/w421`
-  - luego Playwright vence esperando `${baseURL}/login`
-- `pnpm test:e2e` a secas no sirve como repro local canónico de este bug porque no fuerza el arranque del server.
 
 ---
 

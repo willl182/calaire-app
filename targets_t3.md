@@ -105,11 +105,17 @@ Fase 1 completada. Inventarios de Fase 0 disponibles.
 ### Exit criteria
 Next.js sirve la aplicación desde `src/app/`. Login, dashboard y rutas protegidas funcionan.
 
+### Nota Playwright
+- Smoke local mínimo de esta fase: `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium`.
+- Si se quieren validar dashboard y rutas protegidas en esta fase, además hace falta auth persistida en `.auth/workos.json` o credenciales `E2E_AUTH_EMAIL` / `E2E_AUTH_PASSWORD`.
+
 ### Verificación
 ```bash
 pnpm build
 pnpm lint
-pnpm test:e2e
+pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
+# opcional si hay auth lista:
+# pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium
 ```
 
 ---
@@ -147,7 +153,9 @@ Toda la lógica de dominio vive en `src/server/<modulo>/`. No quedan imports rot
 pnpm build
 pnpm lint
 pnpm test
-pnpm test:e2e
+pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
+# opcional si hay auth lista:
+# pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium
 ```
 
 ---
@@ -209,7 +217,9 @@ Todas las funciones Convex usadas por la app apuntan a los nuevos paths `api.<do
 pnpm exec convex codegen
 pnpm build
 pnpm lint
-pnpm test:e2e
+pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
+# opcional si hay auth lista:
+# pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium
 ```
 
 ### Estado de verificación (2026-06-30)
@@ -217,7 +227,7 @@ pnpm test:e2e
 - `pnpm build`: verde.
 - `pnpm lint`: verde.
 - `pnpm test`: verde.
-- `pnpm test:e2e`: bloqueado por un problema previo de `config.webServer`; Next intenta resolver `tailwindcss` desde `/home/w182/w421`.
+- `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium`: bloqueado. Reproduce `config.webServer` intentando arrancar `pnpm dev`, luego falla con `Can't resolve 'tailwindcss' in '/home/w182/w421'` y expira el timeout de 120s.
 
 ---
 
@@ -243,14 +253,14 @@ Un único punto de verdad para variables de entorno. Runtime falla temprano si f
 rg "process\.env\." src convex tests scripts playwright.config.ts
 # debe devolver solo usos en src/env.ts, tests/e2e/env.ts y scripts/env.mjs
 pnpm build
-pnpm test:e2e
+pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
 ```
 
 ### Estado de verificación (2026-06-30)
 - `pnpm build`: verde.
 - `pnpm lint`: verde.
 - `pnpm test`: verde.
-- `pnpm test:e2e`: sigue bloqueado por el problema previo de `config.webServer`.
+- `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium`: sigue bloqueado por el mismo problema previo de `config.webServer` y resolución de `tailwindcss` desde `/home/w182/w421`.
 
 ---
 
@@ -275,7 +285,9 @@ Los componentes UI compartidos son puros y reutilizables por props.
 ```bash
 pnpm build
 pnpm lint
-pnpm test:e2e
+pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
+# opcional si hay auth lista:
+# pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium
 ```
 
 ---
@@ -292,8 +304,8 @@ Fases 0-7 completadas.
 - [x] `app/` no existe en raíz.
 - [x] `lib/` no existe en raíz.
 - [x] `proxy.ts` no existe en raíz.
-- [ ] `README.md` actualizado con la nueva estructura.
-- [ ] `AGENTS.md` actualizado con reglas de paths, capas y convenciones.
+- [x] `README.md` actualizado con la nueva estructura.
+- [x] `AGENTS.md` actualizado con reglas de paths, capas y convenciones.
 - [x] `logs/CURRENT_SESSION.md` actualizado con el estado actual de la migración.
 - [ ] Copia del plan guardada en `logs/plans/260629_1755_plan_migracion_estructura_t3.md`.
 
@@ -306,7 +318,7 @@ pnpm build
 pnpm lint
 pnpm test
 pnpm exec convex codegen
-pnpm test:e2e
+pnpm test:e2e:start
 ls app/ lib/ proxy.ts 2>/dev/null || echo "OK: layout anterior limpio"
 ```
 
@@ -318,10 +330,10 @@ ls app/ lib/ proxy.ts 2>/dev/null || echo "OK: layout anterior limpio"
 |---|---|---|---|
 | 0 | Preparar entorno seguro | `pnpm build` | Inventarios generados |
 | 1 | Andamiaje mínimo | `pnpm build`, `pnpm lint`, `pnpm test` | `src/env.js` válido |
-| 2 | Mover App Router a `src/app/` | `pnpm build`, `pnpm lint`, `pnpm test:e2e` | `rg "@/app/" src/` vacío |
-| 3 | Reorganizar dominios en `src/server/` | `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm test:e2e` | `lib/` eliminado |
+| 2 | Mover App Router a `src/app/` | `pnpm build`, `pnpm lint`, `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` | `rg "@/app/" src/` vacío |
+| 3 | Reorganizar dominios en `src/server/` | `pnpm build`, `pnpm lint`, `pnpm test`, `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` | `lib/` eliminado |
 | 4 | Middleware estándar | `pnpm build`, `pnpm lint` | Login + dashboard + agente manual |
-| 5 | Convex por dominios | `pnpm exec convex codegen`, `pnpm build`, `pnpm test:e2e` | `diff` de `api.X.Y` vacío |
-| 6 | Variables de entorno centralizadas | `pnpm build`, `pnpm test:e2e` | `rg "process\.env\." src/` vacío |
-| 7 | UI primitivos compartidos | `pnpm build`, `pnpm lint`, `pnpm test:e2e` | Sin imports de Convex/auth en `src/components/ui/` |
+| 5 | Convex por dominios | `pnpm exec convex codegen`, `pnpm build`, `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` | `diff` de `api.X.Y` vacío |
+| 6 | Variables de entorno centralizadas | `pnpm build`, `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` | `rg "process\.env\." src/` vacío |
+| 7 | UI primitivos compartidos | `pnpm build`, `pnpm lint`, `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` | Sin imports de Convex/auth en `src/components/ui/` |
 | 8 | Limpieza y docs | Todo lo anterior + verificación de archivos borrados | `README.md` y `AGENTS.md` actualizados |

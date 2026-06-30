@@ -1,4 +1,8 @@
-import { env } from '../src/env'
+const workosClientId = process.env.WORKOS_CLIENT_ID
+
+if (!workosClientId) {
+  throw new Error('WORKOS_CLIENT_ID must be set for convex/auth.config.ts')
+}
 
 const authConfig = {
   providers: [
@@ -6,14 +10,14 @@ const authConfig = {
       type: 'customJwt',
       issuer: 'https://api.workos.com/',
       algorithm: 'RS256',
-      jwks: `https://api.workos.com/sso/jwks/${env.WORKOS_CLIENT_ID}`,
-      applicationID: env.WORKOS_CLIENT_ID,
+      jwks: `https://api.workos.com/sso/jwks/${workosClientId}`,
+      applicationID: workosClientId,
     },
     {
       type: 'customJwt',
-      issuer: `https://api.workos.com/user_management/${env.WORKOS_CLIENT_ID}`,
+      issuer: `https://api.workos.com/user_management/${workosClientId}`,
       algorithm: 'RS256',
-      jwks: `https://api.workos.com/sso/jwks/${env.WORKOS_CLIENT_ID}`,
+      jwks: `https://api.workos.com/sso/jwks/${workosClientId}`,
     },
   ],
 }

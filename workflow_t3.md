@@ -79,10 +79,20 @@ pnpm lint           # obligatorio
 pnpm test           # si aplica (a partir de Fase 1)
 ```
 
+### Regla local para Playwright
+
+- `pnpm test:e2e` **no** levanta `next dev` por sí solo en este repo.
+- Para correr Playwright localmente con server administrado por la config, usar `pnpm test:e2e:start`.
+- `pnpm test:e2e` solo se usa si ya hay un dev server corriendo en `http://localhost:3000` o si el entorno es CI.
+- Si se necesitan rutas autenticadas (`*.auth.spec.ts`), además hace falta uno de estos prerrequisitos:
+  - archivo `.auth/workos.json` ya generado
+  - variables `E2E_AUTH_EMAIL` y `E2E_AUTH_PASSWORD`
+  - flujo manual `pnpm test:e2e:auth:manual`
+
 Fases 2, 5 y 8 además requieren:
 
 ```bash
-pnpm test:e2e
+pnpm test:e2e:start
 ```
 
 Fase 5 además requiere:
@@ -212,7 +222,7 @@ tree -L 3 src/ convex/ --dirsfirst
 - [ ] `pnpm build` verde en la rama.
 - [ ] `pnpm lint` verde en la rama.
 - [ ] `pnpm test` verde en la rama.
-- [ ] `pnpm test:e2e` verde en la rama.
+- [ ] `pnpm test:e2e:start` verde en la rama, o `pnpm test:e2e` contra un server ya levantado.
 - [ ] `pnpm exec convex codegen` sin errores.
 - [ ] `README.md` actualizado con la nueva estructura.
 - [ ] `AGENTS.md` actualizado con las nuevas reglas de paths.
