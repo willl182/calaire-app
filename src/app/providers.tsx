@@ -4,9 +4,10 @@ import { ConvexProviderWithAuth, ConvexReactClient } from 'convex/react'
 import { AuthKitProvider, useAccessToken } from '@workos-inc/authkit-nextjs/components'
 import type { ReactNode } from 'react'
 import { useEffect, useMemo, useState } from 'react'
+import { env } from '@/env'
 
 function createConvexClient() {
-  const url = process.env.NEXT_PUBLIC_CONVEX_URL
+  const url = env.NEXT_PUBLIC_CONVEX_URL
   if (!url) {
     throw new Error(
       'No address provided to ConvexReactClient. ' +

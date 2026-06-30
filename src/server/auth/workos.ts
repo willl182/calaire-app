@@ -1,10 +1,11 @@
 import { WorkOS } from '@workos-inc/node'
+import { env } from '@/env'
 
 let _workos: WorkOS | null = null
 
 function getWorkOS(): WorkOS {
   if (!_workos) {
-    _workos = new WorkOS(process.env.WORKOS_API_KEY!)
+    _workos = new WorkOS(env.WORKOS_API_KEY)
   }
   return _workos
 }

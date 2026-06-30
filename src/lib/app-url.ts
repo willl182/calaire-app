@@ -1,3 +1,5 @@
+import { env } from '@/env'
+
 function resolveOriginCandidate(value?: string) {
   if (!value) return null
 
@@ -14,8 +16,8 @@ function resolveOriginCandidate(value?: string) {
 
 export function getAppOrigin() {
   return (
-    resolveOriginCandidate(process.env.NEXT_PUBLIC_APP_URL) ??
-    resolveOriginCandidate(process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI) ??
+    resolveOriginCandidate(env.NEXT_PUBLIC_APP_URL) ??
+    resolveOriginCandidate(env.NEXT_PUBLIC_WORKOS_REDIRECT_URI) ??
     'http://localhost:3000'
   )
 }

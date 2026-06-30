@@ -7,12 +7,13 @@
 import { execSync } from 'child_process';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { scriptEnv } from './env.mjs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-const RONDA_ID = process.env.RONDA_ID || 'kd77ck9jqbeafg5g61c7cw0vrh8756qr';
-const DEPLOYMENT = process.env.CONVEX_DEPLOYMENT || 'steady-kiwi-725';
+const RONDA_ID = scriptEnv.rondaId;
+const DEPLOYMENT = scriptEnv.convexDeployment;
 
 const bloques = {
   a: `Autorización informe, planificación, evaluación de desempeño.
@@ -110,7 +111,7 @@ console.log('Deployment:', DEPLOYMENT);
 
 try {
   const result = execSync(
-    `npx convex run sgc:seedPlanRonda --deployment ${DEPLOYMENT} -- '${jsonPayload}'`,
+    `pnpm exec convex run sgc:seedPlanRonda --deployment ${DEPLOYMENT} -- '${jsonPayload}'`,
     { cwd: join(__dirname, '..'), encoding: 'utf-8', stdio: 'pipe' }
   );
   console.log('Resultado:', result);

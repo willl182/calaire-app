@@ -1,8 +1,9 @@
 import crypto from 'node:crypto'
 import { ConvexHttpClient } from 'convex/browser'
 import { anyApi, type FunctionReference } from 'convex/server'
+import { env } from '@/env'
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
+const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
   skipConvexDeploymentUrlCheck: true,
 })
 
@@ -29,8 +30,8 @@ function randomOtp() {
 
 export function getAgentAppUrl(pathname: string) {
   const origin =
-    process.env.NEXT_PUBLIC_APP_URL ??
-    process.env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ??
+    env.NEXT_PUBLIC_APP_URL ??
+    env.NEXT_PUBLIC_WORKOS_REDIRECT_URI ??
     'http://localhost:3000'
   return new URL(pathname, origin).toString()
 }

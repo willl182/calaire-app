@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import { env } from '@/env'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { getRonda } from '@/server/rondas'
 import {
@@ -40,7 +41,7 @@ export default async function TemplateViewPage({ params }: PageProps) {
   const templateRaw = readTemplate(name)
   const vars = buildTemplateVars(
     { codigo: ronda.codigo, nombre: ronda.nombre },
-    process.env.NEXT_PUBLIC_APP_URL ?? 'https://calaire.org'
+    env.NEXT_PUBLIC_APP_URL ?? 'https://calaire.org'
   )
   const rendered = renderTemplate(templateRaw, vars)
 

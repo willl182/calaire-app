@@ -1,10 +1,10 @@
 # Session State: calaire-app
 
-**Last Updated**: 2026-06-30 12:55 -05
+**Last Updated**: 2026-06-30 13:08 -05
 
 ## Session Objective
 
-Implementar Fase 5 de la migracion estructural T3: reorganizar `convex/` por dominios.
+Implementar Fase 6 de la migracion estructural T3: reemplazar `process.env.X` por `env.X`.
 
 ## Current State
 
@@ -25,6 +25,11 @@ Implementar Fase 5 de la migracion estructural T3: reorganizar `convex/` por dom
 - [x] `pnpm build` verde.
 - [x] `pnpm lint` verde.
 - [x] `pnpm test` verde.
+- [x] Fase 6 implementada funcionalmente en el working tree:
+  - Consumidores en `src/` y `convex/auth.config.ts` migrados a `env`.
+  - `src/env.js` se consolido como modulo tipado real en `src/env.ts`.
+  - Se eliminaron `src/env.js` y `src/env.d.ts`, que estaban causando conflictos de resolucion de tipos.
+  - `rg "process\\.env\\." src convex --glob '!src/env.ts'` no devuelve resultados.
 - [ ] `pnpm exec convex dev` bloqueado por entorno: falla autorizando con `TypeError: fetch failed`.
 - [ ] `pnpm test:e2e` bloqueado por problema previo: `config.webServer` no arranca porque Next intenta resolver `tailwindcss` desde `/home/w182/w421`.
 - [x] Decisión posterior de auditoría: se acepta la Ruta B. Fase 5 queda documentada como cambio breaking explícito a `api.<dominio>.index.<funcion>` y `api.agent.auth.<funcion>`.
@@ -34,12 +39,14 @@ Implementar Fase 5 de la migracion estructural T3: reorganizar `convex/` por dom
 - Convex no expone `convex/<dominio>/index.ts` como `api.<dominio>.*`; lo genera como `api.<dominio>.index.*`.
 - El criterio original "no cambiar `api.X.Y`" fue descartado por decisión explícita. Se acepta el riesgo de cambio breaking.
 - Para validar la Fase 5 se debe usar inventario API-only con regex profundo: `rg "api\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+" src/ scripts/ tests/ -g "*.ts" -g "*.tsx" --no-filename -o`, porque el regex original captura solo dos segmentos, las rutas de archivo meten ruido por fases 2-3 y este entorno no reconoce `--type tsx`.
+- Fase 6 exigio promover `src/env.js` a `src/env.ts` porque la declaracion ambient `src/env.d.ts` hacia que TypeScript resolviera mal imports relativos desde `convex/auth.config.ts`.
+- Quedan usos intencionales de `process.env` fuera del alcance de Fase 6 en `tests/e2e/auth.setup.ts` y `scripts/poblar-plan-r1.mjs`.
 - El working tree ya venia sucio con Fases 2-4 y cambios en planes/logs. No revertir cambios ajenos.
 - Existe tag local `backup/antes-fase-5`.
 
 ## Next Steps
 
-1. Resolver el bloqueo de Playwright/Tailwind si se requiere e2e verde antes de commitear fases.
+1. Resolver el bloqueo de Playwright/Tailwind si se requiere `pnpm test:e2e` verde para cerrar fases 5-6.
 2. Reintentar `pnpm exec convex dev` cuando la autorizacion/red de Convex este disponible.
-3. Hacer staging selectivo si se mantienen commits separados para Fases 2, 3, 4 y 5.
-4. Antes de commitear fase 5, conservar el diff del inventario profundo como evidencia del cambio breaking aceptado a `.index` / `agent.auth`.
+3. Hacer staging selectivo si se mantienen commits separados para Fases 2, 3, 4, 5 y 6.
+4. Si se audita Fase 6 contra el plan original, documentar la variacion: `src/env.ts` reemplaza `src/env.js` para evitar el conflicto de tipos.

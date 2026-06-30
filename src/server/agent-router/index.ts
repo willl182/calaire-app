@@ -1,7 +1,8 @@
 import { ConvexHttpClient } from 'convex/browser'
 import { anyApi, type FunctionReference } from 'convex/server'
+import { env } from '@/env'
 
-const convex = new ConvexHttpClient(process.env.NEXT_PUBLIC_CONVEX_URL!, {
+const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
   skipConvexDeploymentUrlCheck: true,
 })
 

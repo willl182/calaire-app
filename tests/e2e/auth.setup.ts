@@ -1,4 +1,5 @@
 import { expect, type Locator, type Page, test } from '@playwright/test'
+import { getRequiredE2EAuthCredentials } from './env'
 
 const authFile = '.auth/workos.json'
 
@@ -16,12 +17,7 @@ async function firstUsable(page: Page, locators: Locator[]) {
 }
 
 test('authenticate with local WorkOS credentials', async ({ page }) => {
-  const email = process.env.E2E_AUTH_EMAIL
-  const password = process.env.E2E_AUTH_PASSWORD
-
-  if (!email || !password) {
-    throw new Error('Set E2E_AUTH_EMAIL and E2E_AUTH_PASSWORD to run authenticated E2E tests.')
-  }
+  const { email, password } = getRequiredE2EAuthCredentials()
 
   await page.goto('/login')
   await page.getByRole('link', { name: 'Ingresar con correo electrónico' }).click()

@@ -1,12 +1,13 @@
 import { Resend } from 'resend'
+import { env } from '@/env'
 
 type MailDelivery =
   | { status: 'sent'; provider: 'resend'; id: string | null }
   | { status: 'failed'; provider: 'resend'; reason: string }
   | { status: 'skipped'; reason: 'missing_resend_api_key' | 'missing_mail_from' }
 
-const resendApiKey = process.env.RESEND_API_KEY
-const mailFrom = process.env.MAIL_FROM
+const resendApiKey = env.RESEND_API_KEY
+const mailFrom = env.MAIL_FROM
 const resend = resendApiKey ? new Resend(resendApiKey) : null
 
 function escapeHtml(value: string) {
