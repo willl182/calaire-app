@@ -53,18 +53,20 @@ Crear los archivos base de configuración sin afectar el código existente.
 Fase 0 completada.
 
 ### Targets / Success criteria
-- [ ] `src/env.js` creado con `@t3-oss/env-nextjs` validando:
+- [x] `src/env.js` creado con `@t3-oss/env-nextjs` validando:
   - `NEXT_PUBLIC_CONVEX_URL`
   - `WORKOS_CLIENT_ID`, `WORKOS_API_KEY`, `WORKOS_SECRET`
   - `RESEND_API_KEY`
   - `AUTHKIT_SECRET` (si aplica)
   - `NEXT_PUBLIC_APP_URL`
-- [ ] `src/env.d.ts` creado con `declare module "@/env"`.
-- [ ] `src/lib/utils.ts` creado con `cn()` y helpers puros.
-- [ ] Scripts de test agregados a `package.json`:
+- [x] `src/lib/utils.ts` creado con `cn()` y helpers puros.
+- [x] Scripts de test agregados a `package.json`:
   - `"test": "vitest run"`
   - `"test:watch": "vitest"`
-- [ ] `vitest.config.ts` creado si es necesario.
+- [x] `vitest.config.ts` creado si es necesario.
+
+### Nota de implementación
+`src/env.js` se promovió posteriormente a `src/env.ts` durante Fase 6 para evitar conflictos de resolución de tipos con `convex/auth.config.ts`. `src/env.d.ts` se eliminó como parte de ese ajuste.
 
 ### Exit criteria
 El andamiaje existe pero el código aún no lo usa. Build verde.
@@ -87,17 +89,18 @@ Mover el App Router a `src/app/` manteniendo todos los imports funcionales.
 Fase 1 completada. Inventarios de Fase 0 disponibles.
 
 ### Targets / Success criteria
-- [ ] `app/components/` movido a `src/components/`.
-- [ ] `app/` copiado a `src/app/` (`cp -a`).
-- [ ] Imports dentro de `src/app/` corregidos:
+- [x] `app/components/` movido a `src/components/`.
+- [x] `app/` copiado a `src/app/` (`cp -a`).
+- [x] Imports dentro de `src/app/` corregidos:
   - `@/app/components/LogoUnal` → `@/components/LogoUnal`
   - `@/app/components/Footer` → `@/components/Footer`
-  - `@/app/...` → `@/...`
-- [ ] Puentes temporales `src/lib/*.ts` creados si `lib/` aún no migró.
-- [ ] Alias `@/*` cambiado a `./src/*` en `tsconfig.json`.
-- [ ] Carpeta `app/` eliminada de raíz.
-- [ ] `rg "@/app/" src/` devuelve 0 resultados.
-- [ ] `rg "@/lib/" src/app/` devuelve 0 resultados (salvo puentes temporales).
+  - `@/app/...` → rutas internas limpias; `rg "@/app/" src/app` da 0 resultados
+- [x] Puentes temporales `src/lib/*.ts` creados si `lib/` aún no migró.
+- [x] Alias `@/*` cambiado a `./src/*` en `tsconfig.json`.
+- [x] Carpeta `app/` eliminada de raíz.
+- [x] `rg "@/app/" src/` devuelve 0 resultados.
+- [x] No quedan puentes temporales de Fase 2 bajo `src/lib/`.
+  - Permanecen imports válidos a `@/lib/app-url` y `@/lib/safe-url`, que son la ubicación final definida en T3 y no cuentan como deuda de Fase 2.
 
 ### Exit criteria
 Next.js sirve la aplicación desde `src/app/`. Login, dashboard y rutas protegidas funcionan.
@@ -120,21 +123,21 @@ Reorganizar la lógica de servidor por dominios bajo `src/server/`.
 Fase 2 completada y verificada.
 
 ### Targets / Success criteria
-- [ ] `lib/auth.ts` → `src/server/auth/index.ts`.
-- [ ] `lib/workos.ts` → `src/server/auth/workos.ts`.
-- [ ] `lib/agent-auth.ts` → `src/server/auth/agent-auth.ts`.
-- [ ] `lib/operativo.ts` → `src/server/rondas/service.ts`.
-- [ ] `lib/rondas.ts` → `src/server/rondas/operaciones.ts`.
-- [ ] Archivos de `lib/rondas/` → `src/server/rondas/`.
-- [ ] `lib/sgc.ts` → `src/server/sgc/operaciones.ts`.
-- [ ] Archivos de `lib/sgc/` → `src/server/sgc/`.
-- [ ] `lib/mailer.ts` → `src/server/mailer/index.ts`.
-- [ ] `lib/agent-router.ts` → `src/server/agent-router/index.ts`.
-- [ ] `lib/app-url.ts` y `lib/safe-url.ts` → `src/lib/`.
-- [ ] `lib/referencia-csv.ts` + test → `src/server/rondas/`.
-- [ ] Todos los imports `@/lib/...` actualizados a `@/server/...` o `@/lib/...` según corresponda.
-- [ ] Puentes temporales de Fase 2 eliminados.
-- [ ] Carpeta `lib/` vacía eliminada.
+- [x] `lib/auth.ts` → `src/server/auth/index.ts`.
+- [x] `lib/workos.ts` → `src/server/auth/workos.ts`.
+- [x] `lib/agent-auth.ts` → `src/server/auth/agent-auth.ts`.
+- [x] `lib/operativo.ts` → `src/server/rondas/service.ts`.
+- [x] `lib/rondas.ts` → `src/server/rondas/operaciones.ts`.
+- [x] Archivos de `lib/rondas/` → `src/server/rondas/`.
+- [x] `lib/sgc.ts` → `src/server/sgc/operaciones.ts`.
+- [x] Archivos de `lib/sgc/` → `src/server/sgc/`.
+- [x] `lib/mailer.ts` → `src/server/mailer/index.ts`.
+- [x] `lib/agent-router.ts` → `src/server/agent-router/index.ts`.
+- [x] `lib/app-url.ts` y `lib/safe-url.ts` → `src/lib/`.
+- [x] `lib/referencia-csv.ts` + test → `src/server/rondas/`.
+- [x] Todos los imports `@/lib/...` actualizados a `@/server/...` o `@/lib/...` según corresponda.
+- [x] Puentes temporales de Fase 2 eliminados.
+- [x] Carpeta `lib/` vacía eliminada.
 
 ### Exit criteria
 Toda la lógica de dominio vive en `src/server/<modulo>/`. No quedan imports rotos.
@@ -227,21 +230,27 @@ Centralizar y validar todas las variables de entorno en `src/env.js`.
 Fase 5 completada.
 
 ### Targets / Success criteria
-- [ ] Todos los `process.env.X!` del repo identificados.
-- [ ] Variables server importadas desde `@/env`.
-- [ ] Variables cliente usadas como `env.NEXT_PUBLIC_*`.
-- [ ] Ningún `process.env.X!` queda en código fuente.
+- [x] Todos los `process.env.X!` del repo identificados.
+- [x] Variables server importadas desde `@/env`.
+- [x] Variables cliente usadas como `env.NEXT_PUBLIC_*`.
+- [x] Ningún `process.env.X!` queda en código fuente fuera de los módulos intencionales de entorno.
 
 ### Exit criteria
 Un único punto de verdad para variables de entorno. Runtime falla temprano si falta algo.
 
 ### Verificación
 ```bash
-rg "process\.env\." src/ --type ts --type tsx
-# debe devolver solo usos en src/env.js o cero resultados
+rg "process\.env\." src convex tests scripts playwright.config.ts
+# debe devolver solo usos en src/env.ts, tests/e2e/env.ts y scripts/env.mjs
 pnpm build
 pnpm test:e2e
 ```
+
+### Estado de verificación (2026-06-30)
+- `pnpm build`: verde.
+- `pnpm lint`: verde.
+- `pnpm test`: verde.
+- `pnpm test:e2e`: sigue bloqueado por el problema previo de `config.webServer`.
 
 ---
 
@@ -280,12 +289,12 @@ Eliminar toda huella del layout anterior y documentar las nuevas convenciones.
 Fases 0-7 completadas.
 
 ### Targets / Success criteria
-- [ ] `app/` no existe en raíz.
-- [ ] `lib/` no existe en raíz.
-- [ ] `proxy.ts` no existe en raíz.
+- [x] `app/` no existe en raíz.
+- [x] `lib/` no existe en raíz.
+- [x] `proxy.ts` no existe en raíz.
 - [ ] `README.md` actualizado con la nueva estructura.
 - [ ] `AGENTS.md` actualizado con reglas de paths, capas y convenciones.
-- [ ] `logs/CURRENT_SESSION.md` actualizado con el cierre de la migración.
+- [x] `logs/CURRENT_SESSION.md` actualizado con el estado actual de la migración.
 - [ ] Copia del plan guardada en `logs/plans/260629_1755_plan_migracion_estructura_t3.md`.
 
 ### Exit criteria

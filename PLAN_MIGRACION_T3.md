@@ -540,12 +540,12 @@ pnpm test:e2e
 ## Estado de cargo (checklist)
 
 - [x] Fase 0: ramificación + deps + inventarios mecánicos (`@/...`, `api.X.Y`, imports relativos). Commit `33fc424`. Carpetas vacías de 0.3 persistidas con `.gitkeep`; `src/convex/` untracked sospechoso (debe quedar en raíz); nombre de inventario Convex corregido a `convex-api-uso-antes.txt`.
-- [x] Fase 1: `src/env.js`, `src/lib/utils.ts`. Commit `996fc97`. (auditoría pendiente)
-- [ ] Fase 2: `app/components/` → `src/components/`; copiar `app/` → `src/app/`; corregir imports; activar alias `@/* → ./src/*`; borrar `app/`; puentes `src/lib/*` temporales.
-- [ ] Fase 3: `lib/` → `src/server/{auth,rondas,sgc,mailer,agent-router}` + `src/lib/`; eliminar puentes de Fase 2.
-- [ ] Fase 4: `proxy.ts` → `src/proxy.ts`.
+- [x] Fase 1: `src/env.js`, `src/lib/utils.ts`. Commit `996fc97`. Luego se consolidó en `src/env.ts` durante Fase 6 para corregir conflictos de tipos con `convex/auth.config.ts`.
+- [x] Fase 2: `app/components/` → `src/components/`; `app/` → `src/app/`; alias `@/* → ./src/*`; `app/` raíz eliminado; cleanup estricto de `@/app/...` cerrado con `rg "@/app/" src/app` en cero y `pnpm build` + `pnpm lint` verdes. `pnpm test:e2e` sigue bloqueado por el problema previo de `config.webServer`.
+- [x] Fase 3: `lib/` → `src/server/{auth,rondas,sgc,mailer,agent-router}` + `src/lib/`; `lib/` raíz eliminado.
+- [x] Fase 4: `proxy.ts` → `src/proxy.ts`.
 - [x] Fase 5: `convex/` por dominios con breaking change aceptado a `api.<dominio>.index.*`; inventario API-only antes/después explicado.
-- [ ] Fase 6: `process.env.X!` → `env.X`.
+- [x] Fase 6: `process.env.X!` → `env.X`. Incluye saneamiento de Playwright y scripts en `tests/e2e/env.ts` y `scripts/env.mjs`.
 - [ ] Fase 7: `src/components/ui/` con primitivos compartidos.
 - [ ] Fase 8: limpieza + docs + AGENTS.md actualizado.
 

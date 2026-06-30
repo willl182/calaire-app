@@ -12,10 +12,10 @@ import {
   type FiltroParticipante,
 } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
-import { Alert } from '@/app/(protected)/dashboard/components/Alert'
-import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
-import { CopyInvitationLinkButton } from '@/app/(protected)/dashboard/components/CopyInvitationLinkButton'
-import { ConfirmSubmitButton } from '@/app/(protected)/dashboard/components/ConfirmSubmitButton'
+import { Alert } from '../../../components/Alert'
+import { EstadoBadge } from '../../../components/EstadoBadge'
+import { CopyInvitationLinkButton } from '../../../components/CopyInvitationLinkButton'
+import { ConfirmSubmitButton } from '../../../components/ConfirmSubmitButton'
 import {
   addReferenceSlotAction,
   inviteParticipanteAction,

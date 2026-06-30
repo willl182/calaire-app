@@ -1,11 +1,11 @@
 import Link from 'next/link'
 
-import { ConfirmSubmitButton } from '@/app/(protected)/dashboard/components/ConfirmSubmitButton'
+import { ConfirmSubmitButton } from './ConfirmSubmitButton'
 import {
   changeRondaStatusAction,
   deleteRondaAction,
   reabrirRondaAction,
-} from '@/app/(protected)/dashboard/actions'
+} from '../actions'
 import type { Ronda } from '@/server/rondas'
 import { formatDate, statusClasses } from '../view-model'
 
@@ -183,4 +183,3 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
     </>
   )
 }
-

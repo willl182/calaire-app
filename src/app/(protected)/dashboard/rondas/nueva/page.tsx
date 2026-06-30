@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation'
 
 import { requireAuth, isAdmin } from '@/server/auth'
 import { CONTAMINANTES } from '@/server/rondas'
-import { createRondaAction } from '@/app/(protected)/dashboard/actions'
+import { createRondaAction } from '../../actions'
 
 export default async function NuevaRondaPage() {
   const auth = await requireAuth()

@@ -9,8 +9,8 @@ import {
   type RondaParticipantePT,
 } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
-import { Alert } from '@/app/(protected)/dashboard/components/Alert'
-import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
+import { Alert } from '../../../components/Alert'
+import { EstadoBadge } from '../../../components/EstadoBadge'
 import {
   updateParticipantePTAction,
   updatePTItemAction,

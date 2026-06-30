@@ -2,7 +2,7 @@ import { signOut } from '@workos-inc/authkit-nextjs'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import { Alert } from '@/app/(protected)/dashboard/components/Alert'
+import { Alert } from '../dashboard/components/Alert'
 import { LogoUnal } from '@/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/server/auth'

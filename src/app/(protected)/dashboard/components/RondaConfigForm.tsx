@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-import { updateRondaAction } from '@/app/(protected)/dashboard/actions'
+import { updateRondaAction } from '../actions'
 import { CONTAMINANTES, type Ronda } from '@/server/rondas'
 
 export function RondaConfigForm({ round }: { round: Ronda }) {

@@ -1,16 +1,25 @@
 # Session State: calaire-app
 
-**Last Updated**: 2026-06-30 13:08 -05
+**Last Updated**: 2026-06-30 13:41 -05
 
 ## Session Objective
 
-Implementar Fase 6 de la migracion estructural T3: reemplazar `process.env.X` por `env.X`.
+Reconciliar el plan de migracion T3 con el estado real de la rama y cerrar el cleanup estricto de `@/app/...`.
 
 ## Current State
 
 - [x] Fase 0: Preparacion commiteada como `33fc424`.
 - [x] Fase 1: Andamiaje minimo commiteado como `996fc97`.
-- [x] Fases 2, 3 y 4 siguen aplicadas funcionalmente en el working tree, pero pendientes de commit aislado.
+- [x] Fase 2 aplicada y verificada funcionalmente:
+  - `app/` raiz eliminado y `src/app/` activo.
+  - `src/components/` contiene los componentes movidos desde `app/components/`.
+  - Cleanup estricto de `@/app/...` cerrado: `rg "@/app/" src/app` en cero.
+- [x] Fase 3 aplicada y verificada funcionalmente:
+  - `lib/` raiz eliminado.
+  - Logica redistribuida entre `src/server/*` y `src/lib/*`.
+- [x] Fase 4 aplicada y verificada funcionalmente:
+  - `proxy.ts` raiz eliminado.
+  - `src/proxy.ts` activo con matcher preservado.
 - [x] Fase 5 implementada funcionalmente en el working tree:
   - `convex/rondas.ts` -> `convex/rondas/index.ts`.
   - `convex/sgc.ts` -> `convex/sgc/index.ts`.
@@ -30,6 +39,7 @@ Implementar Fase 6 de la migracion estructural T3: reemplazar `process.env.X` po
   - `src/env.js` se consolido como modulo tipado real en `src/env.ts`.
   - Se eliminaron `src/env.js` y `src/env.d.ts`, que estaban causando conflictos de resolucion de tipos.
   - `rg "process\\.env\\." src convex --glob '!src/env.ts'` no devuelve resultados.
+  - Tooling alineado: `tests/e2e/env.ts` y `scripts/env.mjs` concentran las variables de entorno de Playwright y scripts.
 - [ ] `pnpm exec convex dev` bloqueado por entorno: falla autorizando con `TypeError: fetch failed`.
 - [ ] `pnpm test:e2e` bloqueado por problema previo: `config.webServer` no arranca porque Next intenta resolver `tailwindcss` desde `/home/w182/w421`.
 - [x] Decisión posterior de auditoría: se acepta la Ruta B. Fase 5 queda documentada como cambio breaking explícito a `api.<dominio>.index.<funcion>` y `api.agent.auth.<funcion>`.
@@ -40,13 +50,12 @@ Implementar Fase 6 de la migracion estructural T3: reemplazar `process.env.X` po
 - El criterio original "no cambiar `api.X.Y`" fue descartado por decisión explícita. Se acepta el riesgo de cambio breaking.
 - Para validar la Fase 5 se debe usar inventario API-only con regex profundo: `rg "api\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+" src/ scripts/ tests/ -g "*.ts" -g "*.tsx" --no-filename -o`, porque el regex original captura solo dos segmentos, las rutas de archivo meten ruido por fases 2-3 y este entorno no reconoce `--type tsx`.
 - Fase 6 exigio promover `src/env.js` a `src/env.ts` porque la declaracion ambient `src/env.d.ts` hacia que TypeScript resolviera mal imports relativos desde `convex/auth.config.ts`.
-- Quedan usos intencionales de `process.env` fuera del alcance de Fase 6 en `tests/e2e/auth.setup.ts` y `scripts/poblar-plan-r1.mjs`.
+- Los unicos usos intencionales de `process.env` que quedan estan centralizados en `src/env.ts`, `tests/e2e/env.ts` y `scripts/env.mjs`.
 - El working tree ya venia sucio con Fases 2-4 y cambios en planes/logs. No revertir cambios ajenos.
 - Existe tag local `backup/antes-fase-5`.
 
 ## Next Steps
 
-1. Resolver el bloqueo de Playwright/Tailwind si se requiere `pnpm test:e2e` verde para cerrar fases 5-6.
+1. Resolver el bloqueo de Playwright/Tailwind si se requiere `pnpm test:e2e` verde para cerrar verificaciones de Fases 2, 5 y 6.
 2. Reintentar `pnpm exec convex dev` cuando la autorizacion/red de Convex este disponible.
-3. Hacer staging selectivo si se mantienen commits separados para Fases 2, 3, 4, 5 y 6.
-4. Si se audita Fase 6 contra el plan original, documentar la variacion: `src/env.ts` reemplaza `src/env.js` para evitar el conflicto de tipos.
+3. Ejecutar Fase 7 (`src/components/ui/`) y luego Fase 8 (docs y limpieza final).
