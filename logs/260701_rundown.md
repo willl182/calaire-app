@@ -1,32 +1,29 @@
-# Rundown: calaire-app2
+# Rundown: calaire-app
 
-**Date**: 2026-07-01
+**Updated**: 2026-07-01 22:38
 
 ## Current State
 
-- Fase 5 / Target 9 cerrado para el alcance local.
-- `diagnostico.md` contiene el cierre de verificacion final con estado RESUELTO.
-- Seeds y upload SGC invocan funciones con segmento explicito `sgc/index:*`.
-- `scripts/poblar-plan-r1.mjs` fue eliminado como codigo muerto: no estaba en `package.json` e invocaba `sgc:seedPlanRonda`, funcion inexistente.
-- `plan_fix.md`, `target_fix.md`, `review_fix.md`, `fase5.md` y este rundown quedaron alineados con la deuda cerrada.
-- Verificacion post-cambio verde: `pnpm lint`, `pnpm test`, `pnpm build`, `node --check scripts/upload-sgc-document-versions.mjs`, `node --check scripts/import-sgc-seeds.mjs`.
+- Build de Vercel del PR se arreglo cargando las env vars faltantes (no era bug de codigo; `src/env.ts` valida con zod al importarse).
+- 7 variables cargadas en Vercel: Production (todas) + Preview (rama `feature/t3-estructura-segura`).
+- Redeploy Preview ejecutado y verificado en Ready: `https://calaire-9smpw5g1z-will-salas-projects.vercel.app`.
+- (Sesion previa del dia) cierre funcional Fases 1-5 commiteado en `feature/t3-estructura-segura`; ver history si se necesita.
 
 ## Critical Technical Context
 
-- Para data-backed E2E, arrancar primero `pnpm exec convex dev --tail-logs disable`; `.env.local` apunta la app a `http://127.0.0.1:3212`.
-- `convex dev --once` no deja backend local corriendo para Next; sirve para preparar/pushear, no para la suite data-backed.
-- `convex/sgc/index.ts` mantiene segmento explicito, por eso `convex run` debe usar `sgc/index:<funcion>`.
-- La suite principal valida correctamente el modo offline/degradado cuando Convex local no esta corriendo.
-- Persisten deudas no bloqueantes: screenshots fase 3 sucios, cambios acumulados sin commit, warnings React de formularios y Target 6 de rendimiento.
+- Vercel project `calaire-app` (prj_5Gq9EbXn8a3BAWomAMuzQJTIP6Do, team_18zjhNnAUswaIh2dlwmdvLPF), autenticado como `willl182`.
+- Vars: WORKOS_API_KEY, WORKOS_CLIENT_ID, WORKOS_COOKIE_PASSWORD, NEXT_PUBLIC_WORKOS_REDIRECT_URI, NEXT_PUBLIC_CONVEX_URL, RESEND_API_KEY, MAIL_FROM.
+- CLI Vercel disponible en PATH y via `pnpm exec` sigue en 52.2.1; Preview "all branches" no interactivo falla (`git_branch_required`); se cargo por rama.
+- Detalle del troubleshooting en `logs/history/260701_2233_problems.md`.
 
 ## Next Steps
 
-1. Preparar commit de cierre por fases o commit consolidado, agregando docs/rundowns versionables explicitamente.
-2. Resolver la decision de `docs/screenshots/fase-3/*`: commit, regeneracion o revert controlado.
-3. Considerar limpieza posterior de warnings React en formularios.
+1. Commit de logs de despliegue como `codex`.
+2. Si aparece error de runtime por otra var (p.ej. auth WorkOS), anadirla y repetir.
+3. Actualizar Vercel CLI si se necesita gestionar Preview "all branches" desde CLI.
 
 ## Branch Status
 
-- Branch: `feature/t3-estructura-segura`
-- Status: dirty, con cambios acumulados de Fases 1-5.
-- Pending changes: Convex guards/migrations, fallbacks offline, E2E, CI, dependencias, docs de fase, `diagnostico.md`, `fase*.md`, scripts SGC, eliminacion de `scripts/poblar-plan-r1.mjs`, screenshots fase 3 modificados y logs history/plans desindexados.
+- Branch: feature/t3-estructura-segura
+- Status: en sync con origin/feature/t3-estructura-segura
+- Pending changes: solo cambios en `logs/` de esta sesion (CURRENT_SESSION.md, este rundown)
