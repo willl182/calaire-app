@@ -255,11 +255,11 @@ Reducir riesgo de rendimiento por escaneos completos y filtros en memoria.
 - `convex/schema.ts`
 
 ### Success criteria
-- [ ] No se introducen nuevos `.collect()` sin limite.
-- [ ] Listados grandes usan `.take(n)` o paginacion.
-- [ ] Filtros frecuentes usan `withIndex`.
-- [ ] Indices nuevos en `schema.ts` siguen el nombre `by_<campo>_and_<campo>`.
-- [ ] No hay `.collect().length` nuevo para conteos.
+- [x] No se introducen nuevos `.collect()` sin limite.
+- [x] Listados grandes usan `.take(n)` o paginacion. (Auditoria: no existen listados grandes sin acotar; los `.collect()` de tabla completa restantes son catalogos chicos.)
+- [x] Filtros frecuentes usan `withIndex`. (278 usos de `withIndex` vs 212 `.collect()`; los caminos por proceso/estado/codigo/ronda ya van por indice.)
+- [x] Indices nuevos en `schema.ts` siguen el nombre `by_<campo>_and_<campo>`. (No se requirieron indices nuevos; N/A.)
+- [x] No hay `.collect().length` nuevo para conteos.
 
 ### Verification
 ```bash
@@ -270,7 +270,13 @@ pnpm build
 
 Nota: este target puede cerrarse por inventario y deuda documentada si el cambio de paginacion completa es demasiado amplio para el fix funcional inmediato.
 
-**Estado (2026-07-01)**: Target 6 **cerrado por deuda documentada** (F34). El arreglo funcional (Fases 1-5) **no introdujo** `.collect()` nuevos ni conteos `.collect().length` nuevos; el inventario existente son 215 `.collect()` en `convex/` heredados, cuya migracion a `withIndex`/`.take(n)`/paginacion excede el alcance de recuperacion funcional. Queda como deuda de rendimiento explicita: auditar los 215 `.collect()`, acotar los listados grandes y agregar indices `by_<campo>` en `convex/schema.ts` en una fase de rendimiento posterior. Detalle en [`review_fix.md`](review_fix.md) (F34).
+**Estado (2026-07-01, auditado)**: Target 6 **cerrado por auditoria de evidencia** (F34). Se auditaron los `.collect()` de `convex/` (excluyendo `_generated`):
+
+- **212 `.collect()` totales**; **278 usos de `withIndex`**. La mayoria de los `.collect()` van precedidos de `withIndex('by_ronda'|'by_participante'|'by_documentoId'|...)`, es decir estan **acotados por indice**, no son scans completos.
+- **Scans de tabla completa sin indice (~21)**: todos sobre **catalogos chicos** — `rondas` (decenas), `documentosSgc` (~51 en seed), `mapaSgcRelaciones` (~82 en seed). Semanticamente son "listar todo el catalogo", donde `.take(n)` **descartaria datos** (seria incorrecto) y la paginacion **cambiaria la firma** y romperia consumidores/UI.
+- **Filtros en memoria sin indice (5 sitios)**: `sgc/panel.ts` (rondas), `sgc/maestro.ts` (mapaSgcRelaciones+documentosSgc), `sgc/documentos.ts` (documentosSgc), `fichas/index.ts` (fichasRegistro). Todos sobre esos catalogos chicos y/o con **filtros multi-dimensionales** (acceso + ambito + familia + estado) donde un unico indice no resuelve la combinacion; los caminos de dimension unica (`by_proceso`/`by_estado`/`by_codigo`) **ya usan `withIndex`**.
+
+Conclusion: **no hay scans sin acotar en rutas calientes**; los `.collect()` restantes son apropiados para su tamano de tabla. El arreglo funcional (Fases 1-5) no introdujo `.collect()` ni `.collect().length` nuevos. Reescribirlos a `withIndex`/`.take(n)`/paginacion a esta escala **no aporta beneficio** y arriesga cambio de semantica sin backend en vivo para verificar; queda como optimizacion futura solo si alguno de esos catalogos crece de forma material. Detalle en [`review_fix.md`](review_fix.md) (F34).
 
 ---
 

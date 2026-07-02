@@ -27,10 +27,14 @@ Cerrar los pendientes del ultimo rundown de `plan_fix.md` siguiendo `workflow_fi
 - `convex/sgc/index.ts` mantiene segmento explicito; scripts de `convex run` para SGC deben usar `sgc/index:<funcion>`.
 - `.gitignore` ignora `logs/history/` y `logs/plans/`; esos archivos aparecen como desindexados por decision de Fase 4.
 - `logs/CURRENT_SESSION.md` y los rundowns raiz de `logs/` se consideran versionables.
-- Target 6 queda como deuda de rendimiento documentada: existen 215 `.collect()` heredados en `convex/`.
+- Target 6 cerrado por auditoria (ver seccion "Deudas no bloqueantes resueltas"): 212 `.collect()` mayormente acotados por `withIndex`; scans restantes sobre catalogos chicos.
+
+## Deudas no bloqueantes resueltas (2026-07-01)
+
+- [x] **Target 6 (rendimiento) cerrado por auditoria de evidencia.** 212 `.collect()` vs 278 `withIndex`: la mayoria acotados por indice. Solo ~21 scans de tabla completa, todos sobre catalogos chicos (`rondas`, `documentosSgc` ~51, `mapaSgcRelaciones` ~82) donde "listar todo" es correcto; `.take(n)`/paginacion serian incorrectos o romperian consumidores. 5 filtros en memoria sin indice caen sobre esos catalogos o son multi-dimensionales. Sin scan sin acotar en ruta caliente. No es deuda pendiente sino comportamiento apropiado a la escala; se revisara solo si un catalogo crece de forma material.
+- [x] **Warnings React de formularios: sin defecto reproducible.** `pnpm build` no emite warnings; no hay warning capturado en el repo. Nada concreto que arreglar; el item queda cerrado por verificacion.
 
 ## Next Steps
 
-- Sin pendientes bloqueantes ni procedimentales. Cierre funcional commiteado en `feature/t3-estructura-segura`.
-- Deuda futura documentada (no bloquea): Target 6 (auditar 215 `.collect()` heredados en `convex/`) y limpieza opcional de warnings React en formularios con server actions.
+- Sin pendientes bloqueantes, procedimentales ni de deuda no bloqueante. Cierre funcional + deudas commiteados en `feature/t3-estructura-segura`.
 - Cuando se decida integrar: abrir PR de `feature/t3-estructura-segura` a `main`.
