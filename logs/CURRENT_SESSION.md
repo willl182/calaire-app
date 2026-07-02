@@ -1,40 +1,47 @@
-# Session State: calaire-app
+# Session State: calaire-app2
 
-**Last Updated**: 2026-06-29 11:14
+**Last Updated**: 2026-07-01 23:24 -05
 
 ## Session Objective
 
-Implementar los 15 hallazgos de la revisión de código `cr-rev2.md` (CodeRabbit Review) en la rama feature/sgc-maestro-protv2.
+Rediseñar el mapa de navegación del SGC (`/sgc/mapa`) para que siga el estilo
+visual de la app (fuentes, colores) y reorganizar su layout.
 
 ## Current State
 
-- [x] Derivar siguiente número de versión en `scripts/upload-sgc-document-versions.mjs`
-- [x] Manejar errores de lanzamiento de `spawnSync`
-- [x] Alinear denominador de `completado` en `convex/sgc/maestro.ts`
-- [x] Computar resumen de normativa desde relaciones no filtradas
-- [x] Resaltar sección SGC activa en `app/(protected)/sgc/layout.tsx`
-- [x] Limpiar campo legacy `cambioResumen` y backfilling de `resumenCambios`
-- [x] Marcar motivos de retiro como `required`
-- [x] Usar `ronda.codigo` en lugar de `EA-PP-2026-R1`
-- [x] Agregar `encType="multipart/form-data"` al formulario de evidencia
-- [x] Incluir estado `disponible` en cálculo de progreso
-- [x] Evitar hardcode de `EA-PP-2026-R1` en `ExpedienteSgc.tsx`
-- [x] Mover mapa SGC fuera de `public/` a ruta protegida
-- [x] Verificar UI de filtros del mapa (ya visible, sin `display: none`)
-- [x] Proteger entradas SGC en `SidebarNav.tsx` con `canViewSgcMaestro`
-- [x] No renderizar árbol sin providers en `app/providers.tsx`
-- [x] `pnpm build` exitoso
-- [x] `pnpm lint` exitoso
-- [x] Actualizar `cr-rev2.md` con marcador `[completed]` en cada hallazgo
+- [x] Reestilizado el HTML embebido del mapa (`data/sgc/mapa_navegacion_sgc_pea.html`)
+      para usar Droid Sans + tokens de marca (dorado `#FDB913`, grises de superficie)
+      igual que `src/app/globals.css`.
+- [x] Códigos y números en fuente monoespaciada con `tabular-nums`.
+- [x] Componentes alineados a la app: header con borde dorado, botones/chips con
+      gradiente, tarjetas con borde izquierdo dorado, foco dorado, scrollbar dorada.
+- [x] Recodificadas las 5 familias documentales con paleta armónica + leyenda sincronizada.
+- [x] Movidos los controles laterales (`aside`) a una **barra horizontal arriba** del mapa.
+- [x] Columnas más juntas: Procedimientos x40, Documentos/instructivos x360, Formatos x680;
+      `viewBox` 970×1400.
+- [x] Los 22 formatos ahora en **una sola columna en orden numérico** (F-PSEA-01 … 18).
+- [x] Usuario confirmó: "tuvo bien".
+- [ ] (Pendiente de sesión previa, auth) Verificar `/dashboard` y `/sgc` en producción tras deploy de Convex.
+- [ ] Commit de los cambios pendientes en la rama.
 
 ## Critical Technical Context
 
-- Proyecto Next.js 16.2.4 + React 19 + Convex + Tailwind v4 + pnpm.
-- El mapa SGC ahora se sirve desde `app/(protected)/dashboard/sgc/mapa/embed/route.ts` leyendo `data/sgc/mapa_navegacion_sgc_pea.html`, con validación `canViewSgcMaestro`.
-- `app/(protected)/sgc/layout.tsx` se convirtió a cliente (`'use client'`) para usar `usePathname` y marcar la navegación activa.
-- `DocumentoSgcVersion` ya no expone `cambioResumen`; las versiones se normalizan en `collectDocumentBundle` para garantizar `resumenCambios`.
+- Project uses `pnpm`; do not use `npm` for scripts.
+- El mapa es un HTML estático en `data/sgc/mapa_navegacion_sgc_pea.html`, servido por
+  `src/app/(protected)/dashboard/sgc/mapa/embed/route.ts` dentro de un `<iframe>` desde
+  `src/app/(protected)/dashboard/sgc/mapa/page.tsx`. `/sgc/mapa` re-exporta esa página.
+- La ruta embed aplica CSP `default-src 'self'`; las fuentes `@font-face url('/fonts/...')`
+  cargan bien porque `font-src` hereda `'self'` (mismo origen). No usar fuentes externas.
+- Solo Droid Sans existe localmente en `public/fonts/`; la stack mono cae a fuentes de sistema.
+- Los edges del SVG se recalculan desde las coordenadas de los nodos, así que reordenar
+  nodos no rompe las relaciones.
+- No se pudo renderizar en vivo: la extensión de Chrome no está conectada. Copia autónoma
+  de preview (con rutas de fuente locales) en el scratchpad de la sesión.
+- Contexto previo (auth, sin resolver del todo): producción en `https://calaire-app.vercel.app`,
+  Convex prod `https://steady-kiwi-725.convex.cloud`. Ver `logs/history` para detalle.
 
 ## Next Steps
 
-1. Desplegar/verificar en entorno de integración.
-2. Continuar con próximos issues o revisiones pendientes de `cr-rev2.md` si los hay.
+1. Commitear el rediseño del mapa cuando el usuario lo pida.
+2. Verificar visualmente en producción tras desplegar (`/sgc/mapa`).
+3. Retomar verificación pendiente de auth en `/dashboard` y `/sgc` si aplica.

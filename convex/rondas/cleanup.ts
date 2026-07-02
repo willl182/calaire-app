@@ -1,9 +1,11 @@
 import { v } from 'convex/values'
 import { defineRondaMutation } from './definitions'
+import { requireAdminIdentity } from '../access'
 
 export const deleteRondaDefinition = defineRondaMutation({
   args: { id: v.id('rondas') },
   handler: async (ctx, { id }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
 
@@ -57,6 +59,7 @@ export const deleteRondaDefinition = defineRondaMutation({
 export const removeParticipanteDefinition = defineRondaMutation({
   args: { rondaId: v.id('rondas'), participanteId: v.id('rondaParticipantes') },
   handler: async (ctx, { rondaId, participanteId }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') throw new Error('No se puede modificar la lista de una ronda cerrada.')

@@ -1,4 +1,5 @@
 import { spawnSync } from 'node:child_process'
+import { scriptEnv, withScriptEnv } from './env.mjs'
 
 function run(command, args, options = {}) {
   const result = spawnSync(command, args, {
@@ -15,10 +16,7 @@ function run(command, args, options = {}) {
 
 function runWithEnv(command, args, extraEnv) {
   run(command, args, {
-    env: {
-      ...process.env,
-      ...extraEnv,
-    },
+    env: withScriptEnv(extraEnv),
   })
 }
 
@@ -49,8 +47,8 @@ if (gitStatus()) {
 }
 
 runWithEnv('pnpm', ['exec', 'convex', 'deploy'], {
-  CONVEX_DEPLOYMENT: 'steady-kiwi-725',
-  NEXT_PUBLIC_CONVEX_URL: 'https://steady-kiwi-725.convex.cloud',
+  CONVEX_DEPLOYMENT: scriptEnv.convexDeployment,
+  NEXT_PUBLIC_CONVEX_URL: scriptEnv.convexUrl,
 })
 run('vercel', ['--prod'])
 run('git', ['push', 'origin', 'HEAD'])
