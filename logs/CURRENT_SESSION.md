@@ -1,29 +1,47 @@
-# Session State: calaire-app
+# Session State: calaire-app2
 
-**Last Updated**: 2026-07-01 22:38 -0500
+**Last Updated**: 2026-07-01 23:24 -05
 
 ## Session Objective
 
-Arreglar el build fallido del PR en Vercel (rama `feature/t3-estructura-segura`).
+Rediseñar el mapa de navegación del SGC (`/sgc/mapa`) para que siga el estilo
+visual de la app (fuentes, colores) y reorganizar su layout.
 
 ## Current State
 
-- [x] Diagnosticado: el build fallaba en "Collecting page data" por variables de entorno faltantes en Vercel (no es bug de codigo).
-- [x] `src/env.ts` (@t3-oss/env-nextjs + zod) validado como correcto; abortaba por `WORKOS_API_KEY`, `WORKOS_CLIENT_ID`, `NEXT_PUBLIC_CONVEX_URL` undefined.
-- [x] Cargadas 7 variables en Vercel (Production) desde `.env.local`.
-- [x] Cargadas las mismas 7 en Preview para la rama `feature/t3-estructura-segura`.
-- [x] Redeploy Preview ejecutado y verificado: `https://calaire-9smpw5g1z-will-salas-projects.vercel.app` quedo `Ready`.
+- [x] Reestilizado el HTML embebido del mapa (`data/sgc/mapa_navegacion_sgc_pea.html`)
+      para usar Droid Sans + tokens de marca (dorado `#FDB913`, grises de superficie)
+      igual que `src/app/globals.css`.
+- [x] Códigos y números en fuente monoespaciada con `tabular-nums`.
+- [x] Componentes alineados a la app: header con borde dorado, botones/chips con
+      gradiente, tarjetas con borde izquierdo dorado, foco dorado, scrollbar dorada.
+- [x] Recodificadas las 5 familias documentales con paleta armónica + leyenda sincronizada.
+- [x] Movidos los controles laterales (`aside`) a una **barra horizontal arriba** del mapa.
+- [x] Columnas más juntas: Procedimientos x40, Documentos/instructivos x360, Formatos x680;
+      `viewBox` 970×1400.
+- [x] Los 22 formatos ahora en **una sola columna en orden numérico** (F-PSEA-01 … 18).
+- [x] Usuario confirmó: "tuvo bien".
+- [ ] (Pendiente de sesión previa, auth) Verificar `/dashboard` y `/sgc` en producción tras deploy de Convex.
+- [ ] Commit de los cambios pendientes en la rama.
 
 ## Critical Technical Context
 
-- Vercel project: `calaire-app` (projectId `prj_5Gq9EbXn8a3BAWomAMuzQJTIP6Do`, org `team_18zjhNnAUswaIh2dlwmdvLPF`). Autenticado como `willl182`.
-- Variables subidas: `WORKOS_API_KEY`, `WORKOS_CLIENT_ID`, `WORKOS_COOKIE_PASSWORD`, `NEXT_PUBLIC_WORKOS_REDIRECT_URI`, `NEXT_PUBLIC_CONVEX_URL`, `RESEND_API_KEY`, `MAIL_FROM`.
-- **CLI Vercel en uso sigue en 52.2.1** (`vercel --version` y `pnpm exec vercel --version`): el modo "todas las ramas de Preview" devuelve `git_branch_required` incluso con `--value --yes`; hubo que fijar la rama. Otras ramas de PR necesitaran sus propias vars hasta actualizar el CLI o usar el dashboard con "All Preview".
-- NO subidas: `WORKOS_SECRET` (opcional; en `.env.local` se usa `WORKOS_COOKIE_PASSWORD`), `CONVEX_DEPLOYMENT` (solo dev local), vars de Supabase (no referenciadas por `env.ts`).
-- `env.ts` es la unica fuente de verdad de env vars (regla del repo); no leer `process.env` directo en app code.
+- Project uses `pnpm`; do not use `npm` for scripts.
+- El mapa es un HTML estático en `data/sgc/mapa_navegacion_sgc_pea.html`, servido por
+  `src/app/(protected)/dashboard/sgc/mapa/embed/route.ts` dentro de un `<iframe>` desde
+  `src/app/(protected)/dashboard/sgc/mapa/page.tsx`. `/sgc/mapa` re-exporta esa página.
+- La ruta embed aplica CSP `default-src 'self'`; las fuentes `@font-face url('/fonts/...')`
+  cargan bien porque `font-src` hereda `'self'` (mismo origen). No usar fuentes externas.
+- Solo Droid Sans existe localmente en `public/fonts/`; la stack mono cae a fuentes de sistema.
+- Los edges del SVG se recalculan desde las coordenadas de los nodos, así que reordenar
+  nodos no rompe las relaciones.
+- No se pudo renderizar en vivo: la extensión de Chrome no está conectada. Copia autónoma
+  de preview (con rutas de fuente locales) en el scratchpad de la sesión.
+- Contexto previo (auth, sin resolver del todo): producción en `https://calaire-app.vercel.app`,
+  Convex prod `https://steady-kiwi-725.convex.cloud`. Ver `logs/history` para detalle.
 
 ## Next Steps
 
-1. Commit de logs de despliegue como `codex`.
-2. Si aparece error de runtime por otra var (p.ej. auth WorkOS), anadirla y repetir.
-3. Actualizar Vercel CLI si se necesita cargar Preview en "All branches" desde CLI.
+1. Commitear el rediseño del mapa cuando el usuario lo pida.
+2. Verificar visualmente en producción tras desplegar (`/sgc/mapa`).
+3. Retomar verificación pendiente de auth en `/dashboard` y `/sgc` si aplica.

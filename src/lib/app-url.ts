@@ -18,7 +18,7 @@ export function getAppOrigin() {
   return (
     resolveOriginCandidate(env.NEXT_PUBLIC_APP_URL) ??
     resolveOriginCandidate(env.NEXT_PUBLIC_WORKOS_REDIRECT_URI) ??
-    'http://localhost:3000'
+    'https://calaire-app.vercel.app'
   )
 }
 

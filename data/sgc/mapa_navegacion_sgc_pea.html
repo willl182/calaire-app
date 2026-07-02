@@ -5,20 +5,46 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Mapa de Navegacion SGC PEA</title>
   <style>
+    /* ─── Droid Sans (misma fuente de la app) ───────────────────────────── */
+    @font-face {
+      font-family: 'Droid Sans';
+      src: url('/fonts/DroidSans-Regular.ttf') format('truetype');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Droid Sans';
+      src: url('/fonts/DroidSans-Bold.ttf') format('truetype');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+
     :root {
-      --ink: #17211d;
-      --muted: #65736d;
-      --line: #d7ded8;
-      --paper: #f7f4ec;
-      --panel: #fffdfa;
-      --sea: #0e6b63;
-      --sea-2: #dff1ec;
-      --leaf: #6d8f35;
-      --amber: #b66b1f;
-      --clay: #a74938;
-      --violet: #56508f;
-      --blue: #2d6f98;
-      --shadow: 0 18px 55px rgba(23, 33, 29, .12);
+      /* Tipografía */
+      --font-sans: "Droid Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+      /* Marca (idéntica a globals.css) */
+      --primary:        #FDB913;
+      --primary-dark:   #E5A610;
+      --primary-light:  #FFD54F;
+      --primary-subtle: #FBF3E0;
+
+      /* Texto */
+      --ink: #111827;
+      --muted: #6B7280;
+
+      /* Bordes / superficies */
+      --line: #D1D5DB;
+      --line-soft: #E5E7EB;
+      --paper: #E8EAED;
+      --panel: #F5F6F7;
+      --surface-muted: #F5F5F0;
+
+      --shadow: 0 4px 12px rgba(0, 0, 0, .10);
+      --shadow-sm: 0 2px 4px rgba(0, 0, 0, .08);
     }
 
     * { box-sizing: border-box; }
@@ -26,19 +52,30 @@
     body {
       margin: 0;
       color: var(--ink);
-      background:
-        linear-gradient(90deg, rgba(14,107,99,.05) 1px, transparent 1px),
-        linear-gradient(180deg, rgba(14,107,99,.05) 1px, transparent 1px),
-        var(--paper);
-      background-size: 26px 26px;
-      font-family: "Aptos", "Segoe UI", sans-serif;
+      background: var(--paper);
+      font-family: var(--font-sans);
+      font-size: 0.9375rem;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
     }
 
+    ::selection { background: var(--primary); color: var(--ink); }
+
+    :focus-visible {
+      outline: 2px solid var(--primary);
+      outline-offset: 2px;
+      box-shadow: 0 0 0 4px rgba(253, 185, 19, .4);
+    }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: var(--surface-muted); }
+    ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
+
     header {
-      min-height: 26vh;
-      padding: 34px clamp(18px, 4vw, 58px) 22px;
-      border-bottom: 1px solid var(--line);
-      background: linear-gradient(135deg, rgba(255,253,250,.94), rgba(223,241,236,.88));
+      padding: 30px clamp(18px, 4vw, 48px) 26px;
+      background: linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%);
+      border-bottom: 4px solid var(--primary);
     }
 
     .eyebrow {
@@ -46,58 +83,80 @@
       gap: 10px;
       align-items: center;
       font-size: 12px;
-      font-weight: 800;
-      letter-spacing: 0;
+      font-weight: 700;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      color: var(--sea);
+      color: var(--primary-dark);
     }
 
     .eyebrow::before {
       content: "";
       width: 34px;
-      height: 2px;
-      background: var(--sea);
+      height: 3px;
+      border-radius: 999px;
+      background: var(--primary);
     }
 
     h1 {
       max-width: 980px;
       margin: 14px 0 12px;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: clamp(36px, 6vw, 74px);
-      line-height: .96;
-      letter-spacing: 0;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: clamp(30px, 4.6vw, 52px);
+      line-height: 1.05;
+      letter-spacing: -0.01em;
+      color: var(--ink);
     }
 
     .lead {
       max-width: 940px;
       margin: 0;
-      color: #42504a;
-      font-size: clamp(16px, 2vw, 20px);
-      line-height: 1.55;
+      color: var(--muted);
+      font-size: clamp(15px, 1.6vw, 18px);
+      line-height: 1.6;
+    }
+
+    .lead code, header code, .audit-note code {
+      font-family: var(--font-mono);
+      font-size: 0.9em;
+      padding: 1px 6px;
+      border-radius: 6px;
+      background: var(--primary-subtle);
+      color: var(--primary-dark);
     }
 
     main {
       display: grid;
-      grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+      grid-template-columns: 1fr;
       gap: 18px;
       padding: 18px;
       min-height: 74vh;
     }
 
-    aside, .workspace {
-      background: rgba(255,253,250,.92);
+    .controls, .workspace {
+      background: var(--panel);
       border: 1px solid var(--line);
-      box-shadow: var(--shadow);
+      border-radius: 12px;
+      box-shadow: var(--shadow-sm);
     }
 
-    aside {
-      position: sticky;
-      top: 18px;
-      align-self: start;
-      max-height: calc(100vh - 36px);
-      overflow: auto;
-      padding: 18px;
+    /* Barra de controles horizontal (arriba del mapa) */
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-start;
+      gap: 16px 26px;
+      padding: 16px 18px;
     }
+
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .control-group--search { flex: 1 1 240px; min-width: 200px; }
+    .control-group--routes { flex: 1 1 340px; }
 
     .workspace {
       min-width: 0;
@@ -106,10 +165,11 @@
 
     .control-label {
       display: block;
-      margin: 16px 0 8px;
+      margin: 0 0 8px;
       color: var(--muted);
-      font-size: 12px;
-      font-weight: 800;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
     }
 
@@ -117,16 +177,19 @@
       width: 100%;
       height: 42px;
       padding: 0 12px;
-      border: 1px solid #bfcac3;
-      background: white;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
       color: var(--ink);
       font: inherit;
+      font-family: var(--font-sans);
       outline: none;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
     }
 
     input[type="search"]:focus {
-      border-color: var(--sea);
-      box-shadow: 0 0 0 3px rgba(14,107,99,.16);
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(253, 185, 19, .25);
     }
 
     .chips {
@@ -137,83 +200,102 @@
 
     button {
       min-height: 36px;
-      border: 1px solid #bdc7c1;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
       background: #fff;
       color: var(--ink);
-      font: 700 13px/1 "Aptos", "Segoe UI", sans-serif;
+      font: 600 13px/1 var(--font-sans);
       cursor: pointer;
-      transition: transform .16s ease, background .16s ease, color .16s ease;
+      transition: border-color 140ms ease, background 140ms ease, color 140ms ease, box-shadow 140ms ease;
     }
 
-    button:hover { transform: translateY(-1px); }
+    button:hover {
+      border-color: var(--primary);
+      background: var(--primary-subtle);
+    }
+    button:active { transform: translateY(1px); }
     button.active {
-      background: var(--sea);
-      border-color: var(--sea);
-      color: white;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      border-color: var(--primary-dark);
+      color: var(--ink);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
     }
 
-    .chip { padding: 0 12px; }
+    .chip { padding: 0 14px; }
 
     .link-chip {
       display: inline-flex;
       min-height: 36px;
       align-items: center;
-      border: 1px solid #bdc7c1;
+      padding: 0 14px;
+      border: 1.5px solid var(--line);
+      border-radius: 8px;
       background: #fff;
       color: var(--ink);
-      font: 700 13px/1 "Aptos", "Segoe UI", sans-serif;
+      font: 600 13px/1 var(--font-sans);
       text-decoration: none;
-      transition: transform .16s ease, background .16s ease, color .16s ease;
+      transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
     }
 
-    .link-chip:hover { transform: translateY(-1px); }
+    .link-chip:hover {
+      border-color: var(--primary);
+      background: var(--primary-subtle);
+    }
 
     .route-list {
-      display: grid;
+      display: flex;
+      flex-wrap: wrap;
       gap: 8px;
-      margin-top: 8px;
     }
 
     .route-button {
-      width: 100%;
+      flex: 0 1 auto;
+      max-width: 240px;
       height: auto;
-      min-height: 48px;
-      padding: 10px 12px;
+      min-height: 44px;
+      padding: 8px 12px;
       text-align: left;
-      background: #fbfaf7;
+      line-height: 1.3;
+      background: #fff;
+      border-radius: 10px;
     }
 
     .route-button span {
       display: block;
       margin-top: 4px;
       color: var(--muted);
-      font-weight: 500;
+      font-weight: 400;
       line-height: 1.35;
     }
+    .route-button.active span { color: rgba(17, 24, 39, .75); }
 
     .stats {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
       gap: 8px;
-      margin-top: 18px;
     }
 
     .stat {
-      padding: 10px;
+      min-width: 68px;
+      padding: 10px 12px;
       border: 1px solid var(--line);
-      background: #fbfaf7;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      background: #fff;
     }
 
     .stat strong {
       display: block;
       font-size: 24px;
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.01em;
     }
 
     .stat span {
       color: var(--muted);
       font-size: 11px;
-      font-weight: 800;
+      font-weight: 700;
+      letter-spacing: 0.04em;
       text-transform: uppercase;
     }
 
@@ -224,8 +306,8 @@
       align-items: center;
       justify-content: space-between;
       padding: 14px 16px;
-      border-bottom: 1px solid var(--line);
-      background: rgba(255,253,250,.96);
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--panel);
     }
 
     .toolbar .hint {
@@ -238,20 +320,23 @@
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 10px;
       padding: 14px;
-      border-bottom: 1px solid var(--line);
-      background: #fffdfa;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--panel);
     }
 
     .audit-card {
       min-width: 0;
       padding: 12px;
       border: 1px solid var(--line);
-      background: #fbfaf7;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      background: #fff;
     }
 
     .audit-card strong {
       display: block;
-      font-family: Georgia, "Times New Roman", serif;
+      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       font-size: 24px;
       line-height: 1;
     }
@@ -261,38 +346,41 @@
       margin-top: 6px;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 600;
       line-height: 1.3;
-      text-transform: uppercase;
     }
 
     .audit-note {
-      padding: 0 14px 14px;
-      border-bottom: 1px solid var(--line);
-      background: #fffdfa;
-      color: #42504a;
+      padding: 0 16px 14px;
+      border-bottom: 1px solid var(--line-soft);
+      background: var(--panel);
+      color: var(--muted);
       font-size: 13px;
-      line-height: 1.5;
+      line-height: 1.55;
     }
+    .audit-note strong { color: var(--ink); }
 
     .diagram-shell {
       position: relative;
       min-height: 800px;
       overflow: auto;
       background:
-        radial-gradient(circle at 18% 12%, rgba(109,143,53,.13), transparent 28%),
-        radial-gradient(circle at 88% 80%, rgba(45,111,152,.12), transparent 28%),
-        rgba(255,253,250,.7);
+        radial-gradient(circle at 18% 12%, rgba(253, 185, 19, .08), transparent 30%),
+        radial-gradient(circle at 88% 82%, rgba(229, 166, 16, .07), transparent 30%),
+        #fff;
     }
 
     svg {
       display: block;
       width: 100%;
-      height: 1350px;
+      max-width: 1040px;
+      margin: 0 auto;
+      height: auto;
+      aspect-ratio: 970 / 1400;
     }
 
     .edge {
-      stroke: #aab5ae;
+      stroke: #b9c0c9;
       stroke-width: 1.4;
       fill: none;
       opacity: .52;
@@ -300,7 +388,7 @@
     }
 
     .edge.active {
-      stroke: var(--sea);
+      stroke: var(--primary-dark);
       stroke-width: 3;
       opacity: 1;
     }
@@ -311,36 +399,39 @@
     }
 
     .node rect {
-      rx: 8;
+      rx: 10;
       stroke-width: 1.4;
-      filter: drop-shadow(0 9px 18px rgba(23,33,29,.12));
+      filter: drop-shadow(0 6px 14px rgba(17, 24, 39, .10));
     }
 
     .node text {
       pointer-events: none;
       fill: var(--ink);
       font-size: 13px;
-      font-weight: 800;
+      font-weight: 700;
+      font-family: var(--font-mono);
     }
 
     .node .small {
-      fill: #51615a;
+      fill: var(--muted);
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 400;
+      font-family: var(--font-sans);
     }
 
     .node.dim, .edge.dim { opacity: .13; }
 
     .node.active rect {
-      stroke: #092f2b;
-      stroke-width: 3;
+      stroke: var(--primary-dark);
+      stroke-width: 3.5;
     }
 
-    .family-dg rect { fill: #dff1ec; stroke: #0e6b63; }
-    .family-p rect { fill: #edf2d8; stroke: #6d8f35; }
-    .family-i rect { fill: #e8e7f5; stroke: #56508f; }
-    .family-f rect { fill: #fff0d8; stroke: #b66b1f; }
-    .family-out rect { fill: #f2e2df; stroke: #a74938; }
+    /* Familias documentales — codificación clara y armónica con la marca */
+    .family-dg rect  { fill: #FEF3D7; stroke: #E5A610; }  /* Documentos generales (marca) */
+    .family-p rect   { fill: #E4E7EB; stroke: #4B5563; }  /* Procedimientos (gris pizarra) */
+    .family-i rect   { fill: #EAE7F6; stroke: #6D5AC0; }  /* Instructivos (violeta) */
+    .family-f rect   { fill: #DDF3E7; stroke: #0E9F6E; }  /* Formatos / registros (verde) */
+    .family-out rect { fill: #FBE3E0; stroke: #D64545; }  /* Fuera de alcance (rojo) */
 
     .detail {
       position: fixed;
@@ -349,9 +440,10 @@
       width: min(440px, calc(100vw - 36px));
       max-height: calc(100vh - 36px);
       overflow: auto;
-      padding: 18px;
-      border: 1px solid #bfcac3;
-      background: rgba(255,253,250,.98);
+      padding: 20px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
       box-shadow: var(--shadow);
       transform: translateY(calc(100% + 30px));
       transition: transform .22s ease;
@@ -360,23 +452,27 @@
 
     .detail.open { transform: translateY(0); }
     .detail h2 {
-      margin: 0 0 8px;
-      font-family: Georgia, "Times New Roman", serif;
-      font-size: 30px;
-      letter-spacing: 0;
+      margin: 0 8px 8px 0;
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 22px;
+      line-height: 1.2;
+      letter-spacing: -0.01em;
     }
 
     .detail p {
-      color: #3f4e48;
-      line-height: 1.5;
+      color: #374151;
+      line-height: 1.55;
     }
+    .detail strong { color: var(--ink); }
 
     .detail .context-note {
       margin-top: 12px;
       padding: 10px 12px;
-      border-left: 3px solid var(--sea);
-      background: #edf4f1;
-      color: #31413a;
+      border-left: 3px solid var(--primary);
+      border-radius: 0 8px 8px 0;
+      background: var(--primary-subtle);
+      color: #4b3d10;
       font-size: 13px;
     }
 
@@ -388,13 +484,21 @@
     }
 
     .pill {
-      padding: 6px 9px;
+      padding: 5px 10px;
       border: 1px solid var(--line);
-      background: #fbfaf7;
-      color: #35433d;
+      border-radius: 999px;
+      background: var(--surface-muted);
+      color: #374151;
       font-size: 12px;
-      font-weight: 800;
+      font-weight: 600;
     }
+
+    .detail a {
+      color: var(--primary-dark);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .detail a:hover { text-decoration: underline; }
 
     .detail ul {
       padding-left: 18px;
@@ -407,15 +511,19 @@
       right: 12px;
       width: 34px;
       min-height: 34px;
+      border-radius: 8px;
+      font-size: 16px;
+      line-height: 1;
+      color: var(--muted);
     }
 
     .legend {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 12px;
       padding: 12px 16px;
-      border-top: 1px solid var(--line);
-      background: rgba(255,253,250,.96);
+      border-top: 1px solid var(--line-soft);
+      background: var(--panel);
     }
 
     .legend span {
@@ -424,19 +532,22 @@
       gap: 7px;
       color: var(--muted);
       font-size: 12px;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     .column-label {
-      fill: #65736d;
-      font-size: 13px;
-      font-weight: 900;
+      fill: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
+      font-family: var(--font-sans);
     }
 
     .swatch {
       width: 14px;
       height: 14px;
+      border-radius: 4px;
       border: 1px solid currentColor;
     }
 
@@ -448,7 +559,7 @@
       }
       .audit-strip { grid-template-columns: 1fr 1fr; }
       .diagram-shell { min-height: 520px; }
-      svg { width: 1180px; height: 1000px; }
+      svg { width: 760px; max-width: none; margin: 0; }
       .detail {
         right: 10px;
         bottom: 10px;
@@ -466,23 +577,34 @@
   </header>
 
   <main>
-    <aside>
-      <label class="control-label" for="search">Buscar documento o relacion</label>
-      <input id="search" type="search" placeholder="Ej. F-PSEA-12, pt_app, informe">
+    <aside class="controls">
+      <div class="control-group control-group--search">
+        <label class="control-label" for="search">Buscar documento o relacion</label>
+        <input id="search" type="search" placeholder="Ej. F-PSEA-12, pt_app, informe">
+      </div>
 
-      <div class="control-label">Familia documental</div>
-      <div class="chips" id="familyFilters"></div>
+      <div class="control-group">
+        <div class="control-label">Familia documental</div>
+        <div class="chips" id="familyFilters"></div>
+      </div>
 
-      <div class="control-label">Estado</div>
-      <div class="chips" id="stateFilters"></div>
+      <div class="control-group">
+        <div class="control-label">Estado</div>
+        <div class="chips" id="stateFilters"></div>
+      </div>
 
-      <div class="control-label">Rutas criticas</div>
-      <div class="route-list" id="routes"></div>
+      <div class="control-group control-group--routes">
+        <div class="control-label">Rutas criticas</div>
+        <div class="route-list" id="routes"></div>
+      </div>
 
-      <div class="stats">
-        <div class="stat"><strong id="visibleCount">0</strong><span>visibles</span></div>
-        <div class="stat"><strong id="edgeCount">0</strong><span>relaciones</span></div>
-        <div class="stat"><strong id="selectedCount">0</strong><span>ruta</span></div>
+      <div class="control-group">
+        <div class="control-label">Resumen</div>
+        <div class="stats">
+          <div class="stat"><strong id="visibleCount">0</strong><span>visibles</span></div>
+          <div class="stat"><strong id="edgeCount">0</strong><span>relaciones</span></div>
+          <div class="stat"><strong id="selectedCount">0</strong><span>ruta</span></div>
+        </div>
       </div>
     </aside>
 
@@ -507,23 +629,23 @@
         Revision actualizada al 2026-06-28: <strong>P-PSEA-02</strong> fija la arquitectura documental maestra: <code>01_bloque_general</code> es el SGC maestro y <code>02_despliegue_rondas</code> conserva registros/evidencias por ronda. <strong>EA-PP-2026-R1</strong> es una ronda, no un bloque documental independiente. Los formatos maestros viven en <code>01_bloque_general/04_formatos_maestros</code>; las copias diligenciadas viven en la etapa correspondiente de la ronda. <strong>P-PSEA-03</strong> fija una raiz limpia con <code>checklist_ronda.md</code> y siete carpetas de etapa. <strong>DG-PSEA-02</strong> y <strong>DG-PSEA-03</strong> viven ahora en carpetas documentales propias con Markdown maestro, DOCX, HTML y capturas; no se conserva <code>indice_capturas.md</code> ni carpetas tecnicas <code>dgpsea02</code>/<code>dgpsea03</code>.
       </div>
       <div class="diagram-shell">
-        <svg id="map" viewBox="0 0 1540 1385" role="img" aria-label="Mapa de navegacion documental SGC PEA">
+        <svg id="map" viewBox="0 0 970 1400" role="img" aria-label="Mapa de navegacion documental SGC PEA">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
-              <path d="M 0 0 L 10 5 L 0 10 z" fill="#8f9b94"></path>
+              <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa3ad"></path>
             </marker>
           </defs>
-          <text class="column-label" x="70" y="26">Procedimientos</text>
-          <text class="column-label" x="520" y="26">Documentos / instructivos</text>
-          <text class="column-label" x="980" y="26">Formatos / registros</text>
+          <text class="column-label" x="40" y="26">Procedimientos</text>
+          <text class="column-label" x="360" y="26">Documentos / instructivos</text>
+          <text class="column-label" x="680" y="26">Formatos / registros</text>
         </svg>
       </div>
       <div class="legend">
-        <span><i class="swatch" style="background:#dff1ec;color:#0e6b63"></i>Documentos generales</span>
-        <span><i class="swatch" style="background:#edf2d8;color:#6d8f35"></i>Procedimientos</span>
-        <span><i class="swatch" style="background:#e8e7f5;color:#56508f"></i>Instructivos</span>
-        <span><i class="swatch" style="background:#fff0d8;color:#b66b1f"></i>Formatos y registros</span>
-        <span><i class="swatch" style="background:#f2e2df;color:#a74938"></i>Retirado, reservado o fuera de alcance</span>
+        <span><i class="swatch" style="background:#FEF3D7;color:#E5A610"></i>Documentos generales</span>
+        <span><i class="swatch" style="background:#E4E7EB;color:#4B5563"></i>Procedimientos</span>
+        <span><i class="swatch" style="background:#EAE7F6;color:#6D5AC0"></i>Instructivos</span>
+        <span><i class="swatch" style="background:#DDF3E7;color:#0E9F6E"></i>Formatos y registros</span>
+        <span><i class="swatch" style="background:#FBE3E0;color:#D64545"></i>Retirado, reservado o fuera de alcance</span>
       </div>
     </section>
   </main>
@@ -538,58 +660,58 @@
 
   <script>
     const nodes = [
-      { id: "P-PSEA-01", label: "Protocolo general EA", family: "P", state: "Mantener", x: 70, y: 45, w: 250, h: 54, text: "Procedimiento/protocolo marco del ensayo de aptitud. Debe citar el flujo digital, aplicativos e instructivos cuando el mapa este estabilizado." },
-      { id: "P-PSEA-02", label: "Matriz documental del PEA", family: "P", state: "Elaborado", x: 70, y: 105, w: 250, h: 54, text: "Matriz documental maestra. Fija 01_bloque_general como SGC maestro y 02_despliegue_rondas como registros/evidencias por ronda. Los formatos maestros viven en 01_bloque_general/04_formatos_maestros." },
-      { id: "P-PSEA-03", label: "Control de registros y evidencias", family: "P", state: "Elaborado", x: 70, y: 165, w: 250, h: 54, text: "Procedimiento para estructura simple de ronda: checklist en raiz, planificacion, comunicaciones, preparacion, datos, H/E, analisis-informe y cierre SGC. La raiz solo contiene checklist_ronda.md y las siete carpetas de etapa." },
-      { id: "P-PSEA-04", label: "Planificacion de ronda EA", family: "P", state: "Actualizar", x: 70, y: 225, w: 250, h: 54, text: "Procedimiento transversal para planificar la ronda usando calaire-app, registro de participantes, equipos exportados, ficha basica y planificacion completa." },
-      { id: "P-PSEA-05", label: "Comunicaciones", family: "P", state: "Implementado", x: 70, y: 285, w: 250, h: 54, text: "Procedimiento para comunicaciones del PEA, creado como base editable en MD y DOCX." },
-      { id: "P-PSEA-06", label: "Preparacion y control del item", family: "P", state: "Actualizar", x: 70, y: 345, w: 250, h: 54, text: "Procedimiento para generar concentraciones con calibrador dinamico y cilindro; registra el control del item gaseoso." },
-      { id: "P-PSEA-07", label: "Diseno estadistico", family: "P", state: "Actualizar", x: 70, y: 405, w: 250, h: 54, text: "Procedimiento tecnico central para valor asignado, sigma_pt, incertidumbre, outliers, H/E, desempeno y reglas de decision." },
-      { id: "P-PSEA-08", label: "Flujo tecnico de datos digitales", family: "P", state: "Elaborar", x: 70, y: 465, w: 250, h: 54, text: "Mapa del flujo digital: captura, exportacion, preprocesamiento, consolidacion, analisis, archivos tecnicos e informe." },
-      { id: "P-PSEA-09", label: "Informe de resultados", family: "P", state: "Elaborar", x: 70, y: 525, w: 250, h: 54, text: "Procedimiento que gobierna la generacion y emision del informe final desde pt_app. Absorbe el rol de P-PSEA-22." },
-      { id: "P-PSEA-10", label: "NO/NO2", family: "P", state: "Implementado", x: 70, y: 585, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de oxidos de nitrogeno (NO/NO2). DOCX activo copiado desde 0P-PSEA-02 Procedimiento NO-NO2.docx." },
-      { id: "P-PSEA-11", label: "CO", family: "P", state: "Implementado", x: 70, y: 645, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de monoxido de carbono (CO). DOCX activo copiado desde 0P-PSEA-03 Procedimiento CO_v2.docx." },
-      { id: "P-PSEA-12", label: "O3", family: "P", state: "Implementado", x: 70, y: 705, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de ozono (O3). DOCX activo copiado desde 0P-PSEA-04 Procedimiento O3_v2.docx." },
-      { id: "P-PSEA-13", label: "SO2", family: "P", state: "Implementado", x: 70, y: 765, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de dioxido de azufre (SO2). DOCX activo copiado desde 0P-PSEA-05 Procedimiento SO2_v2.docx." },
-      { id: "P-PSEA-14", label: "Colusion y falsificacion", family: "P", state: "Actualizar", x: 70, y: 825, w: 250, h: 54, text: "Procedimiento independiente para prevenir, detectar y tratar indicios de colusion o falsificacion." },
-      { id: "P-PSEA-15", label: "TNC / NC / CAPA", family: "P", state: "Actualizar", x: 70, y: 885, w: 250, h: 54, text: "Procedimiento para trabajo no conforme, no conformidades y acciones correctivas del PEA." },
-      { id: "P-PSEA-16", label: "Valores sensibles", family: "P", state: "Actualizar", x: 70, y: 945, w: 250, h: 54, text: "Procedimiento para manejo de valores sensibles en el PEA." },
-      { id: "P-PSEA-17", label: "Quejas", family: "P", state: "Actualizar", x: 70, y: 1005, w: 250, h: 54, text: "Procedimiento para registro y tratamiento de quejas en el PEA." },
-      { id: "P-PSEA-18", label: "Apelaciones", family: "P", state: "Actualizar", x: 70, y: 1065, w: 250, h: 54, text: "Procedimiento para apelaciones en el PEA." },
-      { id: "P-PSEA-19", label: "Confidencialidad", family: "P", state: "Actualizar", x: 70, y: 1125, w: 250, h: 54, text: "Procedimiento para confidencialidad en el PEA." },
-      { id: "P-PSEA-20", label: "Competencia", family: "P", state: "Actualizar", x: 70, y: 1185, w: 250, h: 54, text: "Procedimiento para competencia del PEA." },
-      { id: "P-PSEA-21", label: "Proveedores criticos", family: "P", state: "Actualizar", x: 70, y: 1245, w: 250, h: 54, text: "Procedimiento para gestion de proveedores criticos del PEA." },
-      { id: "DG-PSEA-01", label: "Protocolo general de participacion", family: "DG", state: "Mantener", x: 520, y: 45, w: 250, h: 54, text: "Documento general de participacion EA. Se revisa al cierre junto con P-PSEA-01 para citar flujo digital, aplicativos e instructivos estabilizados." },
-      { id: "DG-PSEA-02", label: "calaire-app", family: "DG", state: "Elaborado", x: 520, y: 155, w: 250, h: 54, text: "Documento general del aplicativo de gestion de rondas, participantes, carga de datos del participante, cronogramas, ficha de ronda, captura/exportacion de datos y casos SGC. Ruta canonica: 01_bloque_general/01_documentos_marco/DG-PSEA-02 Aplicativo calaire-app/." },
-      { id: "DG-PSEA-03", label: "pt_app", family: "DG", state: "Elaborado", x: 520, y: 265, w: 250, h: 54, text: "Documento general del aplicativo para preprocesamiento, consolidacion, analisis estadistico, homogeneidad/estabilidad e informe final. Ruta canonica: 01_bloque_general/01_documentos_marco/DG-PSEA-03 Aplicativo pt_app/." },
+      { id: "P-PSEA-01", label: "Protocolo general EA", family: "P", state: "Mantener", x: 40, y: 45, w: 250, h: 54, text: "Procedimiento/protocolo marco del ensayo de aptitud. Debe citar el flujo digital, aplicativos e instructivos cuando el mapa este estabilizado." },
+      { id: "P-PSEA-02", label: "Matriz documental del PEA", family: "P", state: "Elaborado", x: 40, y: 105, w: 250, h: 54, text: "Matriz documental maestra. Fija 01_bloque_general como SGC maestro y 02_despliegue_rondas como registros/evidencias por ronda. Los formatos maestros viven en 01_bloque_general/04_formatos_maestros." },
+      { id: "P-PSEA-03", label: "Control de registros y evidencias", family: "P", state: "Elaborado", x: 40, y: 165, w: 250, h: 54, text: "Procedimiento para estructura simple de ronda: checklist en raiz, planificacion, comunicaciones, preparacion, datos, H/E, analisis-informe y cierre SGC. La raiz solo contiene checklist_ronda.md y las siete carpetas de etapa." },
+      { id: "P-PSEA-04", label: "Planificacion de ronda EA", family: "P", state: "Actualizar", x: 40, y: 225, w: 250, h: 54, text: "Procedimiento transversal para planificar la ronda usando calaire-app, registro de participantes, equipos exportados, ficha basica y planificacion completa." },
+      { id: "P-PSEA-05", label: "Comunicaciones", family: "P", state: "Implementado", x: 40, y: 285, w: 250, h: 54, text: "Procedimiento para comunicaciones del PEA, creado como base editable en MD y DOCX." },
+      { id: "P-PSEA-06", label: "Preparacion y control del item", family: "P", state: "Actualizar", x: 40, y: 345, w: 250, h: 54, text: "Procedimiento para generar concentraciones con calibrador dinamico y cilindro; registra el control del item gaseoso." },
+      { id: "P-PSEA-07", label: "Diseno estadistico", family: "P", state: "Actualizar", x: 40, y: 405, w: 250, h: 54, text: "Procedimiento tecnico central para valor asignado, sigma_pt, incertidumbre, outliers, H/E, desempeno y reglas de decision." },
+      { id: "P-PSEA-08", label: "Flujo tecnico de datos digitales", family: "P", state: "Elaborar", x: 40, y: 465, w: 250, h: 54, text: "Mapa del flujo digital: captura, exportacion, preprocesamiento, consolidacion, analisis, archivos tecnicos e informe." },
+      { id: "P-PSEA-09", label: "Informe de resultados", family: "P", state: "Elaborar", x: 40, y: 525, w: 250, h: 54, text: "Procedimiento que gobierna la generacion y emision del informe final desde pt_app. Absorbe el rol de P-PSEA-22." },
+      { id: "P-PSEA-10", label: "NO/NO2", family: "P", state: "Implementado", x: 40, y: 585, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de oxidos de nitrogeno (NO/NO2). DOCX activo copiado desde 0P-PSEA-02 Procedimiento NO-NO2.docx." },
+      { id: "P-PSEA-11", label: "CO", family: "P", state: "Implementado", x: 40, y: 645, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de monoxido de carbono (CO). DOCX activo copiado desde 0P-PSEA-03 Procedimiento CO_v2.docx." },
+      { id: "P-PSEA-12", label: "O3", family: "P", state: "Implementado", x: 40, y: 705, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de ozono (O3). DOCX activo copiado desde 0P-PSEA-04 Procedimiento O3_v2.docx." },
+      { id: "P-PSEA-13", label: "SO2", family: "P", state: "Implementado", x: 40, y: 765, w: 250, h: 54, text: "Procedimiento original para ensayo de aptitud de dioxido de azufre (SO2). DOCX activo copiado desde 0P-PSEA-05 Procedimiento SO2_v2.docx." },
+      { id: "P-PSEA-14", label: "Colusion y falsificacion", family: "P", state: "Actualizar", x: 40, y: 825, w: 250, h: 54, text: "Procedimiento independiente para prevenir, detectar y tratar indicios de colusion o falsificacion." },
+      { id: "P-PSEA-15", label: "TNC / NC / CAPA", family: "P", state: "Actualizar", x: 40, y: 885, w: 250, h: 54, text: "Procedimiento para trabajo no conforme, no conformidades y acciones correctivas del PEA." },
+      { id: "P-PSEA-16", label: "Valores sensibles", family: "P", state: "Actualizar", x: 40, y: 945, w: 250, h: 54, text: "Procedimiento para manejo de valores sensibles en el PEA." },
+      { id: "P-PSEA-17", label: "Quejas", family: "P", state: "Actualizar", x: 40, y: 1005, w: 250, h: 54, text: "Procedimiento para registro y tratamiento de quejas en el PEA." },
+      { id: "P-PSEA-18", label: "Apelaciones", family: "P", state: "Actualizar", x: 40, y: 1065, w: 250, h: 54, text: "Procedimiento para apelaciones en el PEA." },
+      { id: "P-PSEA-19", label: "Confidencialidad", family: "P", state: "Actualizar", x: 40, y: 1125, w: 250, h: 54, text: "Procedimiento para confidencialidad en el PEA." },
+      { id: "P-PSEA-20", label: "Competencia", family: "P", state: "Actualizar", x: 40, y: 1185, w: 250, h: 54, text: "Procedimiento para competencia del PEA." },
+      { id: "P-PSEA-21", label: "Proveedores criticos", family: "P", state: "Actualizar", x: 40, y: 1245, w: 250, h: 54, text: "Procedimiento para gestion de proveedores criticos del PEA." },
+      { id: "DG-PSEA-01", label: "Protocolo general de participacion", family: "DG", state: "Mantener", x: 360, y: 45, w: 250, h: 54, text: "Documento general de participacion EA. Se revisa al cierre junto con P-PSEA-01 para citar flujo digital, aplicativos e instructivos estabilizados." },
+      { id: "DG-PSEA-02", label: "calaire-app", family: "DG", state: "Elaborado", x: 360, y: 155, w: 250, h: 54, text: "Documento general del aplicativo de gestion de rondas, participantes, carga de datos del participante, cronogramas, ficha de ronda, captura/exportacion de datos y casos SGC. Ruta canonica: 01_bloque_general/01_documentos_marco/DG-PSEA-02 Aplicativo calaire-app/." },
+      { id: "DG-PSEA-03", label: "pt_app", family: "DG", state: "Elaborado", x: 360, y: 265, w: 250, h: 54, text: "Documento general del aplicativo para preprocesamiento, consolidacion, analisis estadistico, homogeneidad/estabilidad e informe final. Ruta canonica: 01_bloque_general/01_documentos_marco/DG-PSEA-03 Aplicativo pt_app/." },
 
-      { id: "I-PSEA-02", label: "Participante en calaire-app", family: "I", state: "Actualizar", x: 520, y: 405, w: 250, h: 54, text: "Instructivo para que el participante use calaire-app y registre sus datos." },
-      { id: "I-PSEA-03", label: "Administracion de rondas", family: "I", state: "Actualizar", x: 520, y: 475, w: 250, h: 54, text: "Instructivo para administracion interna de rondas en calaire-app y sus exportaciones." },
-      { id: "I-PSEA-04", label: "Preprocesador pt_app", family: "I", state: "Elaborar", x: 520, y: 650, w: 250, h: 54, text: "Instructivo operativo para ejecutar el preprocesamiento y registrar entradas, salidas, version y responsable." },
-      { id: "I-PSEA-05", label: "Analisis PT en pt_app", family: "I", state: "Elaborar", x: 520, y: 720, w: 250, h: 54, text: "Instructivo operativo para ejecutar el modulo de analisis PT y generar salidas e informe." },
+      { id: "I-PSEA-02", label: "Participante en calaire-app", family: "I", state: "Actualizar", x: 360, y: 405, w: 250, h: 54, text: "Instructivo para que el participante use calaire-app y registre sus datos." },
+      { id: "I-PSEA-03", label: "Administracion de rondas", family: "I", state: "Actualizar", x: 360, y: 475, w: 250, h: 54, text: "Instructivo para administracion interna de rondas en calaire-app y sus exportaciones." },
+      { id: "I-PSEA-04", label: "Preprocesador pt_app", family: "I", state: "Elaborar", x: 360, y: 650, w: 250, h: 54, text: "Instructivo operativo para ejecutar el preprocesamiento y registrar entradas, salidas, version y responsable." },
+      { id: "I-PSEA-05", label: "Analisis PT en pt_app", family: "I", state: "Elaborar", x: 360, y: 720, w: 250, h: 54, text: "Instructivo operativo para ejecutar el modulo de analisis PT y generar salidas e informe." },
 
-      { id: "F-PSEA-01", label: "Calendario global de ronda", family: "F", state: "Actualizar", x: 980, y: 45, w: 250, h: 50, text: "Calendario general exportable desde calaire-app; alimenta la planificacion y visualizaciones tipo Gantt." },
-      { id: "F-PSEA-02", label: "Cronograma detallado", family: "F", state: "Actualizar", x: 980, y: 105, w: 250, h: 50, text: "Cronograma diligenciable/exportable de actividades detalladas de la ronda." },
-      { id: "F-PSEA-13", label: "Informe final de resultados", family: "F", state: "Implementado", x: 980, y: 165, w: 250, h: 50, text: "Formato maestro del informe final en 01_bloque_general/04_formatos_maestros. La copia emitida se conserva en 02_despliegue_rondas/<ronda>/06_analisis_e_informe/." },
-      { id: "F-PSEA-03", label: "Registro participante", family: "F", state: "Elaborado", x: 1260, y: 165, w: 250, h: 50, text: "Registro de participacion y carga de datos del participante en calaire-app: contacto, personal, analitos, equipos, logistica y aceptacion de condiciones." },
-      { id: "F-PSEA-04", label: "Equipos e instrumentos", family: "F", state: "Implementado", x: 980, y: 225, w: 250, h: 50, text: "Anexo tecnico de equipos e instrumentos exportado desde F-PSEA-03/calaire-app; se conserva CSV/XLSX operativo para analisis." },
-      { id: "F-PSEA-05", label: "Ficha basica de ronda", family: "F", state: "Elaborado", x: 980, y: 285, w: 250, h: 50, text: "Ficha breve o caratula de ronda: identifica alcance, fechas, participantes previstos y registros principales asociados." },
-      { id: "F-PSEA-06", label: "Planificacion de ronda", family: "F", state: "Elaborado", x: 980, y: 345, w: 250, h: 50, text: "Planificacion completa de la ronda: recursos, cronograma, responsabilidades, criterios estadisticos, matriz A-U y aprobaciones." },
-      { id: "F-PSEA-16", label: "Competencia y autorizacion", family: "F", state: "Elaborado", x: 1260, y: 345, w: 250, h: 50, text: "Matriz de competencia y autorizacion operativa. Cuando aplique a una ronda, la evidencia se conserva en planificacion." },
-      { id: "F-PSEA-17", label: "Proveedores criticos", family: "F", state: "Elaborado", x: 1260, y: 405, w: 250, h: 50, text: "Evaluacion de proveedores criticos. Cuando aplique a una ronda, la evidencia se conserva en planificacion." },
-      { id: "F-PSEA-07", label: "Control del item gaseoso", family: "F", state: "Implementado", x: 980, y: 405, w: 250, h: 50, text: "Formato maestro en 01_bloque_general/04_formatos_maestros; la evidencia diligenciada se guarda en 03_preparacion_item de la ronda." },
-      { id: "F-PSEA-08", label: "Datos reportados", family: "F", state: "Implementado", x: 980, y: 465, w: 250, h: 50, text: "Formato maestro para datos reportados por participante; las copias/exportaciones de ronda se guardan en 04_datos_y_preprocesamiento." },
-      { id: "F-PSEA-10", label: "Registro de preprocesamiento", family: "F", state: "Implementado", x: 980, y: 525, w: 250, h: 50, text: "Formato maestro de preprocesamiento; el registro diligenciado de cada ronda se guarda en 04_datos_y_preprocesamiento." },
-      { id: "F-PSEA-09", label: "Exportacion para analisis PT", family: "F", state: "Implementado", x: 980, y: 585, w: 250, h: 50, text: "Formato maestro para exportacion oficial desde calaire-app hacia pt_app; la exportacion de ronda se guarda en 04_datos_y_preprocesamiento." },
-      { id: "F-PSEA-11", label: "Homogeneidad y estabilidad", family: "F", state: "Parcial", x: 980, y: 645, w: 250, h: 50, text: "Formato maestro de H/E del item; registros y anexos diligenciados se guardan en 05_homogeneidad_estabilidad de la ronda." },
-      { id: "F-PSEA-11A", label: "Subformato H/E A", family: "F", state: "Elaborar", x: 980, y: 705, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad A." },
-      { id: "F-PSEA-11B", label: "Subformato H/E B", family: "F", state: "Elaborar", x: 980, y: 765, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad B." },
-      { id: "F-PSEA-11C", label: "Subformato H/E C", family: "F", state: "Elaborar", x: 980, y: 825, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad C." },
-      { id: "F-PSEA-11D", label: "Subformato H/E D", family: "F", state: "Elaborar", x: 980, y: 885, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad D." },
-      { id: "F-PSEA-12", label: "Dataset oficial consolidado", family: "F", state: "Implementado", x: 980, y: 945, w: 250, h: 50, text: "Formato maestro/dataset oficial consolidado; el dataset de cada ronda se guarda en 04_datos_y_preprocesamiento." },
-      { id: "F-PSEA-18", label: "Comunicacion participantes", family: "F", state: "Preliminar", x: 980, y: 1005, w: 250, h: 50, text: "Formato maestro para comunicaciones formales a participantes. Normaliza mensajes de fechas, documentos adjuntos, acciones requeridas y evidencia de envio/respuesta; las copias emitidas se conservan como evidencia de ronda." },
-      { id: "F-PSEA-14", label: "Queja o no conformidad", family: "F", state: "Elaborado", x: 1260, y: 945, w: 250, h: 50, text: "Registro de queja, trabajo no conforme, no conformidad o accion correctiva cuando aplique. La evidencia de ronda se conserva en cierre SGC." },
-      { id: "F-PSEA-15", label: "Apelacion", family: "F", state: "Elaborado", x: 1260, y: 1005, w: 250, h: 50, text: "Registro de apelacion cuando aplique. La evidencia de ronda se conserva en cierre SGC." }
+      { id: "F-PSEA-01", label: "Calendario global de ronda", family: "F", state: "Actualizar", x: 680, y: 45, w: 250, h: 50, text: "Calendario general exportable desde calaire-app; alimenta la planificacion y visualizaciones tipo Gantt." },
+      { id: "F-PSEA-02", label: "Cronograma detallado", family: "F", state: "Actualizar", x: 680, y: 105, w: 250, h: 50, text: "Cronograma diligenciable/exportable de actividades detalladas de la ronda." },
+      { id: "F-PSEA-13", label: "Informe final de resultados", family: "F", state: "Implementado", x: 680, y: 1005, w: 250, h: 50, text: "Formato maestro del informe final en 01_bloque_general/04_formatos_maestros. La copia emitida se conserva en 02_despliegue_rondas/<ronda>/06_analisis_e_informe/." },
+      { id: "F-PSEA-03", label: "Registro participante", family: "F", state: "Elaborado", x: 680, y: 165, w: 250, h: 50, text: "Registro de participacion y carga de datos del participante en calaire-app: contacto, personal, analitos, equipos, logistica y aceptacion de condiciones." },
+      { id: "F-PSEA-04", label: "Equipos e instrumentos", family: "F", state: "Implementado", x: 680, y: 225, w: 250, h: 50, text: "Anexo tecnico de equipos e instrumentos exportado desde F-PSEA-03/calaire-app; se conserva CSV/XLSX operativo para analisis." },
+      { id: "F-PSEA-05", label: "Ficha basica de ronda", family: "F", state: "Elaborado", x: 680, y: 285, w: 250, h: 50, text: "Ficha breve o caratula de ronda: identifica alcance, fechas, participantes previstos y registros principales asociados." },
+      { id: "F-PSEA-06", label: "Planificacion de ronda", family: "F", state: "Elaborado", x: 680, y: 345, w: 250, h: 50, text: "Planificacion completa de la ronda: recursos, cronograma, responsabilidades, criterios estadisticos, matriz A-U y aprobaciones." },
+      { id: "F-PSEA-16", label: "Competencia y autorizacion", family: "F", state: "Elaborado", x: 680, y: 1185, w: 250, h: 50, text: "Matriz de competencia y autorizacion operativa. Cuando aplique a una ronda, la evidencia se conserva en planificacion." },
+      { id: "F-PSEA-17", label: "Proveedores criticos", family: "F", state: "Elaborado", x: 680, y: 1245, w: 250, h: 50, text: "Evaluacion de proveedores criticos. Cuando aplique a una ronda, la evidencia se conserva en planificacion." },
+      { id: "F-PSEA-07", label: "Control del item gaseoso", family: "F", state: "Implementado", x: 680, y: 405, w: 250, h: 50, text: "Formato maestro en 01_bloque_general/04_formatos_maestros; la evidencia diligenciada se guarda en 03_preparacion_item de la ronda." },
+      { id: "F-PSEA-08", label: "Datos reportados", family: "F", state: "Implementado", x: 680, y: 465, w: 250, h: 50, text: "Formato maestro para datos reportados por participante; las copias/exportaciones de ronda se guardan en 04_datos_y_preprocesamiento." },
+      { id: "F-PSEA-10", label: "Registro de preprocesamiento", family: "F", state: "Implementado", x: 680, y: 585, w: 250, h: 50, text: "Formato maestro de preprocesamiento; el registro diligenciado de cada ronda se guarda en 04_datos_y_preprocesamiento." },
+      { id: "F-PSEA-09", label: "Exportacion para analisis PT", family: "F", state: "Implementado", x: 680, y: 525, w: 250, h: 50, text: "Formato maestro para exportacion oficial desde calaire-app hacia pt_app; la exportacion de ronda se guarda en 04_datos_y_preprocesamiento." },
+      { id: "F-PSEA-11", label: "Homogeneidad y estabilidad", family: "F", state: "Parcial", x: 680, y: 645, w: 250, h: 50, text: "Formato maestro de H/E del item; registros y anexos diligenciados se guardan en 05_homogeneidad_estabilidad de la ronda." },
+      { id: "F-PSEA-11A", label: "Subformato H/E A", family: "F", state: "Elaborar", x: 680, y: 705, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad A." },
+      { id: "F-PSEA-11B", label: "Subformato H/E B", family: "F", state: "Elaborar", x: 680, y: 765, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad B." },
+      { id: "F-PSEA-11C", label: "Subformato H/E C", family: "F", state: "Elaborar", x: 680, y: 825, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad C." },
+      { id: "F-PSEA-11D", label: "Subformato H/E D", family: "F", state: "Elaborar", x: 680, y: 885, w: 250, h: 50, text: "Datos preprocesados y resultados de homogeneidad/estabilidad D." },
+      { id: "F-PSEA-12", label: "Dataset oficial consolidado", family: "F", state: "Implementado", x: 680, y: 945, w: 250, h: 50, text: "Formato maestro/dataset oficial consolidado; el dataset de cada ronda se guarda en 04_datos_y_preprocesamiento." },
+      { id: "F-PSEA-18", label: "Comunicacion participantes", family: "F", state: "Preliminar", x: 680, y: 1305, w: 250, h: 50, text: "Formato maestro para comunicaciones formales a participantes. Normaliza mensajes de fechas, documentos adjuntos, acciones requeridas y evidencia de envio/respuesta; las copias emitidas se conservan como evidencia de ronda." },
+      { id: "F-PSEA-14", label: "Queja o no conformidad", family: "F", state: "Elaborado", x: 680, y: 1065, w: 250, h: 50, text: "Registro de queja, trabajo no conforme, no conformidad o accion correctiva cuando aplique. La evidencia de ronda se conserva en cierre SGC." },
+      { id: "F-PSEA-15", label: "Apelacion", family: "F", state: "Elaborado", x: 680, y: 1125, w: 250, h: 50, text: "Registro de apelacion cuando aplique. La evidencia de ronda se conserva en cierre SGC." }
     ];
 
     const edges = [

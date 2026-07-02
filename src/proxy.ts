@@ -7,6 +7,7 @@ export default authkitProxy({
     unauthenticatedPaths: [
       '/',
       '/login',
+      '/login/start',
       '/auth/callback',
       '/denied',
       '/guia.html',
