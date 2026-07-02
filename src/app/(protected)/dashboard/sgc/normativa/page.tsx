@@ -1,7 +1,8 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/server/auth'
-import { listNormativaSgc, listSgcMaestro, type DocumentoRequisito } from '@/server/sgc'
+import { listNormativaSgcWithStatus, listSgcMaestroWithStatus, type DocumentoRequisito } from '@/server/sgc'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
 import { relacionarDocumentoRequisitoAction } from './actions'
 
@@ -71,15 +72,18 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
   const selectedNorma = firstParam(params.norma) ?? null
   const selectedRelacionarId = firstParam(params.relacionar) ?? null
   const page = parsePage(params.page)
-  const [data, documentosMaestros] = await Promise.all([
-    listNormativaSgc({
+  const [normativaResult, documentosMaestrosResult] = await Promise.all([
+    listNormativaSgcWithStatus({
       norma: selectedNorma,
       estadoCobertura: estadoCobertura ?? null,
       page,
       pageSize: 75,
     }),
-    listSgcMaestro(),
+    listSgcMaestroWithStatus(),
   ])
+  const data = normativaResult.data
+  const documentosMaestros = documentosMaestrosResult.data
+  const backendOffline = normativaResult.offline || documentosMaestrosResult.offline
   const canEdit = canEditSgcMaestro(auth)
   const normaCards = data.normas.map((norma) => {
     const rows = data.rows.filter(({ requisito }) => requisito.norma === norma)
@@ -103,6 +107,9 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
 
       {firstParam(params.success) && <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{firstParam(params.success)}</div>}
       {firstParam(params.error) && <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{firstParam(params.error)}</div>}
+      {backendOffline && (
+        <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras Convex no responde." />
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card-accent px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Requisitos</div><div className="mt-2 text-3xl font-semibold">{data.resumen.requisitos}</div></div>
@@ -249,7 +256,11 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
             </tbody>
           </table>
         </div>
-        {data.rows.length === 0 && <div className="p-8 text-center text-sm text-[var(--foreground-muted)]">Sin requisitos para los filtros seleccionados.</div>}
+        {data.rows.length === 0 && (
+          <div className="p-8 text-center text-sm text-[var(--foreground-muted)]">
+            {backendOffline ? 'No hay requisitos disponibles porque el backend esta offline.' : 'Sin requisitos para los filtros seleccionados.'}
+          </div>
+        )}
       </section>
     </div>
   )

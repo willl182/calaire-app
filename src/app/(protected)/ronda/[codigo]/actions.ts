@@ -37,16 +37,16 @@ export async function guardarEnvioAction(
   if (ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
 
   if (!isAdmin(auth)) {
-    const invitado = await isInvitado(rondaId, auth.user.id)
+    const invitado = await isInvitado(rondaId)
     if (!invitado) return { error: 'No tienes acceso a esta ronda.' }
   }
 
-  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId, auth.user.id)
+  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId)
   if (estadoEnvio.enviado) {
     return { error: 'Ya enviaste tus resultados finales. Solo puedes consultarlos.' }
   }
 
-  const participante = await getRondaParticipantePT(rondaId, auth.user.id)
+  const participante = await getRondaParticipantePT(rondaId)
   if (!participante) {
     return { error: 'No fue posible encontrar la asignación del participante para esta ronda.' }
   }
@@ -117,11 +117,11 @@ export async function guardarReferenciaCsvAction(
   if (ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
 
   if (!isAdmin(auth)) {
-    const invitado = await isInvitado(rondaId, auth.user.id)
+    const invitado = await isInvitado(rondaId)
     if (!invitado) return { error: 'No tienes acceso a esta ronda.' }
   }
 
-  const participante = await getRondaParticipantePT(rondaId, auth.user.id)
+  const participante = await getRondaParticipantePT(rondaId)
   if (!participante) {
     return { error: 'No fue posible encontrar la asignación del participante para esta ronda.' }
   }
@@ -135,7 +135,7 @@ export async function guardarReferenciaCsvAction(
     }
   }
 
-  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId, auth.user.id)
+  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId)
   if (estadoEnvio.enviado) {
     return { error: 'Ya enviaste tus resultados finales. Solo puedes consultarlos.' }
   }
@@ -215,11 +215,11 @@ export async function enviarInformeFinalAction(
   }
 
   if (!isAdmin(auth)) {
-    const invitado = await isInvitado(rondaId, auth.user.id)
+    const invitado = await isInvitado(rondaId)
     if (!invitado) return { error: 'No tienes acceso a esta ronda.' }
   }
 
-  const participante = await getRondaParticipantePT(rondaId, auth.user.id)
+  const participante = await getRondaParticipantePT(rondaId)
   if (!participante) {
     return { error: 'No fue posible encontrar la asignación del participante para esta ronda.' }
   }
@@ -230,7 +230,7 @@ export async function enviarInformeFinalAction(
     }
   }
 
-  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId, auth.user.id)
+  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId)
 
   if (estadoEnvio.enviado) {
     return {
@@ -246,7 +246,7 @@ export async function enviarInformeFinalAction(
   }
 
   try {
-    const submittedAt = await submitFinalPT(rondaId, auth.user.id)
+    const submittedAt = await submitFinalPT(rondaId)
     return { ok: true, submittedAt }
   } catch (error) {
     return {
@@ -266,11 +266,11 @@ export async function limpiarEnviosReferenciaAction(
   if (ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
 
   if (!isAdmin(auth)) {
-    const invitado = await isInvitado(rondaId, auth.user.id)
+    const invitado = await isInvitado(rondaId)
     if (!invitado) return { error: 'No tienes acceso a esta ronda.' }
   }
 
-  const participante = await getRondaParticipantePT(rondaId, auth.user.id)
+  const participante = await getRondaParticipantePT(rondaId)
   if (!participante) {
     return { error: 'No fue posible encontrar la asignación del participante para esta ronda.' }
   }
@@ -278,7 +278,7 @@ export async function limpiarEnviosReferenciaAction(
     return { error: 'Solo el laboratorio de referencia puede limpiar los datos cargados.' }
   }
 
-  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId, auth.user.id)
+  const estadoEnvio = await getEstadoEnvioPTParticipante(rondaId)
   if (estadoEnvio.enviado) {
     return { error: 'Ya enviaste tus resultados finales. No puedes limpiar los datos.' }
   }

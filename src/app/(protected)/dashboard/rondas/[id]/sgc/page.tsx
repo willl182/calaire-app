@@ -1,9 +1,11 @@
 import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { Alert } from '@/components/ui/Alert'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { isConvexOffline } from '@/lib/convex-fallback'
 import { isAdmin, requireAuth } from '@/server/auth'
-import { getRonda } from '@/server/rondas'
+import { getRondaWithStatus } from '@/server/rondas'
 import {
   SGC_FORMATOS_FASE_1,
   SGC_PLAN_BLOQUES,
@@ -11,7 +13,7 @@ import {
   type SgcFormatoCodigo,
   type SgcRondaDocumento,
 } from '@/server/sgc/catalog'
-import { getPanelSgc, inicializarPanelSgc } from '@/server/sgc'
+import { getPanelSgcWithStatus, inicializarPanelSgc } from '@/server/sgc'
 import { RondaContextNav } from '../RondaContextNav'
 import { ExpedienteSgc } from './ExpedienteSgc'
 import {
@@ -84,17 +86,28 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
   const { id } = await params
   const query = searchParams ? await searchParams : {}
-  const ronda = await getRonda(id)
-  if (!ronda) notFound()
+  const rondaResult = await getRondaWithStatus(id)
+  if (!rondaResult.data && !rondaResult.offline) notFound()
+  const ronda = rondaResult.data
 
-  await inicializarPanelSgc(id)
-  const panel = await getPanelSgc(id)
-  if (!panel) notFound()
+  let backendOffline = rondaResult.offline
+  if (ronda) {
+    try {
+      await inicializarPanelSgc(id)
+    } catch (error) {
+      if (!isConvexOffline(error)) throw error
+      backendOffline = true
+    }
+  }
+  const panelResult = ronda ? await getPanelSgcWithStatus(id) : { data: null, offline: backendOffline }
+  const panel = panelResult.data
+  backendOffline = backendOffline || panelResult.offline
+  if (!panel && !backendOffline) notFound()
 
   const success = getParam(query.success)
   const error = getParam(query.error)
   const selectedFormato = parseSelectedFormato(query.formato)
-  const checklistByCodigo = new Map(panel.checklist.map((item) => [item.codigo, item]))
+  const checklistByCodigo = new Map((panel?.checklist ?? []).map((item) => [item.codigo, item]))
   const documentos = SGC_RONDA_ETAPAS.flatMap((seccion) => seccion.documentos.map((doc) => ({ seccion, doc })))
   const cubiertos = documentos.filter(({ doc }) => {
     const estado = getDocumentoEstado(doc, checklistByCodigo)
@@ -102,27 +115,27 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   }).length
   const progreso = documentos.length === 0 ? 0 : Math.round((cubiertos / documentos.length) * 100)
 
-  const planBloques = panel.plan?.bloques ?? {}
-  const planCampos = panel.plan?.camposEstructurados ?? {}
-  const informeChecks = panel.revision?.checks ?? {}
-  const homogeneidadChecks = panel.revisionHomogeneidad?.checks ?? {}
+  const planBloques = panel?.plan?.bloques ?? {}
+  const planCampos = panel?.plan?.camposEstructurados ?? {}
+  const informeChecks = panel?.revision?.checks ?? {}
+  const homogeneidadChecks = panel?.revisionHomogeneidad?.checks ?? {}
   const informeCheckKeys = Object.keys(INFORME_CHECK_LABELS)
   const homogeneidadCheckKeys = Object.keys(HOMOGENEIDAD_CHECK_LABELS)
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <RondaContextNav rondaId={id} rondaCodigo={ronda.codigo} />
+        {ronda && <RondaContextNav rondaId={id} rondaCodigo={ronda.codigo} />}
 
         <header className="header-bar px-6 py-5">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
             <div>
               <div className="flex flex-wrap items-center gap-3">
                 <h1 className="text-2xl font-semibold text-[var(--foreground)]">SGC de la ronda</h1>
-                <EstadoBadge estado={ronda.estado} />
+                {ronda && <EstadoBadge estado={ronda.estado} />}
               </div>
               <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-                Expediente documental para {ronda.codigo}. Solo se muestran el mapa documental, el checklist real y los registros que se diligencian desde esta vista.
+                Expediente documental para {ronda?.codigo ?? id}. Solo se muestran el mapa documental, el checklist real y los registros que se diligencian desde esta vista.
               </p>
             </div>
             <div className="min-w-48 rounded-lg border border-[var(--border)] p-4">
@@ -137,15 +150,27 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
+        {backendOffline && (
+          <BackendOfflineBanner detail="El expediente SGC de la ronda se muestra sin datos hasta que Convex responda." />
+        )}
 
-        <ExpedienteSgc panel={panel} rondaId={id} rondaCodigo={ronda.codigo} selectedFormato={selectedFormato} />
+        {panel ? (
+          <ExpedienteSgc panel={panel} rondaId={id} rondaCodigo={ronda?.codigo ?? id} selectedFormato={selectedFormato} />
+        ) : (
+          <section className="card p-8 text-center">
+            <h2 className="text-lg font-semibold text-[var(--foreground)]">Expediente SGC no disponible</h2>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
+              No se pudo cargar el panel documental de esta ronda porque el backend esta offline.
+            </p>
+          </section>
+        )}
 
         <section className="card p-6">
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-[var(--foreground)]">Checklist documental real</h2>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                Lista derivada de las secciones y documentos de {ronda.codigo}, no del checklist operativo anterior.
+                Lista derivada de las secciones y documentos de {ronda?.codigo ?? id}, no del checklist operativo anterior.
               </p>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
@@ -180,7 +205,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoClasses(estado)}`}>{estado}</span>
                       </td>
                       <td className="px-3 py-3 align-top text-[var(--foreground-muted)]">
-                        {doc.archivoBase ? `${seccion.carpeta}/${doc.archivoBase}.md y .docx` : `Sin archivo base en ${ronda.codigo}`}
+                        {doc.archivoBase ? `${seccion.carpeta}/${doc.archivoBase}.md y .docx` : `Sin archivo base en ${ronda?.codigo ?? id}`}
                       </td>
                       <td className="px-3 py-3 align-top text-[var(--foreground-muted)]">
                         {getDocumentoObservacion(doc, checklistByCodigo)}
@@ -198,7 +223,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-06 - Planificacion de ronda EA</h2>
-                <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.plan?.estado ?? 'borrador'}</p>
+                <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel?.plan?.estado ?? 'borrador'}</p>
               </div>
               <Link className="btn-outline" href={`/dashboard/rondas/${id}/sgc/plan/print`}>Vista imprimible</Link>
             </div>
@@ -234,7 +259,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
             <div className="flex items-start justify-between gap-3">
               <div>
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-13 - Informe final de resultados</h2>
-                <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.revision?.estado ?? 'borrador'}</p>
+                <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel?.revision?.estado ?? 'borrador'}</p>
               </div>
               <Link className="btn-outline" href={`/dashboard/rondas/${id}/sgc/f-psea-13/print`}>Vista imprimible</Link>
             </div>
@@ -266,7 +291,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
             <div>
               <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-11 - Homogeneidad y estabilidad del item</h2>
-              <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.revisionHomogeneidad?.estado ?? 'borrador'}</p>
+              <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel?.revisionHomogeneidad?.estado ?? 'borrador'}</p>
             </div>
             <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
               Registro diligenciable
@@ -279,7 +304,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
               className="input min-h-24"
               name="homogeneidad_conclusiones"
               placeholder="Conclusion documentada de homogeneidad y estabilidad"
-              defaultValue={panel.revisionHomogeneidad?.conclusiones ?? ''}
+              defaultValue={panel?.revisionHomogeneidad?.conclusiones ?? ''}
             />
             <div className="grid gap-3 lg:grid-cols-2">
               {homogeneidadCheckKeys.map((key) => {

@@ -2,20 +2,23 @@ import { v } from 'convex/values'
 import { contaminanteValidator } from './validators'
 import { defineRondaMutation, defineRondaQuery } from './definitions'
 import { PENDING_PREFIX, contaminanteIdx } from './state'
+import { requireAdminIdentity, requireIdentity } from '../access'
 
 export const listEnviosDefinition = defineRondaQuery({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const identity = await requireIdentity(ctx)
     return ctx.db
       .query('envios')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .collect()
   },
 })
 
 export const getEstadoEnvioParticipanteDefinition = defineRondaQuery({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const identity = await requireIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) return { completo: false, enviado: false, enviados_at: null, total_esperado: 0, total_guardado: 0 }
 
@@ -27,7 +30,7 @@ export const getEstadoEnvioParticipanteDefinition = defineRondaQuery({
 
     const envios = await ctx.db
       .query('envios')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .collect()
 
     const completo = envios.length === totalEsperado && totalEsperado > 0
@@ -47,6 +50,7 @@ export const getEstadoEnvioParticipanteDefinition = defineRondaQuery({
 export const listResultadosDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) return []
 
@@ -111,6 +115,7 @@ export const listResultadosDefinition = defineRondaQuery({
 export const listResultadosRondaDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
 
@@ -164,16 +169,16 @@ export const claimParticipanteTokenDefinition = defineRondaMutation({
   args: {
     rondaId:   v.id('rondas'),
     token:     v.string(),
-    userId:    v.string(),
     email:     v.string(),
   },
-  handler: async (ctx, { rondaId, token, userId, email }) => {
+  handler: async (ctx, { rondaId, token, email }) => {
+    const identity = await requireIdentity(ctx)
     const normalizedToken = token.trim()
     if (!normalizedToken) return 'invalid' as const
 
     const existing = await ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
     if (existing) return 'already-assigned' as const
 
@@ -187,7 +192,7 @@ export const claimParticipanteTokenDefinition = defineRondaMutation({
     const now = Date.now()
     // Preserve participantCode when a pending slot is claimed.
     await ctx.db.patch(slot._id, {
-      workosUserId: userId,
+      workosUserId: identity.subject,
       email,
       claimedAt: now,
     })
@@ -199,19 +204,19 @@ export const claimParticipanteTokenDefinition = defineRondaMutation({
 export const upsertEnvioDefinition = defineRondaMutation({
   args: {
     rondaId:       v.id('rondas'),
-    userId:        v.string(),
     contaminante:  contaminanteValidator,
     nivel:         v.number(),
     valores:       v.array(v.number()),
     promedio:      v.optional(v.number()),
     incertidumbre: v.optional(v.number()),
   },
-  handler: async (ctx, { rondaId, userId, contaminante, nivel, valores, promedio, incertidumbre }) => {
+  handler: async (ctx, { rondaId, contaminante, nivel, valores, promedio, incertidumbre }) => {
+    const identity = await requireIdentity(ctx)
     const now = Date.now()
     const existing = await ctx.db
       .query('envios')
       .withIndex('by_ronda_user_cont_nivel', (q) =>
-        q.eq('rondaId', rondaId).eq('workosUserId', userId).eq('contaminante', contaminante).eq('nivel', nivel)
+        q.eq('rondaId', rondaId).eq('workosUserId', identity.subject).eq('contaminante', contaminante).eq('nivel', nivel)
       )
       .unique()
 
@@ -222,7 +227,7 @@ export const upsertEnvioDefinition = defineRondaMutation({
 
     return ctx.db.insert('envios', {
       rondaId,
-      workosUserId: userId,
+      workosUserId: identity.subject,
       contaminante,
       nivel,
       valores,

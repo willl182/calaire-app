@@ -92,11 +92,21 @@ export function identityRoles(identity: unknown): string[] {
   return [...directClaims, ...nestedClaims].map((role) => role.toLowerCase())
 }
 
+// F21: fuente unica de la definicion de "admin", compartida entre SGC
+// (`convex/sgc/shared.ts`) y el resto de dominios (`convex/access.ts`). Antes
+// `requireParticipanteOAdmin` solo reconocia 'admin' mientras `access.ts` incluia
+// tambien 'admin_sgc'/'coordinador_proceso', creando autorizacion inconsistente.
+export const ADMIN_ROLES = ['admin', 'admin_sgc', 'coordinador_proceso'] as const
+
+export function isAdminRole(roles: readonly string[]): boolean {
+  return roles.some((role) => (ADMIN_ROLES as readonly string[]).includes(role))
+}
+
 export async function requireSgcAdmin(ctx: SgcAuthCtx) {
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Autenticacion requerida para operar SGC.')
   const roles = identityRoles(identity)
-  if (!roles.some((role) => ['admin', 'admin_sgc', 'coordinador_proceso'].includes(role))) {
+  if (!isAdminRole(roles)) {
     throw new Error('Permisos insuficientes para operar SGC.')
   }
   return identity.email ?? identity.name ?? identity.tokenIdentifier
@@ -111,13 +121,13 @@ export async function requireSgcViewerAccess(ctx: SgcAuthCtx) {
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Autenticacion requerida para consultar SGC.')
   const roles = identityRoles(identity)
-  if (!roles.some((role) => ['admin', 'admin_sgc', 'coordinador_proceso', 'consulta'].includes(role))) {
+  if (!roles.some((role) => [...ADMIN_ROLES, 'consulta'].includes(role))) {
     throw new Error('Permisos insuficientes para consultar SGC.')
   }
   return {
     actor: identity.email ?? identity.name ?? identity.tokenIdentifier,
     roles,
-    canReadInternal: roles.some((role) => ['admin', 'admin_sgc', 'coordinador_proceso'].includes(role)),
+    canReadInternal: isAdminRole(roles),
   }
 }
 
@@ -133,7 +143,7 @@ export async function requireParticipanteOAdmin(ctx: SgcAuthCtx, rondaId: Id<'ro
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Autenticacion requerida.')
   const roles = identityRoles(identity)
-  if (roles.includes('admin')) {
+  if (isAdminRole(roles)) {
     return identity.email ?? identity.name ?? identity.tokenIdentifier
   }
   const participante = await ctx.db

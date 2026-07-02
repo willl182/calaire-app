@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { mutation, query } from './_generated/server'
+import { internalMutation, internalQuery } from './_generated/server'
 import type { Id } from './_generated/dataModel'
 
 const PARTICIPANT_CODE_LENGTH = 6
@@ -48,7 +48,7 @@ function generateUniqueBackfillParticipantCode(existingCodes: Set<string>): stri
   throw new Error('No se pudo generar un codigo de participante unico para esta ronda.')
 }
 
-export const counts = query({
+export const counts = internalQuery({
   args: {},
   handler: async (ctx) => {
     const result: Record<string, number> = {}
@@ -59,7 +59,7 @@ export const counts = query({
   },
 })
 
-export const wipeAll = mutation({
+export const wipeAll = internalMutation({
   args: { confirm: v.literal('WIPE_CONVEX_MIGRATION_TABLES') },
   handler: async (ctx) => {
     for (const table of TABLES) {
@@ -69,7 +69,7 @@ export const wipeAll = mutation({
   },
 })
 
-export const backfillParticipantCodes = mutation({
+export const backfillParticipantCodes = internalMutation({
   args: {
     dryRun: v.optional(v.boolean()),
   },
@@ -156,7 +156,7 @@ export const backfillParticipantCodes = mutation({
   },
 })
 
-export const insertRonda = mutation({
+export const insertRonda = internalMutation({
   args: {
     codigo: v.string(),
     nombre: v.string(),
@@ -171,7 +171,7 @@ export const insertRonda = mutation({
   handler: async (ctx, args) => ctx.db.insert('rondas', args),
 })
 
-export const insertRondaContaminante = mutation({
+export const insertRondaContaminante = internalMutation({
   args: {
     rondaId: v.id('rondas'),
     contaminante: v.union(v.literal('CO'), v.literal('SO2'), v.literal('O3'), v.literal('NO'), v.literal('NO2')),
@@ -181,7 +181,7 @@ export const insertRondaContaminante = mutation({
   handler: async (ctx, args) => ctx.db.insert('rondaContaminantes', args),
 })
 
-export const insertRondaParticipante = mutation({
+export const insertRondaParticipante = internalMutation({
   args: {
     rondaId: v.id('rondas'),
     workosUserId: v.string(),
@@ -196,7 +196,7 @@ export const insertRondaParticipante = mutation({
   handler: async (ctx, args) => ctx.db.insert('rondaParticipantes', clean(args)),
 })
 
-export const insertDirectorioParticipante = mutation({
+export const insertDirectorioParticipante = internalMutation({
   args: {
     nit: v.string(),
     correo: v.string(),
@@ -213,7 +213,7 @@ export const insertDirectorioParticipante = mutation({
   handler: async (ctx, args) => ctx.db.insert('directorioParticipantes', clean(args)),
 })
 
-export const insertRondaPtItem = mutation({
+export const insertRondaPtItem = internalMutation({
   args: {
     rondaId: v.id('rondas'),
     contaminante: v.union(v.literal('CO'), v.literal('SO2'), v.literal('O3'), v.literal('NO'), v.literal('NO2')),
@@ -225,7 +225,7 @@ export const insertRondaPtItem = mutation({
   handler: async (ctx, args) => ctx.db.insert('rondaPtItems', args),
 })
 
-export const insertRondaPtSampleGroup = mutation({
+export const insertRondaPtSampleGroup = internalMutation({
   args: {
     rondaId: v.id('rondas'),
     sampleGroup: v.string(),
@@ -235,7 +235,7 @@ export const insertRondaPtSampleGroup = mutation({
   handler: async (ctx, args) => ctx.db.insert('rondaPtSampleGroups', args),
 })
 
-export const insertEnvio = mutation({
+export const insertEnvio = internalMutation({
   args: {
     rondaId: v.id('rondas'),
     workosUserId: v.string(),
@@ -250,7 +250,7 @@ export const insertEnvio = mutation({
   handler: async (ctx, args) => ctx.db.insert('envios', clean(args)),
 })
 
-export const insertEnvioPt = mutation({
+export const insertEnvioPt = internalMutation({
   args: {
     rondaId: v.id('rondas'),
     rondaParticipanteId: v.id('rondaParticipantes'),
@@ -271,7 +271,7 @@ export const insertEnvioPt = mutation({
   handler: async (ctx, args) => ctx.db.insert('enviosPt', clean(args)),
 })
 
-export const insertFichaRegistro = mutation({
+export const insertFichaRegistro = internalMutation({
   args: {
     rondaParticipanteId: v.id('rondaParticipantes'),
     nombreLaboratorio: v.optional(v.string()),
@@ -296,7 +296,7 @@ export const insertFichaRegistro = mutation({
   handler: async (ctx, args) => ctx.db.insert('fichasRegistro', clean(args)),
 })
 
-export const insertFichaAcompanante = mutation({
+export const insertFichaAcompanante = internalMutation({
   args: {
     fichaId: v.id('fichasRegistro'),
     sortOrder: v.number(),
@@ -307,7 +307,7 @@ export const insertFichaAcompanante = mutation({
   handler: async (ctx, args) => ctx.db.insert('fichasAcompanantes', args),
 })
 
-export const insertFichaAnalizador = mutation({
+export const insertFichaAnalizador = internalMutation({
   args: {
     fichaId: v.id('fichasRegistro'),
     sortOrder: v.number(),
@@ -324,7 +324,7 @@ export const insertFichaAnalizador = mutation({
   handler: async (ctx, args) => ctx.db.insert('fichasAnalizadores', clean(args)),
 })
 
-export const insertFichaInstrumento = mutation({
+export const insertFichaInstrumento = internalMutation({
   args: {
     fichaId: v.id('fichasRegistro'),
     sortOrder: v.number(),

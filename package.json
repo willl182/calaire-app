@@ -12,6 +12,7 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:auth:manual": "PLAYWRIGHT_AUTH_MODE=manual playwright test --project=manual-auth",
+    "test:e2e:screenshots": "PLAYWRIGHT_INCLUDE_SCREENSHOTS=1 PLAYWRIGHT_START_SERVER=1 playwright test --project=screenshots-authenticated-chromium --grep @screenshots",
     "test:e2e:start": "PLAYWRIGHT_START_SERVER=1 playwright test",
     "test:e2e:ui": "playwright test --ui",
     "sgc:extract-seeds": "node scripts/extract-sgc-seeds.mjs",
@@ -20,6 +21,7 @@
     "release": "node scripts/release.mjs"
   },
   "dependencies": {
+    "@t3-oss/env-nextjs": "^0.13.11",
     "@workos-inc/authkit-nextjs": "^3.0.1",
     "@workos-inc/node": "8.13.0",
     "clsx": "^2.1.1",
@@ -28,21 +30,22 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "resend": "^6.12.4",
-    "tailwind-merge": "^3.6.0"
+    "tailwind-merge": "^3.6.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@edge-runtime/vm": "^5.0.0",
     "@playwright/test": "^1.60.0",
-    "@t3-oss/env-nextjs": "^0.13.11",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "convex-test": "^0.0.54",
     "eslint": "^9",
     "eslint-config-next": "16.2.4",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.9",
-    "zod": "^4.4.3"
+    "vitest": "^4.1.9"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

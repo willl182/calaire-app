@@ -64,6 +64,10 @@ docs/EA-PP2026-R*-*.docx
 # migration outputs
 scripts/.migration-state.json
 
+# local/generated agent logs
+logs/history/
+logs/plans/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

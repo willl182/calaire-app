@@ -1,7 +1,37 @@
-import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { fetchMutation as rawFetchMutation, fetchQuery as rawFetchQuery } from 'convex/nextjs'
+import type { FunctionArgs, FunctionReference, FunctionReturnType } from 'convex/server'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
-import { safeConvexCall } from '@/lib/convex-fallback'
+import { safeConvexCall, safeConvexCallWithStatus } from '@/lib/convex-fallback'
+import { requireAuth } from '@/server/auth'
+
+// F19: las funciones Convex de rondas/pt ahora exigen identidad
+// (requireIdentity/requireAdminIdentity/requireParticipantOrAdmin...). El cliente
+// de servidor debe reenviar el accessToken de la sesion como tercer argumento de
+// fetchQuery/fetchMutation, igual que src/server/sgc/index.ts (sgcToken). Sin el
+// token, el backend rechaza al usuario autenticado ("Autenticacion requerida").
+async function rondasToken(): Promise<string> {
+  const auth = await requireAuth()
+  const token = auth.accessToken
+  if (!token) {
+    throw new Error('No hay sesion activa para operar rondas.')
+  }
+  return token
+}
+
+async function fetchQuery<Query extends FunctionReference<'query'>>(
+  query: Query,
+  args: FunctionArgs<Query>,
+): Promise<FunctionReturnType<Query>> {
+  return rawFetchQuery(query, args, { token: await rondasToken() })
+}
+
+async function fetchMutation<Mutation extends FunctionReference<'mutation'>>(
+  mutation: Mutation,
+  args: FunctionArgs<Mutation>,
+): Promise<FunctionReturnType<Mutation>> {
+  return rawFetchMutation(mutation, args, { token: await rondasToken() })
+}
 
 export const CONTAMINANTES = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 export const REPLICAS_OPTIONS = [2, 3] as const
@@ -497,28 +527,48 @@ function mapEnvioPTDoc(e: any): EnvioPT {
 // ---------------------------------------------------------------------------
 
 export async function getRonda(id: string): Promise<Ronda | null> {
-  const result = await safeConvexCall(
+  return (await getRondaWithStatus(id)).data
+}
+
+export async function getRondaWithStatus(id: string) {
+  const result = await safeConvexCallWithStatus(
     'getRonda',
     () => fetchQuery(api.rondas.index.getRonda, { id: id as Id<'rondas'> }),
     null,
   )
-  if (!result) return null
-  return mapRondaWithContaminantes(result)
+  return {
+    data: result.data ? mapRondaWithContaminantes(result.data) : null,
+    offline: result.offline,
+  }
 }
 
 export async function getRondaByCodigo(codigo: string): Promise<Ronda | null> {
-  const result = await safeConvexCall(
+  return (await getRondaByCodigoWithStatus(codigo)).data
+}
+
+export async function getRondaByCodigoWithStatus(codigo: string) {
+  const result = await safeConvexCallWithStatus(
     'getRondaByCodigo',
     () => fetchQuery(api.rondas.index.getRondaByCodigo, { codigo }),
     null,
   )
-  if (!result) return null
-  return mapRondaWithContaminantes(result)
+  return {
+    data: result.data ? mapRondaWithContaminantes(result.data) : null,
+    offline: result.offline,
+  }
 }
 
 export async function listRondas(): Promise<Ronda[]> {
-  const results = await safeConvexCall('listRondas', () => fetchQuery(api.rondas.index.listRondas, {}), [])
-  return results.map(mapRondaWithContaminantes)
+  return (await listRondasWithStatus()).data
+}
+
+export async function listRondasWithStatus() {
+  const result = await safeConvexCallWithStatus(
+    'listRondas',
+    () => fetchQuery(api.rondas.index.listRondas, {}),
+    [],
+  )
+  return { data: result.data.map(mapRondaWithContaminantes), offline: result.offline }
 }
 
 // ---------------------------------------------------------------------------
@@ -537,61 +587,81 @@ export async function listParticipantes(rondaId: string): Promise<RondaParticipa
 export async function listParticipantesRondaResumen(
   rondaId: string
 ): Promise<ParticipanteRondaResumen[]> {
-  const rows = await safeConvexCall(
+  return (await listParticipantesRondaResumenWithStatus(rondaId)).data
+}
+
+export async function listParticipantesRondaResumenWithStatus(
+  rondaId: string
+) {
+  const result = await safeConvexCallWithStatus(
     'listParticipantesRondaResumen',
     () => fetchQuery(api.rondas.index.listParticipantesRondaResumen, {
       rondaId: rondaId as Id<'rondas'>,
     }),
     [],
   )
-  return rows.map(mapParticipanteRondaResumenDoc)
+  return { data: result.data.map(mapParticipanteRondaResumenDoc), offline: result.offline }
 }
 
 export async function listRondasParticipante(userId: string): Promise<RondaParticipanteAsignada[]> {
-  const rows = await safeConvexCall(
+  return (await listRondasParticipanteWithStatus(userId)).data
+}
+
+export async function listRondasParticipanteWithStatus(userId: string) {
+  const result = await safeConvexCallWithStatus(
     'listRondasParticipante',
     () => fetchQuery(api.rondas.index.listRondasParticipante, { userId }),
     [],
   )
-  return rows.map((r) => ({
-    ...mapRondaWithContaminantes(r),
-    email: r.email as string,
-    invitado_at: r.invitado_at as string,
-    ronda_participante_id: r.ronda_participante_id as string,
-    participant_profile: (r.participant_profile ?? 'member') as ParticipantePerfil,
-    ficha_estado: r.ficha_estado as 'no_iniciada' | 'borrador' | 'enviado',
-    envios_pt_count: (r.envios_pt_count ?? 0) as number,
-    envio_pt_enviado: Boolean(r.envio_pt_enviado),
-  }))
+  return {
+    data: result.data.map((r) => ({
+      ...mapRondaWithContaminantes(r),
+      email: r.email as string,
+      invitado_at: r.invitado_at as string,
+      ronda_participante_id: r.ronda_participante_id as string,
+      participant_profile: (r.participant_profile ?? 'member') as ParticipantePerfil,
+      ficha_estado: r.ficha_estado as 'no_iniciada' | 'borrador' | 'enviado',
+      envios_pt_count: (r.envios_pt_count ?? 0) as number,
+      envio_pt_enviado: Boolean(r.envio_pt_enviado),
+    })),
+    offline: result.offline,
+  }
 }
 
 export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
-  const rows = await safeConvexCall(
+  return (await listAllParticipantesWithStatus()).data
+}
+
+export async function listAllParticipantesWithStatus() {
+  const result = await safeConvexCallWithStatus(
     'listAllParticipantes',
     () => fetchQuery(api.rondas.index.listAllParticipantes, {}),
     [],
   )
-  return rows.map((r) => ({
-    workos_user_id: r.workos_user_id,
-    email: r.email,
-    nit: (r.nit ?? null) as string | null,
-    nit_laboratorio: (r.nit_laboratorio ?? null) as string | null,
-    correo_laboratorio: (r.correo_laboratorio ?? null) as string | null,
-    ficha_estado: (r.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
-    total_envios: r.total_envios,
-    rondas: r.rondas.map((ronda) => ({
-      ...ronda,
-      estado: ronda.estado as EstadoRonda,
-      participant_profile: (ronda.participant_profile ?? 'member') as ParticipantePerfil,
-      ronda_participante_id: normalizeOptionalId(
-        ronda.ronda_participante_id ?? ronda.rondaParticipanteId
-      ),
-      ficha_estado: (ronda.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
-      nit_laboratorio: (ronda.nit_laboratorio ?? null) as string | null,
-      correo_laboratorio: (ronda.correo_laboratorio ?? null) as string | null,
-      estado_enlace: (ronda.estado_enlace ?? 'reclamado') as 'pendiente' | 'reclamado',
+  return {
+    data: result.data.map((r) => ({
+      workos_user_id: r.workos_user_id,
+      email: r.email,
+      nit: (r.nit ?? null) as string | null,
+      nit_laboratorio: (r.nit_laboratorio ?? null) as string | null,
+      correo_laboratorio: (r.correo_laboratorio ?? null) as string | null,
+      ficha_estado: (r.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
+      total_envios: r.total_envios,
+      rondas: r.rondas.map((ronda) => ({
+        ...ronda,
+        estado: ronda.estado as EstadoRonda,
+        participant_profile: (ronda.participant_profile ?? 'member') as ParticipantePerfil,
+        ronda_participante_id: normalizeOptionalId(
+          ronda.ronda_participante_id ?? ronda.rondaParticipanteId
+        ),
+        ficha_estado: (ronda.ficha_estado ?? 'no_iniciada') as 'no_iniciada' | 'borrador' | 'enviado',
+        nit_laboratorio: (ronda.nit_laboratorio ?? null) as string | null,
+        correo_laboratorio: (ronda.correo_laboratorio ?? null) as string | null,
+        estado_enlace: (ronda.estado_enlace ?? 'reclamado') as 'pendiente' | 'reclamado',
+      })),
     })),
-  }))
+    offline: result.offline,
+  }
 }
 
 export type DirectorioParticipante = {
@@ -676,12 +746,15 @@ function normalizeOptionalId(value: unknown): string | null {
   return typeof value === 'string' && value !== '' && value !== 'undefined' ? value : null
 }
 
-export async function isInvitado(rondaId: string, userId: string): Promise<boolean> {
-  return safeConvexCall(
+export async function isInvitado(rondaId: string): Promise<boolean> {
+  return (await isInvitadoWithStatus(rondaId)).data
+}
+
+export async function isInvitadoWithStatus(rondaId: string) {
+  return safeConvexCallWithStatus(
     'isInvitado',
     () => fetchQuery(api.rondas.index.isInvitado, {
       rondaId: rondaId as Id<'rondas'>,
-      userId,
     }),
     false,
   )
@@ -691,12 +764,11 @@ export async function isInvitado(rondaId: string, userId: string): Promise<boole
 // Envios regulares — read
 // ---------------------------------------------------------------------------
 
-export async function listEnvios(rondaId: string, userId: string): Promise<Envio[]> {
+export async function listEnvios(rondaId: string): Promise<Envio[]> {
   const rows = await safeConvexCall(
     'listEnvios',
     () => fetchQuery(api.rondas.index.listEnvios, {
       rondaId: rondaId as Id<'rondas'>,
-      userId,
     }),
     [],
   )
@@ -712,14 +784,12 @@ export type EstadoEnvioParticipante = {
 }
 
 export async function getEstadoEnvioParticipante(
-  rondaId: string,
-  userId: string
+  rondaId: string
 ): Promise<EstadoEnvioParticipante> {
   return safeConvexCall(
     'getEstadoEnvioParticipante',
     () => fetchQuery(api.rondas.index.getEstadoEnvioParticipante, {
       rondaId: rondaId as Id<'rondas'>,
-      userId,
     }),
     {
       completo: false,
@@ -786,13 +856,11 @@ export async function listResultadosRonda(rondaId: string): Promise<ResultadoPar
 export async function claimParticipanteToken(
   rondaId: string,
   token: string,
-  userId: string,
   email: string,
 ): Promise<'claimed' | 'already-assigned' | 'invalid'> {
   return fetchMutation(api.rondas.index.claimParticipanteToken, {
     rondaId: rondaId as Id<'rondas'>,
     token,
-    userId,
     email,
   })
 }
@@ -952,21 +1020,29 @@ export type ParticipanteGlobal = {
 // ---------------------------------------------------------------------------
 
 export async function listPTItems(rondaId: string): Promise<RondaPTItem[]> {
-  const rows = await safeConvexCall(
+  return (await listPTItemsWithStatus(rondaId)).data
+}
+
+export async function listPTItemsWithStatus(rondaId: string) {
+  const result = await safeConvexCallWithStatus(
     'listPTItems',
     () => fetchQuery(api.pt.index.listPTItems, { rondaId: rondaId as Id<'rondas'> }),
     [],
   )
-  return rows.map(mapPTItemDoc)
+  return { data: result.data.map(mapPTItemDoc), offline: result.offline }
 }
 
 export async function listPTSampleGroups(rondaId: string): Promise<RondaPTSampleGroup[]> {
-  const rows = await safeConvexCall(
+  return (await listPTSampleGroupsWithStatus(rondaId)).data
+}
+
+export async function listPTSampleGroupsWithStatus(rondaId: string) {
+  const result = await safeConvexCallWithStatus(
     'listPTSampleGroups',
     () => fetchQuery(api.pt.index.listPTSampleGroups, { rondaId: rondaId as Id<'rondas'> }),
     [],
   )
-  return rows.map(mapPTSampleGroupDoc)
+  return { data: result.data.map(mapPTSampleGroupDoc), offline: result.offline }
 }
 
 // ---------------------------------------------------------------------------
@@ -974,19 +1050,25 @@ export async function listPTSampleGroups(rondaId: string): Promise<RondaPTSample
 // ---------------------------------------------------------------------------
 
 export async function getRondaParticipantePT(
-  rondaId: string,
-  userId: string
+  rondaId: string
 ): Promise<RondaParticipantePT | null> {
-  const row = await safeConvexCall(
+  return (await getRondaParticipantePTWithStatus(rondaId)).data
+}
+
+export async function getRondaParticipantePTWithStatus(
+  rondaId: string
+) {
+  const result = await safeConvexCallWithStatus(
     'getRondaParticipantePT',
     () => fetchQuery(api.pt.index.getRondaParticipantePT, {
       rondaId: rondaId as Id<'rondas'>,
-      userId,
     }),
     null,
   )
-  if (!row) return null
-  return mapParticipantePTDoc(row)
+  return {
+    data: result.data ? mapParticipantePTDoc(result.data) : null,
+    offline: result.offline,
+  }
 }
 
 export async function listParticipantesPT(rondaId: string): Promise<RondaParticipantePT[]> {
@@ -1002,16 +1084,19 @@ export async function listParticipantesPT(rondaId: string): Promise<RondaPartici
 // Envios PT — read
 // ---------------------------------------------------------------------------
 
-export async function listEnviosPT(rondaId: string, userId: string): Promise<EnvioPT[]> {
-  const rows = await safeConvexCall(
+export async function listEnviosPT(rondaId: string): Promise<EnvioPT[]> {
+  return (await listEnviosPTWithStatus(rondaId)).data
+}
+
+export async function listEnviosPTWithStatus(rondaId: string) {
+  const result = await safeConvexCallWithStatus(
     'listEnviosPT',
     () => fetchQuery(api.pt.index.listEnviosPT, {
       rondaId: rondaId as Id<'rondas'>,
-      userId,
     }),
     [],
   )
-  return rows.map(mapEnvioPTDoc)
+  return { data: result.data.map(mapEnvioPTDoc), offline: result.offline }
 }
 
 export async function listEnviosPTByParticipante(rondaParticipanteId: string): Promise<EnvioPT[]> {
@@ -1044,14 +1129,18 @@ export async function getEnvioPT(
 }
 
 export async function getEstadoEnvioPTParticipante(
-  rondaId: string,
-  userId: string
+  rondaId: string
 ): Promise<EstadoEnvioParticipante> {
-  return safeConvexCall(
+  return (await getEstadoEnvioPTParticipanteWithStatus(rondaId)).data
+}
+
+export async function getEstadoEnvioPTParticipanteWithStatus(
+  rondaId: string
+) {
+  return safeConvexCallWithStatus(
     'getEstadoEnvioPTParticipante',
     () => fetchQuery(api.pt.index.getEstadoEnvioPTParticipante, {
       rondaId: rondaId as Id<'rondas'>,
-      userId,
     }),
     {
       completo: false,
@@ -1078,7 +1167,11 @@ export async function getParticipanteRondaResumen(
 }
 
 export async function listResultadosPTRonda(rondaId: string): Promise<ResultadoParticipantePT[]> {
-  return safeConvexCall(
+  return (await listResultadosPTRondaWithStatus(rondaId)).data
+}
+
+export async function listResultadosPTRondaWithStatus(rondaId: string) {
+  return safeConvexCallWithStatus(
     'listResultadosPTRonda',
     () => fetchQuery(api.pt.index.listResultadosPTRonda, { rondaId: rondaId as Id<'rondas'> }),
     [],
@@ -1141,10 +1234,9 @@ export async function deleteParticipanteEnviosPT(rondaId: string, rondaParticipa
   })
 }
 
-export async function submitFinalPT(rondaId: string, userId: string): Promise<string> {
+export async function submitFinalPT(rondaId: string): Promise<string> {
   return fetchMutation(api.pt.index.submitFinalPT, {
     rondaId: rondaId as Id<'rondas'>,
-    userId,
   })
 }
 
@@ -1369,11 +1461,22 @@ export async function getRondaMetricasCompletas(
   rondaId: string,
   ronda: Pick<Ronda, 'estado'>
 ): Promise<RondaMetricas> {
-  const [participantes, resultadosPT, ptItems] = await Promise.all([
-    listParticipantesRondaResumen(rondaId),
-    listResultadosPTRonda(rondaId),
-    listPTItems(rondaId),
+  return (await getRondaMetricasCompletasWithStatus(rondaId, ronda)).data
+}
+
+export async function getRondaMetricasCompletasWithStatus(
+  rondaId: string,
+  ronda: Pick<Ronda, 'estado'>
+) {
+  const [participantesResult, resultadosPTResult, ptItemsResult] = await Promise.all([
+    listParticipantesRondaResumenWithStatus(rondaId),
+    listResultadosPTRondaWithStatus(rondaId),
+    listPTItemsWithStatus(rondaId),
   ])
+  const participantes = participantesResult.data
+  const resultadosPT = resultadosPTResult.data
+  const ptItems = ptItemsResult.data
+  const offline = participantesResult.offline || resultadosPTResult.offline || ptItemsResult.offline
 
   const cupos_totales = participantes.length
   const cupos_reclamados = participantes.filter((p) => p.estado === 'reclamado').length
@@ -1395,5 +1498,5 @@ export async function getRondaMetricasCompletas(
 
   const { estado_operativo, accion_recomendada } = derivarEstadoOperativo(ronda, datos)
 
-  return { ...datos, estado_operativo, accion_recomendada }
+  return { data: { ...datos, estado_operativo, accion_recomendada }, offline }
 }

@@ -1,7 +1,37 @@
-import { fetchQuery, fetchMutation } from 'convex/nextjs'
+import { fetchMutation as rawFetchMutation, fetchQuery as rawFetchQuery } from 'convex/nextjs'
+import type { FunctionArgs, FunctionReference, FunctionReturnType } from 'convex/server'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import { safeConvexCall } from '@/lib/convex-fallback'
+import { requireAuth } from '@/server/auth'
+
+// F19: las funciones Convex de fichas exigen identidad
+// (requireIdentity/requireParticipantOrAdminForFicha/requireAdminIdentity...). El
+// cliente de servidor reenvia el accessToken de la sesion como tercer argumento de
+// fetchQuery/fetchMutation, igual que src/server/sgc/index.ts. Sin el token, el
+// backend rechaza al usuario autenticado ("Autenticacion requerida").
+async function fichasToken(): Promise<string> {
+  const auth = await requireAuth()
+  const token = auth.accessToken
+  if (!token) {
+    throw new Error('No hay sesion activa para operar fichas.')
+  }
+  return token
+}
+
+async function fetchQuery<Query extends FunctionReference<'query'>>(
+  query: Query,
+  args: FunctionArgs<Query>,
+): Promise<FunctionReturnType<Query>> {
+  return rawFetchQuery(query, args, { token: await fichasToken() })
+}
+
+async function fetchMutation<Mutation extends FunctionReference<'mutation'>>(
+  mutation: Mutation,
+  args: FunctionArgs<Mutation>,
+): Promise<FunctionReturnType<Mutation>> {
+  return rawFetchMutation(mutation, args, { token: await fichasToken() })
+}
 
 export type EstadoFicha = 'borrador' | 'enviado'
 

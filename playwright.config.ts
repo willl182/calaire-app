@@ -8,6 +8,8 @@ const authFile = '.auth/workos.json'
 const hasAuthCredentials = e2eEnv.hasAuthCredentials
 const hasStoredAuth = fs.existsSync(authFile)
 const isManualAuth = e2eEnv.isManualAuth
+const screenshotSpecs = '**/*screenshots*.auth.spec.ts'
+const includeScreenshots = process.env.PLAYWRIGHT_INCLUDE_SCREENSHOTS === '1'
 const publicProject = {
   name: 'chromium',
   testIgnore: ['**/*.auth.spec.ts', '**/*.setup.ts'],
@@ -56,6 +58,7 @@ const authenticatedProjects =
           name: 'authenticated-chromium',
           dependencies: hasAuthCredentials ? ['auth-setup'] : [],
           testMatch: '**/*.auth.spec.ts',
+          testIgnore: screenshotSpecs,
           use: {
             ...devices['Desktop Chrome'],
             launchOptions: {
@@ -65,6 +68,23 @@ const authenticatedProjects =
             storageState: authFile,
           },
         },
+        ...(includeScreenshots
+          ? [
+              {
+                name: 'screenshots-authenticated-chromium',
+                dependencies: hasAuthCredentials ? ['auth-setup'] : [],
+                testMatch: screenshotSpecs,
+                use: {
+                  ...devices['Desktop Chrome'],
+                  launchOptions: {
+                    executablePath: '/usr/bin/chromium',
+                    args: ['--disable-crashpad'],
+                  },
+                  storageState: authFile,
+                },
+              },
+            ]
+          : []),
       ]
     : []
 

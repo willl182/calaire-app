@@ -4,6 +4,7 @@ import { defineRondaMutation } from './definitions'
 import { generateUniqueParticipantCode } from './codes'
 import { getDirectorioByLookup, normalizeEmail } from './directorio'
 import { assertAllowedEstadoTransition } from './state'
+import { requireAdminIdentity } from '../access'
 
 export const createRondaDefinition = defineRondaMutation({
   args: {
@@ -12,6 +13,7 @@ export const createRondaDefinition = defineRondaMutation({
     estado:  rondaEstadoValidator,
   },
   handler: async (ctx, { codigo, nombre, estado }) => {
+    await requireAdminIdentity(ctx)
     const existing = await ctx.db
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
@@ -28,6 +30,7 @@ export const updateRondaEstadoDefinition = defineRondaMutation({
     estado: rondaEstadoValidator
   },
   handler: async (ctx, { id, estado }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     assertAllowedEstadoTransition(ronda.estado, estado)
@@ -43,6 +46,7 @@ export const addContaminanteDefinition = defineRondaMutation({
     replicas:  replicasValidator,
   },
   handler: async (ctx, { rondaId, contaminante, niveles, replicas }) => {
+    await requireAdminIdentity(ctx)
     const existing = await ctx.db
       .query('rondaContaminantes')
       .withIndex('by_ronda_contaminante', (q) => q.eq('rondaId', rondaId).eq('contaminante', contaminante))
@@ -65,6 +69,7 @@ export const addParticipanteDefinition = defineRondaMutation({
     replicateCode:      v.optional(v.number()),
   },
   handler: async (ctx, { rondaId, workosUserId, email, participantProfile, participantCode, replicateCode }) => {
+    await requireAdminIdentity(ctx)
     const existing = await ctx.db
       .query('rondaParticipantes')
       .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', workosUserId))
@@ -96,6 +101,7 @@ export const updateParticipanteAdminDefinition = defineRondaMutation({
     replicateCode: v.union(v.number(), v.null()),
   },
   handler: async (ctx, { participanteId, email, participantProfile, participantCode, replicateCode }) => {
+    await requireAdminIdentity(ctx)
     const participante = await ctx.db.get(participanteId)
     if (!participante) throw new Error('Participante no encontrado.')
 
@@ -142,6 +148,7 @@ export const createConfiguredRondaDefinition = defineRondaMutation({
     })),
   },
   handler: async (ctx, { codigo, nombre, contaminantes, slots }) => {
+    await requireAdminIdentity(ctx)
     const existing = await ctx.db
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
@@ -197,6 +204,7 @@ export const updateRondaConfigDefinition = defineRondaMutation({
     })),
   },
   handler: async (ctx, { id, codigo, nombre, contaminantes }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') {
@@ -249,6 +257,7 @@ export const updateRondaBasicInfoDefinition = defineRondaMutation({
     nombre: v.string(),
   },
   handler: async (ctx, { id, codigo, nombre }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') {
@@ -275,6 +284,7 @@ export const transitionRondaEstadoDefinition = defineRondaMutation({
     ),
   },
   handler: async (ctx, { id, nextState }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     assertAllowedEstadoTransition(ronda.estado, nextState)
@@ -285,6 +295,7 @@ export const transitionRondaEstadoDefinition = defineRondaMutation({
 export const reabrirRondaDefinition = defineRondaMutation({
   args: { id: v.id('rondas') },
   handler: async (ctx, { id }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado !== 'cerrada') throw new Error('Solo se pueden reabrir rondas cerradas.')
@@ -300,6 +311,7 @@ export const assignParticipanteDefinition = defineRondaMutation({
     participantProfile: participantProfileValidator,
   },
   handler: async (ctx, { rondaId, workosUserId, email, participantProfile }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') throw new Error('No se puede asignar participantes a una ronda cerrada.')
@@ -333,6 +345,7 @@ export const regenerateParticipanteSlotDefinition = defineRondaMutation({
     email: v.string(),
   },
   handler: async (ctx, { rondaId, participanteId, workosUserId, email }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') throw new Error('No se puede modificar una ronda cerrada.')
@@ -357,6 +370,7 @@ export const updateParticipanteEmailDefinition = defineRondaMutation({
     email: v.string(),
   },
   handler: async (ctx, { rondaId, participanteId, email }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') throw new Error('No se puede modificar una ronda cerrada.')
@@ -388,6 +402,7 @@ export const updateParticipanteEmailDefinition = defineRondaMutation({
 export const addReferenceSlotDefinition = defineRondaMutation({
   args: { rondaId: v.id('rondas'), workosUserId: v.string(), email: v.string() },
   handler: async (ctx, { rondaId, workosUserId, email }) => {
+    await requireAdminIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado === 'cerrada') throw new Error('No se puede modificar una ronda cerrada.')

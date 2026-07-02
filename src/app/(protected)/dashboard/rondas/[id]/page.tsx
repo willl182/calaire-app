@@ -2,11 +2,12 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Alert } from '@/components/ui/Alert'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
-  getRonda,
-  getRondaMetricasCompletas,
+  getRondaWithStatus,
+  getRondaMetricasCompletasWithStatus,
   type EstadoOperativo,
   type RondaMetricas,
   type EstadoRonda,
@@ -259,10 +260,27 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
   if (!isAdmin(auth)) redirect('/denied?reason=role')
 
   const { id: rondaId } = await params
-  const ronda = await getRonda(rondaId)
-  if (!ronda) notFound()
+  const rondaResult = await getRondaWithStatus(rondaId)
+  if (!rondaResult.data && !rondaResult.offline) notFound()
+  if (!rondaResult.data) {
+    return (
+      <div className="min-h-screen bg-[var(--background)] px-6 py-8">
+        <div className="mx-auto flex max-w-7xl flex-col gap-6">
+          <BackendOfflineBanner detail="No se pudo verificar la ronda solicitada porque Convex no responde." />
+          <section className="card p-8 text-center">
+            <h1 className="text-xl font-semibold text-[var(--foreground)]">Ronda no disponible</h1>
+            <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
+              La ruta queda en espera de backend; no se marca como 404 hasta poder consultar Convex.
+            </p>
+          </section>
+        </div>
+      </div>
+    )
+  }
+  const ronda = rondaResult.data
 
-  const metricas = await getRondaMetricasCompletas(rondaId, ronda)
+  const metricasResult = await getRondaMetricasCompletasWithStatus(rondaId, ronda)
+  const metricas = metricasResult.data
 
   const sp = searchParams ? await searchParams : {}
   const success = getParam(sp.success)
@@ -317,6 +335,9 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
         {/* Alerts */}
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
+        {metricasResult.offline && (
+          <BackendOfflineBanner detail="La ronda cargo, pero las metricas operativas se muestran vacias temporalmente porque Convex no responde." />
+        )}
 
         {/* Progress Metrics */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

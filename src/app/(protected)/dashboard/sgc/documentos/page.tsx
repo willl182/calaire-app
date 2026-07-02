@@ -2,7 +2,8 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { normalizeHttpUrl } from '@/lib/safe-url'
-import { listSgcMaestro, type DocumentoSgc } from '@/server/sgc'
+import { listSgcMaestro, listSgcMaestroWithStatus, type DocumentoSgc } from '@/server/sgc'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
 import { guardarDocumentoMaestroAction } from './actions'
 
@@ -31,13 +32,14 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
   if (!canViewSgcMaestro(auth)) redirect('/denied?reason=role')
 
   const params = (await searchParams) ?? {}
-  const data = await listSgcMaestro({
+  const result = await listSgcMaestroWithStatus({
     ambito: firstParam(params.ambito) ?? null,
     familia: (firstParam(params.familia) as DocumentoSgc['familia']) ?? null,
     estado: (firstParam(params.estado) as DocumentoSgc['estado']) ?? null,
     modoDiligenciamiento: (firstParam(params.modo) as DocumentoSgc['modoDiligenciamiento']) ?? null,
     texto: firstParam(params.q) ?? null,
   })
+  const data = result.data
   const canEdit = canEditSgcMaestro(auth)
 
   return (
@@ -48,6 +50,10 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         description="Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos."
         email={auth.user.email}
       />
+
+      {result.offline && (
+        <BackendOfflineBanner detail="El centro documental se muestra sin documentos mientras Convex no responde." />
+      )}
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="card-accent px-5 py-4">

@@ -1,14 +1,15 @@
 import { notFound, redirect } from 'next/navigation'
 import { withAuth } from '@workos-inc/authkit-nextjs'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import {
   claimParticipanteToken,
-  getEstadoEnvioPTParticipante,
-  getRondaByCodigo,
-  getRondaParticipantePT,
-  isInvitado,
-  listEnviosPT,
-  listPTItems,
-  listPTSampleGroups,
+  getEstadoEnvioPTParticipanteWithStatus,
+  getRondaByCodigoWithStatus,
+  getRondaParticipantePTWithStatus,
+  isInvitadoWithStatus,
+  listEnviosPTWithStatus,
+  listPTItemsWithStatus,
+  listPTSampleGroupsWithStatus,
 } from '@/server/rondas'
 import { isAdmin } from '@/server/auth'
 import { getFichaByRondaParticipante } from '@/server/rondas/fichas'
@@ -29,18 +30,23 @@ export default async function RondaPage({
   const auth = await withAuth({ ensureSignedIn: true })
   if (!auth.user) redirect('/login')
 
-  const ronda = await getRondaByCodigo(codigo)
-  if (!ronda) notFound()
+  const rondaResult = await getRondaByCodigoWithStatus(codigo)
+  if (!rondaResult.data && !rondaResult.offline) notFound()
+  if (!rondaResult.data) {
+    return <RondaOfflineState codigo={codigo} />
+  }
+  const ronda = rondaResult.data
 
   // Admins pueden acceder siempre; participantes solo si están invitados
   if (!isAdmin(auth)) {
-    let invitado = await isInvitado(ronda.id, auth.user.id)
+    const invitadoResult = await isInvitadoWithStatus(ronda.id)
+    let invitado = invitadoResult.data
+    if (invitadoResult.offline) return <RondaOfflineState codigo={codigo} />
 
     if (!invitado && token) {
       const claim = await claimParticipanteToken(
         ronda.id,
         token,
-        auth.user.id,
         auth.user.email
       )
       if (claim === 'claimed' || claim === 'already-assigned') {
@@ -53,7 +59,9 @@ export default async function RondaPage({
 
     }
 
-    invitado = invitado || (await isInvitado(ronda.id, auth.user.id))
+    const invitadoRecheck = invitado ? { data: true, offline: false } : await isInvitadoWithStatus(ronda.id)
+    if (invitadoRecheck.offline) return <RondaOfflineState codigo={codigo} />
+    invitado = invitado || invitadoRecheck.data
     if (!invitado) {
       redirect('/denied?reason=invite')
     }
@@ -89,8 +97,9 @@ export default async function RondaPage({
       )
     }
 
-    const participantePT = await getRondaParticipantePT(ronda.id, auth.user.id)
-    if (!participantePT) {
+    const participantePTResult = await getRondaParticipantePTWithStatus(ronda.id)
+    if (participantePTResult.offline) return <RondaOfflineState codigo={codigo} />
+    if (!participantePTResult.data) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
           <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
@@ -103,33 +112,35 @@ export default async function RondaPage({
       )
     }
 
-    const ficha = await getFichaByRondaParticipante(participantePT.id)
+    const ficha = await getFichaByRondaParticipante(participantePTResult.data.id)
     if (ficha?.estado !== 'enviado') {
       redirect(`/ronda/${codigo}/registro`)
     }
   }
 
   const [ptItems, sampleGroups, enviosIniciales, estadoEnvio, participantePT] = await Promise.all([
-    listPTItems(ronda.id),
-    listPTSampleGroups(ronda.id),
-    listEnviosPT(ronda.id, auth.user.id),
-    getEstadoEnvioPTParticipante(ronda.id, auth.user.id),
-    getRondaParticipantePT(ronda.id, auth.user.id),
+    listPTItemsWithStatus(ronda.id),
+    listPTSampleGroupsWithStatus(ronda.id),
+    listEnviosPTWithStatus(ronda.id),
+    getEstadoEnvioPTParticipanteWithStatus(ronda.id),
+    getRondaParticipantePTWithStatus(ronda.id),
   ])
+  const backendOffline = ptItems.offline || sampleGroups.offline || enviosIniciales.offline || estadoEnvio.offline || participantePT.offline
+  if (backendOffline) return <RondaOfflineState codigo={codigo} />
 
-  const isReferencia = participantePT?.participant_profile === 'member_special'
+  const isReferencia = participantePT.data?.participant_profile === 'member_special'
 
   if (isReferencia) {
     return (
       <FormularioReferencia
         ronda={ronda}
-        ptItems={ptItems}
-        sampleGroups={sampleGroups}
-        enviosIniciales={enviosIniciales}
-        envioFinalizado={estadoEnvio.enviado}
-        enviadoAt={estadoEnvio.enviados_at}
-        participantCode={participantePT?.participant_code ?? null}
-        replicateCode={participantePT?.replicate_code ?? null}
+        ptItems={ptItems.data}
+        sampleGroups={sampleGroups.data}
+        enviosIniciales={enviosIniciales.data}
+        envioFinalizado={estadoEnvio.data.enviado}
+        enviadoAt={estadoEnvio.data.enviados_at}
+        participantCode={participantePT.data?.participant_code ?? null}
+        replicateCode={participantePT.data?.replicate_code ?? null}
         participanteEmail={auth.user.email}
       />
     )
@@ -138,14 +149,30 @@ export default async function RondaPage({
   return (
     <FormularioRonda
       ronda={ronda}
-      ptItems={ptItems}
-      sampleGroups={sampleGroups}
-      enviosIniciales={enviosIniciales}
-      envioFinalizado={estadoEnvio.enviado}
-      enviadoAt={estadoEnvio.enviados_at}
-      participantCode={participantePT?.participant_code ?? null}
-      replicateCode={participantePT?.replicate_code ?? null}
+      ptItems={ptItems.data}
+      sampleGroups={sampleGroups.data}
+      enviosIniciales={enviosIniciales.data}
+      envioFinalizado={estadoEnvio.data.enviado}
+      enviadoAt={estadoEnvio.data.enviados_at}
+      participantCode={participantePT.data?.participant_code ?? null}
+      replicateCode={participantePT.data?.replicate_code ?? null}
       participanteEmail={auth.user.email}
     />
+  )
+}
+
+function RondaOfflineState({ codigo }: { codigo: string }) {
+  return (
+    <div className="min-h-screen bg-[var(--background)] px-6 py-8">
+      <div className="mx-auto flex max-w-3xl flex-col gap-6">
+        <BackendOfflineBanner detail="No se pudo cargar la ronda del participante. Las acciones de carga quedan deshabilitadas hasta recuperar conexion." />
+        <section className="card p-8 text-center">
+          <h1 className="text-xl font-semibold text-[var(--foreground)]">Ronda no disponible</h1>
+          <p className="mt-2 text-sm text-[var(--foreground-muted)]">
+            No se pudo consultar la ronda {codigo} porque Convex esta offline.
+          </p>
+        </section>
+      </div>
+    </div>
   )
 }

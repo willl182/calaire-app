@@ -1,68 +1,96 @@
 import {
-  listAllParticipantes,
-  listParticipantesRondaResumen,
-  listPTItems,
-  listPTSampleGroups,
-  listResultadosPTRonda,
-  listRondas,
+  listAllParticipantesWithStatus,
+  listParticipantesRondaResumenWithStatus,
+  listPTItemsWithStatus,
+  listPTSampleGroupsWithStatus,
+  listResultadosPTRondaWithStatus,
+  listRondasWithStatus,
   listRondasParticipante,
   type Ronda,
 } from '@/server/rondas'
 import { listWorkOSUsers } from '@/server/auth/workos'
-import { isConvexOffline } from '@/lib/convex-fallback'
 import type { ResultadoDashboardRonda } from './view-model'
 
 export type AdminDashboardData = Awaited<ReturnType<typeof loadAdminDashboardData>>
 
 export async function loadResultadosDashboard(rondas: Ronda[]): Promise<ResultadoDashboardRonda[]> {
-  return Promise.all(
+  const resultados = await Promise.all(
     rondas.map(async (ronda) => {
-      const [ptItems, sampleGroups, resultados] = await Promise.all([
-        listPTItems(ronda.id),
-        listPTSampleGroups(ronda.id),
-        listResultadosPTRonda(ronda.id),
+      const [ptItemsResult, sampleGroupsResult, resultadosResult] = await Promise.all([
+        listPTItemsWithStatus(ronda.id),
+        listPTSampleGroupsWithStatus(ronda.id),
+        listResultadosPTRondaWithStatus(ronda.id),
       ])
 
-      return { ronda, ptItems, sampleGroups, resultados }
+      return {
+        data: {
+          ronda,
+          ptItems: ptItemsResult.data,
+          sampleGroups: sampleGroupsResult.data,
+          resultados: resultadosResult.data,
+        },
+        offline: ptItemsResult.offline || sampleGroupsResult.offline || resultadosResult.offline,
+      }
     })
   )
+  return resultados.map((resultado) => resultado.data)
+}
+
+export async function loadResultadosDashboardWithStatus(rondas: Ronda[]) {
+  const resultados = await Promise.all(
+    rondas.map(async (ronda) => {
+      const [ptItemsResult, sampleGroupsResult, resultadosResult] = await Promise.all([
+        listPTItemsWithStatus(ronda.id),
+        listPTSampleGroupsWithStatus(ronda.id),
+        listResultadosPTRondaWithStatus(ronda.id),
+      ])
+
+      return {
+        data: {
+          ronda,
+          ptItems: ptItemsResult.data,
+          sampleGroups: sampleGroupsResult.data,
+          resultados: resultadosResult.data,
+        },
+        offline: ptItemsResult.offline || sampleGroupsResult.offline || resultadosResult.offline,
+      }
+    })
+  )
+
+  return {
+    data: resultados.map((resultado) => resultado.data),
+    offline: resultados.some((resultado) => resultado.offline),
+  }
 }
 
 export async function loadAdminDashboardData(activeTab: string) {
-  try {
-    const [rondas, allParticipantes, workosUsers] = await Promise.all([
-      listRondas(),
-      listAllParticipantes(),
-      listWorkOSUsers(),
-    ])
-    const rondasResultados = activeTab === 'resultados' ? await loadResultadosDashboard(rondas) : []
-    const rondasActivas = rondas.filter((r) => r.estado === 'activa')
-    const participantesRondasActivas = await Promise.all(
-      rondasActivas.map((r) => listParticipantesRondaResumen(r.id))
-    )
+  const [rondasResult, allParticipantesResult, workosUsers] = await Promise.all([
+    listRondasWithStatus(),
+    listAllParticipantesWithStatus(),
+    listWorkOSUsers(),
+  ])
+  const rondas = rondasResult.data
+  const rondasResultadosResult = activeTab === 'resultados'
+    ? await loadResultadosDashboardWithStatus(rondas)
+    : { data: [], offline: false }
+  const rondasActivas = rondas.filter((r) => r.estado === 'activa')
+  const participantesRondasActivasResults = await Promise.all(
+    rondasActivas.map((r) => listParticipantesRondaResumenWithStatus(r.id))
+  )
 
-    return {
-      rondas,
-      allParticipantes,
-      workosUsers,
-      rondasResultados,
-      rondasActivas,
-      participantesRondasActivas,
-      backendOffline: false as const,
-    }
-  } catch (error) {
-    if (isConvexOffline(error)) {
-      return {
-        rondas: [],
-        allParticipantes: [],
-        workosUsers: [],
-        rondasResultados: [],
-        rondasActivas: [],
-        participantesRondasActivas: [],
-        backendOffline: true as const,
-      }
-    }
-    throw error
+  return {
+    rondas,
+    allParticipantes: allParticipantesResult.data,
+    workosUsers,
+    rondasResultados: rondasResultadosResult.data,
+    rondasActivas,
+    participantesRondasActivas: participantesRondasActivasResults.map((result) => result.data),
+    backendOffline: (
+      rondasResult.offline ||
+      allParticipantesResult.offline ||
+      rondasResultadosResult.offline ||
+      participantesRondasActivasResults.some((result) => result.offline)
+    ),
   }
 }
 

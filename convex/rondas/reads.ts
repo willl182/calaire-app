@@ -3,10 +3,12 @@ import type { Doc, Id } from '../_generated/dataModel'
 import { defineRondaQuery } from './definitions'
 import { PENDING_PREFIX, contaminanteIdx } from './state'
 import { getLatestFichaByRondaParticipante } from './fichas'
+import { isAdminIdentity, requireAdminIdentity, requireIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante } from '../access'
 
 export const getRondaDefinition = defineRondaQuery({
   args: { id: v.id('rondas') },
   handler: async (ctx, { id }) => {
+    await requireIdentity(ctx)
     const ronda = await ctx.db.get(id)
     if (!ronda) return null
     const contaminantes = await ctx.db
@@ -21,6 +23,7 @@ export const getRondaDefinition = defineRondaQuery({
 export const getRondaByCodigoDefinition = defineRondaQuery({
   args: { codigo: v.string() },
   handler: async (ctx, { codigo }) => {
+    await requireIdentity(ctx)
     const ronda = await ctx.db
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
@@ -38,6 +41,7 @@ export const getRondaByCodigoDefinition = defineRondaQuery({
 export const listRondasDefinition = defineRondaQuery({
   args: {},
   handler: async (ctx) => {
+    await requireAdminIdentity(ctx)
     const rondas = await ctx.db.query('rondas').order('desc').collect()
 
     const results = await Promise.all(
@@ -69,6 +73,7 @@ export const listRondasDefinition = defineRondaQuery({
 export const listParticipantesDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireParticipantOrAdminForRonda(ctx, rondaId)
     const rows = await ctx.db
       .query('rondaParticipantes')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -100,6 +105,7 @@ export const listParticipantesDefinition = defineRondaQuery({
 export const listParticipantesRondaResumenDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireParticipantOrAdminForRonda(ctx, rondaId)
     const rows = await ctx.db
       .query('rondaParticipantes')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -146,6 +152,7 @@ export const listParticipantesRondaResumenDefinition = defineRondaQuery({
 export const getParticipanteRondaResumenDefinition = defineRondaQuery({
   args: { participanteId: v.id('rondaParticipantes') },
   handler: async (ctx, { participanteId }) => {
+    await requireParticipantOrAdminForRondaParticipante(ctx, participanteId)
     const p = await ctx.db.get(participanteId)
     if (!p) return null
 
@@ -176,11 +183,21 @@ export const getParticipanteRondaResumenDefinition = defineRondaQuery({
 })
 
 export const listRondasParticipanteDefinition = defineRondaQuery({
-  args: { userId: v.string() },
+  // userId opcional: un participante consulta sus propias rondas (self); un admin
+  // puede consultar las de otro participante (p.ej. /dashboard/participantes/[uid]).
+  // Sin este guard el backend derivaba siempre del token e ignoraba el userId, asi
+  // que el panel admin de participante devolvia las rondas del admin, no las del [uid].
+  args: { userId: v.optional(v.string()) },
   handler: async (ctx, { userId }) => {
+    const identity = await requireIdentity(ctx)
+    let targetUserId = identity.subject
+    if (userId && userId !== identity.subject) {
+      if (!isAdminIdentity(identity)) throw new Error('No tiene acceso a estas rondas.')
+      targetUserId = userId
+    }
     const rpRows = await ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_user', (q) => q.eq('workosUserId', userId))
+      .withIndex('by_user', (q) => q.eq('workosUserId', targetUserId))
       .collect()
     rpRows.sort((a, b) => b.invitadoAt - a.invitadoAt)
 
@@ -226,6 +243,7 @@ export const listRondasParticipanteDefinition = defineRondaQuery({
 export const listAllParticipantesDefinition = defineRondaQuery({
   args: {},
   handler: async (ctx) => {
+    await requireAdminIdentity(ctx)
     const directorioRows = await ctx.db.query('directorioParticipantes').collect()
     const rows = await ctx.db.query('rondaParticipantes').collect()
 
@@ -373,11 +391,12 @@ export const listAllParticipantesDefinition = defineRondaQuery({
 })
 
 export const isInvitadoDefinition = defineRondaQuery({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const identity = await requireIdentity(ctx)
     const row = await ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
     return !!row
   },

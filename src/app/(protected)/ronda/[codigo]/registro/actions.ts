@@ -54,10 +54,10 @@ async function resolveRondaParticipante(codigoRonda: string) {
   const ronda = await getRondaByCodigo(codigoRonda)
   if (!ronda) return { error: 'Ronda no encontrada' as const }
 
-  const invitado = await isInvitado(ronda.id, auth.user.id)
+  const invitado = await isInvitado(ronda.id)
   if (!invitado && !isAdmin(auth)) return { error: 'No autorizado' as const }
 
-  const rp = await getRondaParticipantePT(ronda.id, auth.user.id)
+  const rp = await getRondaParticipantePT(ronda.id)
   if (!rp) return { error: 'Participante no encontrado' as const }
 
   return { auth, ronda, rp }

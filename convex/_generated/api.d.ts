@@ -10,6 +10,7 @@
 
 import type * as _lib_sgc_catalog from "../_lib/sgc/catalog.js";
 import type * as _lib_sgc_checklist from "../_lib/sgc/checklist.js";
+import type * as access from "../access.js";
 import type * as agent_auth from "../agent/auth.js";
 import type * as agent_definitions from "../agent/definitions.js";
 import type * as agent_fichas from "../agent/fichas.js";
@@ -64,6 +65,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "_lib/sgc/catalog": typeof _lib_sgc_catalog;
   "_lib/sgc/checklist": typeof _lib_sgc_checklist;
+  access: typeof access;
   "agent/auth": typeof agent_auth;
   "agent/definitions": typeof agent_definitions;
   "agent/fichas": typeof agent_fichas;

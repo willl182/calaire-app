@@ -1,5 +1,6 @@
 import { v } from 'convex/values'
 import { query, mutation } from '../_generated/server'
+import { requireAdminIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante } from '../access'
 
 // ---------------------------------------------------------------------------
 // PT Items & Sample Groups — read
@@ -8,6 +9,7 @@ import { query, mutation } from '../_generated/server'
 export const listPTItems = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireParticipantOrAdminForRonda(ctx, rondaId)
     const items = await ctx.db
       .query('rondaPtItems')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -23,6 +25,7 @@ export const listPTItems = query({
 export const listPTSampleGroups = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireParticipantOrAdminForRonda(ctx, rondaId)
     const groups = await ctx.db
       .query('rondaPtSampleGroups')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -37,11 +40,12 @@ export const listPTSampleGroups = query({
 // ---------------------------------------------------------------------------
 
 export const getRondaParticipantePT = query({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const { identity } = await requireParticipantOrAdminForRonda(ctx, rondaId)
     return ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
   },
 })
@@ -49,6 +53,7 @@ export const getRondaParticipantePT = query({
 export const listParticipantesPT = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireAdminIdentity(ctx)
     const rows = await ctx.db
       .query('rondaParticipantes')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -63,11 +68,12 @@ export const listParticipantesPT = query({
 // ---------------------------------------------------------------------------
 
 export const listEnviosPT = query({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const { identity } = await requireParticipantOrAdminForRonda(ctx, rondaId)
     const participante = await ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
     if (!participante) return []
 
@@ -81,6 +87,7 @@ export const listEnviosPT = query({
 export const listEnviosPTByParticipante = query({
   args: { rondaParticipanteId: v.id('rondaParticipantes') },
   handler: async (ctx, { rondaParticipanteId }) => {
+    await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
     return ctx.db
       .query('enviosPt')
       .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', rondaParticipanteId))
@@ -95,6 +102,7 @@ export const getEnvioPT = query({
     sampleGroupId:       v.id('rondaPtSampleGroups'),
   },
   handler: async (ctx, { rondaParticipanteId, ptItemId, sampleGroupId }) => {
+    await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
     return ctx.db
       .query('enviosPt')
       .withIndex('by_participante_item_group', (q) =>
@@ -105,8 +113,9 @@ export const getEnvioPT = query({
 })
 
 export const getEstadoEnvioPTParticipante = query({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const { identity } = await requireParticipantOrAdminForRonda(ctx, rondaId)
     const [items, sampleGroups] = await Promise.all([
       ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
       ctx.db.query('rondaPtSampleGroups').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
@@ -115,7 +124,7 @@ export const getEstadoEnvioPTParticipante = query({
 
     const participante = await ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
 
     if (!participante) {
@@ -156,6 +165,7 @@ export const getEstadoEnvioPTParticipante = query({
 export const listResultadosPTRonda = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireAdminIdentity(ctx)
     const [participantes, items, sampleGroups] = await Promise.all([
       ctx.db.query('rondaParticipantes').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
       ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
@@ -211,6 +221,7 @@ export const listResultadosPTRonda = query({
 export const listEnviosPTRound = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
+    await requireAdminIdentity(ctx)
     const envios = await ctx.db
       .query('enviosPt')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -320,6 +331,7 @@ export const upsertEnvioPT = mutation({
     uxExp:               v.optional(v.number()),
   },
   handler: async (ctx, { rondaId, rondaParticipanteId, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, k, uxExp }) => {
+    await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
     const now = Date.now()
 
     const existing = await ctx.db
@@ -354,11 +366,12 @@ export const upsertEnvioPT = mutation({
 })
 
 export const submitFinalPT = mutation({
-  args: { rondaId: v.id('rondas'), userId: v.string() },
-  handler: async (ctx, { rondaId, userId }) => {
+  args: { rondaId: v.id('rondas') },
+  handler: async (ctx, { rondaId }) => {
+    const { identity } = await requireParticipantOrAdminForRonda(ctx, rondaId)
     const participante = await ctx.db
       .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', userId))
+      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
     if (!participante) throw new Error('Participante no encontrado')
 
@@ -398,6 +411,7 @@ export const createPTItem = mutation({
     sortOrder:  v.number(),
   },
   handler: async (ctx, { rondaId, contaminante, runCode, levelLabel, sortOrder }) => {
+    await requireAdminIdentity(ctx)
     const id = await ctx.db.insert('rondaPtItems', { rondaId, contaminante, runCode, levelLabel, sortOrder, createdAt: Date.now() })
     return ctx.db.get(id)
   },
@@ -416,6 +430,7 @@ export const createPTItemsBulk = mutation({
     })),
   },
   handler: async (ctx, { rondaId, contaminante, items }) => {
+    await requireAdminIdentity(ctx)
     const now = Date.now()
     const ids = []
     for (const item of items) {
@@ -440,6 +455,7 @@ export const createPTSampleGroup = mutation({
     sortOrder:   v.number(),
   },
   handler: async (ctx, { rondaId, sampleGroup, sortOrder }) => {
+    await requireAdminIdentity(ctx)
     const id = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup, sortOrder, createdAt: Date.now() })
     return ctx.db.get(id)
   },
@@ -452,6 +468,7 @@ export const updateParticipantePT = mutation({
     replicateCode:   v.union(v.number(), v.null()),
   },
   handler: async (ctx, { participanteId, participantCode, replicateCode }) => {
+    await requireAdminIdentity(ctx)
     const patch: {
       participantCode?: string | null
       replicateCode?: number | null
@@ -470,6 +487,7 @@ export const updatePTItem = mutation({
     levelLabel: v.string(),
   },
   handler: async (ctx, { rondaId, itemId, runCode, levelLabel }) => {
+    await requireAdminIdentity(ctx)
     const item = await ctx.db.get(itemId)
     if (!item) throw new Error('Item PT no encontrado')
     if (item.rondaId !== rondaId) throw new Error('Item PT no pertenece a la ronda')
@@ -485,6 +503,7 @@ export const deleteParticipanteEnviosPT = mutation({
     rondaParticipanteId: v.id('rondaParticipantes'),
   },
   handler: async (ctx, { rondaId, rondaParticipanteId }) => {
+    await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
     const envios = await ctx.db
       .query('enviosPt')
       .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', rondaParticipanteId))
@@ -500,6 +519,7 @@ export const deleteParticipanteEnviosPT = mutation({
 export const deletePTItem = mutation({
   args: { rondaId: v.id('rondas'), itemId: v.id('rondaPtItems') },
   handler: async (ctx, { rondaId, itemId }) => {
+    await requireAdminIdentity(ctx)
     const item = await ctx.db.get(itemId)
     if (!item) return
     if (item.rondaId !== rondaId) throw new Error('Item PT no pertenece a la ronda')
@@ -517,6 +537,7 @@ export const deletePTItem = mutation({
 export const deletePTSampleGroup = mutation({
   args: { rondaId: v.id('rondas'), groupId: v.id('rondaPtSampleGroups') },
   handler: async (ctx, { rondaId, groupId }) => {
+    await requireAdminIdentity(ctx)
     const group = await ctx.db.get(groupId)
     if (!group) return
     if (group.rondaId !== rondaId) throw new Error('Grupo de muestra PT no pertenece a la ronda')

@@ -1,7 +1,7 @@
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
-import { safeConvexCall } from '@/lib/convex-fallback'
+import { safeConvexCall, safeConvexCallWithStatus } from '@/lib/convex-fallback'
 import { requireAuth } from '@/server/auth'
 import {
   agruparChecklistPorFase,
@@ -177,6 +177,11 @@ export type SgcPanel = {
   checklist: SgcChecklistItem[]
   checklistPorFase: Record<SgcFase, SgcChecklistItem[]>
   bloqueantes: string[]
+}
+
+type SgcPanelResult = {
+  data: SgcPanel | null
+  offline: boolean
 }
 
 export type DocumentoSgc = {
@@ -374,16 +379,13 @@ export type MatrizDocumentalSgc = {
   }
 }
 
-export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
-  const token = await sgcToken()
-  const raw = await safeConvexCall(
-    'getPanelSgc',
-    () => fetchQuery(api.sgc.index.getPanelSgc, {
+async function fetchPanelSgcRaw(rondaId: string, token: string) {
+  return fetchQuery(api.sgc.index.getPanelSgc, {
       rondaId: rondaId as Id<'rondas'>,
-    }, { token }),
-    null,
-  )
-  if (!raw) return null
+    }, { token })
+}
+
+function mapPanelSgc(raw: NonNullable<Awaited<ReturnType<typeof fetchPanelSgcRaw>>>): SgcPanel {
   const checklist = calcularChecklistSgc(raw.coverage)
   return {
     ronda: raw.ronda,
@@ -407,6 +409,24 @@ export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
     checklistPorFase: agruparChecklistPorFase(checklist),
     bloqueantes: derivarBloqueantes(checklist),
   }
+}
+
+export async function getPanelSgcWithStatus(rondaId: string): Promise<SgcPanelResult> {
+  const token = await sgcToken()
+  const result = await safeConvexCallWithStatus(
+    'getPanelSgc',
+    () => fetchPanelSgcRaw(rondaId, token),
+    null,
+  )
+
+  return {
+    data: result.data ? mapPanelSgc(result.data) : null,
+    offline: result.offline,
+  }
+}
+
+export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
+  return (await getPanelSgcWithStatus(rondaId)).data
 }
 
 export async function guardarJustificacionSgc(
@@ -462,8 +482,18 @@ export async function listSgcMaestro(filters: {
   modoDiligenciamiento?: DocumentoSgc['modoDiligenciamiento'] | null
   texto?: string | null
 } = {}): Promise<SgcMaestroList> {
+  return (await listSgcMaestroWithStatus(filters)).data
+}
+
+export async function listSgcMaestroWithStatus(filters: {
+  ambito?: string | null
+  familia?: DocumentoSgc['familia'] | null
+  estado?: DocumentoSgc['estado'] | null
+  modoDiligenciamiento?: DocumentoSgc['modoDiligenciamiento'] | null
+  texto?: string | null
+} = {}) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'listSgcMaestro',
     () => fetchQuery(api.sgc.index.listSgcMaestro, filters, { token }),
     EMPTY_SGC_MAESTRO_LIST,
@@ -495,8 +525,17 @@ export async function listNormativaSgc(filters: {
   page?: number
   pageSize?: number
 } = {}): Promise<NormativaSgc> {
+  return (await listNormativaSgcWithStatus(filters)).data
+}
+
+export async function listNormativaSgcWithStatus(filters: {
+  norma?: string | null
+  estadoCobertura?: DocumentoRequisito['estadoCobertura'] | null
+  page?: number
+  pageSize?: number
+} = {}) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'listNormativaSgc',
     () => fetchQuery(api.sgc.index.listNormativaSgc, filters, { token }),
     EMPTY_NORMATIVA_SGC,
@@ -518,8 +557,12 @@ const EMPTY_NORMATIVA_SGC: NormativaSgc = {
 }
 
 export async function listMapaSgc(filters: { ambito?: string | null } = {}): Promise<MapaSgc> {
+  return (await listMapaSgcWithStatus(filters)).data
+}
+
+export async function listMapaSgcWithStatus(filters: { ambito?: string | null } = {}) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'listMapaSgc',
     () => fetchQuery(api.sgc.index.listMapaSgc, filters, { token }),
     EMPTY_MAPA_SGC,
@@ -971,8 +1014,12 @@ export async function deletePublicacion(publicacionId: string) {
 }
 
 export async function getHitosVisibleParticipante(rondaId: string) {
+  return (await getHitosVisibleParticipanteWithStatus(rondaId)).data
+}
+
+export async function getHitosVisibleParticipanteWithStatus(rondaId: string) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'getHitosVisibleParticipante',
     () => fetchQuery(api.sgc.index.getHitosVisibleParticipante, {
       rondaId: rondaId as Id<'rondas'>,
@@ -982,8 +1029,12 @@ export async function getHitosVisibleParticipante(rondaId: string) {
 }
 
 export async function getEvidenciasPublicas(rondaId: string) {
+  return (await getEvidenciasPublicasWithStatus(rondaId)).data
+}
+
+export async function getEvidenciasPublicasWithStatus(rondaId: string) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'getEvidenciasPublicas',
     () => fetchQuery(api.sgc.index.getEvidenciasPublicas, {
       rondaId: rondaId as Id<'rondas'>,
@@ -993,8 +1044,12 @@ export async function getEvidenciasPublicas(rondaId: string) {
 }
 
 export async function listPublicacionesParticipante(rondaId: string) {
+  return (await listPublicacionesParticipanteWithStatus(rondaId)).data
+}
+
+export async function listPublicacionesParticipanteWithStatus(rondaId: string) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'listPublicacionesParticipante',
     () => fetchQuery(api.sgc.index.listPublicaciones, {
       rondaId: rondaId as Id<'rondas'>,
@@ -1012,8 +1067,12 @@ export async function createComentarioRonda(rondaId: string, mensaje: string) {
 }
 
 export async function listMisComentariosRonda(rondaId: string) {
+  return (await listMisComentariosRondaWithStatus(rondaId)).data
+}
+
+export async function listMisComentariosRondaWithStatus(rondaId: string) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'listMisComentariosRonda',
     () => fetchQuery(api.sgc.index.listMisComentariosRonda, {
       rondaId: rondaId as Id<'rondas'>,
@@ -1048,8 +1107,12 @@ export async function crearNotificacion(args: {
 }
 
 export async function listMisNotificaciones(rondaId: string) {
+  return (await listMisNotificacionesWithStatus(rondaId)).data
+}
+
+export async function listMisNotificacionesWithStatus(rondaId: string) {
   const token = await sgcToken()
-  return safeConvexCall(
+  return safeConvexCallWithStatus(
     'listMisNotificaciones',
     () => fetchQuery(api.sgc.index.listMisNotificaciones, {
       rondaId: rondaId as Id<'rondas'>,

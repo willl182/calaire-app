@@ -4,10 +4,17 @@ import { redirect } from 'next/navigation'
 
 import { LogoUnal } from '@/components/LogoUnal'
 import { Alert } from '@/components/ui/Alert'
+import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/server/auth'
-import { listRondasParticipante, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
-import { getHitosVisibleParticipante, getEvidenciasPublicas, listPublicacionesParticipante, listMisComentariosRonda, listMisNotificaciones } from '@/server/sgc'
+import { listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
+import {
+  getHitosVisibleParticipanteWithStatus,
+  getEvidenciasPublicasWithStatus,
+  listPublicacionesParticipanteWithStatus,
+  listMisComentariosRondaWithStatus,
+  listMisNotificacionesWithStatus,
+} from '@/server/sgc'
 import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from './actions'
 
 function estadoParticipanteBadge(estado: Ronda['estado']) {
@@ -39,11 +46,11 @@ function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estad
 }
 
 type SgcDatosParticipante = {
-  hitos: Awaited<ReturnType<typeof getHitosVisibleParticipante>>
-  evidencias: Awaited<ReturnType<typeof getEvidenciasPublicas>>
-  publicaciones: Awaited<ReturnType<typeof listPublicacionesParticipante>>
-  comentarios: Awaited<ReturnType<typeof listMisComentariosRonda>>
-  notificaciones: Awaited<ReturnType<typeof listMisNotificaciones>>
+  hitos: Awaited<ReturnType<typeof getHitosVisibleParticipanteWithStatus>>['data']
+  evidencias: Awaited<ReturnType<typeof getEvidenciasPublicasWithStatus>>['data']
+  publicaciones: Awaited<ReturnType<typeof listPublicacionesParticipanteWithStatus>>['data']
+  comentarios: Awaited<ReturnType<typeof listMisComentariosRondaWithStatus>>['data']
+  notificaciones: Awaited<ReturnType<typeof listMisNotificacionesWithStatus>>['data']
 }
 
 function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignada; sgc?: SgcDatosParticipante }) {
@@ -279,6 +286,22 @@ function EmptyParticipantState({ email }: { email: string }) {
   )
 }
 
+function OfflineParticipantState() {
+  return (
+    <section className="card p-8 text-center">
+      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--pt-primary-dark)]">
+        Backend no disponible
+      </p>
+      <h2 className="mt-2 text-2xl font-bold text-[var(--foreground)]">
+        No se pudieron cargar sus rondas
+      </h2>
+      <p className="mx-auto mt-2 max-w-2xl text-sm leading-6 text-[var(--foreground-muted)]">
+        Convex no responde en este momento. No se interpreta como ausencia de asignaciones; vuelva a intentar cuando el backend este disponible.
+      </p>
+    </section>
+  )
+}
+
 export default async function MiDashboardPage({ searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
@@ -287,26 +310,32 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const params = searchParams ? await searchParams : {}
   const success = getParamValue(params.success)
   const error = getParamValue(params.error)
-  const rondas = await listRondasParticipante(auth.user.id)
+  const rondasResult = await listRondasParticipanteWithStatus(auth.user.id)
+  const rondas = rondasResult.data
   const rondasSgc = new Map<string, SgcDatosParticipante>()
-  await Promise.all(
+  const sgcOfflineResults = await Promise.all(
     rondas.map(async (r) => {
       if (r.estado === 'documentacion_pendiente' || r.estado === 'cerrada') {
-        try {
-          const [hitos, evidencias, publicaciones, comentarios, notificaciones] = await Promise.all([
-            getHitosVisibleParticipante(r.id),
-            getEvidenciasPublicas(r.id),
-            listPublicacionesParticipante(r.id),
-            listMisComentariosRonda(r.id),
-            listMisNotificaciones(r.id),
-          ])
-          rondasSgc.set(r.id, { hitos, evidencias, publicaciones, comentarios, notificaciones })
-        } catch {
-          // Si no hay acceso, simplemente no mostrar datos SGC
-        }
+        const [hitos, evidencias, publicaciones, comentarios, notificaciones] = await Promise.all([
+          getHitosVisibleParticipanteWithStatus(r.id),
+          getEvidenciasPublicasWithStatus(r.id),
+          listPublicacionesParticipanteWithStatus(r.id),
+          listMisComentariosRondaWithStatus(r.id),
+          listMisNotificacionesWithStatus(r.id),
+        ])
+        rondasSgc.set(r.id, {
+          hitos: hitos.data,
+          evidencias: evidencias.data,
+          publicaciones: publicaciones.data,
+          comentarios: comentarios.data,
+          notificaciones: notificaciones.data,
+        })
+        return hitos.offline || evidencias.offline || publicaciones.offline || comentarios.offline || notificaciones.offline
       }
+      return false
     })
   )
+  const backendOffline = rondasResult.offline || sgcOfflineResults.some(Boolean)
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -347,9 +376,14 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
 
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
+        {backendOffline && (
+          <BackendOfflineBanner detail="Las rondas asignadas y la informacion de cierre documental se muestran vacias temporalmente." />
+        )}
 
         <section className="grid gap-6">
-          {rondas.length === 0 ? (
+          {backendOffline && rondas.length === 0 ? (
+            <OfflineParticipantState />
+          ) : rondas.length === 0 ? (
             <EmptyParticipantState email={auth.user.email} />
           ) : (
             <>
