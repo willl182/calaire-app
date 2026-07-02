@@ -15,8 +15,9 @@ Cerrar los pendientes del ultimo rundown de `plan_fix.md` siguiendo `workflow_fi
 - [x] `scripts/poblar-plan-r1.mjs` fue eliminado como codigo muerto; invocaba `sgc:seedPlanRonda`, funcion inexistente, y no estaba wired en `package.json`.
 - [x] Documentos actualizados para reflejar esa deuda cerrada: `plan_fix.md`, `target_fix.md`, `review_fix.md`, `fase5.md`, `logs/260701_rundown.md`.
 - [x] Verificacion post-cambio: `pnpm lint`, `pnpm test`, `pnpm build`, `node --check scripts/upload-sgc-document-versions.mjs` y `node --check scripts/import-sgc-seeds.mjs` verdes.
-- [ ] Pendiente procedimental: preparar commit de cierre por fases o consolidado.
-- [ ] Pendiente de decision: `docs/screenshots/fase-3/*` siguen modificados; decidir commit, regeneracion o revert controlado.
+- [x] Commit de cierre creado (consolidado `fix: recuperacion funcional de la app (Fases 1-5)`); arbol de trabajo limpio.
+- [x] Decision de `docs/screenshots/fase-3/*`: se versionan (incluidos en el commit de cierre), coherente con la decision de Fase 4.
+- [x] Verificacion previa al commit: `pnpm lint`, `pnpm test` (9/9), `pnpm build` y `pnpm exec convex codegen` verdes.
 
 ## Critical Technical Context
 
@@ -30,6 +31,6 @@ Cerrar los pendientes del ultimo rundown de `plan_fix.md` siguiendo `workflow_fi
 
 ## Next Steps
 
-1. Decidir que hacer con los tres screenshots modificados en `docs/screenshots/fase-3/*`.
-2. Preparar commit de cierre incluyendo docs/rundowns versionables: `logs/*.md`, `*fix.md`, `fase*.md` y cambios de codigo relevantes.
-3. Opcional posterior: limpiar warnings React de formularios con server actions.
+- Sin pendientes bloqueantes ni procedimentales. Cierre funcional commiteado en `feature/t3-estructura-segura`.
+- Deuda futura documentada (no bloquea): Target 6 (auditar 215 `.collect()` heredados en `convex/`) y limpieza opcional de warnings React en formularios con server actions.
+- Cuando se decida integrar: abrir PR de `feature/t3-estructura-segura` a `main`.
