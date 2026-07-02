@@ -133,7 +133,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
       {canEdit && <section className="grid gap-4 lg:grid-cols-2">
         <div className="card p-5">
           <h2 className="text-lg font-semibold">Registrar version oficial</h2>
-          <form action={registrarVersionOficialAction} className="mt-4 grid gap-3" encType="multipart/form-data">
+          <form action={registrarVersionOficialAction} className="mt-4 grid gap-3">
             <input type="hidden" name="documento_id" value={documento._id} />
             <div className="grid gap-3 sm:grid-cols-2">
               <input className="input" name="version" type="number" min="1" placeholder={`Sugerida ${versiones.length + 1}`} aria-label="Numero de version oficial" />

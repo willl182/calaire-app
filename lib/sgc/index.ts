@@ -176,6 +176,14 @@ export type SgcPanel = {
   checklist: SgcChecklistItem[]
   checklistPorFase: Record<SgcFase, SgcChecklistItem[]>
   bloqueantes: string[]
+  checklistBloqueantesCierre: string[]
+  checklistBloqueantesDocumentacionPendiente: string[]
+  driveCierre: {
+    totalDocumentos: number
+    recursosDocumentales: number
+    bloqueantes: string[]
+    advertencias: string[]
+  }
 }
 
 export type DocumentoSgc = {
@@ -373,6 +381,66 @@ export type MatrizDocumentalSgc = {
   }
 }
 
+export type SgcDriveTipo = 'carpeta' | 'documento' | 'hoja_calculo' | 'pdf' | 'archivo' | 'enlace'
+export type SgcDriveEstado = 'pendiente' | 'creado' | 'diligenciado' | 'reemplazado' | 'retirado' | 'no_aplica'
+
+export type SgcDriveDefinitivoEnlace = {
+  driveFileId?: string | null
+  webUrl: string
+  tipo?: string | null
+}
+export type SgcDriveDefinitivoArchivo = {
+  storageId: string
+  fileName?: string | null
+  contentType?: string | null
+  size?: number | null
+  tipo?: string | null
+}
+export type SgcDriveDefinitivo = SgcDriveDefinitivoEnlace | SgcDriveDefinitivoArchivo
+
+export type SgcDriveRecurso = {
+  _id: string
+  _creationTime: number
+  rondaId: string
+  parentId?: string | null
+  proveedor: 'google_drive'
+  tipo: SgcDriveTipo
+  codigo: string
+  nombre: string
+  fase?: string | null
+  formatoRelacionado?: string | null
+  documentoSgcId?: string | null
+  documentoSgcVersionId?: string | null
+  evidenciaSerieId?: string | null
+  critico?: boolean
+  publicaParticipante?: boolean
+  driveFileId?: string | null
+  driveFolderId?: string | null
+  webUrl?: string | null
+  templateUrl?: string | null
+  definitivo?: SgcDriveDefinitivo | null
+  estado: SgcDriveEstado
+  notas?: string | null
+  createdAt: number
+  createdBy: string
+  updatedAt: number
+  updatedBy: string
+}
+
+export type SgcDriveTree = {
+  root: SgcDriveRecurso | null
+  recursos: SgcDriveRecurso[]
+}
+
+export type SgcDriveRecursoParticipante = Pick<
+  SgcDriveRecurso,
+  '_id' | 'codigo' | 'nombre' | 'tipo' | 'fase' | 'formatoRelacionado' | 'webUrl' | 'updatedAt'
+> & {
+  // Al participante el definitivo siempre llega como enlace visualizable (URL de descarga
+  // firmada si el registro fue cargado como archivo en la app).
+  definitivo?: SgcDriveDefinitivoEnlace | null
+}
+
 export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
   const token = await sgcToken()
   const raw = await fetchQuery(api.sgc.getPanelSgc, {
@@ -400,7 +468,15 @@ export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
     metricasHomogeneidadActuales: raw.metricasHomogeneidadActuales ?? {},
     checklist,
     checklistPorFase: agruparChecklistPorFase(checklist),
-    bloqueantes: derivarBloqueantes(checklist),
+    bloqueantes: raw.checklistBloqueantesCierre ?? derivarBloqueantes(checklist),
+    checklistBloqueantesCierre: raw.checklistBloqueantesCierre ?? derivarBloqueantes(checklist),
+    checklistBloqueantesDocumentacionPendiente: raw.checklistBloqueantesDocumentacionPendiente ?? [],
+    driveCierre: raw.driveCierre ?? {
+      totalDocumentos: 0,
+      recursosDocumentales: 0,
+      bloqueantes: [],
+      advertencias: [],
+    },
   }
 }
 
@@ -431,6 +507,112 @@ export async function inicializarPanelSgc(rondaId: string) {
   const token = await sgcToken()
   await fetchMutation(api.sgc.inicializarPanelSgc, {
     rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
+export async function getDriveTreeSgc(rondaId: string): Promise<SgcDriveTree> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.getDriveTree, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token }) as Promise<SgcDriveTree>
+}
+
+export async function listDriveRecursosParticipante(rondaId: string): Promise<SgcDriveRecursoParticipante[]> {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.listDriveRecursosParticipante, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token }) as Promise<SgcDriveRecursoParticipante[]>
+}
+
+export async function inicializarDriveRonda(rondaId: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.inicializarDriveRonda, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
+export async function upsertDriveRecurso(args: {
+  recursoId?: string | null
+  rondaId: string
+  parentId?: string | null
+  codigo: string
+  nombre: string
+  fase?: string | null
+  tipo: SgcDriveTipo
+  formatoRelacionado?: string | null
+  webUrl?: string | null
+  templateUrl?: string | null
+  notas?: string | null
+  definitivo?: SgcDriveRecurso['definitivo']
+}) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.upsertDriveRecurso, {
+    ...args,
+    recursoId: args.recursoId as Id<'sgcDriveRecursos'> | null | undefined,
+    rondaId: args.rondaId as Id<'rondas'>,
+    parentId: args.parentId as Id<'sgcDriveRecursos'> | null | undefined,
+    definitivo: args.definitivo as
+      | SgcDriveDefinitivoEnlace
+      | (Omit<SgcDriveDefinitivoArchivo, 'storageId'> & { storageId: Id<'_storage'> })
+      | null
+      | undefined,
+  }, { token })
+}
+
+export async function reemplazarDriveRecurso(args: {
+  recursoId: string
+  webUrl: string
+  motivo: string
+  tipo?: SgcDriveTipo
+}) {
+  const token = await sgcToken()
+  await fetchMutation(api.sgc.reemplazarDriveRecurso, {
+    ...args,
+    recursoId: args.recursoId as Id<'sgcDriveRecursos'>,
+  }, { token })
+}
+
+export async function actualizarEstadoDriveRecurso(
+  recursoId: string,
+  estado: SgcDriveEstado,
+  notas: string | null
+) {
+  const token = await sgcToken()
+  await fetchMutation(api.sgc.actualizarEstadoDriveRecurso, {
+    recursoId: recursoId as Id<'sgcDriveRecursos'>,
+    estado,
+    notas
+  }, { token })
+}
+
+export async function actualizarVisibilidadDriveRecurso(recursoId: string, publicaParticipante: boolean) {
+  const token = await sgcToken()
+  await fetchMutation(api.sgc.actualizarVisibilidadDriveRecurso, {
+    recursoId: recursoId as Id<'sgcDriveRecursos'>,
+    publicaParticipante
+  }, { token })
+}
+
+export async function registrarAutomatizacionDrive(args: {
+  rondaId: string
+  evento: 'sgc.drive.google_api_completado' | 'sgc.drive.google_api_parcial' | 'sgc.drive.google_api_fallo'
+  detalle: string
+  targetId?: string | null
+}) {
+  const token = await sgcToken()
+  await fetchMutation(api.sgc.registrarAutomatizacionDrive, {
+    rondaId: args.rondaId as Id<'rondas'>,
+    evento: args.evento,
+    detalle: args.detalle,
+    targetId: args.targetId as Id<'sgcDriveRecursos'> | null | undefined,
+  }, { token })
+}
+
+export async function retirarDriveRecurso(recursoId: string, motivo: string) {
+  const token = await sgcToken()
+  await fetchMutation(api.sgc.retirarDriveRecurso, {
+    recursoId: recursoId as Id<'sgcDriveRecursos'>,
+    motivo
   }, { token })
 }
 

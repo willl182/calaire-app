@@ -99,7 +99,7 @@ function EvidenciaControls({
           <button className="btn-outline text-xs" type="submit">Descargar vigente</button>
         </form>
       )}
-      <form action={subirEvidenciaAction} className="grid gap-2" encType="multipart/form-data">
+      <form action={subirEvidenciaAction} className="grid gap-2">
         <input type="hidden" name="ronda_id" value={rondaId} />
         <input type="hidden" name="formato_focus" value={doc.formatoOperativo} />
         <input type="hidden" name="serie_id" value={serie._id} />

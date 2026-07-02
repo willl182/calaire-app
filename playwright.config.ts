@@ -72,7 +72,10 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  workers: process.env.CI ? 1 : undefined,
+  // La suite E2E hace SSR contra un unico backend Convex dev local; ejecutarla en paralelo
+  // satura ese backend y produce paginas vacias intermitentes. Se serializa (1 worker) tanto
+  // en CI como en local para que `test:e2e:start` sea estable.
+  workers: 1,
   reporter: [['html'], ['list']],
   use: {
     baseURL,

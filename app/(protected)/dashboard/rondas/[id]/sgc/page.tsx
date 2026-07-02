@@ -11,8 +11,10 @@ import {
   type SgcFormatoCodigo,
   type SgcRondaDocumento,
 } from '@/lib/sgc/catalog'
-import { getPanelSgc, inicializarPanelSgc } from '@/lib/sgc'
+import { getDriveTreeSgc, getPanelSgc, inicializarPanelSgc, type SgcPanel } from '@/lib/sgc'
+import { getDriveGoogleAutomationStatus } from '@/lib/sgc/drive-google'
 import { RondaContextNav } from '../RondaContextNav'
+import { DriveDocumentalSgc } from './DriveDocumentalSgc'
 import { ExpedienteSgc } from './ExpedienteSgc'
 import {
   finalizarPlanRondaAction,
@@ -21,6 +23,8 @@ import {
   guardarPlanRondaAction,
   guardarRevisionDatosAction,
   guardarRevisionHomogeneidadAction,
+  inicializarDriveRondaAction,
+  transicionSgcAction,
 } from './actions'
 
 type PageProps = {
@@ -77,6 +81,114 @@ function getDocumentoObservacion(doc: SgcRondaDocumento, checklistByCodigo: Map<
   return `${item.observaciones}${item.vinculo ? ` Vinculo: ${item.vinculo}.` : ''}`
 }
 
+function CierreDocumentalDrive({ panel, rondaId }: { panel: SgcPanel; rondaId: string }) {
+  const drive = panel.driveCierre
+  const puedePasarADocumentacion = panel.ronda.estado === 'activa'
+  const puedeCerrar = panel.ronda.estado === 'documentacion_pendiente'
+  const puedeReabrir = panel.ronda.estado === 'cerrada'
+  const bloqueantesDocumentacion = [...panel.checklistBloqueantesDocumentacionPendiente, ...drive.bloqueantes]
+  const bloqueantesCierre = [...panel.checklistBloqueantesCierre, ...drive.bloqueantes]
+  const bloqueantesActuales = puedePasarADocumentacion
+    ? bloqueantesDocumentacion
+    : puedeCerrar
+      ? bloqueantesCierre
+      : bloqueantesCierre
+  const puedePasarADocumentacionPendiente = bloqueantesDocumentacion.length === 0
+  const puedeCerrarDocumentalmente = bloqueantesCierre.length === 0
+  const sinBloqueantesActuales = bloqueantesActuales.length === 0
+
+  return (
+    <section className="card p-6" aria-labelledby="cierre-documental-title">
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+        <div>
+          <h2 id="cierre-documental-title" className="text-lg font-semibold text-[var(--foreground)]">Cierre documental SGC</h2>
+          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+            El cierre usa el checklist SGC y el expediente Drive. Los definitivos faltantes son recomendados; no bloquean.
+          </p>
+        </div>
+        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+          {sinBloqueantesActuales ? 'Sin bloqueantes' : `${bloqueantesActuales.length} bloqueante(s)`}
+        </span>
+      </div>
+
+      <div className="mt-4 grid gap-3 md:grid-cols-3">
+        <div className="rounded-lg border border-[var(--border)] px-3 py-2">
+          <div className="text-lg font-semibold">{drive.recursosDocumentales}/{drive.totalDocumentos}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Recursos Drive</div>
+        </div>
+        <div className="rounded-lg border border-[var(--border)] px-3 py-2">
+          <div className="text-lg font-semibold">{drive.bloqueantes.length}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Bloqueos Drive</div>
+        </div>
+        <div className="rounded-lg border border-[var(--border)] px-3 py-2">
+          <div className="text-lg font-semibold">{drive.advertencias.length}</div>
+          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Definitivos recomendados</div>
+        </div>
+      </div>
+
+      {drive.recursosDocumentales === 0 && (
+        <form action={inicializarDriveRondaAction} className="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="text-sm font-semibold text-sky-950">Expediente Drive no inicializado</div>
+              <p className="mt-1 text-sm text-sky-900">Inicialice o repare la estructura documental antes de cerrar.</p>
+            </div>
+            <button className="btn-outline" type="submit">Inicializar expediente</button>
+          </div>
+        </form>
+      )}
+
+      {bloqueantesActuales.length > 0 && (
+        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-4">
+          <div className="text-sm font-semibold text-rose-900">Faltantes bloqueantes</div>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-rose-900">
+            {bloqueantesActuales.map((bloqueante) => <li key={bloqueante}>{bloqueante}</li>)}
+          </ul>
+        </div>
+      )}
+
+      {drive.advertencias.length > 0 && (
+        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
+          <div className="text-sm font-semibold text-amber-900">Advertencias no bloqueantes</div>
+          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-900">
+            {drive.advertencias.map((advertencia) => <li key={advertencia}>{advertencia}</li>)}
+          </ul>
+        </div>
+      )}
+
+      <div className="mt-4 flex flex-wrap gap-3">
+        {puedePasarADocumentacion && (
+          <form action={transicionSgcAction}>
+            <input type="hidden" name="ronda_id" value={rondaId} />
+            <input type="hidden" name="accion" value="documentacion_pendiente" />
+            <button className="btn-primary" type="submit" disabled={!puedePasarADocumentacionPendiente}>
+              Pasar a documentacion pendiente
+            </button>
+          </form>
+        )}
+        {puedeCerrar && (
+          <form action={transicionSgcAction}>
+            <input type="hidden" name="ronda_id" value={rondaId} />
+            <input type="hidden" name="accion" value="cerrar" />
+            <button className="btn-primary" type="submit" disabled={!puedeCerrarDocumentalmente}>
+              Cerrar documentalmente
+            </button>
+          </form>
+        )}
+        {puedeReabrir && (
+          <form action={transicionSgcAction} className="flex flex-wrap gap-2">
+            <input type="hidden" name="ronda_id" value={rondaId} />
+            <input type="hidden" name="accion" value="reabrir" />
+            <input className="input" name="motivo" placeholder="Motivo de reapertura" required />
+            <button className="btn-outline" type="submit">Reabrir</button>
+          </form>
+        )}
+      </div>
+    </section>
+  )
+}
+
 export default async function SgcRondaPage({ params, searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
@@ -88,8 +200,12 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   if (!ronda) notFound()
 
   await inicializarPanelSgc(id)
-  const panel = await getPanelSgc(id)
+  const [panel, drive] = await Promise.all([
+    getPanelSgc(id),
+    getDriveTreeSgc(id),
+  ])
   if (!panel) notFound()
+  const driveGoogleStatus = getDriveGoogleAutomationStatus()
 
   const success = getParam(query.success)
   const error = getParam(query.error)
@@ -137,6 +253,17 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
+
+        <DriveDocumentalSgc
+          drive={drive}
+          rondaId={id}
+          rondaCodigo={ronda.codigo}
+          rondaNombre={ronda.nombre}
+          driveGoogleReady={driveGoogleStatus.ready}
+          driveGoogleConfig={driveGoogleStatus}
+        />
+
+        <CierreDocumentalDrive panel={panel} rondaId={id} />
 
         <ExpedienteSgc panel={panel} rondaId={id} rondaCodigo={ronda.codigo} selectedFormato={selectedFormato} />
 

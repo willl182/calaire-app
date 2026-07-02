@@ -14,6 +14,7 @@ import { listComentariosRondaConfig, listMisComentariosRondaConfig, createComent
 import { crearNotificacionConfig, listMisNotificacionesConfig, marcarNotificacionLeidaConfig } from './sgc/notificaciones'
 import { upsertResultadoPtAppConfig, crearCasoSgcConfig, actualizarCasoSgcConfig } from './sgc/casos'
 import { crearRegistroSgcConfig, getDocumentoMaestroConfig, importarDocumentosSeedSgcConfig, importarMapaSeedSgcConfig, importarRequisitosSeedSgcConfig, importarSeedSgcConfig, listExpedientesSgcConfig, listMapaSgcConfig, listNormativaSgcConfig, listSgcMaestroConfig, registrarVersionOficialConfig, upsertDocumentoMaestroConfig, upsertDocumentoRequisitoConfig } from './sgc/maestro'
+import { actualizarEstadoDriveRecursoConfig, actualizarVisibilidadDriveRecursoConfig, getDriveTreeConfig, inicializarDriveRondaConfig, listDriveRecursosConfig, listDriveRecursosParticipanteConfig, registrarAutomatizacionDriveConfig, reemplazarDriveRecursoConfig, retirarDriveRecursoConfig, upsertDriveRecursoConfig } from './sgc/drive'
 
 export const getPanelSgc = query(getPanelSgcConfig)
 export const getPlanRonda = query(getPlanRondaConfig)
@@ -71,6 +72,9 @@ export const deleteComunicacion = mutation(deleteComunicacionConfig)
 export const listRondasSgcResumen = query(listRondasSgcResumenConfig)
 export const getHitosVisibleParticipante = query(getHitosVisibleParticipanteConfig)
 export const getEvidenciasPublicas = query(getEvidenciasPublicasConfig)
+export const listDriveRecursos = query(listDriveRecursosConfig)
+export const getDriveTree = query(getDriveTreeConfig)
+export const listDriveRecursosParticipante = query(listDriveRecursosParticipanteConfig)
 export const listPublicaciones = query(listPublicacionesConfig)
 export const createPublicacion = mutation(createPublicacionConfig)
 export const deletePublicacion = mutation(deletePublicacionConfig)
@@ -84,3 +88,10 @@ export const marcarNotificacionLeida = mutation(marcarNotificacionLeidaConfig)
 export const upsertResultadoPtApp = mutation(upsertResultadoPtAppConfig)
 export const crearCasoSgc = mutation(crearCasoSgcConfig)
 export const actualizarCasoSgc = mutation(actualizarCasoSgcConfig)
+export const inicializarDriveRonda = mutation(inicializarDriveRondaConfig)
+export const upsertDriveRecurso = mutation(upsertDriveRecursoConfig)
+export const reemplazarDriveRecurso = mutation(reemplazarDriveRecursoConfig)
+export const actualizarEstadoDriveRecurso = mutation(actualizarEstadoDriveRecursoConfig)
+export const actualizarVisibilidadDriveRecurso = mutation(actualizarVisibilidadDriveRecursoConfig)
+export const registrarAutomatizacionDrive = mutation(registrarAutomatizacionDriveConfig)
+export const retirarDriveRecurso = mutation(retirarDriveRecursoConfig)

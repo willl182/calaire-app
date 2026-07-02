@@ -1,6 +1,7 @@
 import { fetchQuery, fetchMutation } from 'convex/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import { getRondaParticipanteLandingPath } from './landing'
 
 export const CONTAMINANTES = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 export const REPLICAS_OPTIONS = [2, 3] as const
@@ -542,6 +543,14 @@ export async function listRondasParticipante(userId: string): Promise<RondaParti
     envios_pt_count: (r.envios_pt_count ?? 0) as number,
     envio_pt_enviado: Boolean(r.envio_pt_enviado),
   }))
+}
+
+export { getRondaParticipanteLandingPath }
+
+export async function getParticipanteLandingPath(userId: string) {
+  const rondas = await listRondasParticipante(userId)
+  const ronda = rondas.find((item) => item.estado === 'activa') ?? rondas[0]
+  return ronda ? getRondaParticipanteLandingPath(ronda) : null
 }
 
 export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {

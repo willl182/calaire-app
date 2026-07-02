@@ -1,6 +1,6 @@
 import { v } from 'convex/values'
 import { calcularChecklistSgc, derivarBloqueantes } from '../../lib/sgc/checklist'
-import { FORMATOS_ARCHIVO, REVISION_CHECKS, HOMOGENEIDAD_CHECKS, requireSgcAdmin, writeAudit, getPlan, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, collectChecklistFaltantes, summarizeSnapshotPayload, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { FORMATOS_ARCHIVO, REVISION_CHECKS, HOMOGENEIDAD_CHECKS, requireSgcAdmin, writeAudit, getPlan, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, collectChecklistFaltantes, collectChecklistFaltantesDocumentacionPendiente, collectDriveCierreCalidad, summarizeSnapshotPayload, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const getPanelSgcArgs = { rondaId: v.id('rondas') }
 
@@ -26,6 +26,9 @@ export const getPanelSgcConfig = {
       ctx.db.query('rondaParticipantes').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
     ])
     const coverage = await collectCoverage(ctx, rondaId)
+    const driveCierre = await collectDriveCierreCalidad(ctx, rondaId)
+    const checklistBloqueantesCierre = collectChecklistFaltantes(coverage)
+    const checklistBloqueantesDocumentacionPendiente = collectChecklistFaltantesDocumentacionPendiente(coverage)
     const metricasActuales = buildRevisionMetricas(coverage)
     const metricasHomogeneidadActuales = buildHomogeneidadMetricas(coverage)
     const versiones = await Promise.all(
@@ -55,7 +58,7 @@ export const getPanelSgcConfig = {
         claimedAt: participante.claimedAt ?? null,
       }))
       .sort((a, b) => (a.participantCode ?? a.email).localeCompare(b.participantCode ?? b.email))
-    return { ronda, plan, revision, revisionHomogeneidad, hitos, series, justificaciones, versiones, snapshots: snapshotSummaries, audit, comentarios, notificaciones, resultadosPtApp, casos, destinatariosNotificacion, coverage, metricasActuales, metricasHomogeneidadActuales }
+    return { ronda, plan, revision, revisionHomogeneidad, hitos, series, justificaciones, versiones, snapshots: snapshotSummaries, audit, comentarios, notificaciones, resultadosPtApp, casos, destinatariosNotificacion, coverage, driveCierre, checklistBloqueantesCierre, checklistBloqueantesDocumentacionPendiente, metricasActuales, metricasHomogeneidadActuales }
   },
 } satisfies SgcQueryConfig<typeof getPanelSgcArgs>
 
@@ -80,18 +83,17 @@ export const transitionRondaToDocumentacionPendienteConfig = {
     if (ronda.estado !== 'activa') throw new Error('Solo una ronda activa puede pasar a documentacion pendiente.')
     const coverage = await collectCoverage(ctx, rondaId)
     if (coverage.participantesEsperados === 0) throw new Error('Debe identificar participantes esperados.')
-    const faltantes = collectChecklistFaltantes(coverage).filter((faltante) =>
-      [
-        'F-PSEA-03/F-PSEA-06 plan finalizado con snapshot',
-        'F-PSEA-05 participantes reclamados o justificados',
-        'F-PSEA-05A fichas enviadas o justificadas',
-        'F-PSEA-07 codigos unicos y no provisionales',
-        'F-PSEA-12 envios finales completos o justificados',
-      ].includes(faltante)
-    )
-    if (faltantes.length > 0) throw new Error(`No se puede pasar a documentacion pendiente. Faltan: ${faltantes.join(', ')}.`)
+    const faltantes = collectChecklistFaltantesDocumentacionPendiente(coverage)
+    const driveCierre = await collectDriveCierreCalidad(ctx, rondaId)
+    const faltantesCierre = [...faltantes, ...driveCierre.bloqueantes]
+    if (faltantesCierre.length > 0) throw new Error(`No se puede pasar a documentacion pendiente. Faltan: ${faltantesCierre.join(', ')}.`)
     await ctx.db.patch(rondaId, { estado: 'documentacion_pendiente' })
-    await writeAudit(ctx, { rondaId, actor, evento: 'sgc.ronda.documentacion_pendiente' })
+    await writeAudit(ctx, {
+      rondaId,
+      actor,
+      evento: 'sgc.ronda.documentacion_pendiente',
+      detalle: `driveAdvertencias=${driveCierre.advertencias.length}`,
+    })
   },
 } satisfies SgcMutationConfig<typeof transitionRondaToDocumentacionPendienteArgs>
 
@@ -106,9 +108,16 @@ export const transitionRondaToCerradaConfig = {
     if (ronda.estado !== 'documentacion_pendiente') throw new Error('Solo una ronda en documentacion pendiente puede cerrarse.')
     const coverage = await collectCoverage(ctx, rondaId)
     const faltantes = collectChecklistFaltantes(coverage)
-    if (faltantes.length > 0) throw new Error(`No se puede cerrar. Faltan: ${faltantes.join(', ')}.`)
+    const driveCierre = await collectDriveCierreCalidad(ctx, rondaId)
+    const faltantesCierre = [...faltantes, ...driveCierre.bloqueantes]
+    if (faltantesCierre.length > 0) throw new Error(`No se puede cerrar. Faltan: ${faltantesCierre.join(', ')}.`)
     await ctx.db.patch(rondaId, { estado: 'cerrada' })
-    await writeAudit(ctx, { rondaId, actor, evento: 'sgc.ronda.cerrada' })
+    await writeAudit(ctx, {
+      rondaId,
+      actor,
+      evento: 'sgc.ronda.cerrada',
+      detalle: `driveAdvertencias=${driveCierre.advertencias.length}`,
+    })
   },
 } satisfies SgcMutationConfig<typeof transitionRondaToCerradaArgs>
 
@@ -244,4 +253,3 @@ export const listRondasSgcResumenConfig = {
     }
   },
 } satisfies SgcQueryConfig<typeof listRondasSgcResumenArgs>
-

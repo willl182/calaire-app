@@ -5,9 +5,9 @@ import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
 import { LogoUnal } from '@/app/components/LogoUnal'
-import { isAdmin, requireAuth } from '@/lib/auth'
+import { isAdmin, isParticipante, requireAuth } from '@/lib/auth'
 import { buildAttentionItems } from '@/lib/operativo'
-import type { Contaminante } from '@/lib/rondas'
+import { getParticipanteLandingPath, type Contaminante } from '@/lib/rondas'
 import { Alert } from './components/Alert'
 import { CoordinatorKpis } from './components/CoordinatorKpis'
 import { CoordinatorOverview } from './components/CoordinatorOverview'
@@ -27,6 +27,10 @@ type DashboardPageProps = {
 export default async function DashboardPage({ searchParams }: DashboardPageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
+  if (isParticipante(auth)) {
+    const landingPath = await getParticipanteLandingPath(auth.user.id)
+    redirect(landingPath ?? '/mi-dashboard')
+  }
 
   const params = searchParams ? await searchParams : {}
   const success = getParamValue(params.success)

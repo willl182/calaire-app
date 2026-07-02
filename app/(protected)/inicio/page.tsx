@@ -4,13 +4,18 @@ import { signOut } from '@workos-inc/authkit-nextjs'
 
 import { LogoUnal } from '@/app/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
-import { requireAuth } from '@/lib/auth'
+import { isParticipante, requireAuth } from '@/lib/auth'
+import { getParticipanteLandingPath } from '@/lib/rondas'
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
 export default async function InicioPage() {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
+  if (isParticipante(auth)) {
+    const landingPath = await getParticipanteLandingPath(auth.user.id)
+    redirect(landingPath ?? '/mi-dashboard')
+  }
 
   return (
     <main className="min-h-screen px-6 py-8">

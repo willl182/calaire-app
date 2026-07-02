@@ -370,6 +370,75 @@ export default defineSchema({
     .index('by_serieId', ['serieId'])
     .index('by_serieId_and_estado', ['serieId', 'estado']),
 
+  sgcDriveRecursos: defineTable({
+    rondaId: v.id('rondas'),
+    parentId: v.optional(v.union(v.id('sgcDriveRecursos'), v.null())),
+    proveedor: v.literal('google_drive'),
+    tipo: v.union(
+      v.literal('carpeta'),
+      v.literal('documento'),
+      v.literal('hoja_calculo'),
+      v.literal('pdf'),
+      v.literal('archivo'),
+      v.literal('enlace')
+    ),
+    codigo: v.string(),
+    nombre: v.string(),
+    fase: v.optional(v.union(v.string(), v.null())),
+    formatoRelacionado: v.optional(v.union(v.string(), v.null())),
+    documentoSgcId: v.optional(v.union(v.id('documentosSgc'), v.null())),
+    documentoSgcVersionId: v.optional(v.union(v.id('documentoSgcVersiones'), v.null())),
+    evidenciaSerieId: v.optional(v.union(v.id('sgcEvidenciaSeries'), v.null())),
+    critico: v.optional(v.boolean()),
+    publicaParticipante: v.optional(v.boolean()),
+    // Enlace editable/principal: Google Doc/Sheet vivo, o carpeta para tipo 'carpeta'.
+    driveFileId: v.optional(v.union(v.string(), v.null())),
+    driveFolderId: v.optional(v.union(v.string(), v.null())),
+    webUrl: v.optional(v.union(v.string(), v.null())),
+    templateUrl: v.optional(v.union(v.string(), v.null())),
+    // Version definitiva/congelada como registro (tipicamente PDF exportado o copia final).
+    // Recomendada pero no bloqueante para el cierre documental.
+    definitivo: v.optional(
+      v.union(
+        // Enlace externo (Drive u otra URL) cargado manualmente.
+        v.object({
+          driveFileId: v.optional(v.union(v.string(), v.null())),
+          webUrl: v.string(),
+          tipo: v.optional(v.union(v.string(), v.null())),
+        }),
+        // Archivo cargado directamente en la app (Convex storage); el participante lo
+        // descarga con una URL firmada, sin necesitar permisos ni cuenta de Drive.
+        v.object({
+          storageId: v.id('_storage'),
+          fileName: v.optional(v.union(v.string(), v.null())),
+          contentType: v.optional(v.union(v.string(), v.null())),
+          size: v.optional(v.union(v.number(), v.null())),
+          tipo: v.optional(v.union(v.string(), v.null())),
+        }),
+        v.null()
+      )
+    ),
+    estado: v.union(
+      v.literal('pendiente'),
+      v.literal('creado'),
+      v.literal('diligenciado'),
+      v.literal('reemplazado'),
+      v.literal('retirado'),
+      v.literal('no_aplica')
+    ),
+    notas: v.optional(v.union(v.string(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_parentId', ['rondaId', 'parentId'])
+    .index('by_rondaId_and_codigo', ['rondaId', 'codigo'])
+    .index('by_rondaId_and_tipo', ['rondaId', 'tipo'])
+    .index('by_rondaId_and_publicaParticipante', ['rondaId', 'publicaParticipante'])
+    .index('by_rondaId_and_formatoRelacionado', ['rondaId', 'formatoRelacionado']),
+
   sgcRegistroSnapshots: defineTable({
     rondaId: v.id('rondas'),
     tipoRegistro: v.string(),

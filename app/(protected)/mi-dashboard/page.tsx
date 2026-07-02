@@ -6,8 +6,8 @@ import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { LogoUnal } from '@/app/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/lib/auth'
-import { listRondasParticipante, type Ronda, type RondaParticipanteAsignada } from '@/lib/rondas'
-import { getHitosVisibleParticipante, getEvidenciasPublicas, listPublicacionesParticipante, listMisComentariosRonda, listMisNotificaciones } from '@/lib/sgc'
+import { getRondaParticipanteLandingPath, listRondasParticipante, type Ronda, type RondaParticipanteAsignada } from '@/lib/rondas'
+import { getHitosVisibleParticipante, getEvidenciasPublicas, listDriveRecursosParticipante, listPublicacionesParticipante, listMisComentariosRonda, listMisNotificaciones } from '@/lib/sgc'
 import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from './actions'
 
 function estadoParticipanteBadge(estado: Ronda['estado']) {
@@ -41,6 +41,7 @@ function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estad
 type SgcDatosParticipante = {
   hitos: Awaited<ReturnType<typeof getHitosVisibleParticipante>>
   evidencias: Awaited<ReturnType<typeof getEvidenciasPublicas>>
+  driveRecursos: Awaited<ReturnType<typeof listDriveRecursosParticipante>>
   publicaciones: Awaited<ReturnType<typeof listPublicacionesParticipante>>
   comentarios: Awaited<ReturnType<typeof listMisComentariosRonda>>
   notificaciones: Awaited<ReturnType<typeof listMisNotificaciones>>
@@ -166,6 +167,31 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
             </div>
           )}
 
+          {sgc.driveRecursos.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-[var(--foreground)]">Documentos Drive publicados</p>
+              <div className="grid gap-2">
+                {sgc.driveRecursos.map((recurso) => (
+                  <div key={recurso._id} className="flex flex-col gap-2 rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm sm:flex-row sm:items-center sm:justify-between">
+                    <div>
+                      <div className="font-medium">{recurso.nombre}</div>
+                      <div className="text-xs text-[var(--foreground-muted)]">
+                        {recurso.codigo}{recurso.formatoRelacionado ? ` · ${recurso.formatoRelacionado}` : ''}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {recurso.definitivo?.webUrl && (
+                        <a className="btn-outline text-xs" href={recurso.definitivo.webUrl} target="_blank" rel="noopener noreferrer">
+                          Descargar
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {sgc.publicaciones.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-[var(--foreground)]">Publicaciones</p>
@@ -224,7 +250,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
             </div>
           </div>
 
-          {sgc.hitos.length === 0 && sgc.evidencias.length === 0 && sgc.publicaciones.length === 0 && sgc.notificaciones.length === 0 && sgc.comentarios.length === 0 && (
+          {sgc.hitos.length === 0 && sgc.evidencias.length === 0 && sgc.driveRecursos.length === 0 && sgc.publicaciones.length === 0 && sgc.notificaciones.length === 0 && sgc.comentarios.length === 0 && (
             <p className="text-sm text-[var(--foreground-muted)]">
               No hay informacion publicada visible en este momento.
             </p>
@@ -288,19 +314,25 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const success = getParamValue(params.success)
   const error = getParamValue(params.error)
   const rondas = await listRondasParticipante(auth.user.id)
+  if (rondas.length > 0) {
+    const ronda = rondas.find((item) => item.estado === 'activa') ?? rondas[0]
+    redirect(getRondaParticipanteLandingPath(ronda))
+  }
+
   const rondasSgc = new Map<string, SgcDatosParticipante>()
   await Promise.all(
     rondas.map(async (r) => {
       if (r.estado === 'documentacion_pendiente' || r.estado === 'cerrada') {
         try {
-          const [hitos, evidencias, publicaciones, comentarios, notificaciones] = await Promise.all([
+          const [hitos, evidencias, driveRecursos, publicaciones, comentarios, notificaciones] = await Promise.all([
             getHitosVisibleParticipante(r.id),
             getEvidenciasPublicas(r.id),
+            listDriveRecursosParticipante(r.id),
             listPublicacionesParticipante(r.id),
             listMisComentariosRonda(r.id),
             listMisNotificaciones(r.id),
           ])
-          rondasSgc.set(r.id, { hitos, evidencias, publicaciones, comentarios, notificaciones })
+          rondasSgc.set(r.id, { hitos, evidencias, driveRecursos, publicaciones, comentarios, notificaciones })
         } catch {
           // Si no hay acceso, simplemente no mostrar datos SGC
         }

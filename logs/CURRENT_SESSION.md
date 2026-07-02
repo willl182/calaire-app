@@ -1,40 +1,35 @@
-# Session State: calaire-app
+# Session State: CALAIRE App
 
-**Last Updated**: 2026-06-29 11:14
+**Last Updated**: 2026-07-02 15:38 -05
 
 ## Session Objective
 
-Implementar los 15 hallazgos de la revisión de código `cr-rev2.md` (CodeRabbit Review) en la rama feature/sgc-maestro-protv2.
+Completar la prueba operativa de Drive documental SGC con Google Drive real y persistir el cierre.
 
 ## Current State
 
-- [x] Derivar siguiente número de versión en `scripts/upload-sgc-document-versions.mjs`
-- [x] Manejar errores de lanzamiento de `spawnSync`
-- [x] Alinear denominador de `completado` en `convex/sgc/maestro.ts`
-- [x] Computar resumen de normativa desde relaciones no filtradas
-- [x] Resaltar sección SGC activa en `app/(protected)/sgc/layout.tsx`
-- [x] Limpiar campo legacy `cambioResumen` y backfilling de `resumenCambios`
-- [x] Marcar motivos de retiro como `required`
-- [x] Usar `ronda.codigo` en lugar de `EA-PP-2026-R1`
-- [x] Agregar `encType="multipart/form-data"` al formulario de evidencia
-- [x] Incluir estado `disponible` en cálculo de progreso
-- [x] Evitar hardcode de `EA-PP-2026-R1` en `ExpedienteSgc.tsx`
-- [x] Mover mapa SGC fuera de `public/` a ruta protegida
-- [x] Verificar UI de filtros del mapa (ya visible, sin `display: none`)
-- [x] Proteger entradas SGC en `SidebarNav.tsx` con `canViewSgcMaestro`
-- [x] No renderizar árbol sin providers en `app/providers.tsx`
-- [x] `pnpm build` exitoso
-- [x] `pnpm lint` exitoso
-- [x] Actualizar `cr-rev2.md` con marcador `[completed]` en cada hallazgo
+- [x] Fase 8 de Drive documental SGC queda con F1-F5 aplicados.
+- [x] `pnpm sgc:provision-drive` escanea una carpeta Drive y genera `GOOGLE_DRIVE_TEMPLATE_MAP`.
+- [x] Carpeta Drive real `10WlUUALhXqNTuVNbdQ6P23nQMv6feoGO` escaneada: 53 candidatos, 22 plantillas seleccionadas.
+- [x] Service account validado para lectura/provisioning; en cuenta personal no sirve para copiar por cuota cero.
+- [x] OAuth personal configurado con `GOOGLE_DRIVE_AUTH_MODE=oauth`.
+- [x] Prueba UI `Crear en Google Drive` ejecutada contra ronda `kd7b0emdk7cmzp1vn34f2bfv7986bb77`.
+- [x] Resultado operativo final: 8/8 carpetas con URL Drive, 22/30 documentos copiados, 0 fallos.
+- [x] Los 8 restantes son `EVID-*` y se cargaran/enlazaran manualmente cuando exista evidencia real.
 
 ## Critical Technical Context
 
-- Proyecto Next.js 16.2.4 + React 19 + Convex + Tailwind v4 + pnpm.
-- El mapa SGC ahora se sirve desde `app/(protected)/dashboard/sgc/mapa/embed/route.ts` leyendo `data/sgc/mapa_navegacion_sgc_pea.html`, con validación `canViewSgcMaestro`.
-- `app/(protected)/sgc/layout.tsx` se convirtió a cliente (`'use client'`) para usar `usePathname` y marcar la navegación activa.
-- `DocumentoSgcVersion` ya no expone `cambioResumen`; las versiones se normalizan en `collectDocumentBundle` para garantizar `resumenCambios`.
+- Stack: Next.js 16.2.4, WorkOS/AuthKit, Convex, pnpm.
+- Layout: `app/`, `lib/`, `convex/`; no crear `src/`.
+- Convex SGC se consume como `api.sgc.<funcion>`.
+- Antes de tocar Convex leer `convex/_generated/ai/guidelines.md`.
+- Antes de tocar App Router leer docs locales en `node_modules/next/dist/docs/`.
+- En cuentas personales de Google Drive usar `GOOGLE_DRIVE_AUTH_MODE=oauth`; service account no puede copiar archivos en Mi unidad por falta de cuota.
+- Secretos locales quedan bajo `.local/` y `.env.local`, ambos ignorados por git.
+- Verificacion reciente: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build`; previamente tambien `pnpm test`, `pnpm test:e2e:start`, `pnpm exec convex codegen`.
 
 ## Next Steps
 
-1. Desplegar/verificar en entorno de integración.
-2. Continuar con próximos issues o revisiones pendientes de `cr-rev2.md` si los hay.
+1. Verificar manualmente en Drive que las 22 copias creadas no apunten a plantillas maestras.
+2. Definir permisos/visibilidad participante antes de exponer documentos definitivos.
+3. Cargar/enlazar `EVID-*` solo cuando exista evidencia real.

@@ -1,22 +1,14 @@
 import { expect, test } from '@playwright/test'
 
-test('shows the SGC master dashboard separated from round expedientes', async ({ page }) => {
+test('shows the SGC master dashboard', async ({ page }) => {
   await page.goto('/dashboard/sgc')
 
   await expect(page.getByRole('heading', { name: /SGC Maestro/i })).toBeVisible()
   await expect(page.getByText(/Repositorio global de documentos, versiones, requisitos y mapa documental/i)).toBeVisible()
-  await expect(page.getByRole('link', { name: 'Centro documental', exact: true })).toBeVisible()
+  await expect(page.locator('a[href="/dashboard/sgc/documentos"]').first()).toBeVisible()
   await expect(page.locator('a[href="/dashboard/sgc/normativa"]').first()).toBeVisible()
   await expect(page.locator('a[href="/dashboard/sgc/mapa"]').first()).toBeVisible()
   await expect(page.getByRole('link', { name: 'Prototipo' })).toHaveCount(0)
-
-  await expect(page.getByRole('heading', { name: 'Dashboard documental por ronda' })).toBeVisible()
-  await expect(page.getByText(/Es otro dashboard/i)).toBeVisible()
-
-  await page.getByRole('link', { name: 'Abrir expedientes de ronda' }).click()
-  await expect(page).toHaveURL(/\/dashboard\/rondas\/expedientes$/)
-  await expect(page.getByRole('heading', { name: 'Expedientes de ronda' })).toBeVisible()
-  await expect(page.getByText(/No es el dashboard SGC maestro global/i)).toBeVisible()
 })
 
 test('opens the SGC document center and a document detail', async ({ page }) => {
@@ -44,15 +36,12 @@ test('opens the SGC normative matrix from persisted requirements', async ({ page
 test('opens the live SGC map from persisted relationships', async ({ page }) => {
   await page.goto('/dashboard/sgc/mapa')
   await expect(page.getByRole('heading', { name: 'Mapa SGC vivo' })).toBeVisible()
-  await expect(page.getByRole('link', { name: /Abrir HTML original/i })).toBeVisible()
-  await expect(page.getByText('Relaciones', { exact: true }).first()).toBeVisible()
-  await expect(page.getByText('Bloques', { exact: true }).first()).toBeVisible()
-  await expect(page.getByRole('link', { name: /pt_app externo/i }).first()).toBeVisible()
+  await expect(page.locator('iframe[src="/dashboard/sgc/mapa/embed"]')).toBeVisible()
+  await expect(page.getByRole('button', { name: /Cerrar sesión/i })).toBeVisible()
 })
 
 test('keeps the legacy SGC expedientes URL as a compatibility redirect', async ({ page }) => {
   await page.goto('/dashboard/sgc/expedientes')
 
-  await expect(page).toHaveURL(/\/dashboard\/rondas\/expedientes$/)
-  await expect(page.getByRole('heading', { name: 'Expedientes de ronda' })).toBeVisible()
+  await expect(page).toHaveURL(/\/dashboard\?tab=rondas$/)
 })

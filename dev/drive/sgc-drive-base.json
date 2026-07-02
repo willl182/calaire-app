@@ -1,0 +1,1142 @@
+{
+  "generatedAt": "2026-07-02T19:58:15.078Z",
+  "base": null,
+  "templatesFolder": {
+    "id": "10WlUUALhXqNTuVNbdQ6P23nQMv6feoGO",
+    "source": "discovered"
+  },
+  "etapas": [],
+  "templateMap": {
+    "F-PSEA-01": "1OUVOzr8WwfgbtDx4xFYbtgXbvb6u_aZm",
+    "F-PSEA-18": "1rREWUSP6gGGOa852oX2Vv0D_amliu6VK",
+    "F-PSEA-05": "1GL7LR0cLGSo6LLU2-dnEcUxGh9pFVBQ7",
+    "F-PSEA-06": "1DRPD9FYGoVQLtIy36X_4eGnY6LqdNDKJ",
+    "F-PSEA-03": "10CqDnnV8XXSj2olXZKad8f8sh1sJAFSP",
+    "F-PSEA-08": "1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X",
+    "F-PSEA-04": "1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi",
+    "F-PSEA-12": "16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW",
+    "F-PSEA-11": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+    "F-PSEA-10": "1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP",
+    "F-PSEA-09": "1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy",
+    "F-PSEA-13": "11HXTindw_VC1NzsfXN-5Ul5R3yyAjFMj",
+    "F-PSEA-11D": "1MTaV-0iqX9Oea-iFZiqjNonmCjNQrkC6",
+    "F-PSEA-11B": "1FyxPoFw910ayNwZvJADgo-aciqxUE5wd",
+    "F-PSEA-11A": "1oM2YiU9C9l9lp8gCLCp9OV6ReobneLe4",
+    "F-PSEA-11C": "1ZlTuaXPvolaroi0pBCaBOQwVS-xISHs7",
+    "F-PSEA-07": "1eKIjshrXxjNw67JDLB2Rra1TOOOueORV",
+    "F-PSEA-14": "1AlG9MLYWn9DCri8M1ojjiF5lkDy_Zc77",
+    "F-PSEA-15": "1xVSjywCFrznpXvP_8upPQEMhOjzsM4fd",
+    "F-PSEA-17": "16ggSSOuzy8nghxDT3ASSCV_g6_-Lt7Hm",
+    "F-PSEA-16": "16RAdlOTDtjTEkj_5W31EjnLVE-9dFOCr",
+    "F-PSEA-02": "1ve8f97oxD2gPXCNpyuuclp1yNUKli34Q"
+  },
+  "discoveredTemplates": [
+    {
+      "path": "01_bloque_general/00_plantillas_base/F-PSEA-01 Plantilla Formato_Excel.xlsx",
+      "codes": [
+        "F-PSEA-01"
+      ],
+      "file": {
+        "id": "1tD9zc9lbWFzzFWA3KuA7SF8SL_QXSWwz",
+        "name": "F-PSEA-01 Plantilla Formato_Excel.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1tD9zc9lbWFzzFWA3KuA7SF8SL_QXSWwz/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-18 Comunicacion participantes.docx",
+      "codes": [
+        "F-PSEA-18"
+      ],
+      "file": {
+        "id": "1rREWUSP6gGGOa852oX2Vv0D_amliu6VK",
+        "name": "F-PSEA-18 Comunicacion participantes.docx",
+        "webUrl": "https://docs.google.com/document/d/1rREWUSP6gGGOa852oX2Vv0D_amliu6VK/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-05 Ficha basica de ronda EA.docx",
+      "codes": [
+        "F-PSEA-05"
+      ],
+      "file": {
+        "id": "1GL7LR0cLGSo6LLU2-dnEcUxGh9pFVBQ7",
+        "name": "F-PSEA-05 Ficha basica de ronda EA.docx",
+        "webUrl": "https://docs.google.com/document/d/1GL7LR0cLGSo6LLU2-dnEcUxGh9pFVBQ7/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-06 Planificacion de ronda EA.docx",
+      "codes": [
+        "F-PSEA-06"
+      ],
+      "file": {
+        "id": "1DRPD9FYGoVQLtIy36X_4eGnY6LqdNDKJ",
+        "name": "F-PSEA-06 Planificacion de ronda EA.docx",
+        "webUrl": "https://docs.google.com/document/d/1DRPD9FYGoVQLtIy36X_4eGnY6LqdNDKJ/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-03 Registro de participacion.docx",
+      "codes": [
+        "F-PSEA-03"
+      ],
+      "file": {
+        "id": "10CqDnnV8XXSj2olXZKad8f8sh1sJAFSP",
+        "name": "F-PSEA-03 Registro de participacion.docx",
+        "webUrl": "https://docs.google.com/document/d/10CqDnnV8XXSj2olXZKad8f8sh1sJAFSP/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.docx",
+      "codes": [
+        "F-PSEA-08"
+      ],
+      "file": {
+        "id": "1wLePy8H_Iy8B7DD14O-6JtZ9c9hbmxly",
+        "name": "F-PSEA-08 Datos reportados por participante.docx",
+        "webUrl": "https://docs.google.com/document/d/1wLePy8H_Iy8B7DD14O-6JtZ9c9hbmxly/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.md",
+      "codes": [
+        "F-PSEA-08"
+      ],
+      "file": {
+        "id": "1OAWu-Tr1wHYuxARiDmaqXvuWwIK1MxSf",
+        "name": "F-PSEA-08 Datos reportados por participante.md",
+        "webUrl": "https://drive.google.com/file/d/1OAWu-Tr1wHYuxARiDmaqXvuWwIK1MxSf/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-18 Comunicacion participantes.md",
+      "codes": [
+        "F-PSEA-18"
+      ],
+      "file": {
+        "id": "1U7DSo5vsYuuVm2Enr3e2nGj1V9tQGMVB",
+        "name": "F-PSEA-18 Comunicacion participantes.md",
+        "webUrl": "https://drive.google.com/file/d/1U7DSo5vsYuuVm2Enr3e2nGj1V9tQGMVB/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-04 Anexo tecnico de equipos e instrumentos.md",
+      "codes": [
+        "F-PSEA-04"
+      ],
+      "file": {
+        "id": "1OiwAykft6EhWmep3TnWJGrPJkfRnzqBH",
+        "name": "F-PSEA-04 Anexo tecnico de equipos e instrumentos.md",
+        "webUrl": "https://drive.google.com/file/d/1OiwAykft6EhWmep3TnWJGrPJkfRnzqBH/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-05 Ficha basica de ronda EA.md",
+      "codes": [
+        "F-PSEA-05"
+      ],
+      "file": {
+        "id": "1dNh2Mk_O-FRiARVeu_Vjd-fokYEOrsXB",
+        "name": "F-PSEA-05 Ficha basica de ronda EA.md",
+        "webUrl": "https://drive.google.com/file/d/1dNh2Mk_O-FRiARVeu_Vjd-fokYEOrsXB/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-03 Registro de participacion.md",
+      "codes": [
+        "F-PSEA-03"
+      ],
+      "file": {
+        "id": "1srCEk1sPU4ZmvscKmbv7LrKwa9l3Eqph",
+        "name": "F-PSEA-03 Registro de participacion.md",
+        "webUrl": "https://drive.google.com/file/d/1srCEk1sPU4ZmvscKmbv7LrKwa9l3Eqph/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-06 Planificacion de ronda EA.md",
+      "codes": [
+        "F-PSEA-06"
+      ],
+      "file": {
+        "id": "12Wq8eRRa6qcQ0dUt9GesjALNe-Drlrex",
+        "name": "F-PSEA-06 Planificacion de ronda EA.md",
+        "webUrl": "https://drive.google.com/file/d/12Wq8eRRa6qcQ0dUt9GesjALNe-Drlrex/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.xlsx",
+      "codes": [
+        "F-PSEA-12"
+      ],
+      "file": {
+        "id": "16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW",
+        "name": "F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Homogeneidad datos.xlsx",
+      "codes": [
+        "F-PSEA-11"
+      ],
+      "file": {
+        "id": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+        "name": "F-PSEA-11 Homogeneidad datos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Estabilidad datos.xlsx",
+      "codes": [
+        "F-PSEA-11"
+      ],
+      "file": {
+        "id": "1eCMiHKyfDAV5TbLOeCgZL0CXjRg3QnUK",
+        "name": "F-PSEA-11 Estabilidad datos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1eCMiHKyfDAV5TbLOeCgZL0CXjRg3QnUK/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-10 Registro de preprocesamiento de datos.xlsx",
+      "codes": [
+        "F-PSEA-10"
+      ],
+      "file": {
+        "id": "1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP",
+        "name": "F-PSEA-10 Registro de preprocesamiento de datos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.xlsx",
+      "codes": [
+        "F-PSEA-08"
+      ],
+      "file": {
+        "id": "1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X",
+        "name": "F-PSEA-08 Datos reportados por participante.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-09 Datos de participantes exportados para analisis PT.xlsx",
+      "codes": [
+        "F-PSEA-09"
+      ],
+      "file": {
+        "id": "1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy",
+        "name": "F-PSEA-09 Datos de participantes exportados para analisis PT.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-04 Anexo tecnico de equipos e instrumentos.xlsx",
+      "codes": [
+        "F-PSEA-04"
+      ],
+      "file": {
+        "id": "1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi",
+        "name": "F-PSEA-04 Anexo tecnico de equipos e instrumentos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-13 Informe final de resultados.docx",
+      "codes": [
+        "F-PSEA-13"
+      ],
+      "file": {
+        "id": "11HXTindw_VC1NzsfXN-5Ul5R3yyAjFMj",
+        "name": "F-PSEA-13 Informe final de resultados.docx",
+        "webUrl": "https://docs.google.com/document/d/11HXTindw_VC1NzsfXN-5Ul5R3yyAjFMj/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11D Resultados de estabilidad.docx",
+      "codes": [
+        "F-PSEA-11D"
+      ],
+      "file": {
+        "id": "1MTaV-0iqX9Oea-iFZiqjNonmCjNQrkC6",
+        "name": "F-PSEA-11D Resultados de estabilidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1MTaV-0iqX9Oea-iFZiqjNonmCjNQrkC6/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11B Datos preprocesados de estabilidad.docx",
+      "codes": [
+        "F-PSEA-11B"
+      ],
+      "file": {
+        "id": "1FyxPoFw910ayNwZvJADgo-aciqxUE5wd",
+        "name": "F-PSEA-11B Datos preprocesados de estabilidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1FyxPoFw910ayNwZvJADgo-aciqxUE5wd/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11A Datos preprocesados de homogeneidad.docx",
+      "codes": [
+        "F-PSEA-11A"
+      ],
+      "file": {
+        "id": "1oM2YiU9C9l9lp8gCLCp9OV6ReobneLe4",
+        "name": "F-PSEA-11A Datos preprocesados de homogeneidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1oM2YiU9C9l9lp8gCLCp9OV6ReobneLe4/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11C Resultados de homogeneidad.docx",
+      "codes": [
+        "F-PSEA-11C"
+      ],
+      "file": {
+        "id": "1ZlTuaXPvolaroi0pBCaBOQwVS-xISHs7",
+        "name": "F-PSEA-11C Resultados de homogeneidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1ZlTuaXPvolaroi0pBCaBOQwVS-xISHs7/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-10 Registro de preprocesamiento de datos.md",
+      "codes": [
+        "F-PSEA-10"
+      ],
+      "file": {
+        "id": "1ozBzBEP6pgR0ej9d8JYjt0Gem5fhXr0w",
+        "name": "F-PSEA-10 Registro de preprocesamiento de datos.md",
+        "webUrl": "https://drive.google.com/file/d/1ozBzBEP6pgR0ej9d8JYjt0Gem5fhXr0w/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-10 Registro de preprocesamiento de datos.csv",
+      "codes": [
+        "F-PSEA-10"
+      ],
+      "file": {
+        "id": "1MdLRA-z6JISyVr-1yFoiHkR-yAlIsgHb",
+        "name": "F-PSEA-10 Registro de preprocesamiento de datos.csv",
+        "webUrl": "https://drive.google.com/file/d/1MdLRA-z6JISyVr-1yFoiHkR-yAlIsgHb/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.csv",
+      "codes": [
+        "F-PSEA-08"
+      ],
+      "file": {
+        "id": "1WzCfYhWswuL9KYnoj_ImFUbQb302gmp_",
+        "name": "F-PSEA-08 Datos reportados por participante.csv",
+        "webUrl": "https://drive.google.com/file/d/1WzCfYhWswuL9KYnoj_ImFUbQb302gmp_/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-09 Datos de participantes exportados para analisis PT.csv",
+      "codes": [
+        "F-PSEA-09"
+      ],
+      "file": {
+        "id": "1HE5gyj4aXxECdB1wot-waQ15JPStJL4Z",
+        "name": "F-PSEA-09 Datos de participantes exportados para analisis PT.csv",
+        "webUrl": "https://drive.google.com/file/d/1HE5gyj4aXxECdB1wot-waQ15JPStJL4Z/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.csv",
+      "codes": [
+        "F-PSEA-12"
+      ],
+      "file": {
+        "id": "1Gc7Tcv7KUhffpcUj-b3URVPqo7fso75_",
+        "name": "F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.csv",
+        "webUrl": "https://drive.google.com/file/d/1Gc7Tcv7KUhffpcUj-b3URVPqo7fso75_/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-04 Anexo tecnico de equipos e instrumentos.csv",
+      "codes": [
+        "F-PSEA-04"
+      ],
+      "file": {
+        "id": "1W8bhBUR2fRHHghXnYxs79vr3jTdE8pA4",
+        "name": "F-PSEA-04 Anexo tecnico de equipos e instrumentos.csv",
+        "webUrl": "https://drive.google.com/file/d/1W8bhBUR2fRHHghXnYxs79vr3jTdE8pA4/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Homogeneidad datos.csv",
+      "codes": [
+        "F-PSEA-11"
+      ],
+      "file": {
+        "id": "1V8fqTECBQIyrlxyENSxIFNgOJfeNHM9b",
+        "name": "F-PSEA-11 Homogeneidad datos.csv",
+        "webUrl": "https://drive.google.com/file/d/1V8fqTECBQIyrlxyENSxIFNgOJfeNHM9b/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Estabilidad datos.csv",
+      "codes": [
+        "F-PSEA-11"
+      ],
+      "file": {
+        "id": "1E-HLBbLkNVywGL6imbe5A8VBk8N7KCJN",
+        "name": "F-PSEA-11 Estabilidad datos.csv",
+        "webUrl": "https://drive.google.com/file/d/1E-HLBbLkNVywGL6imbe5A8VBk8N7KCJN/view?usp=drivesdk",
+        "mimeType": "text/csv"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-07 Preparacion y control del item.xlsx",
+      "codes": [
+        "F-PSEA-07"
+      ],
+      "file": {
+        "id": "1eKIjshrXxjNw67JDLB2Rra1TOOOueORV",
+        "name": "F-PSEA-07 Preparacion y control del item.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1eKIjshrXxjNw67JDLB2Rra1TOOOueORV/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Homogeneidad y estabilidad del item.md",
+      "codes": [
+        "F-PSEA-11"
+      ],
+      "file": {
+        "id": "103cxKMycmxhYyi7SIdatahE8K75Kf0En",
+        "name": "F-PSEA-11 Homogeneidad y estabilidad del item.md",
+        "webUrl": "https://drive.google.com/file/d/103cxKMycmxhYyi7SIdatahE8K75Kf0En/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-13 Informe final de resultados.md",
+      "codes": [
+        "F-PSEA-13"
+      ],
+      "file": {
+        "id": "1b_dqKRg6Q-qTkCj2ypotDdUmxwYSttQu",
+        "name": "F-PSEA-13 Informe final de resultados.md",
+        "webUrl": "https://drive.google.com/file/d/1b_dqKRg6Q-qTkCj2ypotDdUmxwYSttQu/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-07 Preparacion y control del item.md",
+      "codes": [
+        "F-PSEA-07"
+      ],
+      "file": {
+        "id": "1qFU8OqL51mwTjsYH28DR1Wp29jGkdsVq",
+        "name": "F-PSEA-07 Preparacion y control del item.md",
+        "webUrl": "https://drive.google.com/file/d/1qFU8OqL51mwTjsYH28DR1Wp29jGkdsVq/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.md",
+      "codes": [
+        "F-PSEA-12"
+      ],
+      "file": {
+        "id": "1ucGJfKzg1t6Hk9cEf0bvqzDUdzgG3WaI",
+        "name": "F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.md",
+        "webUrl": "https://drive.google.com/file/d/1ucGJfKzg1t6Hk9cEf0bvqzDUdzgG3WaI/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-09 Datos de participantes exportados para analisis PT.md",
+      "codes": [
+        "F-PSEA-09"
+      ],
+      "file": {
+        "id": "1jX7XaIgmU66Zn3aOMWKETJxALSYGCBtT",
+        "name": "F-PSEA-09 Datos de participantes exportados para analisis PT.md",
+        "webUrl": "https://drive.google.com/file/d/1jX7XaIgmU66Zn3aOMWKETJxALSYGCBtT/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-14 Registro caso de queja o NC segun aplique.docx",
+      "codes": [
+        "F-PSEA-14"
+      ],
+      "file": {
+        "id": "1AlG9MLYWn9DCri8M1ojjiF5lkDy_Zc77",
+        "name": "F-PSEA-14 Registro caso de queja o NC segun aplique.docx",
+        "webUrl": "https://docs.google.com/document/d/1AlG9MLYWn9DCri8M1ojjiF5lkDy_Zc77/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-15 Registro de apelaciones.docx",
+      "codes": [
+        "F-PSEA-15"
+      ],
+      "file": {
+        "id": "1xVSjywCFrznpXvP_8upPQEMhOjzsM4fd",
+        "name": "F-PSEA-15 Registro de apelaciones.docx",
+        "webUrl": "https://docs.google.com/document/d/1xVSjywCFrznpXvP_8upPQEMhOjzsM4fd/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-17 Evaluacion de proveedores criticos.docx",
+      "codes": [
+        "F-PSEA-17"
+      ],
+      "file": {
+        "id": "16ggSSOuzy8nghxDT3ASSCV_g6_-Lt7Hm",
+        "name": "F-PSEA-17 Evaluacion de proveedores criticos.docx",
+        "webUrl": "https://docs.google.com/document/d/16ggSSOuzy8nghxDT3ASSCV_g6_-Lt7Hm/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-16 Matriz de competencia autorizacion.docx",
+      "codes": [
+        "F-PSEA-16"
+      ],
+      "file": {
+        "id": "16RAdlOTDtjTEkj_5W31EjnLVE-9dFOCr",
+        "name": "F-PSEA-16 Matriz de competencia autorizacion.docx",
+        "webUrl": "https://docs.google.com/document/d/16RAdlOTDtjTEkj_5W31EjnLVE-9dFOCr/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-17 Evaluacion de proveedores criticos.md",
+      "codes": [
+        "F-PSEA-17"
+      ],
+      "file": {
+        "id": "1-KRIQEIipJ88zKZUmF0lH90PWzLVXVdh",
+        "name": "F-PSEA-17 Evaluacion de proveedores criticos.md",
+        "webUrl": "https://drive.google.com/file/d/1-KRIQEIipJ88zKZUmF0lH90PWzLVXVdh/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-16 Matriz de competencia autorizacion.md",
+      "codes": [
+        "F-PSEA-16"
+      ],
+      "file": {
+        "id": "1j_wAZSvCRUnquG7IuAIlW3E_khHg4_SM",
+        "name": "F-PSEA-16 Matriz de competencia autorizacion.md",
+        "webUrl": "https://drive.google.com/file/d/1j_wAZSvCRUnquG7IuAIlW3E_khHg4_SM/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-15 Registro de apelaciones.md",
+      "codes": [
+        "F-PSEA-15"
+      ],
+      "file": {
+        "id": "1ZIgA_3w6wh7ZP0i3rrWEkgRVV9OWoqOr",
+        "name": "F-PSEA-15 Registro de apelaciones.md",
+        "webUrl": "https://drive.google.com/file/d/1ZIgA_3w6wh7ZP0i3rrWEkgRVV9OWoqOr/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-14 Registro caso de queja o NC segun aplique.md",
+      "codes": [
+        "F-PSEA-14"
+      ],
+      "file": {
+        "id": "11S9Mk3S1vMRhvFnYr6EyVpndaLpHzyR-",
+        "name": "F-PSEA-14 Registro caso de queja o NC segun aplique.md",
+        "webUrl": "https://drive.google.com/file/d/11S9Mk3S1vMRhvFnYr6EyVpndaLpHzyR-/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11D Resultados de estabilidad.md",
+      "codes": [
+        "F-PSEA-11D"
+      ],
+      "file": {
+        "id": "1mk3XEx8gMizkfggQjr9RVUwgDXgePZYx",
+        "name": "F-PSEA-11D Resultados de estabilidad.md",
+        "webUrl": "https://drive.google.com/file/d/1mk3XEx8gMizkfggQjr9RVUwgDXgePZYx/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11C Resultados de homogeneidad.md",
+      "codes": [
+        "F-PSEA-11C"
+      ],
+      "file": {
+        "id": "1dviTmQ0V72aHnBcM7_UYMHZuSHjd6E7O",
+        "name": "F-PSEA-11C Resultados de homogeneidad.md",
+        "webUrl": "https://drive.google.com/file/d/1dviTmQ0V72aHnBcM7_UYMHZuSHjd6E7O/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11B Datos preprocesados de estabilidad.md",
+      "codes": [
+        "F-PSEA-11B"
+      ],
+      "file": {
+        "id": "19CBARNvOw5pXc8dTERnJPn_OVqt1BbUk",
+        "name": "F-PSEA-11B Datos preprocesados de estabilidad.md",
+        "webUrl": "https://drive.google.com/file/d/19CBARNvOw5pXc8dTERnJPn_OVqt1BbUk/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11A Datos preprocesados de homogeneidad.md",
+      "codes": [
+        "F-PSEA-11A"
+      ],
+      "file": {
+        "id": "1gH37ghoBhXxPZU8um50FjaVa3RXzTi89",
+        "name": "F-PSEA-11A Datos preprocesados de homogeneidad.md",
+        "webUrl": "https://drive.google.com/file/d/1gH37ghoBhXxPZU8um50FjaVa3RXzTi89/view?usp=drivesdk",
+        "mimeType": "text/markdown"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-01 Calendario Tipo_v0.xlsx",
+      "codes": [
+        "F-PSEA-01"
+      ],
+      "file": {
+        "id": "1OUVOzr8WwfgbtDx4xFYbtgXbvb6u_aZm",
+        "name": "F-PSEA-01 Calendario Tipo_v0.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1OUVOzr8WwfgbtDx4xFYbtgXbvb6u_aZm/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-02 Cronograma Detallado_v0.xlsx",
+      "codes": [
+        "F-PSEA-02"
+      ],
+      "file": {
+        "id": "1ve8f97oxD2gPXCNpyuuclp1yNUKli34Q",
+        "name": "F-PSEA-02 Cronograma Detallado_v0.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1ve8f97oxD2gPXCNpyuuclp1yNUKli34Q/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      }
+    },
+    {
+      "path": "01_bloque_general/01_documentos_marco/DG-PSEA-02 Aplicativo calaire-app/capturas/06-f-psea-08-captura-datos.png",
+      "codes": [
+        "F-PSEA-08"
+      ],
+      "file": {
+        "id": "1EIHK_-ODQEJ06rAzZl4UNWX-wQP4oeLY",
+        "name": "06-f-psea-08-captura-datos.png",
+        "webUrl": "https://drive.google.com/file/d/1EIHK_-ODQEJ06rAzZl4UNWX-wQP4oeLY/view?usp=drivesdk",
+        "mimeType": "image/png"
+      }
+    }
+  ],
+  "selectedTemplates": [
+    {
+      "code": "F-PSEA-01",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-01 Calendario Tipo_v0.xlsx",
+      "file": {
+        "id": "1OUVOzr8WwfgbtDx4xFYbtgXbvb6u_aZm",
+        "name": "F-PSEA-01 Calendario Tipo_v0.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1OUVOzr8WwfgbtDx4xFYbtgXbvb6u_aZm/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-02",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-02 Cronograma Detallado_v0.xlsx",
+      "file": {
+        "id": "1ve8f97oxD2gPXCNpyuuclp1yNUKli34Q",
+        "name": "F-PSEA-02 Cronograma Detallado_v0.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1ve8f97oxD2gPXCNpyuuclp1yNUKli34Q/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-03",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-03 Registro de participacion.docx",
+      "file": {
+        "id": "10CqDnnV8XXSj2olXZKad8f8sh1sJAFSP",
+        "name": "F-PSEA-03 Registro de participacion.docx",
+        "webUrl": "https://docs.google.com/document/d/10CqDnnV8XXSj2olXZKad8f8sh1sJAFSP/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-04",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-04 Anexo tecnico de equipos e instrumentos.xlsx",
+      "file": {
+        "id": "1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi",
+        "name": "F-PSEA-04 Anexo tecnico de equipos e instrumentos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-05",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-05 Ficha basica de ronda EA.docx",
+      "file": {
+        "id": "1GL7LR0cLGSo6LLU2-dnEcUxGh9pFVBQ7",
+        "name": "F-PSEA-05 Ficha basica de ronda EA.docx",
+        "webUrl": "https://docs.google.com/document/d/1GL7LR0cLGSo6LLU2-dnEcUxGh9pFVBQ7/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-06",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-06 Planificacion de ronda EA.docx",
+      "file": {
+        "id": "1DRPD9FYGoVQLtIy36X_4eGnY6LqdNDKJ",
+        "name": "F-PSEA-06 Planificacion de ronda EA.docx",
+        "webUrl": "https://docs.google.com/document/d/1DRPD9FYGoVQLtIy36X_4eGnY6LqdNDKJ/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-07",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-07 Preparacion y control del item.xlsx",
+      "file": {
+        "id": "1eKIjshrXxjNw67JDLB2Rra1TOOOueORV",
+        "name": "F-PSEA-07 Preparacion y control del item.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1eKIjshrXxjNw67JDLB2Rra1TOOOueORV/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 115
+    },
+    {
+      "code": "F-PSEA-08",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.xlsx",
+      "file": {
+        "id": "1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X",
+        "name": "F-PSEA-08 Datos reportados por participante.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-09",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-09 Datos de participantes exportados para analisis PT.xlsx",
+      "file": {
+        "id": "1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy",
+        "name": "F-PSEA-09 Datos de participantes exportados para analisis PT.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-10",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-10 Registro de preprocesamiento de datos.xlsx",
+      "file": {
+        "id": "1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP",
+        "name": "F-PSEA-10 Registro de preprocesamiento de datos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-11",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Homogeneidad datos.xlsx",
+      "file": {
+        "id": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+        "name": "F-PSEA-11 Homogeneidad datos.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-11A",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11A Datos preprocesados de homogeneidad.docx",
+      "file": {
+        "id": "1oM2YiU9C9l9lp8gCLCp9OV6ReobneLe4",
+        "name": "F-PSEA-11A Datos preprocesados de homogeneidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1oM2YiU9C9l9lp8gCLCp9OV6ReobneLe4/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 95
+    },
+    {
+      "code": "F-PSEA-11B",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11B Datos preprocesados de estabilidad.docx",
+      "file": {
+        "id": "1FyxPoFw910ayNwZvJADgo-aciqxUE5wd",
+        "name": "F-PSEA-11B Datos preprocesados de estabilidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1FyxPoFw910ayNwZvJADgo-aciqxUE5wd/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 95
+    },
+    {
+      "code": "F-PSEA-11C",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11C Resultados de homogeneidad.docx",
+      "file": {
+        "id": "1ZlTuaXPvolaroi0pBCaBOQwVS-xISHs7",
+        "name": "F-PSEA-11C Resultados de homogeneidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1ZlTuaXPvolaroi0pBCaBOQwVS-xISHs7/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 95
+    },
+    {
+      "code": "F-PSEA-11D",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-11D Resultados de estabilidad.docx",
+      "file": {
+        "id": "1MTaV-0iqX9Oea-iFZiqjNonmCjNQrkC6",
+        "name": "F-PSEA-11D Resultados de estabilidad.docx",
+        "webUrl": "https://docs.google.com/document/d/1MTaV-0iqX9Oea-iFZiqjNonmCjNQrkC6/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 95
+    },
+    {
+      "code": "F-PSEA-12",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.xlsx",
+      "file": {
+        "id": "16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW",
+        "name": "F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.xlsx",
+        "webUrl": "https://docs.google.com/spreadsheets/d/16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-13",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-13 Informe final de resultados.docx",
+      "file": {
+        "id": "11HXTindw_VC1NzsfXN-5Ul5R3yyAjFMj",
+        "name": "F-PSEA-13 Informe final de resultados.docx",
+        "webUrl": "https://docs.google.com/document/d/11HXTindw_VC1NzsfXN-5Ul5R3yyAjFMj/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-14",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-14 Registro caso de queja o NC segun aplique.docx",
+      "file": {
+        "id": "1AlG9MLYWn9DCri8M1ojjiF5lkDy_Zc77",
+        "name": "F-PSEA-14 Registro caso de queja o NC segun aplique.docx",
+        "webUrl": "https://docs.google.com/document/d/1AlG9MLYWn9DCri8M1ojjiF5lkDy_Zc77/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-15",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-15 Registro de apelaciones.docx",
+      "file": {
+        "id": "1xVSjywCFrznpXvP_8upPQEMhOjzsM4fd",
+        "name": "F-PSEA-15 Registro de apelaciones.docx",
+        "webUrl": "https://docs.google.com/document/d/1xVSjywCFrznpXvP_8upPQEMhOjzsM4fd/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-16",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-16 Matriz de competencia autorizacion.docx",
+      "file": {
+        "id": "16RAdlOTDtjTEkj_5W31EjnLVE-9dFOCr",
+        "name": "F-PSEA-16 Matriz de competencia autorizacion.docx",
+        "webUrl": "https://docs.google.com/document/d/16RAdlOTDtjTEkj_5W31EjnLVE-9dFOCr/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-17",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-17 Evaluacion de proveedores criticos.docx",
+      "file": {
+        "id": "16ggSSOuzy8nghxDT3ASSCV_g6_-Lt7Hm",
+        "name": "F-PSEA-17 Evaluacion de proveedores criticos.docx",
+        "webUrl": "https://docs.google.com/document/d/16ggSSOuzy8nghxDT3ASSCV_g6_-Lt7Hm/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    },
+    {
+      "code": "F-PSEA-18",
+      "path": "01_bloque_general/04_formatos_maestros/F-PSEA-18 Comunicacion participantes.docx",
+      "file": {
+        "id": "1rREWUSP6gGGOa852oX2Vv0D_amliu6VK",
+        "name": "F-PSEA-18 Comunicacion participantes.docx",
+        "webUrl": "https://docs.google.com/document/d/1rREWUSP6gGGOa852oX2Vv0D_amliu6VK/edit?usp=drivesdk&ouid=111329185909015759245&rtpof=true&sd=true",
+        "mimeType": "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      },
+      "score": 135
+    }
+  ],
+  "duplicateTemplateMatches": [
+    {
+      "code": "F-PSEA-08",
+      "kept": "1wLePy8H_Iy8B7DD14O-6JtZ9c9hbmxly",
+      "ignored": "1OAWu-Tr1wHYuxARiDmaqXvuWwIK1MxSf",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-18",
+      "kept": "1rREWUSP6gGGOa852oX2Vv0D_amliu6VK",
+      "ignored": "1U7DSo5vsYuuVm2Enr3e2nGj1V9tQGMVB",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-18 Comunicacion participantes.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-05",
+      "kept": "1GL7LR0cLGSo6LLU2-dnEcUxGh9pFVBQ7",
+      "ignored": "1dNh2Mk_O-FRiARVeu_Vjd-fokYEOrsXB",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-05 Ficha basica de ronda EA.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-03",
+      "kept": "10CqDnnV8XXSj2olXZKad8f8sh1sJAFSP",
+      "ignored": "1srCEk1sPU4ZmvscKmbv7LrKwa9l3Eqph",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-03 Registro de participacion.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-06",
+      "kept": "1DRPD9FYGoVQLtIy36X_4eGnY6LqdNDKJ",
+      "ignored": "12Wq8eRRa6qcQ0dUt9GesjALNe-Drlrex",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-06 Planificacion de ronda EA.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11",
+      "kept": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+      "ignored": "1eCMiHKyfDAV5TbLOeCgZL0CXjRg3QnUK",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Estabilidad datos.xlsx",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-08",
+      "kept": "1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X",
+      "ignored": "1wLePy8H_Iy8B7DD14O-6JtZ9c9hbmxly",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.docx",
+      "replaced": true
+    },
+    {
+      "code": "F-PSEA-04",
+      "kept": "1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi",
+      "ignored": "1OiwAykft6EhWmep3TnWJGrPJkfRnzqBH",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-04 Anexo tecnico de equipos e instrumentos.md",
+      "replaced": true
+    },
+    {
+      "code": "F-PSEA-10",
+      "kept": "1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP",
+      "ignored": "1ozBzBEP6pgR0ej9d8JYjt0Gem5fhXr0w",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-10 Registro de preprocesamiento de datos.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-10",
+      "kept": "1JtQjDBZjfeoBXA77GJrF4MXr1Le5V1JP",
+      "ignored": "1MdLRA-z6JISyVr-1yFoiHkR-yAlIsgHb",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-10 Registro de preprocesamiento de datos.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-08",
+      "kept": "1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X",
+      "ignored": "1WzCfYhWswuL9KYnoj_ImFUbQb302gmp_",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-09",
+      "kept": "1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy",
+      "ignored": "1HE5gyj4aXxECdB1wot-waQ15JPStJL4Z",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-09 Datos de participantes exportados para analisis PT.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-12",
+      "kept": "16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW",
+      "ignored": "1Gc7Tcv7KUhffpcUj-b3URVPqo7fso75_",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-04",
+      "kept": "1187ZRsY3O4krWveGJBlVVmmWuT6rSPmi",
+      "ignored": "1W8bhBUR2fRHHghXnYxs79vr3jTdE8pA4",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-04 Anexo tecnico de equipos e instrumentos.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11",
+      "kept": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+      "ignored": "1V8fqTECBQIyrlxyENSxIFNgOJfeNHM9b",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Homogeneidad datos.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11",
+      "kept": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+      "ignored": "1E-HLBbLkNVywGL6imbe5A8VBk8N7KCJN",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Estabilidad datos.csv",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11",
+      "kept": "1Crd2l4uhUcRJ5nJsV4NSzwYRLekvXHcc",
+      "ignored": "103cxKMycmxhYyi7SIdatahE8K75Kf0En",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11 Homogeneidad y estabilidad del item.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-13",
+      "kept": "11HXTindw_VC1NzsfXN-5Ul5R3yyAjFMj",
+      "ignored": "1b_dqKRg6Q-qTkCj2ypotDdUmxwYSttQu",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-13 Informe final de resultados.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-07",
+      "kept": "1eKIjshrXxjNw67JDLB2Rra1TOOOueORV",
+      "ignored": "1qFU8OqL51mwTjsYH28DR1Wp29jGkdsVq",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-07 Preparacion y control del item.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-12",
+      "kept": "16IFy_p1X9Nvk0-Ra7en1xtTpzWl8NfeW",
+      "ignored": "1ucGJfKzg1t6Hk9cEf0bvqzDUdzgG3WaI",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-09",
+      "kept": "1mj8zEh4TP2sU-s0cP-Gok8tykOJ_Pkdy",
+      "ignored": "1jX7XaIgmU66Zn3aOMWKETJxALSYGCBtT",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-09 Datos de participantes exportados para analisis PT.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-17",
+      "kept": "16ggSSOuzy8nghxDT3ASSCV_g6_-Lt7Hm",
+      "ignored": "1-KRIQEIipJ88zKZUmF0lH90PWzLVXVdh",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-17 Evaluacion de proveedores criticos.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-16",
+      "kept": "16RAdlOTDtjTEkj_5W31EjnLVE-9dFOCr",
+      "ignored": "1j_wAZSvCRUnquG7IuAIlW3E_khHg4_SM",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-16 Matriz de competencia autorizacion.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-15",
+      "kept": "1xVSjywCFrznpXvP_8upPQEMhOjzsM4fd",
+      "ignored": "1ZIgA_3w6wh7ZP0i3rrWEkgRVV9OWoqOr",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-15 Registro de apelaciones.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-14",
+      "kept": "1AlG9MLYWn9DCri8M1ojjiF5lkDy_Zc77",
+      "ignored": "11S9Mk3S1vMRhvFnYr6EyVpndaLpHzyR-",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-14 Registro caso de queja o NC segun aplique.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11D",
+      "kept": "1MTaV-0iqX9Oea-iFZiqjNonmCjNQrkC6",
+      "ignored": "1mk3XEx8gMizkfggQjr9RVUwgDXgePZYx",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11D Resultados de estabilidad.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11C",
+      "kept": "1ZlTuaXPvolaroi0pBCaBOQwVS-xISHs7",
+      "ignored": "1dviTmQ0V72aHnBcM7_UYMHZuSHjd6E7O",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11C Resultados de homogeneidad.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11B",
+      "kept": "1FyxPoFw910ayNwZvJADgo-aciqxUE5wd",
+      "ignored": "19CBARNvOw5pXc8dTERnJPn_OVqt1BbUk",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11B Datos preprocesados de estabilidad.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-11A",
+      "kept": "1oM2YiU9C9l9lp8gCLCp9OV6ReobneLe4",
+      "ignored": "1gH37ghoBhXxPZU8um50FjaVa3RXzTi89",
+      "ignoredPath": "01_bloque_general/04_formatos_maestros/F-PSEA-11A Datos preprocesados de homogeneidad.md",
+      "replaced": false
+    },
+    {
+      "code": "F-PSEA-01",
+      "kept": "1OUVOzr8WwfgbtDx4xFYbtgXbvb6u_aZm",
+      "ignored": "1tD9zc9lbWFzzFWA3KuA7SF8SL_QXSWwz",
+      "ignoredPath": "01_bloque_general/00_plantillas_base/F-PSEA-01 Plantilla Formato_Excel.xlsx",
+      "replaced": true
+    },
+    {
+      "code": "F-PSEA-08",
+      "kept": "1EJw-EAR3iT2M-RgVTDsARC-4ELLKne9X",
+      "ignored": "1EIHK_-ODQEJ06rAzZl4UNWX-wQP4oeLY",
+      "ignoredPath": "01_bloque_general/01_documentos_marco/DG-PSEA-02 Aplicativo calaire-app/capturas/06-f-psea-08-captura-datos.png",
+      "replaced": false
+    }
+  ],
+  "summary": {
+    "etapas": 7,
+    "documentos": 30,
+    "formatosOperativos": 11,
+    "discoveredTemplates": 53,
+    "templateMapEntries": 22,
+    "duplicateTemplateMatches": 31
+  }
+}
