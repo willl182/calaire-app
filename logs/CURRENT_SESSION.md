@@ -1,35 +1,30 @@
-# Session State: CALAIRE App
+# Session State: Calaire App — Drive Documental SGC
 
-**Last Updated**: 2026-07-02 15:38 -05
+**Last Updated**: 2026-07-02 19:10
 
 ## Session Objective
 
-Completar la prueba operativa de Drive documental SGC con Google Drive real y persistir el cierre.
+Rediseñar el centro documental Google Drive por-ronda (`/dashboard/rondas/[id]/sgc`) como un file manager estilo Google Drive (tarjetas grandes) y corregir el bug `?error=NEXT_REDIRECT`.
 
 ## Current State
 
-- [x] Fase 8 de Drive documental SGC queda con F1-F5 aplicados.
-- [x] `pnpm sgc:provision-drive` escanea una carpeta Drive y genera `GOOGLE_DRIVE_TEMPLATE_MAP`.
-- [x] Carpeta Drive real `10WlUUALhXqNTuVNbdQ6P23nQMv6feoGO` escaneada: 53 candidatos, 22 plantillas seleccionadas.
-- [x] Service account validado para lectura/provisioning; en cuenta personal no sirve para copiar por cuota cero.
-- [x] OAuth personal configurado con `GOOGLE_DRIVE_AUTH_MODE=oauth`.
-- [x] Prueba UI `Crear en Google Drive` ejecutada contra ronda `kd7b0emdk7cmzp1vn34f2bfv7986bb77`.
-- [x] Resultado operativo final: 8/8 carpetas con URL Drive, 22/30 documentos copiados, 0 fallos.
-- [x] Los 8 restantes son `EVID-*` y se cargaran/enlazaran manualmente cuando exista evidencia real.
+- [x] Rediseño file-manager: breadcrumb + tarjetas grandes de carpeta (raíz) y de documento (dentro de carpeta), panel de detalle a la derecha con formularios reusados.
+- [x] Eliminado el sidebar plano largo que "se perdía".
+- [x] Fix `?error=NEXT_REDIRECT`: añadido `unstable_rethrow(error)` como primera línea en los `catch` de 7 drive-actions.
+- [x] Eliminada función `RecursoRow` (unused, warning de lint).
+- [x] `pnpm lint` limpio, `pnpm build` OK.
+- [x] Commit `55b7053` pushado a `feat-drive-sgc` y desplegado a producción (dpl_36pT4WiWiUVZAqmUsxqgNGvBrd7V, ready).
+- [ ] Confirmación del usuario tras hard-refresh en producción.
 
 ## Critical Technical Context
 
-- Stack: Next.js 16.2.4, WorkOS/AuthKit, Convex, pnpm.
-- Layout: `app/`, `lib/`, `convex/`; no crear `src/`.
-- Convex SGC se consume como `api.sgc.<funcion>`.
-- Antes de tocar Convex leer `convex/_generated/ai/guidelines.md`.
-- Antes de tocar App Router leer docs locales en `node_modules/next/dist/docs/`.
-- En cuentas personales de Google Drive usar `GOOGLE_DRIVE_AUTH_MODE=oauth`; service account no puede copiar archivos en Mi unidad por falta de cuota.
-- Secretos locales quedan bajo `.local/` y `.env.local`, ambos ignorados por git.
-- Verificacion reciente: `pnpm exec tsc --noEmit`, `pnpm lint`, `pnpm build`; previamente tambien `pnpm test`, `pnpm test:e2e:start`, `pnpm exec convex codegen`.
+- Feature es POR RONDA, no global. URL: `/dashboard/rondas/<id>/sgc`.
+- Navegación server-side vía searchParams: `?carpeta=<codigo>&doc=<id>`.
+- Next.js `redirect()` lanza `NEXT_REDIRECT`; SIEMPRE llamar `unstable_rethrow(error)` primero en catch para no tragarse el redirect.
+- Usuario prueba en producción `calaire-app.vercel.app` → los cambios deben desplegarse (`vercel --prod --yes`) para ser visibles.
+- Archivos clave: `DriveDocumentalSgc.tsx` (UI), `page.tsx` (props/searchParams), `actions.ts` (server actions).
+- pnpm only. Subagentes: solo gpt-5.4/medium o gpt-5.5/low.
 
 ## Next Steps
 
-1. Verificar manualmente en Drive que las 22 copias creadas no apunten a plantillas maestras.
-2. Definir permisos/visibilidad participante antes de exponer documentos definitivos.
-3. Cargar/enlazar `EVID-*` solo cuando exista evidencia real.
+1. Esperar confirmación del usuario; ajustar tamaños/columnas de tarjetas si lo pide.

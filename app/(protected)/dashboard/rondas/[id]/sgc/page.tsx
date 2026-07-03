@@ -5,17 +5,14 @@ import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { getRonda } from '@/lib/rondas'
 import {
-  SGC_FORMATOS_FASE_1,
   SGC_PLAN_BLOQUES,
   SGC_RONDA_ETAPAS,
-  type SgcFormatoCodigo,
   type SgcRondaDocumento,
 } from '@/lib/sgc/catalog'
 import { getDriveTreeSgc, getPanelSgc, inicializarPanelSgc, type SgcPanel } from '@/lib/sgc'
 import { getDriveGoogleAutomationStatus } from '@/lib/sgc/drive-google'
 import { RondaContextNav } from '../RondaContextNav'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
-import { ExpedienteSgc } from './ExpedienteSgc'
 import {
   finalizarPlanRondaAction,
   finalizarRevisionDatosAction,
@@ -23,7 +20,6 @@ import {
   guardarPlanRondaAction,
   guardarRevisionDatosAction,
   guardarRevisionHomogeneidadAction,
-  inicializarDriveRondaAction,
   transicionSgcAction,
 } from './actions'
 
@@ -57,112 +53,44 @@ function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-function parseSelectedFormato(value: string | string[] | undefined): SgcFormatoCodigo | null {
-  const formato = getParam(value)
-  return SGC_FORMATOS_FASE_1.some((item) => item.codigo === formato) ? formato as SgcFormatoCodigo : null
-}
-
-function estadoClasses(estado: string) {
-  if (estado === 'completo' || estado === 'no_aplica' || estado === 'disponible') return 'bg-emerald-100 text-emerald-800'
-  if (estado === 'advertencia') return 'bg-amber-100 text-amber-800'
-  if (estado === 'pendiente') return 'bg-rose-100 text-rose-800'
-  return 'bg-slate-100 text-slate-700'
-}
-
 function getDocumentoEstado(doc: SgcRondaDocumento, checklistByCodigo: Map<string, { estado: string }>) {
   if (!doc.formatoOperativo) return doc.estado
   return checklistByCodigo.get(doc.formatoOperativo)?.estado ?? doc.estado
 }
 
-function getDocumentoObservacion(doc: SgcRondaDocumento, checklistByCodigo: Map<string, { observaciones: string; vinculo: string | null }>) {
-  if (!doc.formatoOperativo) return doc.nota
-  const item = checklistByCodigo.get(doc.formatoOperativo)
-  if (!item) return doc.nota
-  return `${item.observaciones}${item.vinculo ? ` Vinculo: ${item.vinculo}.` : ''}`
-}
-
-function CierreDocumentalDrive({ panel, rondaId }: { panel: SgcPanel; rondaId: string }) {
+function CierreDocumentalBar({ panel, rondaId }: { panel: SgcPanel; rondaId: string }) {
   const drive = panel.driveCierre
   const puedePasarADocumentacion = panel.ronda.estado === 'activa'
   const puedeCerrar = panel.ronda.estado === 'documentacion_pendiente'
   const puedeReabrir = panel.ronda.estado === 'cerrada'
   const bloqueantesDocumentacion = [...panel.checklistBloqueantesDocumentacionPendiente, ...drive.bloqueantes]
   const bloqueantesCierre = [...panel.checklistBloqueantesCierre, ...drive.bloqueantes]
-  const bloqueantesActuales = puedePasarADocumentacion
-    ? bloqueantesDocumentacion
-    : puedeCerrar
-      ? bloqueantesCierre
-      : bloqueantesCierre
-  const puedePasarADocumentacionPendiente = bloqueantesDocumentacion.length === 0
-  const puedeCerrarDocumentalmente = bloqueantesCierre.length === 0
+  const bloqueantesActuales = puedePasarADocumentacion ? bloqueantesDocumentacion : bloqueantesCierre
   const sinBloqueantesActuales = bloqueantesActuales.length === 0
 
   return (
-    <section className="card p-6" aria-labelledby="cierre-documental-title">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-        <div>
-          <h2 id="cierre-documental-title" className="text-lg font-semibold text-[var(--foreground)]">Cierre documental SGC</h2>
-          <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-            El cierre usa el checklist SGC y el expediente Drive. Los definitivos faltantes son recomendados; no bloquean.
-          </p>
-        </div>
+    <section className="card flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between" aria-labelledby="cierre-documental-title">
+      <div className="flex flex-wrap items-center gap-3">
+        <h2 id="cierre-documental-title" className="text-sm font-semibold text-[var(--foreground)]">Cierre documental SGC</h2>
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
           {sinBloqueantesActuales ? 'Sin bloqueantes' : `${bloqueantesActuales.length} bloqueante(s)`}
         </span>
+        {!sinBloqueantesActuales && (
+          <details className="text-xs text-rose-900">
+            <summary className="cursor-pointer font-semibold">Ver faltantes</summary>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              {bloqueantesActuales.map((bloqueante) => <li key={bloqueante}>{bloqueante}</li>)}
+            </ul>
+          </details>
+        )}
       </div>
 
-      <div className="mt-4 grid gap-3 md:grid-cols-3">
-        <div className="rounded-lg border border-[var(--border)] px-3 py-2">
-          <div className="text-lg font-semibold">{drive.recursosDocumentales}/{drive.totalDocumentos}</div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Recursos Drive</div>
-        </div>
-        <div className="rounded-lg border border-[var(--border)] px-3 py-2">
-          <div className="text-lg font-semibold">{drive.bloqueantes.length}</div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Bloqueos Drive</div>
-        </div>
-        <div className="rounded-lg border border-[var(--border)] px-3 py-2">
-          <div className="text-lg font-semibold">{drive.advertencias.length}</div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Definitivos recomendados</div>
-        </div>
-      </div>
-
-      {drive.recursosDocumentales === 0 && (
-        <form action={inicializarDriveRondaAction} className="mt-4 rounded-lg border border-sky-200 bg-sky-50 p-4">
-          <input type="hidden" name="ronda_id" value={rondaId} />
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <div className="text-sm font-semibold text-sky-950">Expediente Drive no inicializado</div>
-              <p className="mt-1 text-sm text-sky-900">Inicialice o repare la estructura documental antes de cerrar.</p>
-            </div>
-            <button className="btn-outline" type="submit">Inicializar expediente</button>
-          </div>
-        </form>
-      )}
-
-      {bloqueantesActuales.length > 0 && (
-        <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-4">
-          <div className="text-sm font-semibold text-rose-900">Faltantes bloqueantes</div>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-rose-900">
-            {bloqueantesActuales.map((bloqueante) => <li key={bloqueante}>{bloqueante}</li>)}
-          </ul>
-        </div>
-      )}
-
-      {drive.advertencias.length > 0 && (
-        <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-4">
-          <div className="text-sm font-semibold text-amber-900">Advertencias no bloqueantes</div>
-          <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-amber-900">
-            {drive.advertencias.map((advertencia) => <li key={advertencia}>{advertencia}</li>)}
-          </ul>
-        </div>
-      )}
-
-      <div className="mt-4 flex flex-wrap gap-3">
+      <div className="flex flex-wrap gap-2">
         {puedePasarADocumentacion && (
           <form action={transicionSgcAction}>
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="accion" value="documentacion_pendiente" />
-            <button className="btn-primary" type="submit" disabled={!puedePasarADocumentacionPendiente}>
+            <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales}>
               Pasar a documentacion pendiente
             </button>
           </form>
@@ -171,7 +99,7 @@ function CierreDocumentalDrive({ panel, rondaId }: { panel: SgcPanel; rondaId: s
           <form action={transicionSgcAction}>
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="accion" value="cerrar" />
-            <button className="btn-primary" type="submit" disabled={!puedeCerrarDocumentalmente}>
+            <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales}>
               Cerrar documentalmente
             </button>
           </form>
@@ -209,7 +137,6 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
   const success = getParam(query.success)
   const error = getParam(query.error)
-  const selectedFormato = parseSelectedFormato(query.formato)
   const checklistByCodigo = new Map(panel.checklist.map((item) => [item.codigo, item]))
   const documentos = SGC_RONDA_ETAPAS.flatMap((seccion) => seccion.documentos.map((doc) => ({ seccion, doc })))
   const cubiertos = documentos.filter(({ doc }) => {
@@ -265,62 +192,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           selectedDocId={getParam(query.doc) ?? null}
         />
 
-        <CierreDocumentalDrive panel={panel} rondaId={id} />
-
-        <ExpedienteSgc panel={panel} rondaId={id} rondaCodigo={ronda.codigo} selectedFormato={selectedFormato} />
-
-        <section className="card p-6">
-          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">Checklist documental real</h2>
-              <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                Lista derivada de las secciones y documentos de {ronda.codigo}, no del checklist operativo anterior.
-              </p>
-            </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              {documentos.length} items
-            </span>
-          </div>
-          <div className="mt-4 overflow-x-auto">
-            <table className="min-w-full divide-y divide-[var(--border)] text-sm">
-              <thead>
-                <tr className="text-left text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">
-                  <th className="px-3 py-2">Seccion</th>
-                  <th className="px-3 py-2">Documento</th>
-                  <th className="px-3 py-2">Estado</th>
-                  <th className="px-3 py-2">Fuente</th>
-                  <th className="px-3 py-2">Cobertura</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[var(--border)]">
-                {documentos.map(({ seccion, doc }) => {
-                  const estado = getDocumentoEstado(doc, checklistByCodigo)
-                  return (
-                    <tr key={`${seccion.key}-${doc.codigo}`}>
-                      <td className="px-3 py-3 align-top">
-                        <div className="font-semibold">{seccion.numero}. {seccion.nombre}</div>
-                        <div className="text-xs text-[var(--foreground-muted)]">{seccion.carpeta}</div>
-                      </td>
-                      <td className="px-3 py-3 align-top">
-                        <div className="font-semibold">{doc.codigo}</div>
-                        <div>{doc.nombre}</div>
-                      </td>
-                      <td className="px-3 py-3 align-top">
-                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoClasses(estado)}`}>{estado}</span>
-                      </td>
-                      <td className="px-3 py-3 align-top text-[var(--foreground-muted)]">
-                        {doc.archivoBase ? `${seccion.carpeta}/${doc.archivoBase}.md y .docx` : `Sin archivo base en ${ronda.codigo}`}
-                      </td>
-                      <td className="px-3 py-3 align-top text-[var(--foreground-muted)]">
-                        {getDocumentoObservacion(doc, checklistByCodigo)}
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
-        </section>
+        <CierreDocumentalBar panel={panel} rondaId={id} />
 
         <div className="grid gap-6 lg:grid-cols-2">
           <section id="plan-ronda" className="card p-6">

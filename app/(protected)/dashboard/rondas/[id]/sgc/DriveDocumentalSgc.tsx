@@ -398,6 +398,15 @@ export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, d
             /* Dentro de una carpeta: cuadricula de documentos + panel de detalle */
             <div className={`grid gap-0 ${selectedDoc ? 'lg:grid-cols-[minmax(0,1fr)_minmax(360px,520px)]' : ''}`}>
               <div className="p-6">
+                <Link
+                  href={basePath}
+                  className="mb-4 inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-sky-300 hover:bg-slate-50"
+                >
+                  <svg viewBox="0 0 24 24" aria-hidden className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M15 18l-6-6 6-6" />
+                  </svg>
+                  Volver al expediente
+                </Link>
                 <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                   <div>
                     <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
