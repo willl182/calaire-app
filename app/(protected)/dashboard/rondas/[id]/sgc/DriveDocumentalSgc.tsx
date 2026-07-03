@@ -26,6 +26,28 @@ type Props = {
     templateMap: boolean
     sharedDriveId: boolean
   }
+  selectedCarpeta: string | null
+  selectedDocId: string | null
+}
+
+function FolderIcon({ className = 'h-9 w-9' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={`shrink-0 text-sky-500 ${className}`} fill="currentColor">
+      <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
+    </svg>
+  )
+}
+
+function fileColor(tipo: SgcDriveRecurso['tipo']) {
+  return tipo === 'hoja_calculo' ? 'text-emerald-500' : tipo === 'pdf' ? 'text-rose-500' : tipo === 'enlace' ? 'text-violet-500' : 'text-slate-400'
+}
+
+function FileIcon({ tipo, className = 'h-9 w-9' }: { tipo: SgcDriveRecurso['tipo']; className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden className={`shrink-0 ${fileColor(tipo)} ${className}`} fill="currentColor">
+      <path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5z" />
+    </svg>
+  )
 }
 
 const ESTADO_LABELS: Record<SgcDriveRecurso['estado'], string> = {
@@ -236,34 +258,8 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
   )
 }
 
-function RecursoRow({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId: string }) {
-  const isFolder = recurso.tipo === 'carpeta'
-  return (
-    <article id={`drive-${recurso.codigo}`} className="grid gap-4 border-t border-[var(--border)] px-4 py-4 lg:grid-cols-[minmax(0,1fr)_minmax(320px,480px)]">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{isFolder ? 'Carpeta' : tipoLabel(recurso.tipo)}</span>
-          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoClasses(recurso.estado)}`}>{ESTADO_LABELS[recurso.estado]}</span>
-          {recurso.critico && <span className="rounded-full bg-rose-50 px-2.5 py-1 text-xs font-semibold text-rose-700">Critico</span>}
-          {recurso.publicaParticipante && <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Publicado</span>}
-          {recurso.formatoRelacionado && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{recurso.formatoRelacionado}</span>}
-        </div>
-        <h4 className="mt-2 font-semibold text-[var(--foreground)]">{recurso.codigo}</h4>
-        <p className="mt-1 text-sm text-[var(--foreground)]">{recurso.nombre}</p>
-        {recurso.notas && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{recurso.notas}</p>}
-        <div className="mt-3 text-xs text-[var(--foreground-muted)]">
-          Actualizado: {fmtDate(recurso.updatedAt)} por {recurso.updatedBy}
-        </div>
-        <div className="mt-3">
-          <LinkActions recurso={recurso} />
-        </div>
-      </div>
-      <RecursoForms recurso={recurso} rondaId={rondaId} />
-    </article>
-  )
-}
 
-export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig }: Props) {
+export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
   const root = drive.root
   const recursos = drive.recursos
   const folders = root ? childrenOf(recursos, root._id).filter((recurso) => recurso.tipo === 'carpeta') : []
@@ -271,6 +267,11 @@ export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, d
   const completados = documentos.filter((recurso) => recurso.estado === 'diligenciado' || recurso.estado === 'no_aplica').length
   const conEditable = documentos.filter((recurso) => Boolean(recurso.webUrl)).length
   const conDefinitivo = documentos.filter((recurso) => Boolean(recurso.definitivo)).length
+
+  const basePath = `/dashboard/rondas/${rondaId}/sgc`
+  const activeFolder = folders.find((folder) => folder.codigo === selectedCarpeta) ?? null
+  const folderDocs = activeFolder ? childrenOf(recursos, activeFolder._id).filter((recurso) => recurso._id !== activeFolder._id) : []
+  const selectedDoc = activeFolder ? folderDocs.find((recurso) => recurso._id === selectedDocId) ?? null : null
 
   return (
     <section className="card overflow-hidden" aria-labelledby="drive-documental-title">
@@ -348,50 +349,123 @@ export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, d
       )}
 
       {root && (
-        <div className="grid gap-0 lg:grid-cols-[280px_1fr]">
-          <aside className="border-b border-[var(--border)] bg-slate-50 p-4 lg:border-b-0 lg:border-r">
-            <div className="sticky top-4 grid gap-2">
+        <div>
+          {/* Breadcrumb tipo Google Drive */}
+          <nav aria-label="Ruta" className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-slate-50 px-6 py-3 text-sm">
+            <Link href={basePath} className={`font-semibold ${activeFolder ? 'text-sky-700 hover:underline' : 'text-[var(--foreground)]'}`}>
+              Expediente {rondaCodigo}
+            </Link>
+            {activeFolder && (
+              <>
+                <span className="text-[var(--foreground-muted)]">/</span>
+                <span className="font-semibold text-[var(--foreground)]">{activeFolder.nombre}</span>
+              </>
+            )}
+          </nav>
+
+          {!activeFolder ? (
+            /* Nivel raiz: tarjetas de carpeta */
+            <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
               {folders.map((folder) => {
                 const folderChildren = childrenOf(recursos, folder._id).filter((recurso) => recurso.tipo !== 'carpeta')
                 const folderDone = folderChildren.filter((recurso) => recurso.estado === 'diligenciado' || recurso.estado === 'no_aplica').length
                 return (
-                  <a key={folder._id} href={`#drive-${folder.codigo}`} className="rounded-lg border border-transparent px-3 py-2 text-sm transition hover:border-[var(--border)] hover:bg-white">
-                    <div className="flex items-center justify-between gap-3">
-                      <span className="font-semibold text-[var(--foreground)]">{folder.nombre}</span>
-                      <span className="rounded-full bg-white px-2 py-0.5 text-[11px] font-semibold text-[var(--foreground-muted)]">{folderDone}/{folderChildren.length}</span>
+                  <Link
+                    key={folder._id}
+                    href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}`}
+                    className="group overflow-hidden rounded-xl border border-[var(--border)] bg-white transition hover:border-sky-300 hover:shadow-md"
+                  >
+                    <div className="relative flex h-36 items-center justify-center bg-slate-50">
+                      <FolderIcon className="h-16 w-16 transition group-hover:scale-105" />
+                      <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-[var(--foreground-muted)] shadow-sm">
+                        {folderDone}/{folderChildren.length}
+                      </span>
                     </div>
-                    <div className="mt-0.5 truncate text-xs text-[var(--foreground-muted)]">{folder.codigo}</div>
-                  </a>
+                    <div className="border-t border-[var(--border)] px-4 py-3">
+                      <div className="truncate font-semibold text-[var(--foreground)]">{folder.nombre}</div>
+                      <div className="mt-0.5 truncate text-xs text-[var(--foreground-muted)]">
+                        Carpeta · {folderChildren.length} documento{folderChildren.length === 1 ? '' : 's'}
+                      </div>
+                    </div>
+                  </Link>
                 )
               })}
+              {folders.length === 0 && (
+                <p className="text-sm text-[var(--foreground-muted)]">Este expediente aun no tiene carpetas. Usa &quot;Reparar expediente&quot;.</p>
+              )}
             </div>
-          </aside>
-
-          <div className="grid gap-5 p-5">
-            {folders.map((folder) => {
-              const folderChildren = childrenOf(recursos, folder._id)
-              return (
-                <section key={folder._id} id={`drive-${folder.codigo}`} className="rounded-lg border border-[var(--border)] bg-white">
-                  <div className="px-4 py-4">
-                    <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                      <div>
-                        <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Carpeta</div>
-                        <h3 className="mt-1 text-lg font-semibold text-[var(--foreground)]">{folder.nombre}</h3>
-                        <p className="mt-1 text-sm text-[var(--foreground-muted)]">{folder.notas ?? folder.codigo}</p>
-                      </div>
-                      <LinkActions recurso={folder} />
-                    </div>
-                    <div className="mt-4">
-                      <RecursoForms recurso={folder} rondaId={rondaId} />
-                    </div>
+          ) : (
+            /* Dentro de una carpeta: cuadricula de documentos + panel de detalle */
+            <div className={`grid gap-0 ${selectedDoc ? 'lg:grid-cols-[minmax(0,1fr)_minmax(360px,520px)]' : ''}`}>
+              <div className="p-6">
+                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
+                    <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.notas ?? activeFolder.codigo}</p>
                   </div>
-                  {folderChildren.filter((recurso) => recurso._id !== folder._id).map((recurso) => (
-                    <RecursoRow key={recurso._id} recurso={recurso} rondaId={rondaId} />
-                  ))}
-                </section>
-              )
-            })}
-          </div>
+                  <LinkActions recurso={activeFolder} />
+                </div>
+                <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                  {folderDocs.map((recurso) => {
+                    const active = recurso._id === selectedDocId
+                    return (
+                      <Link
+                        key={recurso._id}
+                        href={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}&doc=${recurso._id}`}
+                        aria-current={active ? 'true' : undefined}
+                        className={`group overflow-hidden rounded-xl border bg-white transition hover:shadow-md ${active ? 'border-sky-400 ring-2 ring-sky-200' : 'border-[var(--border)] hover:border-sky-300'}`}
+                      >
+                        <div className="relative flex h-32 items-center justify-center bg-slate-50">
+                          <FileIcon tipo={recurso.tipo} className="h-14 w-14 transition group-hover:scale-105" />
+                          <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm ${estadoClasses(recurso.estado)}`}>{ESTADO_LABELS[recurso.estado]}</span>
+                        </div>
+                        <div className="border-t border-[var(--border)] px-4 py-3">
+                          <div className="truncate text-sm font-semibold text-[var(--foreground)]">{recurso.codigo}</div>
+                          <div className="line-clamp-1 text-xs text-[var(--foreground-muted)]">{recurso.nombre}</div>
+                          <div className="mt-2 flex flex-wrap gap-1">
+                            {recurso.webUrl && <span className="rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700">Enlace</span>}
+                            {recurso.definitivo && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">Definitivo</span>}
+                            {recurso.publicaParticipante && <span className="rounded bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">Publico</span>}
+                            {recurso.critico && <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700">Critico</span>}
+                          </div>
+                        </div>
+                      </Link>
+                    )
+                  })}
+                  {folderDocs.length === 0 && (
+                    <p className="text-sm text-[var(--foreground-muted)]">Esta carpeta no tiene documentos.</p>
+                  )}
+                </div>
+              </div>
+
+              {selectedDoc && (
+                <aside className="border-t border-[var(--border)] bg-slate-50 p-5 lg:border-l lg:border-t-0">
+                  <div className="sticky top-4">
+                    <div className="mb-3 flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <div className="flex flex-wrap items-center gap-2">
+                          <span className="rounded-md bg-slate-100 px-2 py-1 text-xs font-semibold text-slate-700">{tipoLabel(selectedDoc.tipo)}</span>
+                          <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoClasses(selectedDoc.estado)}`}>{ESTADO_LABELS[selectedDoc.estado]}</span>
+                          {selectedDoc.formatoRelacionado && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.formatoRelacionado}</span>}
+                        </div>
+                        <h4 className="mt-2 font-semibold text-[var(--foreground)]">{selectedDoc.codigo}</h4>
+                        <p className="mt-1 text-sm text-[var(--foreground)]">{selectedDoc.nombre}</p>
+                        {selectedDoc.notas && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.notas}</p>}
+                        <div className="mt-2 text-xs text-[var(--foreground-muted)]">Actualizado: {fmtDate(selectedDoc.updatedAt)} por {selectedDoc.updatedBy}</div>
+                      </div>
+                      <Link href={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}`} className="shrink-0 rounded-md border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground-muted)] hover:bg-slate-100" aria-label="Cerrar detalle">
+                        Cerrar
+                      </Link>
+                    </div>
+                    <div className="mb-3">
+                      <LinkActions recurso={selectedDoc} />
+                    </div>
+                    <RecursoForms recurso={selectedDoc} rondaId={rondaId} />
+                  </div>
+                </aside>
+              )}
+            </div>
+          )}
         </div>
       )}
     </section>

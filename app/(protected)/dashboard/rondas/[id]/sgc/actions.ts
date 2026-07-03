@@ -118,6 +118,7 @@ export async function inicializarDriveRondaAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', `Expediente Drive inicializado: ${result.creados} creados, ${result.reutilizados} reutilizados, ${result.reparados} reparados.`)
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible inicializar el expediente Drive.')
   }
 }
@@ -163,6 +164,7 @@ export async function guardarDriveEditableAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Enlace editable Drive actualizado.')
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar el enlace Drive.')
   }
 }
@@ -180,6 +182,7 @@ export async function reemplazarDriveRecursoAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Enlace Drive reemplazado con trazabilidad.')
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible reemplazar el enlace Drive.')
   }
 }
@@ -211,6 +214,7 @@ export async function guardarDriveDefinitivoAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Version definitiva Drive registrada.')
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la version definitiva.')
   }
 }
@@ -270,6 +274,7 @@ export async function cambiarEstadoDriveAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Estado del recurso Drive actualizado.')
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible cambiar el estado Drive.')
   }
 }
@@ -285,6 +290,7 @@ export async function cambiarVisibilidadDriveAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Visibilidad participante del recurso Drive actualizada.')
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar la visibilidad Drive.')
   }
 }
@@ -297,6 +303,7 @@ export async function retirarDriveRecursoAction(formData: FormData) {
     revalidatePath(pageUrl(rondaId))
     redirectWith(rondaId, 'success', 'Recurso Drive retirado.')
   } catch (error) {
+    unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible retirar el recurso Drive.')
   }
 }

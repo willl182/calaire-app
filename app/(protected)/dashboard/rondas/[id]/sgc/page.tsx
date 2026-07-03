@@ -261,6 +261,8 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           rondaNombre={ronda.nombre}
           driveGoogleReady={driveGoogleStatus.ready}
           driveGoogleConfig={driveGoogleStatus}
+          selectedCarpeta={getParam(query.carpeta) ?? null}
+          selectedDocId={getParam(query.doc) ?? null}
         />
 
         <CierreDocumentalDrive panel={panel} rondaId={id} />
