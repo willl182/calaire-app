@@ -1,11 +1,9 @@
-import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { Alert } from '@/app/(protected)/dashboard/components/Alert'
 import { EstadoBadge } from '@/app/(protected)/dashboard/components/EstadoBadge'
 import { isAdmin, requireAuth } from '@/lib/auth'
 import { getRonda } from '@/lib/rondas'
 import {
-  SGC_PLAN_BLOQUES,
   SGC_RONDA_ETAPAS,
   type SgcRondaDocumento,
 } from '@/lib/sgc/catalog'
@@ -13,41 +11,14 @@ import { getDriveTreeSgc, getPanelSgc, inicializarPanelSgc, type SgcPanel } from
 import { getDriveGoogleAutomationStatus } from '@/lib/sgc/drive-google'
 import { RondaContextNav } from '../RondaContextNav'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
-import {
-  finalizarPlanRondaAction,
-  finalizarRevisionDatosAction,
-  finalizarRevisionHomogeneidadAction,
-  guardarPlanRondaAction,
-  guardarRevisionDatosAction,
-  guardarRevisionHomogeneidadAction,
-  transicionSgcAction,
-} from './actions'
+import { transicionSgcAction } from './actions'
 
 type PageProps = {
   params: Promise<{ id: string }>
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-const INFORME_CHECK_LABELS: Record<string, string> = {
-  participantes_revisados: 'Participantes, codigos y fichas revisados',
-  fichas_revisadas: 'F-PSEA-03 y registros de participacion consistentes',
-  envios_finales_revisados: 'F-PSEA-08/F-PSEA-12 revisados contra envios finales',
-  metricas_revisadas: 'Metricas y salidas usadas en el informe revisadas',
-  evidencias_revisadas: 'Evidencias F-PSEA-09, F-PSEA-10 y anexos revisadas',
-  inconsistencias_resueltas: 'Inconsistencias resueltas o justificadas',
-  f_psea_11_no_aplica: 'Homogeneidad/estabilidad revisada o no aplicabilidad justificada',
-}
-
 const DOCUMENTO_ESTADOS_CUBIERTOS = new Set(['completo', 'no_aplica', 'disponible'])
-
-const HOMOGENEIDAD_CHECK_LABELS: Record<string, string> = {
-  plan_muestreo_revisado: 'Plan de muestreo revisado',
-  criterios_aceptacion_definidos: 'Criterios de aceptacion definidos',
-  resultados_homogeneidad_revisados: 'Resultados de homogeneidad revisados',
-  resultados_estabilidad_revisados: 'Resultados de estabilidad revisados',
-  desviaciones_documentadas: 'Desviaciones documentadas',
-  conclusion_lote_aprobada: 'Conclusion de lote aprobada',
-}
 
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
@@ -145,13 +116,6 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   }).length
   const progreso = documentos.length === 0 ? 0 : Math.round((cubiertos / documentos.length) * 100)
 
-  const planBloques = panel.plan?.bloques ?? {}
-  const planCampos = panel.plan?.camposEstructurados ?? {}
-  const informeChecks = panel.revision?.checks ?? {}
-  const homogeneidadChecks = panel.revisionHomogeneidad?.checks ?? {}
-  const informeCheckKeys = Object.keys(INFORME_CHECK_LABELS)
-  const homogeneidadCheckKeys = Object.keys(HOMOGENEIDAD_CHECK_LABELS)
-
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -183,6 +147,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
         <DriveDocumentalSgc
           drive={drive}
+          panel={panel}
           rondaId={id}
           rondaCodigo={ronda.codigo}
           rondaNombre={ronda.nombre}
@@ -193,116 +158,6 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
         />
 
         <CierreDocumentalBar panel={panel} rondaId={id} />
-
-        <div className="grid gap-6 lg:grid-cols-2">
-          <section id="plan-ronda" className="card p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-06 - Planificacion de ronda EA</h2>
-                <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.plan?.estado ?? 'borrador'}</p>
-              </div>
-              <Link className="btn-outline" href={`/dashboard/rondas/${id}/sgc/plan/print`}>Vista imprimible</Link>
-            </div>
-            <form action={guardarPlanRondaAction} className="mt-4 space-y-3">
-              <input type="hidden" name="ronda_id" value={id} />
-              <div className="grid gap-3 sm:grid-cols-2">
-                <input className="input" name="responsable" placeholder="Responsable" defaultValue={planCampos.responsable ?? ''} />
-                <input className="input" name="fecha_plan" type="date" defaultValue={planCampos.fecha_plan ?? ''} />
-              </div>
-              <div className="max-h-[500px] space-y-4 overflow-y-auto rounded-lg border border-[var(--border)] bg-slate-50/50 p-4 pr-2">
-                {SGC_PLAN_BLOQUES.map(({ key, label }) => (
-                  <div key={key} className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground-muted)]">{label}</label>
-                    <textarea
-                      className="input min-h-24 w-full bg-white"
-                      name={`bloque_${key}`}
-                      placeholder={`Ingrese el contenido para el bloque ${key.toUpperCase()}...`}
-                      defaultValue={planBloques[key] ?? ''}
-                    />
-                  </div>
-                ))}
-              </div>
-              <input className="input" name="motivo_revision" placeholder="Motivo si edita un plan finalizado" />
-              <button className="btn-primary" type="submit">Guardar F-PSEA-06</button>
-            </form>
-            <form action={finalizarPlanRondaAction} className="mt-3">
-              <input type="hidden" name="ronda_id" value={id} />
-              <button className="btn-outline" type="submit">Finalizar F-PSEA-06 y crear snapshot</button>
-            </form>
-          </section>
-
-          <section id="f-psea-13" className="card p-6">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-13 - Informe final de resultados</h2>
-                <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.revision?.estado ?? 'borrador'}</p>
-              </div>
-              <Link className="btn-outline" href={`/dashboard/rondas/${id}/sgc/f-psea-13/print`}>Vista imprimible</Link>
-            </div>
-            <form action={guardarRevisionDatosAction} className="mt-4 space-y-3">
-              <input type="hidden" name="ronda_id" value={id} />
-              <input type="hidden" name="check_keys" value={informeCheckKeys.join(',')} />
-              {informeCheckKeys.map((key) => {
-                const check = informeChecks[key]
-                return (
-                  <div key={key} className="rounded-lg border border-[var(--border)] p-3">
-                    <label className="flex items-center gap-2 text-sm font-medium">
-                      <input type="checkbox" name={`check_${key}`} defaultChecked={check?.cumple ?? false} />
-                      {INFORME_CHECK_LABELS[key]}
-                    </label>
-                    <input className="input mt-2" name={`obs_${key}`} placeholder="Observacion si no cumple" defaultValue={check?.observacion ?? ''} />
-                  </div>
-                )
-              })}
-              <button className="btn-primary" type="submit">Guardar F-PSEA-13</button>
-            </form>
-            <form action={finalizarRevisionDatosAction} className="mt-3">
-              <input type="hidden" name="ronda_id" value={id} />
-              <button className="btn-outline" type="submit">Finalizar F-PSEA-13 y crear snapshot</button>
-            </form>
-          </section>
-        </div>
-
-        <section id="f-psea-11" className="card p-6">
-          <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">F-PSEA-11 - Homogeneidad y estabilidad del item</h2>
-              <p className="text-sm text-[var(--foreground-muted)]">Estado: {panel.revisionHomogeneidad?.estado ?? 'borrador'}</p>
-            </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
-              Registro diligenciable
-            </span>
-          </div>
-          <form action={guardarRevisionHomogeneidadAction} className="mt-4 space-y-3">
-            <input type="hidden" name="ronda_id" value={id} />
-            <input type="hidden" name="homogeneidad_check_keys" value={homogeneidadCheckKeys.join(',')} />
-            <textarea
-              className="input min-h-24"
-              name="homogeneidad_conclusiones"
-              placeholder="Conclusion documentada de homogeneidad y estabilidad"
-              defaultValue={panel.revisionHomogeneidad?.conclusiones ?? ''}
-            />
-            <div className="grid gap-3 lg:grid-cols-2">
-              {homogeneidadCheckKeys.map((key) => {
-                const check = homogeneidadChecks[key]
-                return (
-                  <div key={key} className="rounded-lg border border-[var(--border)] p-3">
-                    <label className="flex items-center gap-2 text-sm font-medium">
-                      <input type="checkbox" name={`homogeneidad_check_${key}`} defaultChecked={check?.cumple ?? false} />
-                      {HOMOGENEIDAD_CHECK_LABELS[key]}
-                    </label>
-                    <input className="input mt-2" name={`homogeneidad_obs_${key}`} placeholder="Observacion si no cumple" defaultValue={check?.observacion ?? ''} />
-                  </div>
-                )
-              })}
-            </div>
-            <button className="btn-primary" type="submit">Guardar F-PSEA-11</button>
-          </form>
-          <form action={finalizarRevisionHomogeneidadAction} className="mt-3">
-            <input type="hidden" name="ronda_id" value={id} />
-            <button className="btn-outline" type="submit">Finalizar F-PSEA-11 y crear snapshot</button>
-          </form>
-        </section>
       </div>
     </div>
   )

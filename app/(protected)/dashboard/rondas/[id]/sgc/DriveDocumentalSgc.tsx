@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { CopyInvitationLinkButton } from '@/app/(protected)/dashboard/components/CopyInvitationLinkButton'
-import type { SgcDriveRecurso, SgcDriveTree } from '@/lib/sgc'
+import type { SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/lib/sgc'
+import { SgcRegistroDiligenciable } from './SgcRegistroDiligenciable'
 import {
   cambiarEstadoDriveAction,
   cambiarVisibilidadDriveAction,
@@ -15,6 +16,7 @@ import {
 
 type Props = {
   drive: SgcDriveTree
+  panel: SgcPanel
   rondaId: string
   rondaCodigo: string
   rondaNombre: string
@@ -259,7 +261,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
 }
 
 
-export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
+export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
   const root = drive.root
   const recursos = drive.recursos
   const folders = root ? childrenOf(recursos, root._id).filter((recurso) => recurso.tipo === 'carpeta') : []
@@ -470,6 +472,7 @@ export function DriveDocumentalSgc({ drive, rondaId, rondaCodigo, rondaNombre, d
                       <LinkActions recurso={selectedDoc} />
                     </div>
                     <RecursoForms recurso={selectedDoc} rondaId={rondaId} />
+                    <SgcRegistroDiligenciable codigo={selectedDoc.codigo} panel={panel} rondaId={rondaId} />
                   </div>
                 </aside>
               )}
