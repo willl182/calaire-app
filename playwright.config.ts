@@ -1,12 +1,15 @@
 import { defineConfig, devices } from '@playwright/test'
 import fs from 'node:fs'
+import { e2eEnv } from './tests/e2e/env'
 
-const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? 'http://localhost:3000'
-const shouldStartServer = process.env.PLAYWRIGHT_START_SERVER === '1' || !!process.env.CI
+const baseURL = e2eEnv.baseURL
+const shouldStartServer = e2eEnv.shouldStartServer
 const authFile = '.auth/workos.json'
-const hasAuthCredentials = !!process.env.E2E_AUTH_EMAIL && !!process.env.E2E_AUTH_PASSWORD
+const hasAuthCredentials = e2eEnv.hasAuthCredentials
 const hasStoredAuth = fs.existsSync(authFile)
-const isManualAuth = process.env.PLAYWRIGHT_AUTH_MODE === 'manual'
+const isManualAuth = e2eEnv.isManualAuth
+const screenshotSpecs = '**/*screenshots*.auth.spec.ts'
+const includeScreenshots = process.env.PLAYWRIGHT_INCLUDE_SCREENSHOTS === '1'
 const publicProject = {
   name: 'chromium',
   testIgnore: ['**/*.auth.spec.ts', '**/*.setup.ts'],
@@ -55,6 +58,7 @@ const authenticatedProjects =
           name: 'authenticated-chromium',
           dependencies: hasAuthCredentials ? ['auth-setup'] : [],
           testMatch: '**/*.auth.spec.ts',
+          testIgnore: screenshotSpecs,
           use: {
             ...devices['Desktop Chrome'],
             launchOptions: {
@@ -64,18 +68,32 @@ const authenticatedProjects =
             storageState: authFile,
           },
         },
+        ...(includeScreenshots
+          ? [
+              {
+                name: 'screenshots-authenticated-chromium',
+                dependencies: hasAuthCredentials ? ['auth-setup'] : [],
+                testMatch: screenshotSpecs,
+                use: {
+                  ...devices['Desktop Chrome'],
+                  launchOptions: {
+                    executablePath: '/usr/bin/chromium',
+                    args: ['--disable-crashpad'],
+                  },
+                  storageState: authFile,
+                },
+              },
+            ]
+          : []),
       ]
     : []
 
 export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: true,
-  forbidOnly: !!process.env.CI,
-  retries: process.env.CI ? 2 : 0,
-  // La suite E2E hace SSR contra un unico backend Convex dev local; ejecutarla en paralelo
-  // satura ese backend y produce paginas vacias intermitentes. Se serializa (1 worker) tanto
-  // en CI como en local para que `test:e2e:start` sea estable.
-  workers: 1,
+  forbidOnly: e2eEnv.isCI,
+  retries: e2eEnv.isCI ? 2 : 0,
+  workers: e2eEnv.isCI ? 1 : undefined,
   reporter: [['html'], ['list']],
   use: {
     baseURL,
@@ -87,7 +105,7 @@ export default defineConfig({
     ? {
         command: 'pnpm dev',
         url: `${baseURL}/login`,
-        reuseExistingServer: !process.env.CI,
+        reuseExistingServer: !e2eEnv.isCI,
         timeout: 120 * 1000,
       }
     : undefined,

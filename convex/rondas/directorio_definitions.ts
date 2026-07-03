@@ -2,10 +2,12 @@ import { v } from 'convex/values'
 import { defineRondaMutation, defineRondaQuery } from './definitions'
 import { getDirectorioByLookup, upsertDirectorioFromParticipant } from './directorio'
 import { mapDirectorioParticipante } from './mapping'
+import { requireAdminIdentity } from '../access'
 
 export const listDirectorioParticipantesDefinition = defineRondaQuery({
   args: {},
   handler: async (ctx) => {
+    await requireAdminIdentity(ctx)
     const rows = await ctx.db.query('directorioParticipantes').collect()
     rows.sort((a, b) => {
       const nitCmp = a.nit.localeCompare(b.nit)
@@ -31,6 +33,7 @@ export const listDirectorioParticipantesDefinition = defineRondaQuery({
 export const getDirectorioParticipanteByLookupDefinition = defineRondaQuery({
   args: { lookup: v.string() },
   handler: async (ctx, { lookup }) => {
+    await requireAdminIdentity(ctx)
     const row = await getDirectorioByLookup(ctx, lookup)
     if (!row) return null
     return mapDirectorioParticipante(row)
@@ -50,7 +53,7 @@ export const upsertDirectorioParticipanteDefinition = defineRondaMutation({
     workosUserId: v.optional(v.union(v.string(), v.null())),
   },
   handler: async (ctx, args) => {
+    await requireAdminIdentity(ctx)
     return upsertDirectorioFromParticipant(ctx, args)
   },
 })
-

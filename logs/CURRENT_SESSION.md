@@ -1,30 +1,47 @@
-# Session State: Calaire App — Drive Documental SGC
+# Session State: calaire-app2
 
-**Last Updated**: 2026-07-02 19:10
+**Last Updated**: 2026-07-01 23:24 -05
 
 ## Session Objective
 
-Rediseñar el centro documental Google Drive por-ronda (`/dashboard/rondas/[id]/sgc`) como un file manager estilo Google Drive (tarjetas grandes) y corregir el bug `?error=NEXT_REDIRECT`.
+Rediseñar el mapa de navegación del SGC (`/sgc/mapa`) para que siga el estilo
+visual de la app (fuentes, colores) y reorganizar su layout.
 
 ## Current State
 
-- [x] Rediseño file-manager: breadcrumb + tarjetas grandes de carpeta (raíz) y de documento (dentro de carpeta), panel de detalle a la derecha con formularios reusados.
-- [x] Eliminado el sidebar plano largo que "se perdía".
-- [x] Fix `?error=NEXT_REDIRECT`: añadido `unstable_rethrow(error)` como primera línea en los `catch` de 7 drive-actions.
-- [x] Eliminada función `RecursoRow` (unused, warning de lint).
-- [x] `pnpm lint` limpio, `pnpm build` OK.
-- [x] Commit `55b7053` pushado a `feat-drive-sgc` y desplegado a producción (dpl_36pT4WiWiUVZAqmUsxqgNGvBrd7V, ready).
-- [ ] Confirmación del usuario tras hard-refresh en producción.
+- [x] Reestilizado el HTML embebido del mapa (`data/sgc/mapa_navegacion_sgc_pea.html`)
+      para usar Droid Sans + tokens de marca (dorado `#FDB913`, grises de superficie)
+      igual que `src/app/globals.css`.
+- [x] Códigos y números en fuente monoespaciada con `tabular-nums`.
+- [x] Componentes alineados a la app: header con borde dorado, botones/chips con
+      gradiente, tarjetas con borde izquierdo dorado, foco dorado, scrollbar dorada.
+- [x] Recodificadas las 5 familias documentales con paleta armónica + leyenda sincronizada.
+- [x] Movidos los controles laterales (`aside`) a una **barra horizontal arriba** del mapa.
+- [x] Columnas más juntas: Procedimientos x40, Documentos/instructivos x360, Formatos x680;
+      `viewBox` 970×1400.
+- [x] Los 22 formatos ahora en **una sola columna en orden numérico** (F-PSEA-01 … 18).
+- [x] Usuario confirmó: "tuvo bien".
+- [ ] (Pendiente de sesión previa, auth) Verificar `/dashboard` y `/sgc` en producción tras deploy de Convex.
+- [ ] Commit de los cambios pendientes en la rama.
 
 ## Critical Technical Context
 
-- Feature es POR RONDA, no global. URL: `/dashboard/rondas/<id>/sgc`.
-- Navegación server-side vía searchParams: `?carpeta=<codigo>&doc=<id>`.
-- Next.js `redirect()` lanza `NEXT_REDIRECT`; SIEMPRE llamar `unstable_rethrow(error)` primero en catch para no tragarse el redirect.
-- Usuario prueba en producción `calaire-app.vercel.app` → los cambios deben desplegarse (`vercel --prod --yes`) para ser visibles.
-- Archivos clave: `DriveDocumentalSgc.tsx` (UI), `page.tsx` (props/searchParams), `actions.ts` (server actions).
-- pnpm only. Subagentes: solo gpt-5.4/medium o gpt-5.5/low.
+- Project uses `pnpm`; do not use `npm` for scripts.
+- El mapa es un HTML estático en `data/sgc/mapa_navegacion_sgc_pea.html`, servido por
+  `src/app/(protected)/dashboard/sgc/mapa/embed/route.ts` dentro de un `<iframe>` desde
+  `src/app/(protected)/dashboard/sgc/mapa/page.tsx`. `/sgc/mapa` re-exporta esa página.
+- La ruta embed aplica CSP `default-src 'self'`; las fuentes `@font-face url('/fonts/...')`
+  cargan bien porque `font-src` hereda `'self'` (mismo origen). No usar fuentes externas.
+- Solo Droid Sans existe localmente en `public/fonts/`; la stack mono cae a fuentes de sistema.
+- Los edges del SVG se recalculan desde las coordenadas de los nodos, así que reordenar
+  nodos no rompe las relaciones.
+- No se pudo renderizar en vivo: la extensión de Chrome no está conectada. Copia autónoma
+  de preview (con rutas de fuente locales) en el scratchpad de la sesión.
+- Contexto previo (auth, sin resolver del todo): producción en `https://calaire-app.vercel.app`,
+  Convex prod `https://steady-kiwi-725.convex.cloud`. Ver `logs/history` para detalle.
 
 ## Next Steps
 
-1. Esperar confirmación del usuario; ajustar tamaños/columnas de tarjetas si lo pide.
+1. Commitear el rediseño del mapa cuando el usuario lo pida.
+2. Verificar visualmente en producción tras desplegar (`/sgc/mapa`).
+3. Retomar verificación pendiente de auth en `/dashboard` y `/sgc` si aplica.

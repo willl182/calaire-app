@@ -1,6 +1,6 @@
 # CALAIRE App
 
-Portal web para la gestión de rondas de Ensayos de Aptitud (EA). Permite a coordinadores crear rondas, administrar participantes, generar enlaces individuales de acceso y recibir resultados cargados por participantes autenticados.
+Portal web para gestionar rondas de Ensayos de Aptitud (EA) con Next.js 16, Convex y WorkOS.
 
 ## Stack
 
@@ -8,11 +8,43 @@ Portal web para la gestión de rondas de Ensayos de Aptitud (EA). Permite a coor
 |---|---|
 | Frontend / rutas | Next.js 16 App Router + React 19 |
 | Lenguaje | TypeScript |
-| Autenticación | WorkOS AuthKit |
 | Backend / datos | Convex |
+| Autenticación | WorkOS AuthKit |
 | Estilos | Tailwind CSS 4 |
 | Paquetes | pnpm |
 | Deploy | Vercel + Convex Cloud |
+
+## Estructura T3
+
+```text
+src/
+  app/                  Rutas, layouts y server components de página
+  components/           UI reutilizable sin Convex/auth
+  components/ui/        Primitivos compartidos
+  server/               Lógica de dominio por módulo
+  lib/                  Helpers puros
+  env.ts                Validación centralizada de variables de entorno
+  proxy.ts              Proxy de WorkOS/AuthKit
+
+convex/
+  <dominio>/index.ts    Queries/mutations/actions públicas por dominio
+  _lib/                 Helpers compartidos de Convex
+  schema.ts             Schema global
+  auth.config.ts        Configuración auth de Convex
+
+tests/
+  e2e/                  Playwright
+```
+
+## Reglas de arquitectura
+
+- `src/app/**`: solo rutas, layouts, pages y acciones de página.
+- `src/server/<modulo>/`: lógica de negocio, tipos y acceso a datos por dominio.
+- `src/components/**`: componentes reutilizables por props; no importan Convex ni auth.
+- `src/lib/**`: utilidades puras, sin lógica de dominio.
+- `convex/<dominio>/`: API de backend por dominio. En este repo las funciones públicas quedan como `api.<dominio>.index.<funcion>` y `api.agent.auth.<funcion>`.
+- Alias único: `@/* -> ./src/*`.
+- Variables de entorno: se validan en `src/env.ts`. No se agregan nuevos `process.env.X` fuera de `src/env.ts`, `tests/e2e/env.ts` y `scripts/env.mjs`.
 
 ## Requisitos
 
@@ -31,62 +63,52 @@ pnpm install
 
 ### 2. Variables de entorno
 
-Copiar el archivo de ejemplo:
-
 ```bash
 cp .env.example .env.local
 ```
 
-Completar `.env.local`:
+Variables usadas por la app:
 
 ```bash
 WORKOS_API_KEY=
 WORKOS_CLIENT_ID=
-WORKOS_COOKIE_PASSWORD=
+WORKOS_SECRET=
 NEXT_PUBLIC_WORKOS_REDIRECT_URI=http://localhost:3000/auth/callback
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 CONVEX_DEPLOYMENT=
 NEXT_PUBLIC_CONVEX_URL=
-NEXT_PUBLIC_CONVEX_SITE_URL=
 RESEND_API_KEY=
-MAIL_FROM=wilsonsalasc@gmail.com
+MAIL_FROM=equipo@example.com
 ```
 
 Notas:
 
-- `WORKOS_COOKIE_PASSWORD` debe ser un secreto fuerte.
-- `NEXT_PUBLIC_APP_URL` se usa para construir enlaces formales de acceso por participante.
-- `RESEND_API_KEY` y `MAIL_FROM` habilitan el envio transaccional de enlaces de claim para agentes. Sin `RESEND_API_KEY`, el flujo dev devuelve el enlace en la respuesta JSON y omite el correo. Para envio normal con Resend, `MAIL_FROM` debe pertenecer a un dominio verificado.
-- No commitear `.env.local`; solo `.env.example` debe versionarse.
+- `WORKOS_SECRET` es opcional en `src/env.ts`, pero si el entorno lo requiere debe configurarse en `.env.local`.
+- `NEXT_PUBLIC_CONVEX_URL` es obligatorio para cliente y servidor.
+- `RESEND_API_KEY` y `MAIL_FROM` habilitan el envío de correos para flujos de agente.
+- `CONVEX_DEPLOYMENT` lo usan scripts operativos como `scripts/env.mjs` y `pnpm release`.
+- No se versiona `.env.local`.
 
 ### 3. Configurar WorkOS
 
-En WorkOS:
-
 1. Crear una Application.
-2. Agregar redirect local:
-   - `http://localhost:3000/auth/callback`
-3. Crear roles:
-   - `admin` para coordinadores.
-   - `member` o `participante` para participantes.
-4. Crear/asignar usuarios según corresponda.
-5. Copiar `API Key` y `Client ID` al `.env.local`.
+2. Agregar `http://localhost:3000/auth/callback` como redirect local.
+3. Crear roles `admin` y `member`/`participante`.
+4. Copiar `API Key`, `Client ID` y, si aplica, el secreto correspondiente al `.env.local`.
 
 ### 4. Configurar Convex
 
-Durante desarrollo:
+Desarrollo local:
 
 ```bash
-pnpm dlx convex dev
+pnpm exec convex dev
 ```
 
-Para desplegar funciones/schema:
+Deploy manual:
 
 ```bash
-pnpm dlx convex deploy
+pnpm exec convex deploy
 ```
-
-Luego copiar las URLs y deployment de Convex a `.env.local`.
 
 ## Desarrollo
 
@@ -94,75 +116,52 @@ Luego copiar las URLs y deployment de Convex a `.env.local`.
 pnpm dev
 ```
 
-La app queda disponible en:
+La app queda disponible en `http://localhost:3000`.
 
-```text
-http://localhost:3000
-```
-
-## Scripts útiles
+## Scripts
 
 ```bash
-pnpm lint
 pnpm build
-pnpm start
+pnpm lint
+pnpm test
+pnpm test:e2e
+pnpm test:e2e:start
+pnpm test:e2e:auth:manual
 pnpm release -- "mensaje del commit"
-pnpm test:e2e
 ```
 
-### Playwright local
+## Playwright
 
-Para correr solo el smoke público, deja activo `pnpm dev` y ejecuta:
+- `pnpm test:e2e` asume que ya existe un servidor en `http://localhost:3000`.
+- `pnpm test:e2e:start` levanta el servidor antes de ejecutar Playwright.
+- Para rutas autenticadas:
 
 ```bash
-pnpm test:e2e
+E2E_AUTH_EMAIL="usuario@example.com" E2E_AUTH_PASSWORD="..." pnpm test:e2e:start
 ```
 
-Para probar rutas autenticadas en local, usa un usuario WorkOS sin MFA/captcha:
-
-```bash
-E2E_AUTH_EMAIL="usuario@example.com" E2E_AUTH_PASSWORD="..." pnpm test:e2e
-```
-
-Si prefieres hacer login manual una sola vez:
+- Si prefieres login manual:
 
 ```bash
 pnpm test:e2e:auth:manual
 pnpm test:e2e
 ```
 
-Ambos flujos guardan la sesión local en `.auth/workos.json`, ignorado por git.
+La sesión local se guarda en `.auth/workos.json`, ignorado por git.
 
-Notas para WorkOS/AuthKit en este entorno:
+## Verificación mínima
 
-- Usa `http://localhost:3000`, no `http://127.0.0.1:3000`. El redirect URI de WorkOS está configurado con `localhost`; mezclar hosts puede terminar en `Couldn't sign in`.
-- Para renovar la sesión manual de WorkOS, usa Chromium de sistema: `/usr/bin/chromium`. El Chromium empaquetado por Playwright puede ser rechazado por Google/WorkOS.
-- Si automatizas el login manual, lanza `/usr/bin/chromium` visible con `--disable-blink-features=AutomationControlled` y guarda el estado en `.auth/workos.json`.
-- En esta máquina, los lanzamientos de Chromium/Playwright necesitan ejecutarse fuera del sandbox; dentro del sandbox falla Chromium con `sandbox_host_linux.cc`.
-
-Antes de desplegar, correr al menos:
+Antes de mergear:
 
 ```bash
 pnpm build
+pnpm lint
+pnpm test
+pnpm exec convex codegen
+pnpm test:e2e:start
 ```
 
-## Release
-
-Para publicar cambios en una sola pasada:
-
-```bash
-pnpm release -- "mensaje del commit"
-```
-
-El flujo ejecuta:
-
-1. `pnpm lint`
-2. `pnpm build`
-3. `git add -A`
-4. `git commit`
-5. `pnpm exec convex deploy`
-6. `vercel --prod`
-7. `git push origin HEAD`
+Si `pnpm exec convex dev` o Playwright fallan por red, auth o ausencia de servidor, dejarlo documentado en `logs/CURRENT_SESSION.md`.
 
 ## Rutas principales
 
@@ -171,61 +170,15 @@ El flujo ejecuta:
 | `/login` | Inicio de sesión |
 | `/dashboard` | Vista principal autenticada |
 | `/mi-dashboard` | Vista de participante |
-| `/ronda/[codigo]` | Carga/gestión de información de una ronda |
-| `/denied` | Acceso denegado por permisos |
+| `/ronda/[codigo]` | Carga y gestión de una ronda |
+| `/denied` | Acceso denegado |
 | `/auth/callback` | Callback de WorkOS |
+| `/agent/*` | Endpoints HTTP del agent router |
 
-## Flujo general
-
-1. El coordinador inicia sesión con rol `admin`.
-2. Crea una ronda de EA.
-3. Define el número de participantes esperados.
-4. La app genera enlaces individuales de invitación.
-5. Cada participante entra con su enlace, se autentica y reclama su cupo.
-6. El participante carga sus resultados.
-7. El coordinador revisa la información desde el dashboard.
-
-## Deploy en Vercel
-
-1. Importar el repositorio en Vercel.
-2. Configurar las variables de entorno del proyecto.
-3. En WorkOS, agregar el redirect de producción, por ejemplo:
-
-```text
-https://TU-DOMINIO/auth/callback
-```
-
-4. Confirmar que `NEXT_PUBLIC_CONVEX_URL` apunte al despliegue Convex productivo.
-5. Ejecutar smoke test:
-   - login,
-   - creación de ronda,
-   - generación de invitaciones,
-   - acceso de participante,
-   - carga de resultados.
-
-## Migrar a otra cuenta
-
-El acoplamiento con servicios externos vive en las variables de entorno.
-
-### WorkOS
-
-1. Crear nueva Application.
-2. Configurar redirects local/producción.
-3. Recrear roles `admin` y `member`/`participante`.
-4. Actualizar variables `WORKOS_*` y `NEXT_PUBLIC_WORKOS_REDIRECT_URI`.
-
-### Convex
-
-1. Crear o vincular un nuevo proyecto Convex.
-2. Ejecutar:
+## Release
 
 ```bash
-pnpm dlx convex deploy
+pnpm release -- "mensaje del commit"
 ```
 
-3. Actualizar:
-   - `CONVEX_DEPLOYMENT`
-   - `NEXT_PUBLIC_CONVEX_URL`
-   - `NEXT_PUBLIC_CONVEX_SITE_URL`
-
-Si hay datos productivos, planear exportación/importación antes del corte.
+El flujo ejecuta lint, build, commit, deploy de Convex, deploy de Vercel y push.

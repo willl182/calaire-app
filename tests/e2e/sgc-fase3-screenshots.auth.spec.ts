@@ -3,7 +3,7 @@ import fs from 'node:fs'
 
 const screenshotDir = 'docs/screenshots/fase-3'
 
-test('captures SGC phase 3 document matrix screenshots', async ({ page }) => {
+test('@screenshots captures SGC phase 3 document matrix screenshots', async ({ page }) => {
   fs.mkdirSync(screenshotDir, { recursive: true })
 
   await page.goto('/dashboard/sgc')

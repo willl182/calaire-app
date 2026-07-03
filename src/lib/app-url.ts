@@ -1,0 +1,27 @@
+import { env } from '@/env'
+
+function resolveOriginCandidate(value?: string) {
+  if (!value) return null
+
+  try {
+    return new URL(value).origin
+  } catch {
+    try {
+      return new URL(`https://${value}`).origin
+    } catch {
+      return null
+    }
+  }
+}
+
+export function getAppOrigin() {
+  return (
+    resolveOriginCandidate(env.NEXT_PUBLIC_APP_URL) ??
+    resolveOriginCandidate(env.NEXT_PUBLIC_WORKOS_REDIRECT_URI) ??
+    'https://calaire-app.vercel.app'
+  )
+}
+
+export function buildAbsoluteAppUrl(pathname: string) {
+  return new URL(pathname, getAppOrigin()).toString()
+}

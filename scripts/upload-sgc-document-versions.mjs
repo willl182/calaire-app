@@ -56,7 +56,7 @@ function contentTypeFor(path) {
 }
 
 async function uploadToStorage(filePath, contentType) {
-  const uploadUrl = runConvex('sgc:generateUploadUrl', {})
+  const uploadUrl = runConvex('sgc/index:generateUploadUrl', {})
   const bytes = await readFile(filePath)
   const response = await fetch(uploadUrl, {
     method: 'POST',
@@ -69,7 +69,7 @@ async function uploadToStorage(filePath, contentType) {
 
 async function main() {
   const seed = JSON.parse(await readFile(join(root, 'dev/import/documentos_sgc.seed.json'), 'utf8'))
-  const maestro = runConvex('sgc:listSgcMaestro', {
+  const maestro = runConvex('sgc/index:listSgcMaestro', {
     ambito: null,
     familia: null,
     estado: null,
@@ -104,7 +104,7 @@ async function main() {
     }
     const { uploaded, bytes } = await uploadToStorage(filePath, contentType)
     const hash = createHash('sha256').update(bytes).digest('hex')
-    runConvex('sgc:registrarVersionOficial', {
+    runConvex('sgc/index:registrarVersionOficial', {
       documentoId: doc._id,
       version: nextVersionByDoc.get(doc._id) ?? 1,
       estado: 'vigente',

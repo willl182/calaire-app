@@ -25,7 +25,7 @@ const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.metadata.readonly'
 const FOLDER_MIME = 'application/vnd.google-apps.folder'
 const SHORTCUT_MIME = 'application/vnd.google-apps.shortcut'
 
-const { SGC_RONDA_ETAPAS } = await import('../lib/sgc/catalog.ts')
+const { SGC_RONDA_ETAPAS } = await import('../src/server/sgc/catalog.ts')
 const STAGE_FOLDER_NAMES = new Set(SGC_RONDA_ETAPAS.map((etapa) => etapa.carpeta))
 
 let cachedToken = null

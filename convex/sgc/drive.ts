@@ -1,10 +1,10 @@
 import { v, type GenericValidator, type ObjectType, type PropertyValidators } from 'convex/values'
 
-import { SGC_FORMATOS_FASE_1, SGC_RONDA_ETAPAS } from '../../lib/sgc/catalog'
+import { SGC_FORMATOS_FASE_1, SGC_RONDA_ETAPAS } from '../_lib/sgc/catalog'
 import type { Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { normalizeCodigoDocumento, requireParticipanteOAdmin, requireSgcAdmin, requireSgcViewer, writeAudit } from './shared'
-import { esRecursoVisibleParaParticipante } from '../../lib/sgc/drive-visibility'
+import { esRecursoVisibleParaParticipante } from '../../src/server/sgc/drive-visibility'
 
 const DRIVE_ROOT_CODIGO = 'DRIVE_ROOT'
 

@@ -11,7 +11,7 @@
 
 | # | Punto | Decisión |
 |---|------|----------|
-| 1 | `proxy.ts` (middleware WorkOS) | Renombrar a `src/middleware.ts`. No entra en `src/server/`. |
+| 1 | `proxy.ts` (WorkOS AuthKit Proxy) | Mover a `src/proxy.ts`. Next 16.2.4 depreca la convención `middleware` y documenta `proxy.ts` dentro de `src` al nivel de `app`. No entra en `src/server/`. |
 | 2 | `lib/agent-router.ts` + `convex/agent*.ts` | Mudar a `src/server/agent-router/` sin refactor. Gateway HTTP legítimo hacia Convex. No meter en tRPC. |
 | 3 | `app/providers.tsx` | Mudar a `src/app/providers.tsx`. Sin tocar lógica `mounted`/`ConvexClient`. Sin tRPC QueryClient. |
 | 4 | Server Actions vs tRPC | **NO tRPC.** Server actions en `src/app/<modulo>/actions.ts` para mutaciones; hooks Convex (`useQuery(api.X)`) para lecturas reactivas. Validación con `convex/values`. |
@@ -104,7 +104,7 @@ calaire-app/
 │   │
 │   ├── env.js                               # Zod - nuevo
 │   ├── env.d.ts                             # tipos de env
-│   └── middleware.ts                        # antes proxy.ts
+│   └── proxy.ts                             # antes proxy.ts raíz
 │
 ├── convex/                                  # NO se mueve a src/
 │   ├── _generated/
@@ -152,6 +152,19 @@ Para reducir el riesgo de las fases 2 y 5 se aplican dos principios:
 2. **Puentes de compatibilidad**: archivos temporales que re-exportan el contenido nuevo, para no romper imports a mitad de camino.
 3. **Inventario mecánico antes del cambio**: listar todos los `@/...` y todos los `api.X.Y` usados, para comparar antes y después.
 
+### Regla operativa para Playwright
+
+- En este repo `pnpm test:e2e` no levanta `next dev` automáticamente.
+- La verificación local con Playwright debe usar `pnpm test:e2e:start` para que `config.webServer` arranque el server.
+- `pnpm test:e2e` solo aplica si ya hay un server corriendo en `http://localhost:3000` o si el entorno es CI.
+- La suite autenticada (`*.auth.spec.ts`) requiere uno de estos prerrequisitos:
+  - `.auth/workos.json` ya generado
+  - `E2E_AUTH_EMAIL` y `E2E_AUTH_PASSWORD`
+  - `pnpm test:e2e:auth:manual` para regenerar storage state de forma interactiva
+- Separar siempre:
+  - **smoke público**: `tests/e2e/app.spec.ts`
+  - **smoke autenticado**: `tests/e2e/dashboard.auth.spec.ts` y luego SGC
+
 ## Fases (cada fase = PR aislado, build verde)
 
 ### Fase 0: Preparación
@@ -164,7 +177,7 @@ Para reducir el riesgo de las fases 2 y 5 se aplican dos principios:
    ```bash
    rg "(from|import)\s+['\"]@/[^'\"]+['\"]" --type ts --type tsx -o > logs/plans/imports-antes.txt
    rg "(from|import)\s+['\"]\.?\.?/[^'\"]+['\"]" --type ts --type tsx -o > logs/plans/imports-relativos.txt
-   rg "api\.[a-zA-Z_]+\.[a-zA-Z_]+" src/ lib/ app/ --type ts --type tsx -o | sort | uniq > logs/plans/convex-api-uso.txt
+   rg "api\.[a-zA-Z_]+\.[a-zA-Z_]+" src/ lib/ app/ --type ts --type tsx -o | sort | uniq > logs/plans/convex-api-uso-antes.txt
    ```
 0.5. `pnpm add` scripts de utilidad en `package.json` (opcional):
    ```json
@@ -172,6 +185,8 @@ Para reducir el riesgo de las fases 2 y 5 se aplican dos principios:
    "test:watch": "vitest"
    ```
 0.6. **Verificación**: `pnpm build` debe seguir verde (no cambiamos nada aún).
+
+**Auditoría 2026-06-29**: el commit `33fc424` cumple rama, deps, scripts e inventarios. Las carpetas vacías de 0.3 quedaron persistidas posteriormente con `.gitkeep` porque git no trackea directorios vacíos. También se corrigió el nombre del inventario Convex en este plan: debe ser `convex-api-uso-antes.txt`, igual que el archivo commiteado y los targets.
 
 ---
 
@@ -264,7 +279,7 @@ Next.js detecta `src/app/` automáticamente; no tocar `next.config.ts`.
 
 **Verificación inmediata**:
 ```bash
-pnpm build && pnpm lint && pnpm test:e2e
+pnpm build && pnpm lint && pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
 ```
 
 #### Paso 2.6: Limpieza de puentes
@@ -316,39 +331,48 @@ Una vez que Fase 3 mueva `lib/` a `src/server/`, eliminar los `src/lib/*.ts` pue
    - `@/app/components/LogoUnal` → `@/components/LogoUnal`
    - `@/app/components/Footer` → `@/components/Footer`
 3.21. **Verificación**: `pnpm build && pnpm lint && pnpm test && pnpm test:e2e` verde.
+   - Smoke público obligatorio: `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium`
+   - Smoke autenticado opcional de fase: `pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium`
+   - El smoke autenticado solo cuenta si ya existe `.auth/workos.json` o si hay credenciales `E2E_AUTH_EMAIL` / `E2E_AUTH_PASSWORD`.
 
 ---
 
-### Fase 4: Renombrar `proxy.ts` → `src/middleware.ts`
-**Objetivo**: middleware en ubicación estándar T3.
+### Fase 4: Mover `proxy.ts` → `src/proxy.ts`
+**Objetivo**: proxy de WorkOS AuthKit en ubicación estándar de Next.js dentro de `src`.
 
-4.1. `git mv proxy.ts src/middleware.ts`.
-4.2. Next.js detecta `src/middleware.ts` automáticamente. **No tocar `next.config.ts`**.
-4.3. Ajustar imports dentro del middleware si los hay.
+4.1. `git mv proxy.ts src/proxy.ts`.
+4.2. Next.js detecta `src/proxy.ts` automáticamente cuando está al nivel de `src/app`. **No tocar `next.config.ts`**.
+4.3. Ajustar imports dentro del proxy si los hay.
 4.4. **Verificación**: dev server + ruta `/login` y `/dashboard` comportándose igual.
 
 ---
 
-### Fase 5 (segura): Reorganizar `convex/` por dominios
-**Objetivo**: carpeta por dominio; helpers en `_lib/`; **sin renombrar módulos** para no romper `api.X.Y`.
+### Fase 5 (breaking aceptado): Reorganizar `convex/` por dominios
+**Objetivo**: carpeta por dominio; helpers en `_lib/`; aceptar el cambio de paths públicos Convex que produce mover funciones a `index.ts`.
 
-**Regla de oro**: no renombrar módulos. Solo fusionar archivos sueltos con carpetas existentes del mismo nombre, o mover archivos sueltos a carpetas nuevas con `index.ts`.
+**Decisión 2026-06-30**: se acepta la Ruta B. En esta versión de Convex, `convex/<dominio>/index.ts` no se expone como `api.<dominio>.*`; se expone como `api.<dominio>.index.*`. Por tanto esta fase **sí cambia** los paths públicos y todos los consumidores internos deben migrar.
 
-- `agent.ts` → `agent/index.ts` (mismo módulo `api.agent.*`)
-- `agentAuth.ts` → `agent/auth.ts` (cambia de `api.agentAuth.*` a `api.agent.auth.*`)
-- `rondas.ts` → `rondas/index.ts` (mismo módulo `api.rondas.*`)
-- `sgc.ts` → `sgc/index.ts` (mismo módulo `api.sgc.*`)
-- `fichas.ts` → `fichas/index.ts` (mismo módulo `api.fichas.*`)
-- `pt.ts` → `pt/index.ts` (mismo módulo `api.pt.*`)
+- `agent.ts` → `agent/index.ts` (`api.agent.*` pasa a `api.agent.index.*`)
+- `agentAuth.ts` → `agent/auth.ts` (`api.agentAuth.*` pasa a `api.agent.auth.*`)
+- `rondas.ts` → `rondas/index.ts` (`api.rondas.*` pasa a `api.rondas.index.*`)
+- `sgc.ts` → `sgc/index.ts` (`api.sgc.*` pasa a `api.sgc.index.*`)
+- `fichas.ts` → `fichas/index.ts` (`api.fichas.*` pasa a `api.fichas.index.*`)
+- `pt.ts` → `pt/index.ts` (`api.pt.*` pasa a `api.pt.index.*`)
 
 #### Paso 5.1: Inventario de referencias `api.*`
 Antes de mover nada, capturar el set exacto de funciones Convex usadas:
 
 ```bash
-rg "api\.[a-zA-Z_]+\.[a-zA-Z_]+" src/ lib/ app/ --type ts --type tsx -o | sort | uniq > logs/plans/convex-api-uso-antes.txt
+rg "api\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+" src/ lib/ app/ scripts/ tests/ -g "*.ts" -g "*.tsx" --no-filename -o | sort | uniq > logs/plans/convex-api-uso-antes.txt
 ```
 
-Al final de la fase, comparar con el mismo comando para confirmar que ningún `api.X.Y` cambió.
+Al final de la fase, comparar con el mismo comando para confirmar que solo cambiaron los paths esperados:
+- `api.rondas.<fn>` → `api.rondas.index.<fn>`
+- `api.sgc.<fn>` → `api.sgc.index.<fn>`
+- `api.fichas.<fn>` → `api.fichas.index.<fn>`
+- `api.pt.<fn>` → `api.pt.index.<fn>`
+- `api.agentAuth.<fn>` → `api.agent.auth.<fn>`
+- `api.agent.<fn>` → `api.agent.index.<fn>` si hay consumidores.
 
 #### Paso 5.2: Fusionar `rondas.ts` con `convex/rondas/`
 `convex/rondas.ts` solo re-exporta funciones desde `convex/rondas/*.ts`.
@@ -393,21 +417,16 @@ sed -i "s|from './agent/|from './|g" convex/agent/index.ts
 git mv convex/agentAuth.ts convex/agent/auth.ts
 ```
 
-Este cambio sí modifica el path público: `api.agentAuth.*` pasa a `api.agent.auth.*`.
+Este cambio modifica el path público: `api.agentAuth.*` pasa a `api.agent.auth.*`.
 
 Actualizar todos los usos:
 
 ```bash
-rg "api\.agentAuth\." src/ app/ lib/ --type ts --type tsx -l
+rg "api\.agentAuth\." src/ app/ lib/ -g "*.ts" -g "*.tsx" -l
 find src app lib -type f \( -name '*.ts' -o -name '*.tsx' \) -exec sed -i 's|api\.agentAuth\.|api.agent.auth.|g' {} +
 ```
 
-**Opción de puente temporal** (si hay demasiados usos para arreglar de golpe):
-```ts
-// convex/agentAuth.ts
-export * from './agent/auth'
-```
-Borrar el puente una vez actualizados todos los consumidores.
+No dejar puente temporal en `convex/agentAuth.ts`: esta fase acepta el cambio breaking y debe actualizar todos los consumidores internos.
 
 #### Paso 5.6: Mover `fichas.ts` y `pt.ts` a carpetas
 
@@ -417,7 +436,7 @@ git mv convex/fichas.ts convex/fichas/index.ts
 git mv convex/pt.ts convex/pt/index.ts
 ```
 
-Como antes no existían carpetas `fichas/` ni `pt/`, los paths `api.fichas.*` y `api.pt.*` se mantienen.
+Como Convex expone `index.ts` como segmento explícito, los paths pasan a `api.fichas.index.*` y `api.pt.index.*`.
 
 #### Paso 5.7: Helpers comunes a `convex/_lib/`
 Si hay helpers compartidos (auth.config, validación de usuario, etc.), moverlos a `convex/_lib/` y actualizar sus imports dentro de `convex/`. No mover `convex/schema.ts`, `convex/auth.config.ts` ni `convex/migrations.ts` salvo que sea estrictamente necesario.
@@ -433,9 +452,12 @@ Esto actualiza `convex/_generated/api.d.ts`. Si falla, se corrige antes de segui
 #### Paso 5.9: Verificación mecánica
 
 ```bash
-# El set de api.X.Y debe ser idéntico al del inventario
-rg "api\.[a-zA-Z_]+\.[a-zA-Z_]+" src/ lib/ app/ --type ts --type tsx -o | sort | uniq > logs/plans/convex-api-uso-despues.txt
-diff logs/plans/convex-api-uso-antes.txt logs/plans/convex-api-uso-despues.txt
+# El set debe reflejar solo los cambios breaking aceptados a .index / agent.auth.
+rg "api\.[A-Za-z0-9_]+(?:\.[A-Za-z0-9_]+)+" src/ scripts/ tests/ -g "*.ts" -g "*.tsx" --no-filename -o | sort | uniq > logs/plans/convex-api-uso-despues.txt
+diff logs/plans/convex-api-uso-antes.txt logs/plans/convex-api-uso-despues.txt || true
+
+# No deben quedar consumidores internos con paths antiguos.
+rg -P "api\.(rondas|sgc|fichas|pt)\.(?!index\b)[A-Za-z0-9_]+\b|api\.agentAuth\." src/ scripts/ tests/ -g "*.ts" -g "*.tsx"
 
 # No deben quedar imports a archivos borrados
 rg "from ['\"]@/lib/" src/ || true
@@ -446,16 +468,19 @@ rg "from ['\"]\.\./\.\./convex/(rondas|sgc|agent)['\"]" src/ || true
 ```bash
 pnpm exec convex codegen
 pnpm build
-pnpm test:e2e
+pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium
 ```
 
 #### Checklist Fase 5
-- [ ] `convex/rondas.ts`, `convex/sgc.ts` y `convex/agent.ts` sueltos ya no existen.
-- [ ] `convex/rondas/index.ts`, `convex/sgc/index.ts`, `convex/agent/index.ts` importan con `./reads`, `./mutations`, etc., no con `./rondas/reads`.
-- [ ] `convex-api-uso-antes.txt` y `convex-api-uso-despues.txt` son idénticos.
-- [ ] `pnpm exec convex codegen` sin errores.
-- [ ] `pnpm build` verde.
-- [ ] `pnpm test:e2e` pasa login + dashboard + una ronda.
+- [x] `convex/rondas.ts`, `convex/sgc.ts` y `convex/agent.ts` sueltos ya no existen.
+- [x] `convex/rondas/index.ts`, `convex/sgc/index.ts`, `convex/agent/index.ts` importan con `./reads`, `./mutations`, etc., no con `./rondas/reads`.
+- [x] `convex-api-uso-despues.txt` usa regex profundo y muestra los paths breaking esperados (`.index` / `agent.auth`).
+- [x] No quedan consumidores internos con `api.rondas.<fn>`, `api.sgc.<fn>`, `api.fichas.<fn>`, `api.pt.<fn>` ni `api.agentAuth.<fn>` fuera de los nuevos segmentos `.index`.
+- [x] `pnpm exec convex codegen` sin errores.
+- [x] `pnpm build` verde.
+- [ ] `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` pasa.
+- [ ] `pnpm test:e2e:start tests/e2e/dashboard.auth.spec.ts --project=authenticated-chromium` pasa si hay auth lista.
+- [ ] Estado actual 2026-06-30: el repro correcto del bloqueo usa `test:e2e:start`; `config.webServer` intenta levantar `pnpm dev`, falla con `Can't resolve 'tailwindcss' in '/home/w182/w421'` y luego vence el timeout.
 
 ---
 
@@ -495,7 +520,7 @@ pnpm test:e2e
    - `pnpm lint`
    - `pnpm test`
    - `pnpm exec convex dev` (CI Convex)
-   - `pnpm test:e2e` (subir servers, login flow, dashboard, sgc)
+   - `pnpm test:e2e:start` (subir server, smoke público y luego dashboard/sgc si hay auth lista)
 8.7. Merge a `main` (squash o por fases, según política del repo).
 
 ---
@@ -523,24 +548,34 @@ pnpm test:e2e
 | `convex/rondas.ts` + `convex/rondas/` colisionan al mover | Fusionar `rondas.ts` en `rondas/index.ts` y corregir imports relativos (`./rondas/reads` → `./reads`). Mismo para `sgc` y `agent`. No renombrar módulos. |
 | Cambio de path de función Convex rompe `api.rondas.list` | Inventario mecánico de `api.X.Y` antes y después. No renombrar módulos (`agent` se mantiene `agent`, no `agente`). Verificar con `pnpm exec convex codegen` y `diff` del inventario. |
 | Mover `app/` de golpe rompe imports y deja build rojo largo | Copiar `app/` a `src/app/`, corregir imports, activar con el cambio de alias y recién entonces borrar `app/`. Usar puentes `src/lib/*.ts` si `lib/` aún no se movió. |
-| WorkOS AuthKit no reacciona a `src/middleware.ts` | Next.js 16 detecta `src/middleware.ts` automáticamente; copiar el matcher exacto de `proxy.ts` y verificar `/login`, `/dashboard`, `/denied`. |
+| WorkOS AuthKit no reacciona a `src/proxy.ts` | Next.js 16 detecta `src/proxy.ts` automáticamente al nivel de `src/app`; copiar el matcher exacto de `proxy.ts` y verificar `/login`, `/dashboard`, `/denied`. |
 | `env.js` cambia firma de vars (server vs client) | Validar con `NEXT_PUBLIC_*` solo las que el cliente usa (Convex URL). Server vars nunca en cliente. |
 | Antiguos `process.env.X!` dispersos se caen en runtime | Fase 6 reemplaza todos de un solo sweep; correr e2e que toca Resend + WorkOS. |
-| Tests e2e que dependen de rutas estáticas (`/docs/screenshots`) | `proxy.ts` matcher se mantiene idéntico en `src/middleware.ts`. |
+| Tests e2e que dependen de rutas estáticas (`/docs/screenshots`) | `proxy.ts` matcher se mantiene idéntico en `src/proxy.ts`. |
+| La verificación e2e local se ejecuta con el comando equivocado | Usar `pnpm test:e2e:start` para local. `pnpm test:e2e` solo si ya existe server o en CI. |
+| La suite autenticada no corre en clones limpios | Documentar y preparar `.auth/workos.json`, credenciales `E2E_AUTH_*`, o el flujo `pnpm test:e2e:auth:manual`. |
 
 ---
 
 ## Estado de cargo (checklist)
 
-- [ ] Fase 0: ramificación + deps + inventarios mecánicos (`@/...`, `api.X.Y`, imports relativos).
-- [ ] Fase 1: `src/env.js`, `src/lib/utils.ts`.
-- [ ] Fase 2: `app/components/` → `src/components/`; copiar `app/` → `src/app/`; corregir imports; activar alias `@/* → ./src/*`; borrar `app/`; puentes `src/lib/*` temporales.
-- [ ] Fase 3: `lib/` → `src/server/{auth,rondas,sgc,mailer,agent-router}` + `src/lib/`; eliminar puentes de Fase 2.
-- [ ] Fase 4: `proxy.ts` → `src/middleware.ts`.
-- [ ] Fase 5: `convex/` por dominios sin renombrar módulos; inventario `api.X.Y` antes/después idéntico.
-- [ ] Fase 6: `process.env.X!` → `env.X`.
+- [x] Fase 0: ramificación + deps + inventarios mecánicos (`@/...`, `api.X.Y`, imports relativos). Commit `33fc424`. Carpetas vacías de 0.3 persistidas con `.gitkeep`; `src/convex/` untracked sospechoso (debe quedar en raíz); nombre de inventario Convex corregido a `convex-api-uso-antes.txt`.
+- [x] Fase 1: `src/env.js`, `src/lib/utils.ts`. Commit `996fc97`. Luego se consolidó en `src/env.ts` durante Fase 6 para corregir conflictos de tipos con `convex/auth.config.ts`.
+- [x] Fase 2: `app/components/` → `src/components/`; `app/` → `src/app/`; alias `@/* → ./src/*`; `app/` raíz eliminado; cleanup estricto de `@/app/...` cerrado con `rg "@/app/" src/app` en cero y `pnpm build` + `pnpm lint` verdes. `pnpm test:e2e` sigue bloqueado por el problema previo de `config.webServer`.
+- [x] Fase 3: `lib/` → `src/server/{auth,rondas,sgc,mailer,agent-router}` + `src/lib/`; `lib/` raíz eliminado.
+- [x] Fase 4: `proxy.ts` → `src/proxy.ts`.
+- [x] Fase 5: `convex/` por dominios con breaking change aceptado a `api.<dominio>.index.*`; inventario API-only antes/después explicado.
+- [x] Fase 6: `process.env.X!` → `env.X`. Incluye saneamiento de Playwright y scripts en `tests/e2e/env.ts` y `scripts/env.mjs`.
 - [ ] Fase 7: `src/components/ui/` con primitivos compartidos.
 - [ ] Fase 8: limpieza + docs + AGENTS.md actualizado.
+
+### Estado Playwright al 2026-06-30
+
+- `pnpm test:e2e:start tests/e2e/app.spec.ts --project=chromium` reproduce el bloqueo actual.
+- El fallo observado hoy es de arranque de `config.webServer`, no de descubrimiento de tests:
+  - Next intenta resolver `tailwindcss` desde `/home/w182/w421`
+  - luego Playwright vence esperando `${baseURL}/login`
+- `pnpm test:e2e` a secas no sirve como repro local canónico de este bug porque no fuerza el arranque del server.
 
 ---
 

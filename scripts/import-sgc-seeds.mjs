@@ -45,13 +45,13 @@ async function main() {
   const mapa = await readJson('dev/import/relaciones_mapa_sgc.seed.json')
 
   const documentChunks = chunks(documentos, 50)
-  documentChunks.forEach((chunk, index) => runConvex('sgc:importarDocumentosSeedSgc', { documentos: chunk }, index === 0))
+  documentChunks.forEach((chunk, index) => runConvex('sgc/index:importarDocumentosSeedSgc', { documentos: chunk }, index === 0))
 
   for (const chunk of chunks(requisitos, 75)) {
-    runConvex('sgc:importarRequisitosSeedSgc', { requisitos: chunk })
+    runConvex('sgc/index:importarRequisitosSeedSgc', { requisitos: chunk })
   }
 
-  chunks(mapa, 75).forEach((chunk, index) => runConvex('sgc:importarMapaSeedSgc', { mapa: chunk, reemplazar: index === 0 }))
+  chunks(mapa, 75).forEach((chunk, index) => runConvex('sgc/index:importarMapaSeedSgc', { mapa: chunk, reemplazar: index === 0 }))
 }
 
 main().catch((error) => {

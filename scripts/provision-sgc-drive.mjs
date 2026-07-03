@@ -27,7 +27,7 @@ const PREFERRED_TEMPLATE_EXTENSIONS = new Map([
 ])
 const DEFAULT_TEMPLATE_EXTENSIONS = ['.docx', '.doc', '.xlsx', '.xls', '.ods', '.csv', '.md', '.pdf']
 
-const { SGC_RONDA_ETAPAS } = await import('../lib/sgc/catalog.ts')
+const { SGC_RONDA_ETAPAS } = await import('../src/server/sgc/catalog.ts')
 
 let cachedToken = null
 
