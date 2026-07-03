@@ -22,6 +22,13 @@ function estadoTone(estado: string) {
   return 'bg-rose-100 text-rose-800'
 }
 
+function estadoSemaforoTone(estado: string) {
+  if (estado === 'vigente') return 'bg-emerald-500 ring-emerald-100'
+  if (estado === 'en_revision') return 'bg-amber-400 ring-amber-100'
+  if (estado === 'obsoleto') return 'bg-slate-400 ring-slate-100'
+  return 'bg-rose-500 ring-rose-100'
+}
+
 function tipoTone(tipo: DocumentoSgc['tipo']) {
   if (tipo === 'procedimiento') return 'text-sky-500'
   if (tipo === 'instructivo') return 'text-violet-500'
@@ -225,8 +232,8 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         )}
 
         {activeFolder && (
-          <div className={`grid gap-0 ${selectedDoc ? 'lg:grid-cols-[minmax(0,1fr)_minmax(360px,520px)]' : ''}`}>
-            <div className="p-6">
+          <div className={`grid gap-0 ${selectedDoc ? 'lg:grid-cols-[minmax(280px,35%)_minmax(0,65%)]' : ''}`}>
+            <div className={`p-6 ${selectedDoc ? 'lg:border-r lg:border-[var(--border)]' : ''}`}>
               <Link
                 href={buildDocumentosHref(params, { carpeta: null, doc: null })}
                 className="mb-4 inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-sky-300 hover:bg-slate-50"
@@ -240,7 +247,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                 <h3 className="text-lg font-semibold text-[var(--foreground)]">{familiaLabel(activeFolder.familia)}</h3>
                 <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.familia} · {folderDocs.length} documento{folderDocs.length === 1 ? '' : 's'} filtrado{folderDocs.length === 1 ? '' : 's'}</p>
               </div>
-              <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              <div className="grid gap-2">
                 {folderDocs.map((doc) => {
                   const active = doc._id === selectedDocId
                   const version = versionFor(doc, data.versiones)
@@ -250,22 +257,29 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                       key={doc._id}
                       href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: doc._id })}
                       aria-current={active ? 'true' : undefined}
-                      className={`group overflow-hidden rounded-xl border bg-white transition hover:shadow-md ${active ? 'border-sky-400 ring-2 ring-sky-200' : 'border-[var(--border)] hover:border-sky-300'}`}
+                      className={`group grid min-h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border bg-white px-3 py-2 transition hover:shadow-sm ${active ? 'border-sky-400 bg-sky-50/50 ring-2 ring-sky-100' : 'border-[var(--border)] hover:border-sky-300'}`}
                     >
-                      <div className="relative flex h-32 items-center justify-center bg-slate-50">
-                        <FileIcon tipo={doc.tipo} className="h-14 w-14 transition group-hover:scale-105" />
-                        <span className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[11px] font-semibold shadow-sm ${estadoTone(doc.estado)}`}>{doc.estado}</span>
+                      <div className="relative flex h-10 w-10 items-center justify-center rounded-md bg-slate-50">
+                        <FileIcon tipo={doc.tipo} className="h-6 w-6 transition group-hover:scale-105" />
+                        <span
+                          aria-label={`Estado: ${doc.estado}`}
+                          title={doc.estado}
+                          className={`absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full ring-4 ${estadoSemaforoTone(doc.estado)}`}
+                        />
                       </div>
-                      <div className="border-t border-[var(--border)] px-4 py-3">
-                        <div className="truncate text-sm font-semibold text-[var(--foreground)]">{doc.codigo}</div>
-                        <div className="line-clamp-1 text-xs text-[var(--foreground-muted)]">{doc.nombre}</div>
-                        <div className="mt-2 flex flex-wrap gap-1">
-                          {fuenteEditableUrl && <span className="rounded bg-sky-50 px-1.5 py-0.5 text-[10px] font-semibold text-sky-700">Editable</span>}
-                          {version?.vigente && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-700">v{version.vigente.version}</span>}
-                          {doc.visibilidad === 'participantes' && <span className="rounded bg-violet-50 px-1.5 py-0.5 text-[10px] font-semibold text-violet-700">Participantes</span>}
-                          {doc.criticidad === 'alta' && <span className="rounded bg-rose-50 px-1.5 py-0.5 text-[10px] font-semibold text-rose-700">Critico</span>}
+                      <div className="min-w-0">
+                        <div className="flex min-w-0 items-baseline gap-2">
+                          <span className="shrink-0 text-sm font-semibold text-[var(--foreground)]">{doc.codigo}</span>
+                          <span className="truncate text-sm text-[var(--foreground-muted)]">{doc.nombre}</span>
+                        </div>
+                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-[var(--foreground-muted)]">
+                          <span>{doc.tipo}</span>
+                          {doc.visibilidad === 'participantes' && <span aria-label="Visible para participantes" title="Visible para participantes" className="h-1.5 w-1.5 rounded-full bg-violet-500" />}
+                          {doc.criticidad === 'alta' && <span aria-label="Criticidad alta" title="Criticidad alta" className="h-1.5 w-1.5 rounded-full bg-rose-500" />}
+                          {fuenteEditableUrl && <span aria-label="Editable disponible" title="Editable disponible" className="h-1.5 w-1.5 rounded-full bg-sky-500" />}
                         </div>
                       </div>
+                      {version?.vigente && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">v{version.vigente.version}</span>}
                     </Link>
                   )
                 })}
@@ -273,21 +287,21 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             </div>
 
             {selectedDoc && (
-              <aside className="border-t border-[var(--border)] bg-slate-50 p-5 lg:border-l lg:border-t-0">
-                <div className="sticky top-24">
+              <aside className="border-t border-[var(--border)] bg-slate-50 p-5 lg:border-t-0">
+                <div className="sticky top-24 max-w-4xl">
                   {(() => {
                     const version = versionFor(selectedDoc, data.versiones)
                     const fuenteEditableUrl = normalizeHttpUrl(selectedDoc.fuenteEditableUrl)
                     return (
                       <>
-                        <div className="mb-3 flex items-start justify-between gap-3">
+                        <div className="mb-4 flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
                               <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{selectedDoc.tipo}</span>
                               <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoTone(selectedDoc.estado)}`}>{selectedDoc.estado}</span>
                               <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.modoDiligenciamiento ?? 'no_diligenciable'}</span>
                             </div>
-                            <h4 className="mt-2 font-semibold text-[var(--foreground)]">{selectedDoc.codigo}</h4>
+                            <h4 className="mt-3 text-xl font-semibold text-[var(--foreground)]">{selectedDoc.codigo}</h4>
                             <p className="mt-1 text-sm text-[var(--foreground)]">{selectedDoc.nombre}</p>
                             <p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.ambito ?? 'Sin ambito'} · {selectedDoc.proceso}</p>
                           </div>
@@ -296,17 +310,24 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                           </Link>
                         </div>
 
+                        <div className="tab-nav mb-4 overflow-x-auto">
+                          <Link className="tab-active" href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: selectedDoc._id })}>Ficha</Link>
+                          <span className="inline-flex items-center px-5 py-2 text-sm font-medium text-[var(--foreground-muted)]">Diligenciamiento</span>
+                          <span className="inline-flex items-center px-5 py-2 text-sm font-medium text-[var(--foreground-muted)]">Archivos</span>
+                          <span className="inline-flex items-center px-5 py-2 text-sm font-medium text-[var(--foreground-muted)]">Historial</span>
+                        </div>
+
                         <div className="mb-4 flex flex-wrap gap-2">
-                          <Link className="btn-primary px-3 py-1 text-xs" href={`/dashboard/sgc/documentos/${selectedDoc._id}`}>Ver ficha</Link>
-                          {fuenteEditableUrl && <a className="btn-outline px-3 py-1 text-xs" href={fuenteEditableUrl} target="_blank" rel="noreferrer">Abrir editable</a>}
+                          <Link className="btn-primary px-4 py-2 text-sm" href={`/dashboard/sgc/documentos/${selectedDoc._id}`}>Ver ficha</Link>
+                          {fuenteEditableUrl && <a className="btn-outline px-4 py-2 text-sm" href={fuenteEditableUrl} target="_blank" rel="noreferrer">Abrir editable</a>}
                           {version?.vigente && (
-                            <Link className="btn-outline px-3 py-1 text-xs" href={`/dashboard/sgc/documentos/${selectedDoc._id}/versiones/${version.vigente._id}/download`}>
+                            <Link className="btn-outline px-4 py-2 text-sm" href={`/dashboard/sgc/documentos/${selectedDoc._id}/versiones/${version.vigente._id}/download`}>
                               Descargar oficial
                             </Link>
                           )}
                         </div>
 
-                        <dl className="grid gap-3 text-sm">
+                        <dl className="grid gap-4 text-sm">
                           <div className="rounded-lg border border-[var(--border)] bg-white p-3">
                             <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Version oficial</dt>
                             <dd className="mt-1 text-[var(--foreground)]">
