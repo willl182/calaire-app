@@ -5,6 +5,7 @@ import {
   copyGoogleDriveFile,
   createGoogleDriveFolder,
   extractGoogleDriveIdFromRef,
+  findGoogleDriveFolder,
   getGoogleDriveConfigStatus,
   googleDriveRootFolderId,
   parseGoogleDriveTemplateMap,
@@ -222,18 +223,24 @@ export async function automatizarDriveRondaSgc(
         result.carpetasReutilizadas += 1
         continue
       }
-      const created = await createGoogleDriveFolder({
-        name: buildFolderName(folder),
+      const folderName = buildFolderName(folder)
+      const existingFolder = await findGoogleDriveFolder({
+        name: folderName,
+        parentId: rootFolderId,
+      })
+      const created = existingFolder ?? await createGoogleDriveFolder({
+        name: folderName,
         parentId: rootFolderId,
       })
       folderIds.set(folder._id, created.id)
       await saveRecursoLink({
         recurso: folder,
         webUrl: created.webUrl,
-        estado: 'Subcarpeta creada automaticamente.',
+        estado: existingFolder ? 'Subcarpeta reutilizada desde carpeta existente.' : 'Subcarpeta creada automaticamente.',
         tipo: 'carpeta',
       })
-      result.carpetasCreadas += 1
+      if (existingFolder) result.carpetasReutilizadas += 1
+      else result.carpetasCreadas += 1
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Error desconocido creando carpeta.'
       result.fallidos.push({ codigo: folder.codigo, error: message })

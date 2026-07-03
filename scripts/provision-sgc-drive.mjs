@@ -143,11 +143,26 @@ async function getServiceAccount(args) {
 }
 
 async function getConfig(args) {
+  const authMode = process.env.GOOGLE_DRIVE_AUTH_MODE?.trim() === 'oauth' ? 'oauth' : 'service_account'
+  const rootFolderId = args.rootFolderId ?? process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID?.trim() ?? null
+  const sharedDriveId = process.env.GOOGLE_DRIVE_SHARED_DRIVE_ID?.trim() || null
+  if (authMode === 'oauth') {
+    return {
+      authMode,
+      oauthClientId: getEnv('GOOGLE_DRIVE_OAUTH_CLIENT_ID'),
+      oauthClientSecret: getEnv('GOOGLE_DRIVE_OAUTH_CLIENT_SECRET'),
+      oauthRefreshToken: getEnv('GOOGLE_DRIVE_OAUTH_REFRESH_TOKEN'),
+      rootFolderId,
+      sharedDriveId,
+    }
+  }
+
   const serviceAccount = await getServiceAccount(args)
   return {
+    authMode,
     ...serviceAccount,
-    rootFolderId: args.rootFolderId ?? process.env.GOOGLE_DRIVE_ROOT_FOLDER_ID?.trim() ?? null,
-    sharedDriveId: process.env.GOOGLE_DRIVE_SHARED_DRIVE_ID?.trim() || null,
+    rootFolderId,
+    sharedDriveId,
   }
 }
 
@@ -176,14 +191,22 @@ function createJwt(config) {
 
 async function getAccessToken(config) {
   if (cachedToken && cachedToken.expiresAt > Date.now() + 60_000) return cachedToken.accessToken
+  const tokenParams = config.authMode === 'oauth'
+    ? {
+        grant_type: 'refresh_token',
+        client_id: config.oauthClientId,
+        client_secret: config.oauthClientSecret,
+        refresh_token: config.oauthRefreshToken,
+      }
+    : {
+        grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+        assertion: createJwt(config),
+      }
 
   const response = await fetch(OAUTH_TOKEN_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
-      assertion: createJwt(config),
-    }),
+    body: new URLSearchParams(tokenParams),
   })
   const body = await response.json()
   if (!response.ok || !body.access_token) {
@@ -406,6 +429,8 @@ async function dryRun(args) {
 }
 
 async function provision(args) {
+  await loadEnvFile(join(root, 'dev/drive/google-drive-oauth.env'))
+  await loadEnvFile(join(root, 'dev/drive/google-drive.env'))
   await loadEnvFile(join(root, '.env.local'))
   const config = await getConfig(args)
   const discoveredTemplates = args.discoverTemplatesFrom

@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 const root = join(dirname(fileURLToPath(import.meta.url)), '..')
 const DRIVE_API_BASE = 'https://www.googleapis.com/drive/v3'
 const OAUTH_TOKEN_URL = 'https://oauth2.googleapis.com/token'
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive'
+const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.metadata.readonly'
 const FOLDER_MIME = 'application/vnd.google-apps.folder'
 const SHORTCUT_MIME = 'application/vnd.google-apps.shortcut'
 

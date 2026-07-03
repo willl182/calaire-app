@@ -4,6 +4,7 @@
 
 export type ParticipanteLandingRonda = {
   codigo: string
+  estado?: 'borrador' | 'activa' | 'documentacion_pendiente' | 'cerrada'
   ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
 }
 
@@ -12,6 +13,9 @@ export type ParticipanteLandingRonda = {
  * ficha enviada, en la ronda. Nunca en un dashboard global.
  */
 export function getRondaParticipanteLandingPath(ronda: ParticipanteLandingRonda) {
+  if (ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada') {
+    return `/mi-dashboard#cierre-documental-${encodeURIComponent(ronda.codigo)}`
+  }
   if (ronda.ficha_estado !== 'enviado') return `/ronda/${ronda.codigo}/registro`
   return `/ronda/${ronda.codigo}`
 }

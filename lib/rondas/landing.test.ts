@@ -18,6 +18,20 @@ test('ficha enviada aterriza en la ronda', () => {
   assert.equal(getRondaParticipanteLandingPath(ronda({ ficha_estado: 'enviado' })), '/ronda/EA-2026-R1')
 })
 
+test('ronda en cierre documental aterriza en el panel de cierre', () => {
+  assert.equal(
+    getRondaParticipanteLandingPath(ronda({ estado: 'documentacion_pendiente', ficha_estado: 'enviado' })),
+    '/mi-dashboard#cierre-documental-EA-2026-R1'
+  )
+})
+
+test('ronda cerrada aterriza en el panel de cierre', () => {
+  assert.equal(
+    getRondaParticipanteLandingPath(ronda({ estado: 'cerrada', ficha_estado: 'no_iniciada' })),
+    '/mi-dashboard#cierre-documental-EA-2026-R1'
+  )
+})
+
 test('el destino nunca es un dashboard global', () => {
   for (const estado of ['no_iniciada', 'borrador', 'enviado'] as const) {
     const path = getRondaParticipanteLandingPath(ronda({ ficha_estado: estado }))

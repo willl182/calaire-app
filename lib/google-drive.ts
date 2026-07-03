@@ -9,6 +9,7 @@ const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive'
 
 type GoogleDriveFile = {
   id: string
+  name?: string
   webViewLink?: string
   mimeType?: string
 }
@@ -168,6 +169,10 @@ function driveUrl(path: string, params: Record<string, string | boolean | null |
   return url
 }
 
+function escapeQueryValue(value: string) {
+  return value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")
+}
+
 async function driveRequest(path: string, init: RequestInit, params?: Record<string, string | boolean | null | undefined>) {
   const accessToken = await getAccessToken()
   const response = await fetch(driveUrl(path, params), {
@@ -229,6 +234,32 @@ export async function createGoogleDriveFolder(args: { name: string; parentId: st
   return {
     id: result.id,
     webUrl: result.webViewLink ?? viewUrl(result.id),
+  }
+}
+
+export async function findGoogleDriveFolder(args: { name: string; parentId: string }) {
+  const config = getConfig()
+  const params: Record<string, string | boolean | null | undefined> = {
+    q: [
+      `'${escapeQueryValue(args.parentId)}' in parents`,
+      `name = '${escapeQueryValue(args.name)}'`,
+      "mimeType = 'application/vnd.google-apps.folder'",
+      'trashed = false',
+    ].join(' and '),
+    pageSize: '1',
+    fields: 'files(id,name,webViewLink,mimeType)',
+  }
+  if (config.sharedDriveId) {
+    params.includeItemsFromAllDrives = true
+    params.corpora = 'drive'
+    params.driveId = config.sharedDriveId
+  }
+  const result = await driveRequest('/files', { method: 'GET' }, params) as { files?: GoogleDriveFile[] }
+  const folder = result.files?.[0]
+  if (!folder) return null
+  return {
+    id: folder.id,
+    webUrl: folder.webViewLink ?? viewUrl(folder.id),
   }
 }
 

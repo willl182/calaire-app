@@ -479,13 +479,22 @@ export const upsertDriveRecursoConfig = {
     const nombre = args.nombre.trim()
     if (!codigo || !nombre) throw new Error('Codigo y nombre son obligatorios.')
 
-    if (args.parentId) {
-      const parent = await ctx.db.get(args.parentId)
-      if (!parent || parent.rondaId !== args.rondaId) throw new Error('La carpeta padre no pertenece a la ronda.')
-    }
-
     const existing = args.recursoId ? await ctx.db.get(args.recursoId) : await findRecursoByCodigo(ctx, args.rondaId, codigo)
     if (existing && existing.rondaId !== args.rondaId) throw new Error('El recurso no pertenece a la ronda.')
+
+    if (args.parentId) {
+      if (existing && args.parentId === existing._id) throw new Error('Un recurso no puede ser su propia carpeta padre.')
+      const parent = await ctx.db.get(args.parentId)
+      if (!parent || parent.rondaId !== args.rondaId) throw new Error('La carpeta padre no pertenece a la ronda.')
+      if (parent.tipo !== 'carpeta') throw new Error('La carpeta padre debe ser de tipo carpeta.')
+    }
+
+    if (args.recursoId) {
+      const recursoConCodigo = await findRecursoByCodigo(ctx, args.rondaId, codigo)
+      if (recursoConCodigo && (!existing || recursoConCodigo._id !== existing._id)) {
+        throw new Error('Ya existe un recurso Drive con ese codigo en la ronda.')
+      }
+    }
 
     const webUrl = trimToNull(args.webUrl)
     const tipo = inferTipoFromUrl(webUrl, args.tipo)
