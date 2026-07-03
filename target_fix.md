@@ -1,6 +1,6 @@
 # Targets: Criterios medibles para dejar la app funcional
 
-**Base**: [`diagnostico.md`](diagnostico.md) y [`plan_fix.md`](plan_fix.md).  
+**Base**: [`diagnostico.md`](diagnostico.md) y [`plan_fix.md`](plan_fix.md).
 **Uso**: marcar cada target solo cuando su verificacion haya sido ejecutada o el bloqueo este documentado.
 
 ---

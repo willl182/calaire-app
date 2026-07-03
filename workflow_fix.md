@@ -1,6 +1,6 @@
 # Workflow: Ejecucion del arreglo funcional
 
-**Base**: [`plan_fix.md`](plan_fix.md) y [`diagnostico.md`](diagnostico.md).  
+**Base**: [`plan_fix.md`](plan_fix.md) y [`diagnostico.md`](diagnostico.md).
 **Proposito**: definir como ejecutar el arreglo sin mezclar fases, sin perder trazabilidad y sin depender de memoria implicita.
 
 ---

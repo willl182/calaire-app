@@ -1,6 +1,11 @@
 import { v, type ObjectType, type PropertyValidators } from 'convex/values'
 import { type MutationCtx, type QueryCtx } from '../_generated/server'
 import type { Id } from '../_generated/dataModel'
+import { SGC_RONDA_ETAPAS } from '../_lib/sgc/catalog'
+import { evaluateDriveCierreCalidad, normalizeCodigoDocumento } from '../../src/server/sgc/cierre'
+
+export { evaluateDriveCierreCalidad, normalizeCodigoDocumento }
+export type { DriveCierreRecursoInput, DriveCierreEtapaInput, DriveCierreCalidad } from '../../src/server/sgc/cierre'
 export const FORMATOS_ARCHIVO = ['F-PSEA-08', 'F-PSEA-09', 'F-PSEA-10', 'F-PSEA-14'] as const
 export type FormatoJustificable = 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12'
 export const REVISION_CHECKS = [
@@ -420,6 +425,26 @@ export function collectChecklistFaltantes(coverage: Awaited<ReturnType<typeof co
   return faltantes
 }
 
+export const FALTANTES_DOCUMENTACION_PENDIENTE = [
+  'F-PSEA-03/F-PSEA-06 plan finalizado con snapshot',
+  'F-PSEA-05 participantes reclamados o justificados',
+  'F-PSEA-05A fichas enviadas o justificadas',
+  'F-PSEA-07 codigos unicos y no provisionales',
+  'F-PSEA-12 envios finales completos o justificados',
+] as const
+
+export function collectChecklistFaltantesDocumentacionPendiente(coverage: Awaited<ReturnType<typeof collectCoverage>>) {
+  return collectChecklistFaltantes(coverage).filter((faltante) =>
+    (FALTANTES_DOCUMENTACION_PENDIENTE as readonly string[]).includes(faltante)
+  )
+}
+
+export async function collectDriveCierreCalidad(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
+  const recursos = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
+  const documentos = recursos.filter((recurso) => recurso.tipo !== 'carpeta')
+  return evaluateDriveCierreCalidad(documentos, SGC_RONDA_ETAPAS)
+}
+
 export async function createSnapshot(
   ctx: MutationCtx,
   args: { rondaId: Id<'rondas'>; tipoRegistro: string; registroId: string; payload: unknown; actor: string }
@@ -500,11 +525,6 @@ export async function writeGlobalAudit(
     targetId: args.targetId ?? null,
   })
 }
-
-export function normalizeCodigoDocumento(codigo: string) {
-  return codigo.trim().toUpperCase()
-}
-
 
 export type SgcQueryConfig<Args extends PropertyValidators> = {
   args: Args

@@ -1,6 +1,6 @@
 # Fase 5 - Cierre funcional
 
-**Fecha**: 2026-07-01  
+**Fecha**: 2026-07-01
 **Alcance**: Target 9 de `target_fix.md`, siguiendo `workflow_fix.md`.
 
 ## Cambios implementados en esta fase

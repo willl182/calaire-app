@@ -12,4 +12,7 @@ export {
 export {
   derivarEstadoOperativo,
 } from './estados'
+export {
+  getRondaParticipanteLandingPath,
+} from './landing'
 export * from './client'

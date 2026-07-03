@@ -1,6 +1,6 @@
 # Fase 2: Robustez frontend, offline y estados vacios
 
-**Fecha**: 2026-07-01  
+**Fecha**: 2026-07-01
 **Estado**: implementada con verificacion principal verde.
 
 ## Cambios implementados

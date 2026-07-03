@@ -179,4 +179,3 @@ Resultados esperados:
 - Las pruebas smoke de Playwright pasan sin importar el estado de Convex.
 - La aplicación responde de forma controlada y segura ante un Convex offline o sin datos.
 - Las mutaciones de Convex no quedan expuestas de manera pública sin autenticación.
-

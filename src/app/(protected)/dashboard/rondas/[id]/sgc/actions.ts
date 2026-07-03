@@ -1,10 +1,13 @@
 'use server'
 
 import { revalidatePath } from 'next/cache'
-import { redirect } from 'next/navigation'
+import { redirect, unstable_rethrow } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { SGC_PLAN_BLOQUES, type SgcPlanBloques } from '@/server/sgc/catalog'
+import { automatizarDriveRondaSgc } from '@/server/sgc/drive-google'
 import {
+  actualizarEstadoDriveRecurso,
+  actualizarVisibilidadDriveRecurso,
   actualizarHitoRonda,
   actualizarCasoSgc,
   cerrarDocumentalmente,
@@ -22,14 +25,20 @@ import {
   guardarPlanRonda,
   guardarRevisionDatos,
   guardarRevisionHomogeneidad,
+  inicializarDriveRonda,
   pasarADocumentacionPendiente,
   registrarEvidenciaVersion,
+  reemplazarDriveRecurso,
+  retirarDriveRecurso,
   retirarJustificacionSgc,
   retirarEvidenciaVersion,
   reabrirRondaSgc,
   responderComentarioRonda,
   upsertResultadoPtApp,
   crearNotificacion,
+  upsertDriveRecurso,
+  type SgcDriveEstado,
+  type SgcDriveTipo,
 } from '@/server/sgc'
 
 function pageUrl(rondaId: string) {
@@ -79,6 +88,16 @@ function parseCasoEstado(value: string) {
   return 'abierto'
 }
 
+function parseDriveTipo(value: string): SgcDriveTipo {
+  if (['carpeta', 'documento', 'hoja_calculo', 'pdf', 'archivo', 'enlace'].includes(value)) return value as SgcDriveTipo
+  return 'documento'
+}
+
+function parseDriveEstado(value: string): SgcDriveEstado {
+  if (['pendiente', 'creado', 'diligenciado', 'reemplazado', 'retirado', 'no_aplica'].includes(value)) return value as SgcDriveEstado
+  return 'pendiente'
+}
+
 async function requireAdmin() {
   const auth = await requireAuth()
   if (!isAdmin(auth)) redirect('/denied?reason=role')
@@ -88,6 +107,204 @@ async function assertEvidenciaVersionBelongsToRonda(evidenciaVersionId: string, 
   const version = await getEvidenciaVersionContext(evidenciaVersionId)
   if (!version || String(version.rondaId) !== rondaId) {
     throw new Error('La evidencia no pertenece a esta ronda.')
+  }
+}
+
+export async function inicializarDriveRondaAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    const result = await inicializarDriveRonda(rondaId)
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', `Expediente Drive inicializado: ${result.creados} creados, ${result.reutilizados} reutilizados, ${result.reparados} reparados.`)
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible inicializar el expediente Drive.')
+  }
+}
+
+export async function crearDriveGoogleAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  const rondaCodigo = parseText(formData, 'ronda_codigo')
+  const rondaNombre = parseText(formData, 'ronda_nombre')
+  try {
+    const result = await automatizarDriveRondaSgc(rondaId, rondaCodigo, rondaNombre || null)
+    revalidatePath(pageUrl(rondaId))
+    const fallos = result.fallidos.length > 0 ? `, ${result.fallidos.length} fallidos` : ''
+    redirectWith(
+      rondaId,
+      result.fallidos.length > 0 ? 'error' : 'success',
+      `Google Drive: ${result.rootCreado ? 'raiz creada' : 'raiz reutilizada'}, ${result.carpetasCreadas} carpetas nuevas, ${result.carpetasReutilizadas} reutilizadas, ${result.documentosCopiados} copias, ${result.documentosReutilizados} documentos omitidos por enlace existente/estado, ${result.pendientesSinPlantilla} sin plantilla${fallos}.`
+    )
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible crear el expediente en Google Drive.')
+  }
+}
+
+export async function guardarDriveEditableAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  const recursoId = parseText(formData, 'recurso_id')
+  try {
+    await upsertDriveRecurso({
+      recursoId: recursoId || null,
+      rondaId,
+      parentId: parseText(formData, 'parent_id') || null,
+      codigo: parseText(formData, 'codigo'),
+      nombre: parseText(formData, 'nombre'),
+      fase: parseText(formData, 'fase') || null,
+      tipo: parseDriveTipo(parseText(formData, 'tipo')),
+      formatoRelacionado: parseText(formData, 'formato_relacionado') || null,
+      webUrl: parseText(formData, 'web_url') || null,
+      templateUrl: parseText(formData, 'template_url') || null,
+      notas: parseText(formData, 'notas') || null,
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Enlace editable Drive actualizado.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar el enlace Drive.')
+  }
+}
+
+export async function reemplazarDriveRecursoAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await reemplazarDriveRecurso({
+      recursoId: parseText(formData, 'recurso_id'),
+      webUrl: parseText(formData, 'web_url'),
+      motivo: parseText(formData, 'motivo'),
+      tipo: parseDriveTipo(parseText(formData, 'tipo')),
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Enlace Drive reemplazado con trazabilidad.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible reemplazar el enlace Drive.')
+  }
+}
+
+export async function guardarDriveDefinitivoAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  const recursoId = parseText(formData, 'recurso_id')
+  try {
+    const definitivoUrl = parseText(formData, 'definitivo_url')
+    if (!definitivoUrl) throw new Error('La URL definitiva es obligatoria.')
+    await upsertDriveRecurso({
+      recursoId: recursoId || null,
+      rondaId,
+      parentId: parseText(formData, 'parent_id') || null,
+      codigo: parseText(formData, 'codigo'),
+      nombre: parseText(formData, 'nombre'),
+      fase: parseText(formData, 'fase') || null,
+      tipo: parseDriveTipo(parseText(formData, 'tipo')),
+      formatoRelacionado: parseText(formData, 'formato_relacionado') || null,
+      webUrl: parseText(formData, 'web_url') || null,
+      templateUrl: parseText(formData, 'template_url') || null,
+      notas: parseText(formData, 'notas') || null,
+      definitivo: {
+        webUrl: definitivoUrl,
+        tipo: parseText(formData, 'definitivo_tipo') || 'pdf',
+      },
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Version definitiva Drive registrada.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la version definitiva.')
+  }
+}
+
+export async function subirDriveDefinitivoAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  const recursoId = parseText(formData, 'recurso_id')
+  try {
+    const file = formData.get('archivo')
+    if (!(file instanceof File) || file.size === 0) throw new Error('Seleccione un archivo para cargar.')
+    const uploadUrl = await generateSgcUploadUrl()
+    const response = await fetch(uploadUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': file.type || 'application/octet-stream' },
+      body: file,
+    })
+    if (!response.ok) throw new Error('No fue posible subir el archivo.')
+    const { storageId } = await response.json()
+    await upsertDriveRecurso({
+      recursoId: recursoId || null,
+      rondaId,
+      parentId: parseText(formData, 'parent_id') || null,
+      codigo: parseText(formData, 'codigo'),
+      nombre: parseText(formData, 'nombre'),
+      fase: parseText(formData, 'fase') || null,
+      tipo: parseDriveTipo(parseText(formData, 'tipo')),
+      formatoRelacionado: parseText(formData, 'formato_relacionado') || null,
+      webUrl: parseText(formData, 'web_url') || null,
+      templateUrl: parseText(formData, 'template_url') || null,
+      notas: parseText(formData, 'notas') || null,
+      definitivo: {
+        storageId,
+        fileName: file.name,
+        contentType: file.type || null,
+        size: file.size,
+        tipo: parseText(formData, 'definitivo_tipo') || 'archivo',
+      },
+    })
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Documento definitivo cargado para el participante.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible cargar el documento definitivo.')
+  }
+}
+
+export async function cambiarEstadoDriveAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await actualizarEstadoDriveRecurso(
+      parseText(formData, 'recurso_id'),
+      parseDriveEstado(parseText(formData, 'estado')),
+      parseText(formData, 'notas') || null
+    )
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Estado del recurso Drive actualizado.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible cambiar el estado Drive.')
+  }
+}
+
+export async function cambiarVisibilidadDriveAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await actualizarVisibilidadDriveRecurso(
+      parseText(formData, 'recurso_id'),
+      parseText(formData, 'publica_participante') === 'true'
+    )
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Visibilidad participante del recurso Drive actualizada.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar la visibilidad Drive.')
+  }
+}
+
+export async function retirarDriveRecursoAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await retirarDriveRecurso(parseText(formData, 'recurso_id'), parseText(formData, 'motivo'))
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Recurso Drive retirado.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible retirar el recurso Drive.')
   }
 }
 

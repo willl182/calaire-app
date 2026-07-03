@@ -7,7 +7,7 @@ import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/server/auth'
-import { listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
+import { getRondaParticipanteLandingPath, listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
 import {
   getHitosVisibleParticipanteWithStatus,
   getEvidenciasPublicasWithStatus,
@@ -66,7 +66,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
   const mostrarSgc = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
 
   return (
-    <article className="card grid gap-4 p-6">
+    <article id={`cierre-documental-${ronda.codigo}`} className="card grid gap-4 p-6">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -312,6 +312,11 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const error = getParamValue(params.error)
   const rondasResult = await listRondasParticipanteWithStatus(auth.user.id)
   const rondas = rondasResult.data
+  if (rondas.length > 0) {
+    const ronda = rondas.find((item) => item.estado === 'activa') ?? rondas[0]
+    const landingPath = getRondaParticipanteLandingPath(ronda)
+    if (!landingPath.startsWith('/mi-dashboard')) redirect(landingPath)
+  }
   const rondasSgc = new Map<string, SgcDatosParticipante>()
   const sgcOfflineResults = await Promise.all(
     rondas.map(async (r) => {

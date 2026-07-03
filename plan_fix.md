@@ -1,7 +1,7 @@
 # Plan: Recuperacion funcional de la app
 
-**Fecha base**: 2026-06-30  
-**Fuente**: [`diagnostico.md`](diagnostico.md)  
+**Fecha base**: 2026-06-30
+**Fuente**: [`diagnostico.md`](diagnostico.md)
 **Objetivo**: llevar `calaire-app` a un estado funcional verificable, donde `pnpm lint`, `pnpm test`, `pnpm build` y la suite E2E principal pasen, aun cuando Convex este vacio u offline para los flujos que deben degradar de forma controlada.
 
 ---

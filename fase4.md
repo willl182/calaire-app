@@ -1,6 +1,6 @@
 # Fase 4 — Infraestructura minima
 
-**Fecha**: 2026-07-01  
+**Fecha**: 2026-07-01
 **Alcance**: Target 7 y Target 8 de `target_fix.md`, siguiendo `workflow_fix.md`.
 
 ## Cambios implementados
