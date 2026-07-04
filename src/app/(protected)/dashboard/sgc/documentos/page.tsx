@@ -5,6 +5,14 @@ import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listSgcMaestro, listSgcMaestroWithStatus, type DocumentoSgc } from '@/server/sgc'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
+import { DocGrid, driveSplitGrid } from '@/components/ui/drive/DocGrid'
+import { DocMetaDot, DocRow } from '@/components/ui/drive/DocRow'
+import { DriveBreadcrumb } from '@/components/ui/drive/DriveBreadcrumb'
+import { DriveDetailAside } from '@/components/ui/drive/DriveDetailAside'
+import { DriveStatsBar } from '@/components/ui/drive/DriveStatsBar'
+import { FolderCard } from '@/components/ui/drive/FolderCard'
+import type { FileTone } from '@/components/ui/drive/DriveIcons'
+import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
 import { guardarDocumentoMaestroAction } from './actions'
 
 type PageProps = {
@@ -15,26 +23,12 @@ function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-function estadoTone(estado: string) {
-  if (estado === 'vigente') return 'bg-emerald-100 text-emerald-800'
-  if (estado === 'en_revision') return 'bg-amber-100 text-amber-800'
-  if (estado === 'obsoleto') return 'bg-slate-200 text-slate-700'
-  return 'bg-rose-100 text-rose-800'
-}
-
-function estadoSemaforoTone(estado: string) {
-  if (estado === 'vigente') return 'bg-emerald-500 ring-emerald-100'
-  if (estado === 'en_revision') return 'bg-amber-400 ring-amber-100'
-  if (estado === 'obsoleto') return 'bg-slate-400 ring-slate-100'
-  return 'bg-rose-500 ring-rose-100'
-}
-
-function tipoTone(tipo: DocumentoSgc['tipo']) {
-  if (tipo === 'procedimiento') return 'text-sky-500'
-  if (tipo === 'instructivo') return 'text-violet-500'
-  if (tipo === 'formato' || tipo === 'registro') return 'text-emerald-500'
-  if (tipo === 'plantilla') return 'text-amber-500'
-  return 'text-slate-400'
+function tipoTone(tipo: DocumentoSgc['tipo']): FileTone {
+  if (tipo === 'procedimiento') return 'sky'
+  if (tipo === 'instructivo') return 'violet'
+  if (tipo === 'formato' || tipo === 'registro') return 'emerald'
+  if (tipo === 'plantilla') return 'amber'
+  return 'slate'
 }
 
 function familiaLabel(familia: NonNullable<DocumentoSgc['familia']>) {
@@ -43,22 +37,6 @@ function familiaLabel(familia: NonNullable<DocumentoSgc['familia']>) {
   if (familia === 'I') return 'Instructivos'
   if (familia === 'F') return 'Formatos y registros'
   return 'Otros documentos'
-}
-
-function FolderIcon({ className = 'h-9 w-9' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={`shrink-0 text-sky-500 ${className}`} fill="currentColor">
-      <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
-    </svg>
-  )
-}
-
-function FileIcon({ tipo, className = 'h-9 w-9' }: { tipo: DocumentoSgc['tipo']; className?: string }) {
-  return (
-    <svg viewBox="0 0 24 24" aria-hidden className={`shrink-0 ${tipoTone(tipo)} ${className}`} fill="currentColor">
-      <path d="M6 2c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6H6zm7 1.5L18.5 9H13V3.5z" />
-    </svg>
-  )
 }
 
 function versionFor(doc: DocumentoSgc, versiones: Awaited<ReturnType<typeof listSgcMaestro>>['versiones']) {
@@ -118,6 +96,8 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
   const activeFolder = selectedCarpeta ? carpetas.find((carpeta) => carpeta.familia === selectedCarpeta) ?? null : null
   const folderDocs = activeFolder?.documentos ?? []
   const selectedDoc = selectedDocId ? folderDocs.find((doc) => doc._id === selectedDocId) ?? null : null
+  const selectedVersion = selectedDoc ? versionFor(selectedDoc, data.versiones) : null
+  const selectedEditableUrl = selectedDoc ? normalizeHttpUrl(selectedDoc.fuenteEditableUrl) : null
 
   return (
     <div className="grid min-w-0 gap-6">
@@ -126,80 +106,45 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         accent="Inventario maestro de documentos SGC"
         description="Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos."
         email={auth.user.email}
+        actions={<Link className="btn-outline" href="/dashboard/sgc/documentos">Administrar documentos</Link>}
       />
 
       {result.offline && (
         <BackendOfflineBanner detail="El centro documental se muestra sin documentos mientras Convex no responde." />
       )}
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="card-accent px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Documentos</div>
-          <div className="numeric mt-2 text-3xl font-semibold">{data.resumen.total}</div>
-        </div>
-        <div className="card-accent border-l-emerald-500 bg-emerald-50/40 px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Vigentes</div>
-          <div className="numeric mt-2 text-3xl font-semibold">{data.resumen.vigentes}</div>
-        </div>
-        <div className="card-accent border-l-amber-500 bg-amber-50/40 px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">En revision</div>
-          <div className="numeric mt-2 text-3xl font-semibold">{data.resumen.enRevision}</div>
-        </div>
-        <div className="card-accent border-l-rose-500 bg-rose-50/40 px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Sin version</div>
-          <div className="numeric mt-2 text-3xl font-semibold">{data.resumen.sinVersion}</div>
-        </div>
-      </section>
+      <DriveStatsBar
+        items={[
+          { label: 'Documentos', value: data.resumen.total },
+          { label: 'Vigentes', value: data.resumen.vigentes, tone: 'emerald' },
+          { label: 'En revision', value: data.resumen.enRevision, tone: 'amber' },
+          { label: 'Sin version', value: data.resumen.sinVersion, tone: 'rose' },
+        ]}
+      />
 
-      <section className="card p-5">
-        <form className="grid gap-3 md:grid-cols-5">
-          <input className="input md:col-span-2" name="q" placeholder="Codigo o nombre" defaultValue={firstParam(params.q) ?? ''} />
-          <select className="input" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
+      <section className="card overflow-hidden">
+        <form className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-white px-6 py-3">
+          {activeFolder && <input type="hidden" name="carpeta" value={activeFolder.familia} />}
+          <input className="input min-w-48 flex-1" name="q" placeholder="Codigo o nombre" defaultValue={firstParam(params.q) ?? ''} />
+          <select className="input w-auto" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
             <option value="">Todas las familias</option>
             {data.familias.map((familia) => <option key={familia} value={familia}>{familia}</option>)}
           </select>
-          <select className="input" name="estado" defaultValue={firstParam(params.estado) ?? ''}>
+          <select className="input w-auto" name="estado" defaultValue={firstParam(params.estado) ?? ''}>
             <option value="">Todos los estados</option>
             <option value="vigente">Vigente</option>
             <option value="en_revision">En revision</option>
             <option value="borrador">Borrador</option>
             <option value="obsoleto">Obsoleto</option>
           </select>
-          <button className="btn-primary" type="submit">Filtrar</button>
+          <button className="btn-outline" type="submit">Filtrar</button>
         </form>
-      </section>
 
-      <section className="card overflow-hidden">
-        <div className="border-b border-[var(--border)] bg-white px-6 py-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Mi unidad</p>
-              <h2 className="mt-1 text-xl font-semibold text-[var(--foreground)]">Repositorio documental SGC</h2>
-              <div className="mt-2 flex flex-wrap items-center gap-2 text-sm text-[var(--foreground-muted)]">
-                <span>Centro documental</span>
-                {activeFolder && (
-                  <>
-                    <span>/</span>
-                    <span>{familiaLabel(activeFolder.familia)}</span>
-                  </>
-                )}
-              </div>
-            </div>
-            <Link className="btn-outline self-start" href="/dashboard/sgc/documentos">Administrar documentos</Link>
-          </div>
-        </div>
-
-        <nav aria-label="Ruta" className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-slate-50 px-6 py-3 text-sm">
-          <Link href={buildDocumentosHref(params, { carpeta: null, doc: null })} className={`font-semibold ${activeFolder ? 'text-sky-700 hover:underline' : 'text-[var(--foreground)]'}`}>
-            Centro documental
-          </Link>
-          {activeFolder && (
-            <>
-              <span className="text-[var(--foreground-muted)]">/</span>
-              <span className="font-semibold text-[var(--foreground)]">{familiaLabel(activeFolder.familia)}</span>
-            </>
-          )}
-        </nav>
+        <DriveBreadcrumb
+          rootLabel="Centro documental"
+          rootHref={buildDocumentosHref(params, { carpeta: null, doc: null })}
+          folderLabel={activeFolder ? familiaLabel(activeFolder.familia) : null}
+        />
 
         {data.documentos.length === 0 && <div className="p-8 text-center text-sm text-[var(--foreground-muted)]">No hay documentos para los filtros seleccionados.</div>}
 
@@ -208,160 +153,108 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             {carpetas.map(({ familia, documentos }) => {
               const vigentes = documentos.filter((doc) => doc.estado === 'vigente').length
               return (
-                <Link
+                <FolderCard
                   key={familia}
                   href={buildDocumentosHref(params, { carpeta: familia, doc: null })}
-                  className="group overflow-hidden rounded-xl border border-[var(--border)] bg-white transition hover:border-sky-300 hover:shadow-md"
-                >
-                  <div className="relative flex h-36 items-center justify-center bg-slate-50">
-                    <FolderIcon className="h-16 w-16 transition group-hover:scale-105" />
-                    <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-[var(--foreground-muted)] shadow-sm">
-                      {vigentes}/{documentos.length}
-                    </span>
-                  </div>
-                  <div className="border-t border-[var(--border)] px-4 py-3">
-                    <div className="truncate font-semibold text-[var(--foreground)]">{familiaLabel(familia)}</div>
-                    <div className="mt-0.5 truncate text-xs text-[var(--foreground-muted)]">
-                      Carpeta · {documentos.length} documento{documentos.length === 1 ? '' : 's'}
-                    </div>
-                  </div>
-                </Link>
+                  nombre={familiaLabel(familia)}
+                  sublabel={`Carpeta · ${documentos.length} documento${documentos.length === 1 ? '' : 's'}`}
+                  badge={`${vigentes}/${documentos.length}`}
+                />
               )
             })}
           </div>
         )}
 
         {activeFolder && (
-          <div className={`grid gap-0 ${selectedDoc ? 'lg:grid-cols-[minmax(280px,35%)_minmax(0,65%)]' : ''}`}>
-            <div className={`p-6 ${selectedDoc ? 'lg:border-r lg:border-[var(--border)]' : ''}`}>
-              <Link
-                href={buildDocumentosHref(params, { carpeta: null, doc: null })}
-                className="mb-4 inline-flex items-center gap-1.5 rounded-md border border-[var(--border)] bg-white px-3 py-1.5 text-sm font-semibold text-[var(--foreground)] transition hover:border-sky-300 hover:bg-slate-50"
-              >
-                <svg viewBox="0 0 24 24" aria-hidden className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-                Volver al centro documental
-              </Link>
+          <div className={selectedDoc ? driveSplitGrid : ''}>
+            <div className="p-6">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-[var(--foreground)]">{familiaLabel(activeFolder.familia)}</h3>
                 <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.familia} · {folderDocs.length} documento{folderDocs.length === 1 ? '' : 's'} filtrado{folderDocs.length === 1 ? '' : 's'}</p>
               </div>
-              <div className="grid gap-2">
+              <DocGrid collapsed={Boolean(selectedDoc)}>
                 {folderDocs.map((doc) => {
-                  const active = doc._id === selectedDocId
                   const version = versionFor(doc, data.versiones)
                   const fuenteEditableUrl = normalizeHttpUrl(doc.fuenteEditableUrl)
                   return (
-                    <Link
+                    <DocRow
                       key={doc._id}
                       href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: doc._id })}
-                      aria-current={active ? 'true' : undefined}
-                      className={`group grid min-h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border bg-white px-3 py-2 transition hover:shadow-sm ${active ? 'border-sky-400 bg-sky-50/50 ring-2 ring-sky-100' : 'border-[var(--border)] hover:border-sky-300'}`}
-                    >
-                      <div className="relative flex h-10 w-10 items-center justify-center rounded-md bg-slate-50">
-                        <FileIcon tipo={doc.tipo} className="h-6 w-6 transition group-hover:scale-105" />
-                        <span
-                          aria-label={`Estado: ${doc.estado}`}
-                          title={doc.estado}
-                          className={`absolute -right-1 -top-1 h-3.5 w-3.5 rounded-full ring-4 ${estadoSemaforoTone(doc.estado)}`}
-                        />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex min-w-0 items-baseline gap-2">
-                          <span className="shrink-0 text-sm font-semibold text-[var(--foreground)]">{doc.codigo}</span>
-                          <span className="truncate text-sm text-[var(--foreground-muted)]">{doc.nombre}</span>
-                        </div>
-                        <div className="mt-1 flex items-center gap-1.5 text-[11px] font-semibold text-[var(--foreground-muted)]">
+                      active={doc._id === selectedDocId}
+                      iconTone={tipoTone(doc.tipo)}
+                      estado={doc.estado}
+                      codigo={doc.codigo}
+                      nombre={doc.nombre}
+                      meta={
+                        <>
                           <span>{doc.tipo}</span>
-                          {doc.visibilidad === 'participantes' && <span aria-label="Visible para participantes" title="Visible para participantes" className="h-1.5 w-1.5 rounded-full bg-violet-500" />}
-                          {doc.criticidad === 'alta' && <span aria-label="Criticidad alta" title="Criticidad alta" className="h-1.5 w-1.5 rounded-full bg-rose-500" />}
-                          {fuenteEditableUrl && <span aria-label="Editable disponible" title="Editable disponible" className="h-1.5 w-1.5 rounded-full bg-sky-500" />}
-                        </div>
-                      </div>
-                      {version?.vigente && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">v{version.vigente.version}</span>}
-                    </Link>
+                          {doc.visibilidad === 'participantes' && <DocMetaDot label="Visible para participantes" tone="violet" />}
+                          {doc.criticidad === 'alta' && <DocMetaDot label="Criticidad alta" tone="rose" />}
+                          {fuenteEditableUrl && <DocMetaDot label="Editable disponible" tone="sky" />}
+                        </>
+                      }
+                      trailing={version?.vigente && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">v{version.vigente.version}</span>}
+                    />
                   )
                 })}
-              </div>
+              </DocGrid>
             </div>
 
             {selectedDoc && (
-              <aside className="border-t border-[var(--border)] bg-slate-50 p-5 lg:border-t-0">
-                <div className="sticky top-24 max-w-4xl">
-                  {(() => {
-                    const version = versionFor(selectedDoc, data.versiones)
-                    const fuenteEditableUrl = normalizeHttpUrl(selectedDoc.fuenteEditableUrl)
-                    return (
-                      <>
-                        <div className="mb-4 flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{selectedDoc.tipo}</span>
-                              <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoTone(selectedDoc.estado)}`}>{selectedDoc.estado}</span>
-                              <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.modoDiligenciamiento ?? 'no_diligenciable'}</span>
-                            </div>
-                            <h4 className="mt-3 text-xl font-semibold text-[var(--foreground)]">{selectedDoc.codigo}</h4>
-                            <p className="mt-1 text-sm text-[var(--foreground)]">{selectedDoc.nombre}</p>
-                            <p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.ambito ?? 'Sin ambito'} · {selectedDoc.proceso}</p>
-                          </div>
-                          <Link href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: null })} className="shrink-0 rounded-md border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground-muted)] hover:bg-slate-100" aria-label="Cerrar detalle">
-                            Cerrar
-                          </Link>
-                        </div>
-
-                        <div className="tab-nav mb-4 overflow-x-auto">
-                          <Link className="tab-active" href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: selectedDoc._id })}>Ficha</Link>
-                          <span className="inline-flex items-center px-5 py-2 text-sm font-medium text-[var(--foreground-muted)]">Diligenciamiento</span>
-                          <span className="inline-flex items-center px-5 py-2 text-sm font-medium text-[var(--foreground-muted)]">Archivos</span>
-                          <span className="inline-flex items-center px-5 py-2 text-sm font-medium text-[var(--foreground-muted)]">Historial</span>
-                        </div>
-
-                        <div className="mb-4 flex flex-wrap gap-2">
-                          <Link className="btn-primary px-4 py-2 text-sm" href={`/dashboard/sgc/documentos/${selectedDoc._id}`}>Ver ficha</Link>
-                          {fuenteEditableUrl && <a className="btn-outline px-4 py-2 text-sm" href={fuenteEditableUrl} target="_blank" rel="noreferrer">Abrir editable</a>}
-                          {version?.vigente && (
-                            <Link className="btn-outline px-4 py-2 text-sm" href={`/dashboard/sgc/documentos/${selectedDoc._id}/versiones/${version.vigente._id}/download`}>
-                              Descargar oficial
-                            </Link>
-                          )}
-                        </div>
-
-                        <dl className="grid gap-4 text-sm">
-                          <div className="rounded-lg border border-[var(--border)] bg-white p-3">
-                            <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Version oficial</dt>
-                            <dd className="mt-1 text-[var(--foreground)]">
-                              {version?.vigente ? `v${version.vigente.version} · ${version.vigente.fileName ?? 'archivo oficial'}${formatBytes(version.vigente.size) ? ` · ${formatBytes(version.vigente.size)}` : ''}` : 'Sin version registrada'}
-                            </dd>
-                          </div>
-                          <div className="rounded-lg border border-[var(--border)] bg-white p-3">
-                            <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Gobierno</dt>
-                            <dd className="mt-1 text-[var(--foreground)]">Responsable: {selectedDoc.responsable ?? selectedDoc.propietario}</dd>
-                            <dd className="text-[var(--foreground-muted)]">Criticidad: {selectedDoc.criticidad} · Visibilidad: {selectedDoc.visibilidad ?? 'interna'}</dd>
-                          </div>
-                          {(selectedDoc.notas || selectedDoc.ubicacionFuente || selectedDoc.externalLabel) && (
-                            <div className="rounded-lg border border-[var(--border)] bg-white p-3">
-                              <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Notas</dt>
-                              {selectedDoc.notas && <dd className="mt-1 text-[var(--foreground)]">{selectedDoc.notas}</dd>}
-                              {selectedDoc.ubicacionFuente && <dd className="mt-1 text-[var(--foreground-muted)]">{selectedDoc.ubicacionFuente}</dd>}
-                              {selectedDoc.externalLabel && <dd className="mt-1 text-[var(--foreground-muted)]">{selectedDoc.externalLabel}</dd>}
-                            </div>
-                          )}
-                        </dl>
-                      </>
-                    )
-                  })()}
+              <DriveDetailAside
+                chips={
+                  <>
+                    <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{selectedDoc.tipo}</span>
+                    <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoBadgeTone(selectedDoc.estado)}`}>{selectedDoc.estado}</span>
+                    <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.modoDiligenciamiento ?? 'no_diligenciable'}</span>
+                  </>
+                }
+                codigo={selectedDoc.codigo}
+                nombre={selectedDoc.nombre}
+                subtitle={<p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.ambito ?? 'Sin ambito'} · {selectedDoc.proceso}</p>}
+                closeHref={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: null })}
+              >
+                <div className="mb-4 flex flex-wrap gap-2">
+                  <Link className="btn-primary px-4 py-2 text-sm" href={`/dashboard/sgc/documentos/${selectedDoc._id}`}>Ver ficha</Link>
+                  {selectedEditableUrl && <a className="btn-outline px-4 py-2 text-sm" href={selectedEditableUrl} target="_blank" rel="noreferrer">Abrir editable</a>}
+                  {selectedVersion?.vigente && (
+                    <Link className="btn-outline px-4 py-2 text-sm" href={`/dashboard/sgc/documentos/${selectedDoc._id}/versiones/${selectedVersion.vigente._id}/download`}>
+                      Descargar oficial
+                    </Link>
+                  )}
                 </div>
-              </aside>
+
+                <dl className="grid gap-4 text-sm">
+                  <div className="rounded-lg border border-[var(--border)] bg-white p-3">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Version oficial</dt>
+                    <dd className="mt-1 text-[var(--foreground)]">
+                      {selectedVersion?.vigente ? `v${selectedVersion.vigente.version} · ${selectedVersion.vigente.fileName ?? 'archivo oficial'}${formatBytes(selectedVersion.vigente.size) ? ` · ${formatBytes(selectedVersion.vigente.size)}` : ''}` : 'Sin version registrada'}
+                    </dd>
+                  </div>
+                  <div className="rounded-lg border border-[var(--border)] bg-white p-3">
+                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Gobierno</dt>
+                    <dd className="mt-1 text-[var(--foreground)]">Responsable: {selectedDoc.responsable ?? selectedDoc.propietario}</dd>
+                    <dd className="text-[var(--foreground-muted)]">Criticidad: {selectedDoc.criticidad} · Visibilidad: {selectedDoc.visibilidad ?? 'interna'}</dd>
+                  </div>
+                  {(selectedDoc.notas || selectedDoc.ubicacionFuente || selectedDoc.externalLabel) && (
+                    <div className="rounded-lg border border-[var(--border)] bg-white p-3">
+                      <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Notas</dt>
+                      {selectedDoc.notas && <dd className="mt-1 text-[var(--foreground)]">{selectedDoc.notas}</dd>}
+                      {selectedDoc.ubicacionFuente && <dd className="mt-1 text-[var(--foreground-muted)]">{selectedDoc.ubicacionFuente}</dd>}
+                      {selectedDoc.externalLabel && <dd className="mt-1 text-[var(--foreground-muted)]">{selectedDoc.externalLabel}</dd>}
+                    </div>
+                  )}
+                </dl>
+              </DriveDetailAside>
             )}
           </div>
         )}
       </section>
 
       {canEdit && (
-        <section className="card p-5">
-          <h2 className="text-lg font-semibold">Crear documento maestro</h2>
-          <form action={guardarDocumentoMaestroAction} className="mt-4 grid gap-3 md:grid-cols-3">
+        <details className="card">
+          <summary className="cursor-pointer px-5 py-4 text-lg font-semibold text-[var(--foreground)]">Crear documento maestro</summary>
+          <form action={guardarDocumentoMaestroAction} className="grid gap-3 border-t border-[var(--border)] p-5 md:grid-cols-3">
             <input className="input" name="codigo" placeholder="Codigo" required />
             <input className="input md:col-span-2" name="nombre" placeholder="Nombre" required />
             <select className="input" name="familia" defaultValue="F">
@@ -400,7 +293,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <textarea className="input md:col-span-3" name="notas" placeholder="Notas" rows={3} />
             <button className="btn-primary justify-self-start" type="submit">Guardar documento</button>
           </form>
-        </section>
+        </details>
       )}
     </div>
   )
