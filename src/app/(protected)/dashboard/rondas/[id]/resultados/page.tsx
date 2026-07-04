@@ -10,7 +10,7 @@ import {
   type ResultadoParticipantePT,
 } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
-import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { RondaPageHeader } from '../RondaPageHeader'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -71,17 +71,17 @@ function MetricaCard({
   variant?: 'default' | 'success' | 'warning'
 }) {
   const variantClass = {
-    default: 'border-l-[var(--pt-primary)]',
-    success: 'border-l-emerald-500 bg-emerald-50/40',
-    warning: 'border-l-amber-500 bg-amber-50/50',
+    default: '',
+    success: 'bg-emerald-50/40',
+    warning: 'bg-amber-50/50',
   }[variant]
 
   return (
-    <div className={`card-accent px-5 py-4 ${variantClass}`}>
-      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
+    <div className={`sgc-kpi ${variantClass}`}>
+      <div className="sgc-kpi-label">
         {label}
       </div>
-      <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
+      <div className="sgc-kpi-value numeric">
         {value}
         {total !== undefined && (
           <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {total}</span>
@@ -225,22 +225,12 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
         {/* Context Navigation */}
         <RondaContextNav rondaId={rondaId} rondaCodigo={ronda.codigo} />
 
-        <header className="header-bar px-6 py-5">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-            <div className="flex flex-col gap-2">
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-semibold text-[var(--foreground)]">Resultados PT</h1>
-                <EstadoBadge estado={ronda.estado} />
-              </div>
-              <p className="text-sm text-[var(--foreground-muted)]">
-                {ronda.nombre} · Código <span className="font-medium text-[var(--foreground)]">{ronda.codigo}</span>
-              </p>
-              <p className="text-sm text-[var(--foreground-muted)]">
-                Revise la matriz completa por ronda o agrupada por contaminante.
-              </p>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-3">
+        <RondaPageHeader
+          ronda={ronda}
+          section="Resultados PT"
+          description="Revise la matriz completa por ronda o agrupada por contaminante."
+          actions={
+            <>
               {canExport ? (
                 <a href={`/dashboard/rondas/${ronda.id}/resultados/export-pt.csv`} className="btn-primary">
                   Exportar CSV PT
@@ -250,11 +240,11 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
                   Exportar CSV PT (sin envíos finales)
                 </span>
               )}
-            </div>
-          </div>
-        </header>
+            </>
+          }
+        />
 
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="sgc-kpis">
           <MetricaCard label="Participantes" value={resultados.length} />
           <MetricaCard
             label="Envíos finales"
@@ -270,30 +260,19 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
           <MetricaCard label="Contaminantes" value={contaminantes.length} />
         </section>
 
-        <nav
-          className="overflow-hidden rounded-xl border border-[var(--border)] shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}
-        >
-          <div className="flex gap-0 overflow-x-auto px-2">
+        <nav className="card overflow-hidden p-0">
+          <div className="tab-nav overflow-x-auto px-2">
             <Link
               href={baseHref}
               aria-current={activeView === 'ronda' ? 'page' : undefined}
-              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeView === 'ronda'
-                  ? 'border-[var(--pt-primary)] font-semibold text-[var(--foreground)]'
-                  : 'border-transparent text-[var(--foreground-muted)] hover:border-[var(--border)] hover:text-[var(--foreground)]'
-              }`}
+              className={`whitespace-nowrap ${activeView === 'ronda' ? 'tab-active' : ''}`}
             >
               Por ronda
             </Link>
             <Link
               href={`${baseHref}?vista=contaminante`}
               aria-current={activeView === 'contaminante' ? 'page' : undefined}
-              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeView === 'contaminante'
-                  ? 'border-[var(--pt-primary)] font-semibold text-[var(--foreground)]'
-                  : 'border-transparent text-[var(--foreground-muted)] hover:border-[var(--border)] hover:text-[var(--foreground)]'
-              }`}
+              className={`whitespace-nowrap ${activeView === 'contaminante' ? 'tab-active' : ''}`}
             >
               Por contaminante
             </Link>

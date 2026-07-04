@@ -15,7 +15,7 @@ import { RondaContextNav } from '../RondaContextNav'
 import { Alert } from '@/components/ui/Alert'
 import { ConfirmSubmitButton } from '@/components/ui/ConfirmSubmitButton'
 import { CopyInvitationLinkButton } from '@/components/ui/CopyInvitationLinkButton'
-import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { RondaPageHeader } from '../RondaPageHeader'
 import {
   addReferenceSlotAction,
   inviteParticipanteAction,
@@ -102,7 +102,7 @@ function FiltroBar({
   rondaId: string
 }) {
   return (
-    <nav className="flex flex-wrap gap-1.5">
+    <nav className="sgc-tabs" aria-label="Filtros de participantes">
       {filtros.map(({ valor, label, count }) => {
         const isActive = filtroActivo === valor
         const isDisabled = count === 0 && valor !== 'todos'
@@ -115,7 +115,7 @@ function FiltroBar({
           return (
             <span
               key={valor}
-              className="rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--foreground-muted)] opacity-40"
+              className="opacity-40"
             >
               {label} <span className="numeric">{count}</span>
             </span>
@@ -126,11 +126,7 @@ function FiltroBar({
           <Link
             key={valor}
             href={href}
-            className={`rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
-              isActive
-                ? 'border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] text-[var(--foreground)]'
-                : 'border-[var(--border)] text-[var(--foreground-muted)] hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]'
-            }`}
+            className={isActive ? 'sgc-tabs-active' : ''}
           >
             {label} <span className="numeric">{count}</span>
           </Link>
@@ -161,15 +157,15 @@ function ResumenStrip({
 }) {
   const cards = [
     { label: 'Total cupos', value: totalCupos, filtro: 'todos' as const, color: '' },
-    { label: 'Enlace pendiente', value: enlacesPendientes, filtro: 'enlace_pendiente' as const, color: enlacesPendientes > 0 ? 'border-amber-200 bg-amber-50' : '' },
-    { label: 'Reclamados', value: cuposReclamados, filtro: 'todos' as const, color: cuposReclamados > 0 ? 'border-emerald-200 bg-emerald-50' : '' },
-    { label: 'Ficha pendiente', value: fichasPendientes, filtro: 'ficha_pendiente' as const, color: fichasPendientes > 0 ? 'border-amber-200 bg-amber-50' : '' },
-    { label: 'Ficha enviada', value: fichasEnviadas, filtro: 'ficha_enviada' as const, color: fichasEnviadas > 0 ? 'border-emerald-200 bg-emerald-50' : '' },
-    { label: 'Con envíos PT', value: conEnvios, filtro: 'con_envios' as const, color: conEnvios > 0 ? 'border-blue-200 bg-blue-50' : '' },
+    { label: 'Enlace pendiente', value: enlacesPendientes, filtro: 'enlace_pendiente' as const, color: enlacesPendientes > 0 ? 'bg-amber-50/50' : '' },
+    { label: 'Reclamados', value: cuposReclamados, filtro: 'todos' as const, color: cuposReclamados > 0 ? 'bg-emerald-50/40' : '' },
+    { label: 'Ficha pendiente', value: fichasPendientes, filtro: 'ficha_pendiente' as const, color: fichasPendientes > 0 ? 'bg-amber-50/50' : '' },
+    { label: 'Ficha enviada', value: fichasEnviadas, filtro: 'ficha_enviada' as const, color: fichasEnviadas > 0 ? 'bg-emerald-50/40' : '' },
+    { label: 'Con envíos PT', value: conEnvios, filtro: 'con_envios' as const, color: conEnvios > 0 ? 'bg-sky-50/40' : '' },
   ]
 
   return (
-    <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="sgc-kpis sgc-kpis-six">
       {cards.map(({ label, value, filtro, color }) => {
         const href =
           filtro === 'todos'
@@ -179,12 +175,12 @@ function ResumenStrip({
           <Link
             key={label}
             href={href}
-            className={`rounded-xl border px-4 py-3 text-sm transition hover:border-[var(--pt-primary)] ${
-              color || 'border-[var(--border)] bg-[var(--surface-muted)]'
+            className={`sgc-kpi hover:no-underline ${
+              color || ''
             }`}
           >
-            <div className="text-[11px] font-medium text-[var(--foreground-muted)]">{label}</div>
-            <div className="numeric mt-0.5 text-xl font-semibold text-[var(--foreground)]">
+            <div className="sgc-kpi-label">{label}</div>
+            <div className="sgc-kpi-value numeric">
               {value}
             </div>
           </Link>
@@ -469,18 +465,11 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
         {/* Context Navigation */}
         <RondaContextNav rondaId={rondaId} rondaCodigo={ronda.codigo} ptConfigurado={ptItems.length > 0} />
 
-        <header className="header-bar px-6 py-5">
-          <div className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
-              <EstadoBadge estado={ronda.estado} />
-            </div>
-            <p className="text-sm text-[var(--foreground-muted)]">
-              Código <span className="font-medium text-[var(--foreground)]">{ronda.codigo}</span> ·{' '}
-              {participantes.length} cupo{participantes.length !== 1 ? 's' : ''}
-            </p>
-          </div>
-        </header>
+        <RondaPageHeader
+          ronda={ronda}
+          section="Participantes"
+          description={`${participantes.length} cupo${participantes.length !== 1 ? 's' : ''} asignado${participantes.length !== 1 ? 's' : ''} en la ronda.`}
+        />
 
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
@@ -500,23 +489,23 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
         <FiltroBar filtros={filtros} filtroActivo={filtroActivo} rondaId={rondaId} />
 
         {/* Participants table */}
-        <section className="card p-6">
-          <div className="mb-5 flex items-end justify-between gap-4">
+        <section className="card overflow-hidden">
+          <div className="sgc-panel-head">
             <div>
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">Cupos asignados</h2>
-              <p className="text-sm text-[var(--foreground-muted)]">
+              <h2>Cupos asignados</h2>
+              <p>
                 {filtroActivo !== 'todos'
                   ? `Mostrando ${participantesFiltrados.length} de ${totalCupos} (filtro: ${filtros.find((f) => f.valor === filtroActivo)?.label ?? filtroActivo})`
                   : `Estado de cupos, fichas y envíos PT por laboratorio.`}
               </p>
             </div>
-            <div className="rounded-lg bg-[var(--pt-primary-subtle)] px-4 py-2 text-sm font-medium text-[var(--foreground)]">
+            <div className="sgc-badge">
               {participantesFiltrados.length}
             </div>
           </div>
 
           {participantesFiltrados.length === 0 ? (
-            <div className="rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] p-8 text-center text-sm text-[var(--foreground-muted)]">
+            <div className="m-6 rounded-xl border border-dashed border-[var(--border)] bg-[var(--surface-muted)] p-8 text-center text-sm text-[var(--foreground-muted)]">
               {filtroActivo !== 'todos'
                 ? 'No hay participantes que coincidan con este filtro.'
                 : 'No hay participantes asignados. Use la sección de abajo para agregar laboratorios.'}

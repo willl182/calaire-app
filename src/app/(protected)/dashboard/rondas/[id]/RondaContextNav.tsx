@@ -27,8 +27,7 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
   }
 
   return (
-    <nav className="border border-[var(--border)] rounded-xl overflow-hidden shadow-sm" style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}>
-      {/* Breadcrumb */}
+    <nav className="card overflow-hidden p-0">
       <div className="flex items-center gap-2 px-5 pt-3 pb-0">
         <Link
           href="/dashboard"
@@ -44,8 +43,7 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
           {rondaCodigo}
         </Link>
       </div>
-      {/* Tabs */}
-      <div className="flex gap-0 overflow-x-auto px-2">
+      <div className="tab-nav overflow-x-auto px-2">
         {TABS.map((tab) => {
           const active = isActive(tab)
           const href = tab.href(rondaId)
@@ -54,11 +52,7 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
               key={tab.label}
               href={href}
               aria-current={active ? 'page' : undefined}
-              className={`whitespace-nowrap px-4 py-3 text-sm font-medium transition-colors border-b-2 ${
-                active
-                  ? 'border-[var(--pt-primary)] text-[var(--foreground)] font-semibold'
-                  : 'border-transparent text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:border-[var(--border)]'
-              }`}
+              className={`whitespace-nowrap ${active ? 'tab-active' : ''}`}
             >
               {tab.label}
             </Link>

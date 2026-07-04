@@ -2,9 +2,16 @@ import { ConvexHttpClient } from 'convex/browser'
 import { anyApi, type FunctionReference } from 'convex/server'
 import { env } from '@/env'
 
-const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
-  skipConvexDeploymentUrlCheck: true,
-})
+let _convex: ConvexHttpClient | null = null
+
+function getConvex(): ConvexHttpClient {
+  if (!_convex) {
+    _convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
+      skipConvexDeploymentUrlCheck: true,
+    })
+  }
+  return _convex
+}
 
 type AgentFunctionReference = FunctionReference<'query'> | FunctionReference<'mutation'>
 
@@ -144,10 +151,10 @@ export async function executeAgentRoute(
 
   try {
     if (def.kind === 'query') {
-      const result = await convex.query(fnRef as FunctionReference<'query'>, args)
+      const result = await getConvex().query(fnRef as FunctionReference<'query'>, args)
       return { status: 200, data: result }
     } else {
-      const result = await convex.mutation(fnRef as FunctionReference<'mutation'>, args)
+      const result = await getConvex().mutation(fnRef as FunctionReference<'mutation'>, args)
       return { status: 200, data: result }
     }
   } catch (e) {

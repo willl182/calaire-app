@@ -27,7 +27,11 @@ export function SgcHeader({
             {email && <p className="text-sm text-[var(--foreground-muted)]">{email} · Coordinador</p>}
           </div>
         </div>
-        {actions && <div className="flex items-center gap-3">{actions}</div>}
+        {actions && (
+          <div className="flex shrink-0 items-center gap-3">
+            {actions}
+          </div>
+        )}
       </div>
     </header>
   )

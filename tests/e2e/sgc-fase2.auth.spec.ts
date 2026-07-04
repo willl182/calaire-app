@@ -8,7 +8,7 @@ test('shows the SGC round panel sections', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'SGC de la ronda' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Drive documental SGC' })).toBeVisible()
   await expect(page.getByText('Checklist documental')).toBeVisible()
-  await expect(page.getByText('Carpeta raiz Drive')).toBeVisible()
+  await expect(page.getByText('Administrar carpeta raiz')).toBeVisible()
   await expect(page.getByRole('link', { name: /Planificacion de ronda/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /Analisis e informe/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /Homogeneidad y estabilidad/ })).toBeVisible()

@@ -4,7 +4,6 @@ import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import { LogoUnal } from '@/components/LogoUnal'
 import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { isAdmin, requireAuth } from '@/server/auth'
@@ -59,28 +58,30 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
   const attentionItems = admin
     ? buildAttentionItems(rondas, participantesRondasActivas)
     : []
+  const pageTitleByTab: Record<string, string> = {
+    inicio: 'Panel de coordinación',
+    rondas: 'Rondas',
+    registros: 'Registros',
+    participantes: 'Participantes',
+    resultados: 'Resultados',
+  }
+  const pageTitle = pageTitleByTab[activeTab] ?? 'Panel de coordinación'
 
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-8 py-6">
+        <header className="header-bar px-6 py-4">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-6">
-              <LogoUnal height={64} />
-              <div className="space-y-0.5">
-                <h1 className="text-xl font-bold text-[var(--foreground)]">
-                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
-                </h1>
-                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
-                  Gases Contaminantes Criterio
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  {auth.user.email} · {admin ? 'Coordinador' : 'Participante'}
-                </p>
-              </div>
+            <div className="min-w-0 space-y-1">
+              <p className="text-xs font-bold uppercase tracking-[0.14em] text-[var(--pt-primary-dark)]">
+                Gestión de rondas
+              </p>
+              <h1 className="text-2xl font-bold leading-tight text-[var(--foreground)]">
+                {pageTitle}
+              </h1>
+              <p className="text-sm text-[var(--foreground-muted)]">
+                Ensayos de Aptitud · {auth.user.email} · {admin ? 'Coordinador' : 'Participante'}
+              </p>
             </div>
 
             <div className="flex items-center gap-3">
@@ -132,13 +133,10 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
             {/* ── Tab rondas: lista completa ──────────────────── */}
             {activeTab === 'rondas' && (
               <div className="grid gap-4">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-[var(--foreground-muted)]">
+                <div>
+                  <p className="text-sm font-medium text-[var(--foreground-muted)]">
                     {rondas.length} ronda{rondas.length !== 1 ? 's' : ''} registrada{rondas.length !== 1 ? 's' : ''}
                   </p>
-                  <Link href="/dashboard/rondas/nueva" className="btn-primary">
-                    ＋ Nueva ronda
-                  </Link>
                 </div>
                 <RondasTable rondas={rondas} editando={editando} />
               </div>

@@ -3,7 +3,6 @@ import { notFound, redirect } from 'next/navigation'
 
 import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
-import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
   getRondaWithStatus,
@@ -13,6 +12,7 @@ import {
   type EstadoRonda,
 } from '@/server/rondas'
 import { RondaContextNav } from './RondaContextNav'
+import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
 
 type PageProps = {
@@ -71,18 +71,18 @@ function MetricaCard({
   href?: string
 }) {
   const variantClass = {
-    default: 'border-l-[var(--pt-primary)]',
-    success: 'border-l-emerald-500 bg-emerald-50/40',
-    warning: 'border-l-amber-500 bg-amber-50/50',
-    danger: 'border-l-rose-500 bg-rose-50/50',
+    default: '',
+    success: 'bg-emerald-50/40',
+    warning: 'bg-amber-50/50',
+    danger: 'bg-rose-50/50',
   }[variant]
 
   const inner = (
     <>
-      <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
+      <div className="sgc-kpi-label">
         {label}
       </div>
-      <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
+            <div className="sgc-kpi-value numeric">
         {value}
         {total !== undefined && (
           <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {total}</span>
@@ -93,13 +93,13 @@ function MetricaCard({
 
   if (href) {
     return (
-      <Link href={href} className={`card-accent px-5 py-4 transition hover:border-[var(--pt-primary)] hover:shadow-md ${variantClass}`}>
+      <Link href={href} className={`sgc-kpi hover:no-underline ${variantClass}`}>
         {inner}
       </Link>
     )
   }
 
-  return <div className={`card-accent px-5 py-4 ${variantClass}`}>{inner}</div>
+  return <div className={`sgc-kpi ${variantClass}`}>{inner}</div>
 }
 
 // ---------------------------------------------------------------------------
@@ -316,21 +316,12 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
         {/* Context Navigation */}
         <RondaContextNav rondaId={rondaId} rondaCodigo={ronda.codigo} ptConfigurado={metricas.pt_configurado} />
 
-        {/* Header */}
-        <header className="header-bar px-6 py-5">
-          <div className="flex flex-col gap-2">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
-              <EstadoBadge estado={ronda.estado} />
-            </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <EstadoOperativoBadge estado={metricas.estado_operativo} />
-            </div>
-            <p className="text-sm text-[var(--foreground-muted)]">
-              {metricas.accion_recomendada}
-            </p>
-          </div>
-        </header>
+        <RondaPageHeader
+          ronda={ronda}
+          section="Resumen"
+          description={metricas.accion_recomendada}
+          actions={<EstadoOperativoBadge estado={metricas.estado_operativo} />}
+        />
 
         {/* Alerts */}
         <Alert tone="success" message={success} />
@@ -340,10 +331,11 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
         )}
 
         {/* Progress Metrics */}
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="sgc-kpis">
           <MetricaCard
             label="Config PT"
-            value={metricas.pt_configurado ? '✓ Configurado' : '✗ Pendiente'}
+            value={metricas.pt_configurado ? 1 : 0}
+            total={1}
             href={!metricas.pt_configurado ? `/dashboard/rondas/${rondaId}/configuracion-pt` : undefined}
           />
           <MetricaCard

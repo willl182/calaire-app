@@ -111,24 +111,24 @@ export function DirectorioPanel({ allParticipantes }: { allParticipantes: Partic
 
   return (
     <section className="grid gap-6">
-      <div className="grid gap-4 sm:grid-cols-3">
-        <div className="card-accent px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Directorio</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{participantes.length}</div>
+      <section className="sgc-kpis sgc-kpis-three">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Directorio</div>
+          <div className="sgc-kpi-value numeric">{participantes.length}</div>
         </div>
-        <div className="card-accent px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Con cuenta</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Con cuenta</div>
+          <div className="sgc-kpi-value numeric">
             {participantes.length}
           </div>
         </div>
-        <div className="card-accent px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Con rondas</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Con rondas</div>
+          <div className="sgc-kpi-value numeric">
             {participantes.filter((p) => p.rondas.length > 0).length}
           </div>
         </div>
-      </div>
+      </section>
 
       <DirectorioForm />
 
@@ -176,4 +176,3 @@ export function DirectorioPanel({ allParticipantes }: { allParticipantes: Partic
     </section>
   )
 }
-

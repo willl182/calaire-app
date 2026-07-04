@@ -1,6 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
 import { Alert } from '@/components/ui/Alert'
-import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { getRonda } from '@/server/rondas'
 import {
@@ -10,6 +9,7 @@ import {
 import { getDriveTreeSgc, getPanelSgc, inicializarPanelSgc, type SgcPanel } from '@/server/sgc'
 import { getDriveGoogleAutomationStatus } from '@/server/sgc/drive-google'
 import { RondaContextNav } from '../RondaContextNav'
+import { RondaPageHeader } from '../RondaPageHeader'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
 import { transicionSgcAction } from './actions'
 
@@ -121,29 +121,39 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <RondaContextNav rondaId={id} rondaCodigo={ronda.codigo} />
 
-        <header className="header-bar px-6 py-5">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div>
-              <div className="flex flex-wrap items-center gap-3">
-                <h1 className="text-2xl font-semibold text-[var(--foreground)]">SGC de la ronda</h1>
-                <EstadoBadge estado={ronda.estado} />
-              </div>
-              <p className="mt-2 text-sm text-[var(--foreground-muted)]">
-                Expediente documental para {ronda.codigo}. Solo se muestran el mapa documental, el checklist real y los registros que se diligencian desde esta vista.
-              </p>
-            </div>
-            <div className="min-w-48 rounded-lg border border-[var(--border)] p-4">
-              <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Checklist documental</div>
-              <div className="mt-2 text-3xl font-semibold text-[var(--foreground)]">{progreso}%</div>
-              <div className="mt-3 h-2 rounded-full bg-slate-100">
-                <div className="h-2 rounded-full bg-emerald-600" style={{ width: `${progreso}%` }} />
-              </div>
-            </div>
-          </div>
-        </header>
+        <RondaPageHeader
+          ronda={ronda}
+          section="SGC"
+          description="Expediente documental de la ronda: mapa documental, checklist real y registros diligenciables."
+        />
 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
+
+        <section className="sgc-kpis">
+          <div className="sgc-kpi bg-emerald-50/40">
+            <div className="sgc-kpi-label">Checklist</div>
+            <div className="sgc-kpi-value numeric">{progreso}%</div>
+          </div>
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Carpetas</div>
+            <div className="sgc-kpi-value numeric">{SGC_RONDA_ETAPAS.length}</div>
+          </div>
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Cubiertos</div>
+            <div className="sgc-kpi-value numeric">
+              {cubiertos}
+              <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {documentos.length}</span>
+            </div>
+          </div>
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Definitivos</div>
+            <div className="sgc-kpi-value numeric">
+              {drive.recursos.filter((recurso) => recurso.definitivo).length}
+              <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {drive.recursos.length}</span>
+            </div>
+          </div>
+        </section>
 
         <DriveDocumentalSgc
           drive={drive}

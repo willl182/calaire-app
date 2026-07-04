@@ -1,47 +1,32 @@
 # Session State: calaire-app2
 
-**Last Updated**: 2026-07-01 23:24 -05
+**Last Updated**: 2026-07-04 15:36 -0500
 
 ## Session Objective
 
-Rediseñar el mapa de navegación del SGC (`/sgc/mapa`) para que siga el estilo
-visual de la app (fuentes, colores) y reorganizar su layout.
+Afinar la vista final de Rondas (header compacto, tabla limpia) y desplegar la rama `feat-drive-sgc` a producción vía commit + push.
 
 ## Current State
 
-- [x] Reestilizado el HTML embebido del mapa (`data/sgc/mapa_navegacion_sgc_pea.html`)
-      para usar Droid Sans + tokens de marca (dorado `#FDB913`, grises de superficie)
-      igual que `src/app/globals.css`.
-- [x] Códigos y números en fuente monoespaciada con `tabular-nums`.
-- [x] Componentes alineados a la app: header con borde dorado, botones/chips con
-      gradiente, tarjetas con borde izquierdo dorado, foco dorado, scrollbar dorada.
-- [x] Recodificadas las 5 familias documentales con paleta armónica + leyenda sincronizada.
-- [x] Movidos los controles laterales (`aside`) a una **barra horizontal arriba** del mapa.
-- [x] Columnas más juntas: Procedimientos x40, Documentos/instructivos x360, Formatos x680;
-      `viewBox` 970×1400.
-- [x] Los 22 formatos ahora en **una sola columna en orden numérico** (F-PSEA-01 … 18).
-- [x] Usuario confirmó: "tuvo bien".
-- [ ] (Pendiente de sesión previa, auth) Verificar `/dashboard` y `/sgc` en producción tras deploy de Convex.
-- [ ] Commit de los cambios pendientes en la rama.
+- [x] Header interno de Rondas compacto y contextual: `Rondas`, usuario y acciones (sin branding duplicado).
+- [x] Un solo botón `+ Nueva ronda` arriba; se eliminó el segundo botón dentro del contenido.
+- [x] Tabla de rondas limpiada: acciones más pequeñas, sin botones deshabilitados visibles, `Ingresar` → `Gestionar`.
+- [x] Skeleton del dashboard ajustado al nuevo header compacto.
+- [x] Ajustes visuales globales de dashboard/SGC (panels, layout, SgcHeader, DriveStatsBar, globals.css).
+- [x] Verificado localmente: `pnpm lint`, `pnpm build`, `pnpm test` pasan.
+- [x] Commit `1e1583f` con todo el working tree (33 archivos) y push a `origin/feat-drive-sgc`.
+- [x] Vercel desplegará automáticamente la rama `feat-drive-sgc` por git integration.
 
 ## Critical Technical Context
 
-- Project uses `pnpm`; do not use `npm` for scripts.
-- El mapa es un HTML estático en `data/sgc/mapa_navegacion_sgc_pea.html`, servido por
-  `src/app/(protected)/dashboard/sgc/mapa/embed/route.ts` dentro de un `<iframe>` desde
-  `src/app/(protected)/dashboard/sgc/mapa/page.tsx`. `/sgc/mapa` re-exporta esa página.
-- La ruta embed aplica CSP `default-src 'self'`; las fuentes `@font-face url('/fonts/...')`
-  cargan bien porque `font-src` hereda `'self'` (mismo origen). No usar fuentes externas.
-- Solo Droid Sans existe localmente en `public/fonts/`; la stack mono cae a fuentes de sistema.
-- Los edges del SVG se recalculan desde las coordenadas de los nodos, así que reordenar
-  nodos no rompe las relaciones.
-- No se pudo renderizar en vivo: la extensión de Chrome no está conectada. Copia autónoma
-  de preview (con rutas de fuente locales) en el scratchpad de la sesión.
-- Contexto previo (auth, sin resolver del todo): producción en `https://calaire-app.vercel.app`,
-  Convex prod `https://steady-kiwi-725.convex.cloud`. Ver `logs/history` para detalle.
+- El deploy a producción se realiza vía push a `feat-drive-sgc`; Vercel git integration lo construye y publica.
+- El commit incluye `_workspace/ui-mockups/` (mockups HTML sueltos); mantenerlos fuera del `src/`.
+- Primitiva nueva: `RondaPageHeader` (`src/app/(protected)/dashboard/rondas/[id]/RondaPageHeader.tsx`) es el header contextual de cada ronda; no duplicar branding dentro del contenido.
+- `MapaSgcFrame` separa el contenido del mapa HTML del wrapper de la app que gestiona filtros/KPIs.
+- El estándar de UI es anatomía de página: nav superior, subnav de entidad opcional, header contextual, KPI strip, filtros/tabs, contenido principal.
 
 ## Next Steps
 
-1. Commitear el rediseño del mapa cuando el usuario lo pida.
-2. Verificar visualmente en producción tras desplegar (`/sgc/mapa`).
-3. Retomar verificación pendiente de auth en `/dashboard` y `/sgc` si aplica.
+1. Verificar el deploy de Vercel para `feat-drive-sgc` (revisar URL de preview y producción).
+2. Revisar visualmente con sesión admin real en `https://calaire-app.vercel.app`.
+3. Si aparece más deriva de UI, extraer la anatomía repetida en shell components compartidos en lugar de editar cada página.
