@@ -270,30 +270,19 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
           <MetricaCard label="Contaminantes" value={contaminantes.length} />
         </section>
 
-        <nav
-          className="overflow-hidden rounded-xl border border-[var(--border)] shadow-sm"
-          style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}
-        >
-          <div className="flex gap-0 overflow-x-auto px-2">
+        <nav className="card overflow-hidden p-0">
+          <div className="tab-nav overflow-x-auto px-2">
             <Link
               href={baseHref}
               aria-current={activeView === 'ronda' ? 'page' : undefined}
-              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeView === 'ronda'
-                  ? 'border-[var(--pt-primary)] font-semibold text-[var(--foreground)]'
-                  : 'border-transparent text-[var(--foreground-muted)] hover:border-[var(--border)] hover:text-[var(--foreground)]'
-              }`}
+              className={`whitespace-nowrap ${activeView === 'ronda' ? 'tab-active' : ''}`}
             >
               Por ronda
             </Link>
             <Link
               href={`${baseHref}?vista=contaminante`}
               aria-current={activeView === 'contaminante' ? 'page' : undefined}
-              className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
-                activeView === 'contaminante'
-                  ? 'border-[var(--pt-primary)] font-semibold text-[var(--foreground)]'
-                  : 'border-transparent text-[var(--foreground-muted)] hover:border-[var(--border)] hover:text-[var(--foreground)]'
-              }`}
+              className={`whitespace-nowrap ${activeView === 'contaminante' ? 'tab-active' : ''}`}
             >
               Por contaminante
             </Link>

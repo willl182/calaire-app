@@ -15,12 +15,12 @@ export function FolderCard({
   return (
     <Link
       href={href}
-      className="group overflow-hidden rounded-xl border border-[var(--border)] bg-white transition hover:border-sky-300 hover:shadow-md"
+      className="group card overflow-hidden p-0 transition hover:border-[var(--pt-primary)] hover:no-underline"
     >
-      <div className="relative flex h-36 items-center justify-center bg-slate-50">
+      <div className="relative flex h-36 items-center justify-center bg-[var(--surface-muted)]">
         <FolderIcon className="h-16 w-16 transition group-hover:scale-105" />
         {badge && (
-          <span className="absolute right-3 top-3 rounded-full bg-white/90 px-2 py-0.5 text-[11px] font-semibold text-[var(--foreground-muted)] shadow-sm">
+          <span className="absolute right-3 top-3 rounded-full bg-[var(--surface-panel)] px-2 py-0.5 text-[11px] font-semibold text-[var(--foreground-muted)] shadow-sm">
             {badge}
           </span>
         )}

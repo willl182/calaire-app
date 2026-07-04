@@ -20,7 +20,7 @@ export default function SgcRootLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)]" style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}>
+      <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)] bg-[var(--surface-panel)] shadow-sm">
         <div className="mx-auto flex max-w-screen-2xl items-stretch gap-5 px-6">
           <Link href="/inicio" className="flex items-center gap-3 border-r border-[var(--border-soft)] py-4 pr-6 hover:no-underline">
             <LogoUnal height={32} />

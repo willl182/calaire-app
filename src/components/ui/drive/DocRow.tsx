@@ -41,9 +41,9 @@ export function DocRow({
     <Link
       href={href}
       aria-current={active ? 'true' : undefined}
-      className={`group grid min-h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border bg-white px-3 py-2 transition hover:shadow-sm ${active ? 'border-sky-400 bg-sky-50/50 ring-2 ring-sky-100' : 'border-[var(--border)] hover:border-sky-300'}`}
+      className={`group grid min-h-16 grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 rounded-lg border px-3 py-2 transition hover:shadow-sm ${active ? 'border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] ring-2 ring-[var(--focus-ring)]' : 'border-[var(--border)] bg-[var(--surface-panel)] hover:border-[var(--pt-primary)]'}`}
     >
-      <div className="relative flex h-10 w-10 items-center justify-center rounded-md bg-slate-50">
+      <div className="relative flex h-10 w-10 items-center justify-center rounded-md bg-[var(--surface-muted)]">
         <FileIcon tone={iconTone} className="h-6 w-6 transition group-hover:scale-105" />
         <span
           aria-label={`Estado: ${estadoLabel ?? estado}`}

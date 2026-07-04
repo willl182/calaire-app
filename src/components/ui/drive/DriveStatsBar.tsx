@@ -16,11 +16,11 @@ const VALUE_TONES: Record<NonNullable<DriveStat['tone']>, string> = {
 // el drive de ronda.
 export function DriveStatsBar({ items }: { items: DriveStat[] }) {
   return (
-    <div className="flex flex-wrap items-stretch divide-x divide-[var(--border)] overflow-hidden rounded-lg border border-[var(--border)] bg-white">
+    <div className="card flex flex-wrap items-stretch divide-x divide-[var(--border)] overflow-hidden p-0">
       {items.map((item) => (
-        <div key={item.label} className="min-w-28 flex-1 px-4 py-2">
-          <div className={`numeric text-xl font-semibold ${VALUE_TONES[item.tone ?? 'default']}`}>{item.value}</div>
-          <div className="text-[10px] font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">{item.label}</div>
+        <div key={item.label} className="min-w-36 flex-1 px-5 py-4">
+          <div className={`numeric text-2xl font-semibold ${VALUE_TONES[item.tone ?? 'default']}`}>{item.value}</div>
+          <div className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{item.label}</div>
         </div>
       ))}
     </div>

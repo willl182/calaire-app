@@ -4,10 +4,7 @@ import { LogoUnal } from '@/components/LogoUnal'
 
 export function ParticipantTopNav({ hasRondas }: { hasRondas: boolean }) {
   return (
-    <header
-      className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)]"
-      style={{ background: 'linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%)' }}
-    >
+    <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)] bg-[var(--surface-panel)] shadow-sm">
       <div className="mx-auto flex max-w-screen-2xl items-stretch gap-6 px-6">
         <div className="flex items-center gap-3 border-r border-[var(--border-soft)] py-4 pr-6">
           <LogoUnal height={32} />

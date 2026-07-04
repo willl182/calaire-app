@@ -161,15 +161,15 @@ function ResumenStrip({
 }) {
   const cards = [
     { label: 'Total cupos', value: totalCupos, filtro: 'todos' as const, color: '' },
-    { label: 'Enlace pendiente', value: enlacesPendientes, filtro: 'enlace_pendiente' as const, color: enlacesPendientes > 0 ? 'border-amber-200 bg-amber-50' : '' },
-    { label: 'Reclamados', value: cuposReclamados, filtro: 'todos' as const, color: cuposReclamados > 0 ? 'border-emerald-200 bg-emerald-50' : '' },
-    { label: 'Ficha pendiente', value: fichasPendientes, filtro: 'ficha_pendiente' as const, color: fichasPendientes > 0 ? 'border-amber-200 bg-amber-50' : '' },
-    { label: 'Ficha enviada', value: fichasEnviadas, filtro: 'ficha_enviada' as const, color: fichasEnviadas > 0 ? 'border-emerald-200 bg-emerald-50' : '' },
-    { label: 'Con envíos PT', value: conEnvios, filtro: 'con_envios' as const, color: conEnvios > 0 ? 'border-blue-200 bg-blue-50' : '' },
+    { label: 'Enlace pendiente', value: enlacesPendientes, filtro: 'enlace_pendiente' as const, color: enlacesPendientes > 0 ? 'border-l-amber-500 bg-amber-50/50' : '' },
+    { label: 'Reclamados', value: cuposReclamados, filtro: 'todos' as const, color: cuposReclamados > 0 ? 'border-l-emerald-500 bg-emerald-50/40' : '' },
+    { label: 'Ficha pendiente', value: fichasPendientes, filtro: 'ficha_pendiente' as const, color: fichasPendientes > 0 ? 'border-l-amber-500 bg-amber-50/50' : '' },
+    { label: 'Ficha enviada', value: fichasEnviadas, filtro: 'ficha_enviada' as const, color: fichasEnviadas > 0 ? 'border-l-emerald-500 bg-emerald-50/40' : '' },
+    { label: 'Con envíos PT', value: conEnvios, filtro: 'con_envios' as const, color: conEnvios > 0 ? 'border-l-sky-500 bg-sky-50/40' : '' },
   ]
 
   return (
-    <div className="grid gap-2 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {cards.map(({ label, value, filtro, color }) => {
         const href =
           filtro === 'todos'
@@ -179,12 +179,12 @@ function ResumenStrip({
           <Link
             key={label}
             href={href}
-            className={`rounded-xl border px-4 py-3 text-sm transition hover:border-[var(--pt-primary)] ${
-              color || 'border-[var(--border)] bg-[var(--surface-muted)]'
+            className={`card-accent px-5 py-4 transition hover:border-[var(--pt-primary)] hover:no-underline ${
+              color || ''
             }`}
           >
-            <div className="text-[11px] font-medium text-[var(--foreground-muted)]">{label}</div>
-            <div className="numeric mt-0.5 text-xl font-semibold text-[var(--foreground)]">
+            <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{label}</div>
+            <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">
               {value}
             </div>
           </Link>
