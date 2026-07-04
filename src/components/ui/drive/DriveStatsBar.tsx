@@ -16,11 +16,11 @@ const VALUE_TONES: Record<NonNullable<DriveStat['tone']>, string> = {
 // el drive de ronda.
 export function DriveStatsBar({ items }: { items: DriveStat[] }) {
   return (
-    <div className="card flex flex-wrap items-stretch divide-x divide-[var(--border)] overflow-hidden p-0">
+    <div className="sgc-kpis">
       {items.map((item) => (
-        <div key={item.label} className="min-w-36 flex-1 px-5 py-4">
-          <div className={`numeric text-2xl font-semibold ${VALUE_TONES[item.tone ?? 'default']}`}>{item.value}</div>
-          <div className="mt-1 text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{item.label}</div>
+        <div key={item.label} className="sgc-kpi">
+          <div className="sgc-kpi-label">{item.label}</div>
+          <div className={`sgc-kpi-value numeric ${VALUE_TONES[item.tone ?? 'default']}`}>{item.value}</div>
         </div>
       ))}
     </div>

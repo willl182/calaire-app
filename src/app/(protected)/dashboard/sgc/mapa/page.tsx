@@ -6,15 +6,22 @@ import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgcWithStatus } from '@/server/sgc'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
+import { MapaSgcFrame } from './MapaSgcFrame'
 
 export default async function MapaSgcPage() {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
   if (!canViewSgcMaestro(auth)) redirect('/denied?reason=role')
   const mapa = await listMapaSgcWithStatus()
+  const documentosConRelacion = new Set(
+    mapa.data.relaciones.flatMap((relacion) => [
+      relacion.documentoOrigenId,
+      relacion.documentoDestinoId,
+    ]).filter(Boolean)
+  ).size
 
   return (
-    <div className="grid min-w-0 gap-6">
+    <div className="app-workspace min-w-0">
       <SgcHeader
         title="Mapa SGC vivo"
         accent="Navegación documental del inventario maestro"
@@ -37,14 +44,27 @@ export default async function MapaSgcPage() {
         <BackendOfflineBanner detail="El mapa SGC se muestra sin relaciones mientras Convex no responde." />
       )}
 
+      <section className="sgc-kpis">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Relaciones</div>
+          <div className="sgc-kpi-value numeric">{mapa.data.relaciones.length}</div>
+        </div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Documentos</div>
+          <div className="sgc-kpi-value numeric">{documentosConRelacion || mapa.data.documentos.length}</div>
+        </div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Bloques</div>
+          <div className="sgc-kpi-value numeric">{mapa.data.bloques.length}</div>
+        </div>
+        <div className="sgc-kpi bg-amber-50/50">
+          <div className="sgc-kpi-label">Pendientes</div>
+          <div className="sgc-kpi-value numeric">{mapa.data.pendientes}</div>
+        </div>
+      </section>
+
       {mapa.data.relaciones.length > 0 ? (
-        <section className="overflow-hidden rounded-lg border border-[var(--border)] bg-white shadow-sm">
-          <iframe
-            className="h-[calc(100vh-19rem)] min-h-[680px] w-full bg-white"
-            src="/dashboard/sgc/mapa/embed"
-            title="Mapa interactivo de navegación del SGC"
-          />
-        </section>
+        <MapaSgcFrame src="/dashboard/sgc/mapa/embed" title="Mapa interactivo de navegación del SGC" />
       ) : (
         <section className="card p-8 text-center">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Mapa SGC sin relaciones</h2>

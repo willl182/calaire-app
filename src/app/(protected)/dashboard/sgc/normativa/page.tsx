@@ -97,7 +97,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
   })
 
   return (
-    <div className="grid min-w-0 gap-6">
+    <div className="app-workspace min-w-0">
       <SgcHeader
         title="Matriz normativa"
         accent="Requisitos operativos y cobertura documental"
@@ -111,30 +111,25 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
         <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras Convex no responde." />
       )}
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="card-accent px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Requisitos</div><div className="mt-2 text-3xl font-semibold">{data.resumen.requisitos}</div></div>
-        <div className="card-accent border-l-emerald-500 bg-emerald-50/40 px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Cubiertos</div><div className="mt-2 text-3xl font-semibold">{data.resumen.cubiertos}</div></div>
-        <div className="card-accent border-l-amber-500 bg-amber-50/40 px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Parciales</div><div className="mt-2 text-3xl font-semibold">{data.resumen.parciales}</div></div>
-        <div className="card-accent border-l-rose-500 bg-rose-50/40 px-5 py-4"><div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Pendientes</div><div className="mt-2 text-3xl font-semibold">{data.resumen.pendientes}</div></div>
+      <section className="sgc-kpis">
+        <div className="sgc-kpi"><div className="sgc-kpi-label">Requisitos</div><div className="sgc-kpi-value numeric">{data.resumen.requisitos}</div></div>
+        <div className="sgc-kpi"><div className="sgc-kpi-label">Cubiertos</div><div className="sgc-kpi-value numeric">{data.resumen.cubiertos}</div></div>
+        <div className="sgc-kpi"><div className="sgc-kpi-label">Parciales</div><div className="sgc-kpi-value numeric">{data.resumen.parciales}</div></div>
+        <div className="sgc-kpi"><div className="sgc-kpi-label">Pendientes</div><div className="sgc-kpi-value numeric">{data.resumen.pendientes}</div></div>
       </section>
 
-      <section className="grid gap-4 lg:grid-cols-3">
+      <nav className="sgc-quicknav" aria-label="Normas">
         {normaCards.map((card) => {
           const isSelected = selectedNorma === card.norma
           return (
             <Link
               key={card.norma}
-              className={`card-accent px-5 py-4 transition hover:-translate-y-0.5 hover:shadow-md ${isSelected ? 'border-l-[var(--pt-primary)] bg-amber-50/50' : 'bg-white/80'}`}
+              className={isSelected ? 'bg-[var(--pt-primary-subtle)]' : ''}
               href={buildNormaHref(params, card.norma)}
             >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Norma</div>
-                  <div className="mt-2 text-xl font-semibold">{card.norma}</div>
-                </div>
-                <div className="rounded-full bg-[var(--surface-muted)] px-3 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{card.requisitos}</div>
-              </div>
-              <div className="mt-4 grid grid-cols-3 gap-2 text-xs">
+              <div>{card.norma}</div>
+              <div className="mt-2 text-xs text-[var(--foreground-muted)]">{card.requisitos} requisitos</div>
+              <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
                 <div><div className="font-semibold text-emerald-700">{card.cubiertos}</div><div className="text-[var(--foreground-muted)]">cubiertos</div></div>
                 <div><div className="font-semibold text-amber-700">{card.parciales}</div><div className="text-[var(--foreground-muted)]">parciales</div></div>
                 <div><div className="font-semibold text-rose-700">{card.pendientes}</div><div className="text-[var(--foreground-muted)]">pendientes</div></div>
@@ -142,9 +137,9 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
             </Link>
           )
         })}
-      </section>
+      </nav>
 
-      <section className="card p-5">
+      <section className="sgc-filters">
         <form className="grid gap-3 md:grid-cols-3" action="/dashboard/sgc/normativa">
           <select className="input" name="norma" defaultValue={selectedNorma ?? ''}>
             <option value="">Todas las normas</option>
@@ -162,11 +157,12 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
       </section>
 
       <section className="card overflow-hidden">
-        <div className="flex flex-col gap-3 border-b border-[var(--border-soft)] px-4 py-3 text-sm text-[var(--foreground-muted)] md:flex-row md:items-center md:justify-between">
+        <div className="sgc-panel-head">
           <div>
-            Mostrando pagina <span className="font-semibold text-[var(--foreground)]">{data.pagination.page}</span> de{' '}
-            <span className="font-semibold text-[var(--foreground)]">{data.pagination.totalPages}</span>
-            {' '}({data.pagination.totalRows} requisitos filtrados)
+            <h2>Requisitos normativos</h2>
+            <p>
+              Pagina {data.pagination.page} de {data.pagination.totalPages} · {data.pagination.totalRows} requisitos filtrados
+            </p>
           </div>
           <div className="flex gap-2">
             {data.pagination.hasPreviousPage ? (

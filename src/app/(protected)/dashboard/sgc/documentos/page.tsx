@@ -5,13 +5,9 @@ import { normalizeHttpUrl } from '@/lib/safe-url'
 import { listSgcMaestro, listSgcMaestroWithStatus, type DocumentoSgc } from '@/server/sgc'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
-import { DocGrid, driveSplitGrid } from '@/components/ui/drive/DocGrid'
-import { DocMetaDot, DocRow } from '@/components/ui/drive/DocRow'
+import { driveSplitGrid } from '@/components/ui/drive/DocGrid'
 import { DriveBreadcrumb } from '@/components/ui/drive/DriveBreadcrumb'
 import { DriveDetailAside } from '@/components/ui/drive/DriveDetailAside'
-import { DriveStatsBar } from '@/components/ui/drive/DriveStatsBar'
-import { FolderCard } from '@/components/ui/drive/FolderCard'
-import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
 import { guardarDocumentoMaestroAction } from './actions'
 
@@ -23,13 +19,7 @@ function firstParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-function tipoTone(tipo: DocumentoSgc['tipo']): FileTone {
-  if (tipo === 'procedimiento') return 'sky'
-  if (tipo === 'instructivo') return 'violet'
-  if (tipo === 'formato' || tipo === 'registro') return 'emerald'
-  if (tipo === 'plantilla') return 'amber'
-  return 'slate'
-}
+const DOCUMENTOS_BASE = '/dashboard/sgc/documentos'
 
 function familiaLabel(familia: NonNullable<DocumentoSgc['familia']>) {
   if (familia === 'DG') return 'Documentos generales'
@@ -57,7 +47,13 @@ function buildDocumentosHref(
     else search.delete(key)
   }
   const query = search.toString()
-  return query ? `/sgc/documentos?${query}` : '/sgc/documentos'
+  return query ? `${DOCUMENTOS_BASE}?${query}` : DOCUMENTOS_BASE
+}
+
+function estadoStatusClass(estado: DocumentoSgc['estado']) {
+  if (estado === 'vigente') return 'sgc-status-ok'
+  if (estado === 'en_revision' || estado === 'borrador') return 'sgc-status-warn'
+  return 'sgc-status-bad'
 }
 
 function formatBytes(size?: number | null) {
@@ -100,7 +96,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
   const selectedEditableUrl = selectedDoc ? normalizeHttpUrl(selectedDoc.fuenteEditableUrl) : null
 
   return (
-    <div className="grid min-w-0 gap-6">
+    <div className="app-workspace min-w-0">
       <SgcHeader
         title="Centro documental"
         accent="Inventario maestro de documentos SGC"
@@ -113,33 +109,62 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         <BackendOfflineBanner detail="El centro documental se muestra sin documentos mientras Convex no responde." />
       )}
 
-      <DriveStatsBar
-        items={[
-          { label: 'Documentos', value: data.resumen.total },
-          { label: 'Vigentes', value: data.resumen.vigentes, tone: 'emerald' },
-          { label: 'En revision', value: data.resumen.enRevision, tone: 'amber' },
-          { label: 'Sin version', value: data.resumen.sinVersion, tone: 'rose' },
-        ]}
-      />
+      <section className="sgc-kpis">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Documentos</div>
+          <div className="sgc-kpi-value numeric">{data.resumen.total}</div>
+        </div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Vigentes</div>
+          <div className="sgc-kpi-value numeric">{data.resumen.vigentes}</div>
+        </div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">En revision</div>
+          <div className="sgc-kpi-value numeric">{data.resumen.enRevision}</div>
+        </div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Sin version</div>
+          <div className="sgc-kpi-value numeric">{data.resumen.sinVersion}</div>
+        </div>
+      </section>
 
-      <section className="card overflow-hidden">
-        <form className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-[var(--surface-panel)] px-6 py-3">
+      <section className="sgc-filters">
+        <form className="grid items-center gap-3 lg:grid-cols-12">
           {activeFolder && <input type="hidden" name="carpeta" value={activeFolder.familia} />}
-          <input className="input min-w-48 flex-1" name="q" placeholder="Codigo o nombre" defaultValue={firstParam(params.q) ?? ''} />
-          <select className="input w-auto" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
+          <input className="input min-w-0 lg:col-span-5 xl:col-span-6" name="q" placeholder="Codigo o nombre" defaultValue={firstParam(params.q) ?? ''} />
+          <select className="input min-w-0 lg:col-span-3" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
             <option value="">Todas las familias</option>
             {data.familias.map((familia) => <option key={familia} value={familia}>{familia}</option>)}
           </select>
-          <select className="input w-auto" name="estado" defaultValue={firstParam(params.estado) ?? ''}>
+          <select className="input min-w-0 lg:col-span-2" name="estado" defaultValue={firstParam(params.estado) ?? ''}>
             <option value="">Todos los estados</option>
             <option value="vigente">Vigente</option>
             <option value="en_revision">En revision</option>
             <option value="borrador">Borrador</option>
             <option value="obsoleto">Obsoleto</option>
           </select>
-          <button className="btn-outline" type="submit">Filtrar</button>
+          <button className="btn-primary h-11 px-5 lg:col-span-2 xl:col-span-1" type="submit">Filtrar</button>
         </form>
+      </section>
 
+      {data.documentos.length > 0 && (
+        <nav className="sgc-tabs" aria-label="Familias documentales">
+          <Link className={!activeFolder ? 'sgc-tabs-active' : ''} href={buildDocumentosHref(params, { carpeta: null, doc: null })}>
+            Centro documental
+          </Link>
+          {carpetas.map(({ familia }) => (
+            <Link
+              key={familia}
+              className={activeFolder?.familia === familia ? 'sgc-tabs-active' : ''}
+              href={buildDocumentosHref(params, { carpeta: familia, doc: null })}
+            >
+              {familiaLabel(familia)}
+            </Link>
+          ))}
+        </nav>
+      )}
+
+      <section className="card overflow-hidden">
         <DriveBreadcrumb
           rootLabel="Centro documental"
           rootHref={buildDocumentosHref(params, { carpeta: null, doc: null })}
@@ -149,55 +174,77 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         {data.documentos.length === 0 && <div className="p-8 text-center text-sm text-[var(--foreground-muted)]">No hay documentos para los filtros seleccionados.</div>}
 
         {data.documentos.length > 0 && !activeFolder && (
-          <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
+          <nav className="sgc-quicknav" aria-label="Carpetas documentales">
             {carpetas.map(({ familia, documentos }) => {
               const vigentes = documentos.filter((doc) => doc.estado === 'vigente').length
               return (
-                <FolderCard
+                <Link
                   key={familia}
                   href={buildDocumentosHref(params, { carpeta: familia, doc: null })}
-                  nombre={familiaLabel(familia)}
-                  sublabel={`Carpeta · ${documentos.length} documento${documentos.length === 1 ? '' : 's'}`}
-                  badge={`${vigentes}/${documentos.length}`}
-                />
+                >
+                  <div>{familiaLabel(familia)}</div>
+                  <div className="mt-2 text-xs text-[var(--foreground-muted)]">
+                    Carpeta · {documentos.length} documento{documentos.length === 1 ? '' : 's'} · {vigentes} vigente{vigentes === 1 ? '' : 's'}
+                  </div>
+                </Link>
               )
             })}
-          </div>
+          </nav>
         )}
 
         {activeFolder && (
           <div className={selectedDoc ? driveSplitGrid : ''}>
-            <div className="p-6">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-[var(--foreground)]">{familiaLabel(activeFolder.familia)}</h3>
-                <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.familia} · {folderDocs.length} documento{folderDocs.length === 1 ? '' : 's'} filtrado{folderDocs.length === 1 ? '' : 's'}</p>
+            <div>
+              <div className="sgc-panel-head">
+                <div>
+                  <h2>{familiaLabel(activeFolder.familia)}</h2>
+                  <p>Centro documental / {familiaLabel(activeFolder.familia)} · {folderDocs.length} documento{folderDocs.length === 1 ? '' : 's'} filtrado{folderDocs.length === 1 ? '' : 's'}</p>
+                </div>
+                <span className="sgc-badge">{folderDocs.length}</span>
               </div>
-              <DocGrid collapsed={Boolean(selectedDoc)}>
-                {folderDocs.map((doc) => {
-                  const version = versionFor(doc, data.versiones)
-                  const fuenteEditableUrl = normalizeHttpUrl(doc.fuenteEditableUrl)
-                  return (
-                    <DocRow
-                      key={doc._id}
-                      href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: doc._id })}
-                      active={doc._id === selectedDocId}
-                      iconTone={tipoTone(doc.tipo)}
-                      estado={doc.estado}
-                      codigo={doc.codigo}
-                      nombre={doc.nombre}
-                      meta={
-                        <>
-                          <span>{doc.tipo}</span>
-                          {doc.visibilidad === 'participantes' && <DocMetaDot label="Visible para participantes" tone="violet" />}
-                          {doc.criticidad === 'alta' && <DocMetaDot label="Criticidad alta" tone="rose" />}
-                          {fuenteEditableUrl && <DocMetaDot label="Editable disponible" tone="sky" />}
-                        </>
-                      }
-                      trailing={version?.vigente && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">v{version.vigente.version}</span>}
-                    />
-                  )
-                })}
-              </DocGrid>
+              <div className="overflow-x-auto">
+                <table className="min-w-[840px]">
+                  <thead>
+                    <tr>
+                      <th className="text-left text-xs font-semibold uppercase tracking-[0.15em] text-[var(--foreground-muted)]">Codigo</th>
+                      <th className="text-left text-xs font-semibold uppercase tracking-[0.15em] text-[var(--foreground-muted)]">Documento</th>
+                      <th className="text-left text-xs font-semibold uppercase tracking-[0.15em] text-[var(--foreground-muted)]">Tipo</th>
+                      <th className="text-left text-xs font-semibold uppercase tracking-[0.15em] text-[var(--foreground-muted)]">Estado</th>
+                      <th className="text-left text-xs font-semibold uppercase tracking-[0.15em] text-[var(--foreground-muted)]">Version</th>
+                      <th className="text-left text-xs font-semibold uppercase tracking-[0.15em] text-[var(--foreground-muted)]">Accion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {folderDocs.map((doc) => {
+                      const version = versionFor(doc, data.versiones)
+                      const active = doc._id === selectedDocId
+                      return (
+                        <tr key={doc._id} className={`border-b border-[var(--border-soft)] last:border-0 ${active ? 'bg-[var(--pt-primary-subtle)]' : 'hover:bg-[var(--surface-muted)]'}`}>
+                          <td className="px-4 py-3 text-sm font-semibold text-[var(--foreground)]">{doc.codigo}</td>
+                          <td className="px-4 py-3 text-sm text-[var(--foreground)]">
+                            <div className="font-medium">{doc.nombre}</div>
+                            <div className="mt-1 text-xs text-[var(--foreground-muted)]">{doc.proceso} · {doc.criticidad}</div>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[var(--foreground-muted)]">{doc.tipo}</td>
+                          <td className="px-4 py-3">
+                            <span className={`inline-flex min-h-6 items-center rounded-full px-2.5 text-xs font-semibold ${estadoStatusClass(doc.estado)}`}>
+                              {doc.estado}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 text-sm text-[var(--foreground-muted)]">
+                            {version?.vigente ? `v${version.vigente.version}` : 'Sin version'}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Link className="btn-outline px-3 py-2 text-xs" href={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: doc._id })}>
+                              Ver ficha
+                            </Link>
+                          </td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {selectedDoc && (

@@ -34,27 +34,27 @@ export function ResultadosGlobalView({
         <div className="flex flex-col gap-2">
           <h2 className="text-2xl font-semibold text-[var(--foreground)]">Resultados PT</h2>
           <p className="text-sm text-[var(--foreground-muted)]">
-            Dashboard global de resultados. Ingrese por ronda o revise una pestaña específica por contaminante.
+            Matriz global de resultados por ronda o contaminante.
           </p>
         </div>
       </header>
 
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div className="card-accent border-l-[var(--pt-primary)] px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Rondas</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{rondasResultados.length}</div>
+      <section className="sgc-kpis">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Rondas</div>
+          <div className="sgc-kpi-value numeric">{rondasResultados.length}</div>
         </div>
-        <div className="card-accent border-l-[var(--pt-primary)] px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Participantes</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{totalParticipantes}</div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Participantes</div>
+          <div className="sgc-kpi-value numeric">{totalParticipantes}</div>
         </div>
-        <div className="card-accent border-l-emerald-500 bg-emerald-50/40 px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Envíos finales</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{totalEnviosFinales}</div>
+        <div className="sgc-kpi bg-emerald-50/40">
+          <div className="sgc-kpi-label">Envios finales</div>
+          <div className="sgc-kpi-value numeric">{totalEnviosFinales}</div>
         </div>
-        <div className="card-accent border-l-[var(--pt-primary)] px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Contaminantes</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{contaminantes.length}</div>
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Contaminantes</div>
+          <div className="sgc-kpi-value numeric">{contaminantes.length}</div>
         </div>
       </section>
 

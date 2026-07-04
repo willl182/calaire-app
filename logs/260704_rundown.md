@@ -4,32 +4,46 @@
 
 ## Current State
 
-- Morning: SGC document browser compacted and deployed to production (`04a0a7e`, alias `https://calaire-app.vercel.app`).
-- Afternoon: `plan_ui_homogeneo.md` IMPLEMENTADO completo (Fases 1–3): primitivas compartidas en `src/components/ui/drive/` (DriveIcons, DriveBreadcrumb, FolderCard, DocRow, DocGrid + `driveSplitGrid`, DriveDetailAside, DriveStatsBar, estadoTone); centro documental y drive de ronda migrados al patrón único (DocRow compacto, DocGrid dos modos, aside/breadcrumb/stats/tonos unificados, root admin y "Crear documento" en `<details>`, banner Google solo si no está listo).
-- Verificación: `pnpm build`, `pnpm lint`, `pnpm test` en verde. E2E del centro documental pasan; los de ronda fallan con 404 por `rondaId` seed inexistente en Convex (dato, no UI); el e2e del redirect legacy de expedientes falla también sin estos cambios (preexistente).
-- Cambios sin commitear. Plan lifecycle copy: `logs/plans/260704_1123_plan_ui-homogeneo.md` → status ahora efectivamente completed (código); actualizar si se usa.
+- UI standardization changes are live in production at `https://calaire-app.vercel.app`.
+- Vercel production deployment is `dpl_G2beWf2oBseJFryVPdeYgy53GiNL`, status `READY`.
+- Local verification passed: `pnpm lint`, `pnpm build`, and `pnpm test`.
+- Global results copy was corrected from "Dashboard global..." to "Matriz global de resultados por ronda o contaminante."
+- KPI strips were normalized for global Registros/Participantes and SGC map.
+- Round pages now share `RondaPageHeader` and follow the same page order across summary, configuración PT, participantes, resultados, and SGC.
+- SGC map now has app-owned filters/KPIs and the embedded HTML no longer renders its own page hero.
 
 ## Critical Technical Context
 
-- Repo migrado a `src/` (AGENTS.md desactualizado); `/sgc/documentos` re-exporta la page de `src/app/(protected)/dashboard/sgc/documentos/page.tsx` — ambas URLs sirven lo mismo.
-- `tests/e2e/sgc-fase2.auth.spec.ts` ahora espera "Administrar carpeta raiz" (antes "Carpeta raiz Drive").
-- E2E corridos justo tras `pnpm build` pueden fallar en TODAS las páginas con `adapterFn is not a function` (`.next` de producción stale en dev); reintentar el run resuelve.
-- Server actions y contratos Convex sin cambios; todo capa de presentación.
-- `pnpm release` runs `git add -A` — avoid while `logs/` is dirty; deploy manually if needed.
+- The UI standard means consistent page anatomy: nav, optional entity subnav, context header, KPI strip, filters/tabs, primary content.
+- Use `sgc-kpis` / `sgc-kpi` for KPI rows; avoid `card-accent` for comparable KPI bands.
+- Round pages should keep the round name as the main H1 through `RondaPageHeader`.
+- `/dashboard/sgc/mapa/embed` should remain an embedded map surface, not a nested standalone page.
+- Production was deployed directly from the dirty local working tree; changes are live but not committed.
 
 ## Next Steps
 
-1. Commits sugeridos por el plan: `feat(ui): primitivas drive compartidas`, `refactor(sgc): centro documental sobre primitivas + layout compacto`, `refactor(sgc): drive de ronda homogéneo con centro documental`.
-2. Revisión visual de las 4 URLs de referencia con una ronda seed real (breakpoints sm/lg); los e2e de ronda necesitan un `rondaId` válido.
-3. Investigar el fallo preexistente del e2e del redirect legacy de expedientes.
+1. Visually verify authenticated production routes with an admin account.
+2. Commit only the intended UI standardization files, keeping unrelated dirty work separate.
+3. Consider extracting more shared shell primitives if future SGC/dashboard pages drift again.
 
 ## Branch Status
 
 - Branch: `feat-drive-sgc`
-- Status: dirty (in sync with origin at `04a0a7e`, nada commiteado esta sesión)
+- Status: dirty
 - Pending changes:
-  - `src/components/ui/drive/` (nuevo, 8 archivos)
-  - `src/app/(protected)/dashboard/sgc/documentos/page.tsx`, `src/app/(protected)/dashboard/rondas/[id]/sgc/DriveDocumentalSgc.tsx`
-  - `tests/e2e/sgc-fase2.auth.spec.ts`
-  - `plan_ui_homogeneo.md` (untracked)
-  - Logs: `CURRENT_SESSION.md`, `260704_rundown.md`, `logs/history/260704_1135_findings.md`, más rundowns previos dirty (260702, 260703)
+  - `data/sgc/mapa_navegacion_sgc_pea.html`
+  - `logs/CURRENT_SESSION.md`
+  - `logs/260704_rundown.md`
+  - `src/app/(protected)/dashboard/components/DirectorioPanel.tsx`
+  - `src/app/(protected)/dashboard/components/RegistrosPanel.tsx`
+  - `src/app/(protected)/dashboard/components/ResultadosPanel.tsx`
+  - `src/app/(protected)/dashboard/rondas/[id]/RondaPageHeader.tsx`
+  - `src/app/(protected)/dashboard/rondas/[id]/page.tsx`
+  - `src/app/(protected)/dashboard/rondas/[id]/configuracion-pt/page.tsx`
+  - `src/app/(protected)/dashboard/rondas/[id]/participantes/page.tsx`
+  - `src/app/(protected)/dashboard/rondas/[id]/resultados/page.tsx`
+  - `src/app/(protected)/dashboard/rondas/[id]/sgc/page.tsx`
+  - `src/app/(protected)/dashboard/sgc/mapa/page.tsx`
+  - `src/app/(protected)/dashboard/sgc/mapa/MapaSgcFrame.tsx`
+  - `src/app/globals.css`
+  - Additional pre-existing dirty UI/SGC/log files remain in the worktree.

@@ -41,10 +41,11 @@
       --line-soft: #E5E7EB;
       --paper: #E8EAED;
       --panel: #F5F6F7;
+      --surface: #FBFBFA;
       --surface-muted: #F5F5F0;
 
-      --shadow: 0 4px 12px rgba(0, 0, 0, .10);
-      --shadow-sm: 0 2px 4px rgba(0, 0, 0, .08);
+      --shadow: 0 6px 18px rgba(17, 24, 39, .10);
+      --shadow-sm: 0 2px 6px rgba(17, 24, 39, .08);
     }
 
     * { box-sizing: border-box; }
@@ -52,7 +53,7 @@
     body {
       margin: 0;
       color: var(--ink);
-      background: var(--paper);
+      background: transparent;
       font-family: var(--font-sans);
       font-size: 0.9375rem;
       line-height: 1.6;
@@ -73,16 +74,16 @@
     ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
 
     header {
-      padding: 30px clamp(18px, 4vw, 48px) 26px;
-      background: linear-gradient(135deg, #F5F6F7 0%, #F5F5F0 100%);
+      padding: 18px clamp(18px, 3vw, 32px) 20px;
+      background: var(--surface);
       border-bottom: 4px solid var(--primary);
     }
 
     .eyebrow {
       display: inline-flex;
-      gap: 10px;
+      gap: 8px;
       align-items: center;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.08em;
       text-transform: uppercase;
@@ -91,29 +92,29 @@
 
     .eyebrow::before {
       content: "";
-      width: 34px;
-      height: 3px;
+      width: 24px;
+      height: 2px;
       border-radius: 999px;
       background: var(--primary);
     }
 
     h1 {
       max-width: 980px;
-      margin: 14px 0 12px;
+      margin: 8px 0 6px;
       font-family: var(--font-sans);
       font-weight: 700;
-      font-size: clamp(30px, 4.6vw, 52px);
-      line-height: 1.05;
-      letter-spacing: -0.01em;
+      font-size: clamp(22px, 2.4vw, 32px);
+      line-height: 1.15;
+      letter-spacing: 0;
       color: var(--ink);
     }
 
     .lead {
-      max-width: 940px;
+      max-width: 1040px;
       margin: 0;
       color: var(--muted);
-      font-size: clamp(15px, 1.6vw, 18px);
-      line-height: 1.6;
+      font-size: 14px;
+      line-height: 1.55;
     }
 
     .lead code, header code, .audit-note code {
@@ -128,16 +129,13 @@
     main {
       display: grid;
       grid-template-columns: 1fr;
-      gap: 18px;
-      padding: 18px;
+      gap: 0;
+      padding: 0;
       min-height: 74vh;
     }
 
     .controls, .workspace {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      box-shadow: var(--shadow-sm);
+      background: var(--surface);
     }
 
     /* Barra de controles horizontal (arriba del mapa) */
@@ -145,8 +143,9 @@
       display: flex;
       flex-wrap: wrap;
       align-items: flex-start;
-      gap: 16px 26px;
-      padding: 16px 18px;
+      gap: 8px 12px;
+      padding: 10px clamp(16px, 3vw, 28px);
+      border-bottom: 1px solid var(--line-soft);
     }
 
     .control-group {
@@ -155,17 +154,40 @@
       min-width: 0;
     }
 
-    .control-group--search { flex: 1 1 240px; min-width: 200px; }
-    .control-group--routes { flex: 1 1 340px; }
+    .control-group--search { flex: 1 1 260px; min-width: 220px; }
+    .control-group--routes { flex: 1 1 320px; }
+    .control-group--summary { margin-left: auto; }
 
     .workspace {
       min-width: 0;
       overflow: hidden;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .controls-panel {
+      border-top: 1px solid var(--line-soft);
+      background: var(--surface);
+    }
+
+    .controls-panel summary {
+      cursor: pointer;
+      padding: 9px clamp(16px, 3vw, 28px);
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      list-style-position: inside;
+    }
+
+    .controls-panel summary:hover {
+      color: var(--ink);
+      background: var(--surface-muted);
     }
 
     .control-label {
       display: block;
-      margin: 0 0 8px;
+      margin: 0 0 6px;
       color: var(--muted);
       font-size: 11px;
       font-weight: 700;
@@ -175,11 +197,11 @@
 
     input[type="search"] {
       width: 100%;
-      height: 42px;
-      padding: 0 12px;
-      border: 1.5px solid var(--line);
+      height: 32px;
+      padding: 0 10px;
+      border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fff;
+      background: var(--surface);
       color: var(--ink);
       font: inherit;
       font-family: var(--font-sans);
@@ -195,16 +217,16 @@
     .chips {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     button {
-      min-height: 36px;
-      border: 1.5px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
+      min-height: 30px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
       color: var(--ink);
-      font: 600 13px/1 var(--font-sans);
+      font: 700 11px/1 var(--font-sans);
       cursor: pointer;
       transition: border-color 140ms ease, background 140ms ease, color 140ms ease, box-shadow 140ms ease;
     }
@@ -215,24 +237,24 @@
     }
     button:active { transform: translateY(1px); }
     button.active {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+      background: var(--primary);
       border-color: var(--primary-dark);
       color: var(--ink);
       box-shadow: 0 1px 2px rgba(0, 0, 0, .08);
     }
 
-    .chip { padding: 0 14px; }
+    .chip { padding: 0 10px; }
 
     .link-chip {
       display: inline-flex;
-      min-height: 36px;
+      min-height: 30px;
       align-items: center;
-      padding: 0 14px;
-      border: 1.5px solid var(--line);
-      border-radius: 8px;
-      background: #fff;
+      padding: 0 10px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface);
       color: var(--ink);
-      font: 600 13px/1 var(--font-sans);
+      font: 700 11px/1 var(--font-sans);
       text-decoration: none;
       transition: border-color 140ms ease, background 140ms ease, color 140ms ease;
     }
@@ -245,24 +267,24 @@
     .route-list {
       display: flex;
       flex-wrap: wrap;
-      gap: 8px;
+      gap: 6px;
     }
 
     .route-button {
       flex: 0 1 auto;
-      max-width: 240px;
+      max-width: 220px;
       height: auto;
-      min-height: 44px;
-      padding: 8px 12px;
+      min-height: 34px;
+      padding: 6px 8px;
       text-align: left;
       line-height: 1.3;
-      background: #fff;
-      border-radius: 10px;
+      background: var(--surface);
+      border-radius: 8px;
     }
 
     .route-button span {
       display: block;
-      margin-top: 4px;
+      margin-top: 3px;
       color: var(--muted);
       font-weight: 400;
       line-height: 1.35;
@@ -271,21 +293,21 @@
 
     .stats {
       display: flex;
-      gap: 8px;
+      gap: 6px;
     }
 
     .stat {
-      min-width: 68px;
-      padding: 10px 12px;
+      min-width: 64px;
+      padding: 7px 9px;
       border: 1px solid var(--line);
       border-left: 4px solid var(--primary);
-      border-radius: 10px;
-      background: #fff;
+      border-radius: 8px;
+      background: var(--surface);
     }
 
     .stat strong {
       display: block;
-      font-size: 24px;
+      font-size: 18px;
       font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
       letter-spacing: -0.01em;
@@ -293,7 +315,7 @@
 
     .stat span {
       color: var(--muted);
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.04em;
       text-transform: uppercase;
@@ -305,31 +327,31 @@
       gap: 10px;
       align-items: center;
       justify-content: space-between;
-      padding: 14px 16px;
+      padding: 8px clamp(16px, 3vw, 28px);
       border-bottom: 1px solid var(--line-soft);
-      background: var(--panel);
+      background: var(--surface);
     }
 
     .toolbar .hint {
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .audit-strip {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 10px;
-      padding: 14px;
+      gap: 8px;
+      padding: 10px clamp(16px, 3vw, 28px);
       border-bottom: 1px solid var(--line-soft);
-      background: var(--panel);
+      background: var(--surface);
     }
 
     .audit-card {
       min-width: 0;
-      padding: 12px;
+      padding: 10px 12px;
       border: 1px solid var(--line);
       border-left: 4px solid var(--primary);
-      border-radius: 10px;
+      border-radius: 8px;
       background: #fff;
     }
 
@@ -337,43 +359,45 @@
       display: block;
       font-family: var(--font-mono);
       font-variant-numeric: tabular-nums;
-      font-size: 24px;
+      font-size: 20px;
       line-height: 1;
     }
 
     .audit-card span {
       display: block;
-      margin-top: 6px;
+      margin-top: 5px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
       line-height: 1.3;
     }
 
     .audit-note {
-      padding: 0 16px 14px;
+      padding: 10px clamp(16px, 3vw, 28px) 12px;
       border-bottom: 1px solid var(--line-soft);
-      background: var(--panel);
+      background: var(--surface);
       color: var(--muted);
-      font-size: 13px;
+      font-size: 12px;
       line-height: 1.55;
     }
     .audit-note strong { color: var(--ink); }
 
+    .audit-section {
+      border-top: 1px solid var(--line-soft);
+      background: var(--surface);
+    }
+
     .diagram-shell {
       position: relative;
-      min-height: 800px;
+      min-height: 760px;
       overflow: auto;
-      background:
-        radial-gradient(circle at 18% 12%, rgba(253, 185, 19, .08), transparent 30%),
-        radial-gradient(circle at 88% 82%, rgba(229, 166, 16, .07), transparent 30%),
-        #fff;
+      background: #fff;
     }
 
     svg {
       display: block;
       width: 100%;
-      max-width: 1040px;
+      max-width: 1000px;
       margin: 0 auto;
       height: auto;
       aspect-ratio: 970 / 1400;
@@ -381,15 +405,15 @@
 
     .edge {
       stroke: #b9c0c9;
-      stroke-width: 1.4;
+      stroke-width: 1.2;
       fill: none;
-      opacity: .52;
+      opacity: .45;
       marker-end: url(#arrow);
     }
 
     .edge.active {
       stroke: var(--primary-dark);
-      stroke-width: 3;
+      stroke-width: 2.2;
       opacity: 1;
     }
 
@@ -399,22 +423,22 @@
     }
 
     .node rect {
-      rx: 10;
-      stroke-width: 1.4;
-      filter: drop-shadow(0 6px 14px rgba(17, 24, 39, .10));
+      rx: 7;
+      stroke-width: 1.2;
+      filter: drop-shadow(0 3px 8px rgba(17, 24, 39, .08));
     }
 
     .node text {
       pointer-events: none;
       fill: var(--ink);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       font-family: var(--font-mono);
     }
 
     .node .small {
       fill: var(--muted);
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 400;
       font-family: var(--font-sans);
     }
@@ -423,7 +447,7 @@
 
     .node.active rect {
       stroke: var(--primary-dark);
-      stroke-width: 3.5;
+      stroke-width: 2.4;
     }
 
     /* Familias documentales — codificación clara y armónica con la marca */
@@ -442,7 +466,7 @@
       overflow: auto;
       padding: 20px;
       border: 1px solid var(--line);
-      border-radius: 12px;
+      border-radius: 8px;
       background: #fff;
       box-shadow: var(--shadow);
       transform: translateY(calc(100% + 30px));
@@ -455,9 +479,9 @@
       margin: 0 8px 8px 0;
       font-family: var(--font-sans);
       font-weight: 700;
-      font-size: 22px;
+      font-size: 18px;
       line-height: 1.2;
-      letter-spacing: -0.01em;
+      letter-spacing: 0;
     }
 
     .detail p {
@@ -473,7 +497,7 @@
       border-radius: 0 8px 8px 0;
       background: var(--primary-subtle);
       color: #4b3d10;
-      font-size: 13px;
+      font-size: 12px;
     }
 
     .meta {
@@ -489,7 +513,7 @@
       border-radius: 999px;
       background: var(--surface-muted);
       color: #374151;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
 
@@ -523,7 +547,7 @@
       gap: 12px;
       padding: 12px 16px;
       border-top: 1px solid var(--line-soft);
-      background: var(--panel);
+      background: var(--surface);
     }
 
     .legend span {
@@ -531,13 +555,13 @@
       align-items: center;
       gap: 7px;
       color: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
     }
 
     .column-label {
       fill: var(--muted);
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       letter-spacing: 0.06em;
       text-transform: uppercase;
@@ -570,64 +594,8 @@
   </style>
 </head>
 <body>
-  <header>
-    <div class="eyebrow">CALAIRE-EA · Sistema documental PEA</div>
-    <h1>Mapa interactivo de navegacion del SGC</h1>
-    <p class="lead">Vista operacional de las relaciones entre el SGC maestro, los formatos maestros y las evidencias generadas por ronda. El mapa separa <code>01_bloque_general</code> como fuente documental maestra y <code>02_despliegue_rondas</code> como espacio de registros por ronda.</p>
-  </header>
-
   <main>
-    <aside class="controls">
-      <div class="control-group control-group--search">
-        <label class="control-label" for="search">Buscar documento o relacion</label>
-        <input id="search" type="search" placeholder="Ej. F-PSEA-12, pt_app, informe">
-      </div>
-
-      <div class="control-group">
-        <div class="control-label">Familia documental</div>
-        <div class="chips" id="familyFilters"></div>
-      </div>
-
-      <div class="control-group">
-        <div class="control-label">Estado</div>
-        <div class="chips" id="stateFilters"></div>
-      </div>
-
-      <div class="control-group control-group--routes">
-        <div class="control-label">Rutas criticas</div>
-        <div class="route-list" id="routes"></div>
-      </div>
-
-      <div class="control-group">
-        <div class="control-label">Resumen</div>
-        <div class="stats">
-          <div class="stat"><strong id="visibleCount">0</strong><span>visibles</span></div>
-          <div class="stat"><strong id="edgeCount">0</strong><span>relaciones</span></div>
-          <div class="stat"><strong id="selectedCount">0</strong><span>ruta</span></div>
-        </div>
-      </div>
-    </aside>
-
     <section class="workspace">
-      <div class="toolbar">
-        <div class="hint">Seleccione un nodo para ver su rol documental y resaltar sus dependencias directas.</div>
-        <div class="chips">
-          <a class="chip link-chip" href="fichas_resumen/index.html" target="_blank" rel="noopener">Indice de fichas</a>
-          <a class="chip link-chip" href="rev1.md" target="_blank" rel="noopener">Revision formatos</a>
-          <button class="chip" id="reset">Limpiar vista</button>
-          <button class="chip" id="fitData">Flujo de datos</button>
-          <button class="chip" id="fitUpdate">Orden de elaboracion</button>
-        </div>
-      </div>
-      <div class="audit-strip" aria-label="Resumen de cobertura de formatos">
-        <div class="audit-card"><strong>3/3</strong><span>Documentos generales con DOCX</span></div>
-        <div class="audit-card"><strong>21/21</strong><span>Procedimientos con DOCX</span></div>
-        <div class="audit-card"><strong>5/5</strong><span>Instructivos con DOCX</span></div>
-        <div class="audit-card"><strong>5</strong><span>Formatos faltantes integrados</span></div>
-      </div>
-      <div class="audit-note">
-        Revision actualizada al 2026-06-28: <strong>P-PSEA-02</strong> fija la arquitectura documental maestra: <code>01_bloque_general</code> es el SGC maestro y <code>02_despliegue_rondas</code> conserva registros/evidencias por ronda. <strong>EA-PP-2026-R1</strong> es una ronda, no un bloque documental independiente. Los formatos maestros viven en <code>01_bloque_general/04_formatos_maestros</code>; las copias diligenciadas viven en la etapa correspondiente de la ronda. <strong>P-PSEA-03</strong> fija una raiz limpia con <code>checklist_ronda.md</code> y siete carpetas de etapa. <strong>DG-PSEA-02</strong> y <strong>DG-PSEA-03</strong> viven ahora en carpetas documentales propias con Markdown maestro, DOCX, HTML y capturas; no se conserva <code>indice_capturas.md</code> ni carpetas tecnicas <code>dgpsea02</code>/<code>dgpsea03</code>.
-      </div>
       <div class="diagram-shell">
         <svg id="map" viewBox="0 0 970 1400" role="img" aria-label="Mapa de navegacion documental SGC PEA">
           <defs>
@@ -639,13 +607,6 @@
           <text class="column-label" x="360" y="26">Documentos / instructivos</text>
           <text class="column-label" x="680" y="26">Formatos / registros</text>
         </svg>
-      </div>
-      <div class="legend">
-        <span><i class="swatch" style="background:#FEF3D7;color:#E5A610"></i>Documentos generales</span>
-        <span><i class="swatch" style="background:#E4E7EB;color:#4B5563"></i>Procedimientos</span>
-        <span><i class="swatch" style="background:#EAE7F6;color:#6D5AC0"></i>Instructivos</span>
-        <span><i class="swatch" style="background:#DDF3E7;color:#0E9F6E"></i>Formatos y registros</span>
-        <span><i class="swatch" style="background:#FBE3E0;color:#D64545"></i>Retirado, reservado o fuera de alcance</span>
       </div>
     </section>
   </main>
@@ -778,6 +739,7 @@
     let activeState = "Todos";
     let activeRoute = null;
     let activeNode = null;
+    let searchQuery = "";
 
     function center(n) { return { x: n.x + n.w / 2, y: n.y + n.h / 2 }; }
     function pathBetween(a, b) {
@@ -828,6 +790,7 @@
 
     function renderControls() {
       const familyBox = document.getElementById("familyFilters");
+      if (!familyBox) return;
       ["Todos", ...Object.keys(familyNames)].forEach(f => {
         const b = document.createElement("button");
         b.className = "chip";
@@ -837,6 +800,7 @@
       });
       const states = ["Todos", ...new Set(nodes.map(n => n.state))];
       const stateBox = document.getElementById("stateFilters");
+      if (!stateBox) return;
       states.forEach(s => {
         const b = document.createElement("button");
         b.className = "chip";
@@ -845,6 +809,7 @@
         stateBox.appendChild(b);
       });
       const routeBox = document.getElementById("routes");
+      if (!routeBox) return;
       routes.forEach(r => {
         const b = document.createElement("button");
         b.className = "route-button";
@@ -886,7 +851,7 @@
     }
 
     function matchesFilters(n) {
-      const q = document.getElementById("search").value.trim().toLowerCase();
+      const q = searchQuery.trim().toLowerCase();
       const text = `${n.id} ${n.label} ${n.family} ${n.state} ${n.text}`.toLowerCase();
       const familyOk = activeFamily === "Todos" || n.family === activeFamily;
       const stateOk = activeState === "Todos" || n.state === activeState;
@@ -922,14 +887,25 @@
       document.querySelectorAll("#familyFilters button").forEach(b => b.classList.toggle("active", b.textContent === (activeFamily === "Todos" ? "Todos" : familyNames[activeFamily])));
       document.querySelectorAll("#stateFilters button").forEach(b => b.classList.toggle("active", b.textContent === activeState));
       document.querySelectorAll("#routes button").forEach((b, i) => b.classList.toggle("active", routes[i].id === activeRoute));
-      document.getElementById("visibleCount").textContent = visible.size;
-      document.getElementById("edgeCount").textContent = edgeVisible;
-      document.getElementById("selectedCount").textContent = routeSet ? routeSet.size : selected.size;
+      const visibleCount = document.getElementById("visibleCount");
+      const edgeCount = document.getElementById("edgeCount");
+      const selectedCount = document.getElementById("selectedCount");
+      if (visibleCount) visibleCount.textContent = visible.size;
+      if (edgeCount) edgeCount.textContent = edgeVisible;
+      if (selectedCount) selectedCount.textContent = routeSet ? routeSet.size : selected.size;
     }
 
-    document.getElementById("search").addEventListener("input", () => { activeRoute = null; selected.clear(); activeNode = null; update(); });
-    document.getElementById("reset").addEventListener("click", () => {
-      document.getElementById("search").value = "";
+    document.getElementById("search")?.addEventListener("input", event => {
+      searchQuery = event.target.value;
+      activeRoute = null;
+      selected.clear();
+      activeNode = null;
+      update();
+    });
+    document.getElementById("reset")?.addEventListener("click", () => {
+      const search = document.getElementById("search");
+      if (search) search.value = "";
+      searchQuery = "";
       activeFamily = "Todos";
       activeState = "Todos";
       activeRoute = null;
@@ -938,9 +914,25 @@
       detail.classList.remove("open");
       update();
     });
-    document.getElementById("fitData").addEventListener("click", () => { activeRoute = "data"; selected.clear(); activeNode = null; update(); });
-    document.getElementById("fitUpdate").addEventListener("click", () => { activeRoute = "update"; selected.clear(); activeNode = null; update(); });
+    document.getElementById("fitData")?.addEventListener("click", () => { activeRoute = "data"; selected.clear(); activeNode = null; update(); });
+    document.getElementById("fitUpdate")?.addEventListener("click", () => { activeRoute = "update"; selected.clear(); activeNode = null; update(); });
     document.getElementById("closeDetail").addEventListener("click", () => { detail.classList.remove("open"); selected.clear(); activeNode = null; update(); });
+
+    window.addEventListener("message", event => {
+      if (event.origin !== window.location.origin) return;
+      const payload = event.data;
+      if (!payload || payload.type !== "sgc-map-controls") return;
+      searchQuery = typeof payload.search === "string" ? payload.search : "";
+      activeFamily = payload.family || "Todos";
+      activeState = payload.state || "Todos";
+      activeRoute = payload.route || null;
+      if (payload.resetSelection) {
+        selected.clear();
+        activeNode = null;
+        detail.classList.remove("open");
+      }
+      update();
+    });
 
     renderControls();
     draw();

@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Mockup v2 - páginas capturadas</title>
+    <style>
+      :root {
+        --bg: #eceff3;
+        --panel: #fbfbfa;
+        --soft: #f5f6f7;
+        --text: #111827;
+        --muted: #667085;
+        --border: #d4dae2;
+        --border-soft: #e7e9ee;
+        --accent: #f6ad00;
+        --green: #008760;
+        --red: #c0103a;
+        --shadow: 0 6px 18px rgba(17, 24, 39, 0.07);
+        --radius: 10px;
+      }
+
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        letter-spacing: 0;
+      }
+      h1, h2, h3, p { margin: 0; }
+
+      .index {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        display: flex;
+        gap: 8px;
+        align-items: center;
+        overflow-x: auto;
+        border-bottom: 4px solid var(--accent);
+        background: var(--panel);
+        padding: 10px 18px;
+        box-shadow: var(--shadow);
+      }
+      .index strong { margin-right: 10px; white-space: nowrap; }
+      .index a {
+        display: inline-flex;
+        align-items: center;
+        height: 34px;
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        color: var(--muted);
+        padding: 0 12px;
+        font-size: 13px;
+        font-weight: 750;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+
+      .page {
+        border-bottom: 1px solid #cfd5dd;
+        padding: 18px 32px 40px;
+      }
+      .shell {
+        width: min(1584px, 100%);
+        margin: 0 auto;
+      }
+      .path {
+        margin-bottom: 10px;
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+      }
+
+      .topbar {
+        display: grid;
+        grid-template-columns: 330px 390px minmax(0, 1fr);
+        height: 68px;
+        border-bottom: 3px solid var(--accent);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+      .brand,
+      .modules,
+      .mainnav {
+        display: flex;
+        align-items: center;
+        height: 100%;
+        border-right: 1px solid var(--border-soft);
+      }
+      .brand { gap: 14px; padding: 0 24px; }
+      .logo-mini {
+        display: grid;
+        place-items: center;
+        width: 108px;
+        height: 42px;
+        border: 1px dashed var(--border);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+      }
+      .brand-word {
+        font-size: 14px;
+        font-weight: 850;
+        letter-spacing: 0.22em;
+        line-height: 1.1;
+      }
+      .ea {
+        display: inline-flex;
+        align-items: center;
+        height: 30px;
+        border-radius: 7px;
+        background: var(--accent);
+        padding: 0 10px;
+        font-weight: 850;
+      }
+      .modules {
+        gap: 8px;
+        padding: 0 20px;
+      }
+      .module {
+        display: inline-flex;
+        align-items: center;
+        height: 36px;
+        border-radius: 8px;
+        color: var(--muted);
+        padding: 0 14px;
+        font-size: 14px;
+        font-weight: 750;
+      }
+      .module.active {
+        background: var(--accent);
+        color: var(--text);
+        box-shadow: 0 7px 16px rgba(246, 173, 0, 0.22);
+      }
+      .mainnav {
+        gap: 24px;
+        border-right: 0;
+        padding: 0 24px;
+      }
+      .mainnav span {
+        display: inline-flex;
+        align-items: center;
+        height: 100%;
+        border-bottom: 3px solid transparent;
+        color: var(--muted);
+        font-size: 15px;
+        font-weight: 550;
+      }
+      .mainnav .active {
+        border-color: var(--accent);
+        color: var(--text);
+        font-weight: 800;
+      }
+
+      .workspace {
+        display: grid;
+        gap: 14px;
+        margin-top: 14px;
+      }
+
+      .subnav,
+      .hero,
+      .kpis,
+      .filters,
+      .tabs,
+      .panel,
+      .quicknav {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+      }
+
+      .subnav,
+      .tabs {
+        display: flex;
+        min-height: 48px;
+        align-items: stretch;
+        overflow-x: auto;
+        padding: 0 14px;
+      }
+      .subnav span,
+      .tabs span {
+        display: inline-flex;
+        align-items: center;
+        border-bottom: 2px solid transparent;
+        color: var(--muted);
+        padding: 0 18px;
+        font-size: 14px;
+        font-weight: 750;
+        white-space: nowrap;
+      }
+      .subnav .active,
+      .tabs .active {
+        border-color: var(--accent);
+        color: var(--text);
+        font-weight: 850;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: 260px minmax(0, 1fr) auto;
+        gap: 24px;
+        align-items: center;
+        min-height: 128px;
+        border-bottom: 3px solid var(--accent);
+        padding: 18px 28px;
+      }
+      .logo-large {
+        display: grid;
+        place-items: center;
+        height: 72px;
+        border: 1px dashed var(--border);
+        color: var(--muted);
+        font-size: 12px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+      .hero h1 { font-size: 23px; line-height: 1.18; }
+      .hero .accent { margin-top: 4px; color: #d89100; font-size: 17px; }
+      .hero p { margin-top: 4px; color: var(--muted); font-size: 14px; line-height: 1.4; }
+
+      .context-hero {
+        display: grid;
+        grid-template-columns: 120px minmax(0, 1fr) auto;
+        gap: 18px;
+        align-items: center;
+        min-height: 96px;
+        border: 1px solid var(--border);
+        border-bottom: 3px solid var(--accent);
+        border-radius: var(--radius);
+        background: var(--panel);
+        box-shadow: var(--shadow);
+        padding: 14px 18px;
+      }
+      .context-mark {
+        display: grid;
+        place-items: center;
+        height: 52px;
+        border: 1px dashed var(--border);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+        text-transform: uppercase;
+      }
+      .context-hero h1 { font-size: 21px; line-height: 1.18; }
+      .context-hero .accent { margin-top: 3px; color: #d89100; font-size: 15px; }
+      .context-hero p { margin-top: 3px; color: var(--muted); font-size: 13px; }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 38px;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: var(--panel);
+        color: var(--text);
+        padding: 0 14px;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 750;
+        text-decoration: none;
+        white-space: nowrap;
+      }
+      .btn.primary {
+        border-color: var(--accent);
+        background: var(--accent);
+      }
+
+      .kpis {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        overflow: hidden;
+      }
+      .kpis.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+      .kpis.six { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+      .kpi {
+        min-height: 64px;
+        border-left: 1px solid var(--border-soft);
+        border-top: 3px solid var(--accent);
+        padding: 10px 16px;
+      }
+      .kpi:first-child { border-left: 0; }
+      .kpi-label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .kpi-value {
+        margin-top: 5px;
+        font-size: 30px;
+        line-height: 1;
+        font-weight: 850;
+      }
+
+      .filters { padding: 10px 12px; }
+      .filter-row {
+        display: grid;
+        grid-template-columns: minmax(280px, 1.45fr) minmax(190px, .8fr) minmax(190px, .8fr) 140px;
+        gap: 10px;
+      }
+      .filter-row.two {
+        grid-template-columns: minmax(220px, 1fr) minmax(220px, 1fr) 140px;
+      }
+      .control {
+        width: 100%;
+        height: 38px;
+        min-width: 0;
+        border: 1px solid var(--border);
+        border-radius: 9px;
+        background: white;
+        color: var(--text);
+        padding: 0 13px;
+        font: inherit;
+        font-size: 14px;
+      }
+
+      .quicknav {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        overflow: hidden;
+      }
+      .quicknav span {
+        min-height: 52px;
+        border-left: 1px solid var(--border-soft);
+        border-top: 3px solid var(--accent);
+        padding: 14px 16px;
+        font-size: 17px;
+        font-weight: 800;
+      }
+      .quicknav span:first-child { border-left: 0; }
+
+      .panel { overflow: hidden; }
+      .panel-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 16px;
+        padding: 14px 18px;
+        border-bottom: 1px solid var(--border-soft);
+      }
+      .panel-head.no-border { border-bottom: 0; }
+      .panel h2 { font-size: 20px; }
+      .panel p { margin-top: 4px; color: var(--muted); font-size: 13px; }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        height: 26px;
+        border-radius: 999px;
+        background: #e5f8ef;
+        color: var(--green);
+        padding: 0 10px;
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: .1em;
+        text-transform: uppercase;
+      }
+      .progress-block {
+        min-width: 260px;
+      }
+      .progress-block .label {
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+      }
+      .progress {
+        margin-top: 6px;
+        height: 8px;
+        overflow: hidden;
+        border-radius: 999px;
+        background: var(--soft);
+      }
+      .progress span {
+        display: block;
+        width: 10%;
+        height: 100%;
+        border-radius: inherit;
+        background: var(--green);
+      }
+      .notice {
+        margin: 12px;
+        border: 1px solid #f4d477;
+        border-radius: 9px;
+        background: #fff9e8;
+        color: #a34f00;
+        padding: 12px 14px;
+        font-size: 14px;
+      }
+
+      table {
+        width: 100%;
+        min-width: 840px;
+        border-collapse: collapse;
+      }
+      th {
+        background: var(--soft);
+        color: var(--muted);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: .15em;
+        text-align: left;
+        text-transform: uppercase;
+      }
+      th, td {
+        border-bottom: 1px solid var(--border-soft);
+        padding: 10px 14px;
+        font-size: 13px;
+      }
+      .table-wrap { overflow-x: auto; }
+      .status {
+        display: inline-flex;
+        align-items: center;
+        height: 24px;
+        border-radius: 999px;
+        padding: 0 9px;
+        font-size: 12px;
+        font-weight: 800;
+      }
+      .ok { background: #e5f8ef; color: var(--green); }
+      .warn { background: #fff4db; color: #a96200; }
+      .bad { background: #fff0f3; color: var(--red); }
+
+      @media (max-width: 1200px) {
+        .topbar { grid-template-columns: 1fr; height: auto; }
+        .brand, .modules, .mainnav { min-height: 58px; border-right: 0; }
+        .hero { grid-template-columns: 190px minmax(0, 1fr); }
+        .context-hero { grid-template-columns: 100px minmax(0, 1fr); }
+        .hero .btn { grid-column: 2; justify-self: start; }
+        .kpis, .kpis.five, .kpis.six, .quicknav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+        .filter-row, .filter-row.two { grid-template-columns: minmax(0, 1fr) minmax(170px, .7fr) minmax(170px, .7fr) 130px; }
+      }
+      @media (max-width: 760px) {
+        .page { padding: 16px 12px 32px; }
+        .hero, .context-hero, .kpis, .kpis.five, .kpis.six, .quicknav, .filter-row, .filter-row.two { grid-template-columns: 1fr; }
+        .hero { padding: 16px; }
+        .btn { width: 100%; }
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="index">
+      <strong>Mockups v2</strong>
+      <a href="#sgc">SGC inicio</a>
+      <a href="#docs">Documentos</a>
+      <a href="#docs-folder">Documentos carpeta</a>
+      <a href="#normativa">Normativa</a>
+      <a href="#resultados-global">Resultados global</a>
+      <a href="#ronda-sgc">Ronda SGC</a>
+      <a href="#ronda-resultados">Ronda resultados</a>
+      <a href="#ronda-participantes">Ronda participantes</a>
+    </nav>
+
+    <template id="noop"></template>
+
+    <section class="page" id="sgc">
+      <div class="shell">
+        <div class="path">/sgc</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module">Gestión de rondas</span><span class="module active">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span class="active">Inicio SGC</span><span>Documentos</span><span>Normativa</span><span>Mapa</span></nav></div>
+        <div class="workspace">
+          <section class="hero"><div class="logo-large">Logo Universidad</div><div><h1>SGC Maestro <span style="color:var(--muted);font-weight:500">CALAIRE</span></h1><div class="accent">Repositorio global de documentos, versiones, requisitos y mapa documental</div><p>Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín</p><p>wilsonsalasc@gmail.com · Coordinador</p></div></section>
+          <section class="kpis"><article class="kpi"><div class="kpi-label">Documentos</div><div class="kpi-value">52</div></article><article class="kpi"><div class="kpi-label">Sin versión</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Requisitos</div><div class="kpi-value">1122</div></article><article class="kpi"><div class="kpi-label">Relaciones</div><div class="kpi-value">82</div></article></section>
+          <nav class="quicknav"><span>Centro documental</span><span>Matriz normativa</span><span>Mapa SGC</span></nav>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="docs">
+      <div class="shell">
+        <div class="path">/sgc/documentos</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module">Gestión de rondas</span><span class="module active">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio SGC</span><span class="active">Documentos</span><span>Normativa</span><span>Mapa</span></nav></div>
+        <div class="workspace">
+          <section class="hero"><div class="logo-large">Logo Universidad</div><div><h1>Centro documental</h1><div class="accent">Inventario maestro de documentos SGC</div><p>Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos.</p><p>wilsonsalasc@gmail.com · Coordinador</p></div><a class="btn" href="#">Administrar documentos</a></section>
+          <section class="kpis"><article class="kpi"><div class="kpi-label">Documentos</div><div class="kpi-value">52</div></article><article class="kpi"><div class="kpi-label">Vigentes</div><div class="kpi-value">37</div></article><article class="kpi"><div class="kpi-label">En revisión</div><div class="kpi-value">14</div></article><article class="kpi"><div class="kpi-label">Sin versión</div><div class="kpi-value">0</div></article></section>
+          <section class="filters"><div class="filter-row"><input class="control" placeholder="Código o nombre"><select class="control"><option>Todas las familias</option></select><select class="control"><option>Todos los estados</option></select><button class="btn primary">Filtrar</button></div></section>
+          <nav class="tabs"><span class="active">Centro documental</span><span>Documentos generales</span><span>Procedimientos</span><span>Instructivos</span><span>Formatos</span></nav>
+          <nav class="quicknav"><span>Documentos generales</span><span>Procedimientos</span><span>Formatos y registros</span></nav>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="docs-folder">
+      <div class="shell">
+        <div class="path">/sgc/documentos?carpeta=P</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module">Gestión de rondas</span><span class="module active">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio SGC</span><span class="active">Documentos</span><span>Normativa</span><span>Mapa</span></nav></div>
+        <div class="workspace">
+          <section class="hero"><div class="logo-large">Logo Universidad</div><div><h1>Centro documental</h1><div class="accent">Inventario maestro de documentos SGC</div><p>Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos.</p><p>wilsonsalasc@gmail.com · Coordinador</p></div><a class="btn" href="#">Administrar documentos</a></section>
+          <section class="kpis"><article class="kpi"><div class="kpi-label">Documentos</div><div class="kpi-value">52</div></article><article class="kpi"><div class="kpi-label">Vigentes</div><div class="kpi-value">37</div></article><article class="kpi"><div class="kpi-label">En revisión</div><div class="kpi-value">14</div></article><article class="kpi"><div class="kpi-label">Sin versión</div><div class="kpi-value">0</div></article></section>
+          <section class="filters"><div class="filter-row"><input class="control" placeholder="Código o nombre"><select class="control"><option>Todas las familias</option></select><select class="control"><option>Todos los estados</option></select><button class="btn primary">Filtrar</button></div></section>
+          <nav class="tabs"><span>Centro documental</span><span class="active">Procedimientos</span><span>Instructivos</span><span>Formatos</span></nav>
+          <section class="panel"><div class="panel-head"><div><h2>Procedimientos</h2><p>Centro documental / Procedimientos · 22 documentos filtrados</p></div><span class="badge">22</span></div><div class="table-wrap"><table><thead><tr><th>Código</th><th>Documento</th><th>Tipo</th><th>Estado</th><th>Acción</th></tr></thead><tbody><tr><td><strong>P-PSEA-01</strong></td><td>Protocolo general EA</td><td>Procedimiento</td><td><span class="status ok">Vigente</span></td><td><a class="btn">Ver ficha</a></td></tr><tr><td><strong>P-PSEA-02</strong></td><td>Matriz documental básica del SGC</td><td>Procedimiento</td><td><span class="status ok">Vigente</span></td><td><a class="btn">Ver ficha</a></td></tr></tbody></table></div></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="normativa">
+      <div class="shell">
+        <div class="path">/sgc/normativa</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module">Gestión de rondas</span><span class="module active">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio SGC</span><span>Documentos</span><span class="active">Normativa</span><span>Mapa</span></nav></div>
+        <div class="workspace">
+          <section class="hero"><div class="logo-large">Logo Universidad</div><div><h1>Matriz normativa</h1><div class="accent">Requisitos operativos y cobertura documental</div><p>Las relaciones documento-requisito son explícitas y auditables.</p><p>wilsonsalasc@gmail.com · Coordinador</p></div></section>
+          <section class="kpis"><article class="kpi"><div class="kpi-label">Requisitos</div><div class="kpi-value">1122</div></article><article class="kpi"><div class="kpi-label">Cubiertos</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Parciales</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Pendientes</div><div class="kpi-value">1122</div></article></section>
+          <nav class="quicknav"><span>ISO 13528</span><span>ISO/IEC 17025</span><span>ISO/IEC 17043</span></nav>
+          <section class="filters"><div class="filter-row two"><select class="control"><option>Todas las normas</option></select><select class="control"><option>Todos los estados</option></select><button class="btn primary">Filtrar</button></div></section>
+          <section class="panel"><div class="panel-head"><div><h2>Requisitos normativos</h2><p>Página 1 de 15 · 1122 requisitos filtrados</p></div><div style="display:flex;gap:8px"><a class="btn">Anterior</a><a class="btn">Siguiente</a></div></div><div class="table-wrap"><table><thead><tr><th>Norma</th><th>Cláusula</th><th>Requisito</th><th>Criticidad</th><th>Cobertura</th><th>Documentos</th></tr></thead><tbody><tr><td>ISO 13528</td><td>1</td><td>Alcance y función dentro del SGC</td><td>Media</td><td><span class="status bad">Pendiente</span></td><td>Sin relación</td></tr></tbody></table></div></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="resultados-global">
+      <div class="shell">
+        <div class="path">/dashboard?tab=resultados</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module active">Gestión de rondas</span><span class="module">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio</span><span>Rondas</span><span>Registros</span><span>Participantes</span><span class="active">Resultados</span></nav></div>
+        <div class="workspace">
+          <section class="hero"><div class="logo-large">Logo Universidad</div><div><h1>CALAIRE-APP <span style="color:var(--muted);font-weight:500">Ensayos de Aptitud</span></h1><div class="accent">Gases Contaminantes Criterio</div><p>Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín</p><p>wilsonsalasc@gmail.com · Coordinador</p></div><a class="btn primary">+ Nueva ronda</a></section>
+          <section class="kpis five"><article class="kpi"><div class="kpi-label">Activas</div><div class="kpi-value">3</div></article><article class="kpi"><div class="kpi-label">Fichas pend.</div><div class="kpi-value">7</div></article><article class="kpi"><div class="kpi-label">Sin reclamar</div><div class="kpi-value">7</div></article><article class="kpi"><div class="kpi-label">Exportables</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Borrador</div><div class="kpi-value">0</div></article></section>
+          <section class="panel"><div class="panel-head no-border"><div><h2>Resultados PT</h2><p>Matriz global de resultados por ronda o contaminante.</p></div></div></section>
+          <nav class="tabs"><span class="active">Rondas</span><span>CO</span><span>NO</span><span>NO2</span><span>O3</span><span>SO2</span></nav>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="ronda-sgc">
+      <div class="shell">
+        <div class="path">/dashboard/rondas/[id]/sgc</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module active">Gestión de rondas</span><span class="module">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio</span><span>Rondas</span><span>Registros</span><span>Participantes</span><span>Resultados</span></nav></div>
+        <div class="workspace">
+          <nav class="subnav"><span>Resumen</span><span>Configuración PT</span><span>Participantes</span><span>Resultados</span><span class="active">SGC</span></nav>
+          <section class="context-hero"><div class="context-mark">UNAL</div><div><h1>SGC de la ronda <span class="badge">Activa</span></h1><div class="accent">Expediente documental EA-PP2026-R3</div><p>Mapa documental, checklist real y registros diligenciables de esta ronda.</p></div><div class="progress-block"><div class="label">Checklist documental · 10%</div><div class="progress"><span></span></div></div></section>
+          <section class="kpis"><article class="kpi"><div class="kpi-label">Carpetas</div><div class="kpi-value">7</div></article><article class="kpi"><div class="kpi-label">Editables</div><div class="kpi-value">0/30</div></article><article class="kpi"><div class="kpi-label">Cubiertos</div><div class="kpi-value">0/30</div></article><article class="kpi"><div class="kpi-label">Definitivos</div><div class="kpi-value">0/30</div></article></section>
+          <section class="panel"><div class="panel-head no-border"><div><h2>Drive documental SGC</h2><p>EA-PP2026-R3</p></div><div style="display:flex;gap:10px"><span class="badge">Drive conectado</span><a class="btn">Reparar expediente</a><a class="btn primary">Crear en Google Drive</a></div></div></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="ronda-resultados">
+      <div class="shell">
+        <div class="path">/dashboard/rondas/[id]/resultados</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module active">Gestión de rondas</span><span class="module">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio</span><span>Rondas</span><span>Registros</span><span>Participantes</span><span>Resultados</span></nav></div>
+        <div class="workspace">
+          <nav class="subnav"><span>Resumen</span><span>Configuración PT</span><span>Participantes</span><span class="active">Resultados</span><span>SGC</span></nav>
+          <section class="context-hero"><div class="context-mark">UNAL</div><div><h1>Resultados PT <span class="badge">Activa</span></h1><div class="accent">EA - Prueba Piloto 2026 - Ronda 3</div><p>Código EA-PP2026-R3 · matriz por ronda o contaminante.</p></div><a class="btn">Exportar CSV PT</a></section>
+          <section class="kpis"><article class="kpi"><div class="kpi-label">Participantes</div><div class="kpi-value">3</div></article><article class="kpi"><div class="kpi-label">Finales</div><div class="kpi-value">0/3</div></article><article class="kpi"><div class="kpi-label">Incompletos</div><div class="kpi-value">3</div></article><article class="kpi"><div class="kpi-label">Contaminantes</div><div class="kpi-value">5</div></article></section>
+          <nav class="tabs"><span class="active">Por ronda</span><span>Por contaminante</span></nav>
+          <section class="panel"><div class="notice">El CSV PT exporta únicamente combinaciones con envío final confirmado.</div></section>
+        </div>
+      </div>
+    </section>
+
+    <section class="page" id="ronda-participantes">
+      <div class="shell">
+        <div class="path">/dashboard/rondas/[id]/participantes</div>
+        <div class="topbar"><div class="brand"><div class="logo-mini">UNAL</div><div class="brand-word">CALAIRE-<br>APP</div><div class="ea">EA</div></div><div class="modules"><span class="module active">Gestión de rondas</span><span class="module">SGC</span><span class="module">pt_app ↗</span></div><nav class="mainnav"><span>Inicio</span><span>Rondas</span><span>Registros</span><span>Participantes</span><span>Resultados</span></nav></div>
+        <div class="workspace">
+          <nav class="subnav"><span>Resumen</span><span>Configuración PT</span><span class="active">Participantes</span><span>Resultados</span><span>SGC</span></nav>
+          <section class="context-hero"><div class="context-mark">UNAL</div><div><h1>EA - Prueba Piloto 2026 - Ronda 3 <span class="badge">Activa</span></h1><div class="accent">Gestión de participantes</div><p>Código EA-PP2026-R3 · 3 cupos asignados.</p></div></section>
+          <section class="kpis six"><article class="kpi"><div class="kpi-label">Cupos</div><div class="kpi-value">3</div></article><article class="kpi"><div class="kpi-label">Sin enlace</div><div class="kpi-value">3</div></article><article class="kpi"><div class="kpi-label">Reclamados</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Ficha pend.</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Ficha env.</div><div class="kpi-value">0</div></article><article class="kpi"><div class="kpi-label">Envíos PT</div><div class="kpi-value">0</div></article></section>
+          <nav class="tabs"><span class="active">Todos 3</span><span>Enlace pendiente 3</span><span>Ficha pendiente 0</span><span>Ficha enviada 0</span><span>Con envíos PT 0</span></nav>
+          <section class="panel"><div class="panel-head"><div><h2>Cupos asignados</h2><p>Estado de cupos, fichas y envíos PT por laboratorio.</p></div><span class="badge">3</span></div><div class="table-wrap"><table><thead><tr><th>Participante</th><th>Correo</th><th>Enlace</th><th>Ficha</th><th>Envíos PT</th><th>Acciones</th></tr></thead><tbody><tr><td>participante 01</td><td>participante01@lab.com</td><td><a class="btn">Copiar enlace</a></td><td><span class="status warn">Borrador</span></td><td>Sin envíos</td><td><a class="btn">Editar ficha</a></td></tr></tbody></table></div></section>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>

@@ -22,18 +22,18 @@ export function RegistrosTabView({
 
   return (
     <section className="grid gap-6">
-      <section className="grid gap-3 sm:grid-cols-3">
-        <div className="card-accent px-5 py-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Total</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{participantesGlobal.length}</div>
+      <section className="sgc-kpis sgc-kpis-three">
+        <div className="sgc-kpi">
+          <div className="sgc-kpi-label">Total</div>
+          <div className="sgc-kpi-value numeric">{participantesGlobal.length}</div>
         </div>
-        <div className="card-accent px-5 py-4 border-l-emerald-500 bg-emerald-50/40">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Con enlace</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{conEnlace.length}</div>
+        <div className="sgc-kpi bg-emerald-50/40">
+          <div className="sgc-kpi-label">Con enlace</div>
+          <div className="sgc-kpi-value numeric">{conEnlace.length}</div>
         </div>
-        <div className="card-accent px-5 py-4 border-l-amber-500 bg-amber-50/50">
-          <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Sin reclamar</div>
-          <div className="numeric mt-2 text-3xl font-semibold text-[var(--foreground)]">{sinEnlace.length}</div>
+        <div className="sgc-kpi bg-amber-50/50">
+          <div className="sgc-kpi-label">Sin reclamar</div>
+          <div className="sgc-kpi-value numeric">{sinEnlace.length}</div>
         </div>
       </section>
 

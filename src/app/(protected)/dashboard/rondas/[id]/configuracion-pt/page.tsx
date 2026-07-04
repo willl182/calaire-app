@@ -10,7 +10,7 @@ import {
 } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
 import { Alert } from '@/components/ui/Alert'
-import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { RondaPageHeader } from '../RondaPageHeader'
 import {
   updateParticipantePTAction,
   updatePTItemAction,
@@ -158,6 +158,8 @@ export default async function ConfiguracionPTPage({ params, searchParams }: Page
   const error = getParam(sp.error)
 
   const canEdit = ronda.estado !== 'cerrada'
+  const contaminantesConfigurados = new Set(ptItems.map((item) => item.contaminante)).size
+  const participantesConfigurados = participantesPT.filter((participante) => participante.participant_code || participante.replicate_code).length
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
@@ -165,20 +167,36 @@ export default async function ConfiguracionPTPage({ params, searchParams }: Page
         {/* Context Navigation */}
         <RondaContextNav rondaId={rondaId} rondaCodigo={ronda.codigo} ptConfigurado={ptItems.length > 0} />
 
-        <header className="header-bar px-6 py-5">
-          <div className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <h1 className="text-2xl font-semibold text-[var(--foreground)]">{ronda.nombre}</h1>
-              <EstadoBadge estado={ronda.estado} />
-            </div>
-            <p className="text-sm text-[var(--foreground-muted)]">
-              Configure los parámetros PT para generar el CSV compatible con pt_app
-            </p>
-          </div>
-        </header>
+        <RondaPageHeader
+          ronda={ronda}
+          section="Configuración PT"
+          description="Configure los parámetros PT para generar el CSV compatible con pt_app."
+        />
 
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
+
+        <section className="sgc-kpis">
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Contaminantes</div>
+            <div className="sgc-kpi-value numeric">{contaminantesConfigurados}</div>
+          </div>
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Niveles PT</div>
+            <div className="sgc-kpi-value numeric">{ptItems.length}</div>
+          </div>
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Participantes</div>
+            <div className="sgc-kpi-value numeric">{participantesPT.length}</div>
+          </div>
+          <div className="sgc-kpi">
+            <div className="sgc-kpi-label">Códigos PT</div>
+            <div className="sgc-kpi-value numeric">
+              {participantesConfigurados}
+              <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {participantesPT.length}</span>
+            </div>
+          </div>
+        </section>
 
         <div className="grid gap-6">
           <section className="card p-6">

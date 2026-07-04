@@ -15,7 +15,7 @@ import { RondaConfigForm } from './RondaConfigForm'
 
 function StatusAction({ round }: { round: Ronda }) {
   const secondaryButtonClass =
-    'min-w-20 rounded-lg border border-[var(--border)] px-2.5 py-1 text-center text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)]'
+    'inline-flex h-8 min-w-16 items-center justify-center rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]'
 
   if (round.estado === 'borrador') {
     return (
@@ -43,23 +43,15 @@ function StatusAction({ round }: { round: Ronda }) {
     )
   }
 
-  return (
-    <button type="button" disabled className={secondaryButtonClass}>
-      Abrir
-    </button>
-  )
+  return null
 }
 
 function CloseRondaAction({ round }: { round: Ronda }) {
   const secondaryButtonClass =
-    'min-w-20 rounded-lg border border-[var(--border)] px-2.5 py-1 text-center text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] disabled:cursor-not-allowed disabled:border-[var(--border-soft)] disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)]'
+    'inline-flex h-8 min-w-16 items-center justify-center rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]'
 
   if (round.estado !== 'activa') {
-    return (
-      <button type="button" disabled className={secondaryButtonClass}>
-        Cerrar
-      </button>
-    )
+    return null
   }
 
   return (
@@ -86,7 +78,7 @@ export function RondasTable({ rondas, editando }: { rondas: Ronda[]; editando: E
   return (
     <div className="card overflow-hidden">
       <div className="overflow-x-auto">
-        <table className="w-full min-w-[72rem]">
+        <table className="w-full min-w-[64rem]">
           <thead>
             <tr className="border-b-2 border-[var(--pt-primary)]">
               <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Estado</th>
@@ -151,12 +143,12 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
           {formatDate(round.created_at)}
         </td>
         <td className="px-4 py-4">
-          <div className="flex items-center justify-end gap-2">
+          <div className="flex items-center justify-end gap-1.5">
             <Link
               href={`/dashboard/rondas/${round.id}`}
-              className="btn-primary min-w-20 px-3 py-1 text-center text-xs"
+              className="inline-flex h-8 min-w-20 items-center justify-center rounded-md bg-[var(--pt-primary)] px-3 text-xs font-semibold text-[var(--foreground)] shadow-sm transition hover:bg-[var(--pt-primary-dark)] hover:no-underline"
             >
-              Ingresar
+              Gestionar
             </Link>
             <StatusAction round={round} />
             <CloseRondaAction round={round} />
@@ -165,7 +157,7 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
               <ConfirmSubmitButton
                 type="submit"
                 message={`¿Borrar la ronda ${round.codigo}? Esta acción no se puede deshacer.`}
-                className="min-w-20 rounded-lg border border-rose-200 px-2.5 py-1 text-center text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800"
+                className="inline-flex h-8 min-w-16 items-center justify-center rounded-md border border-rose-200 px-2.5 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800"
               >
                 Eliminar
               </ConfirmSubmitButton>

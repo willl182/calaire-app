@@ -276,16 +276,25 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
   const selectedDoc = activeFolder ? folderDocs.find((recurso) => recurso._id === selectedDocId) ?? null : null
 
   return (
-    <section className="card overflow-hidden" aria-labelledby="drive-documental-title">
-      <div className="border-b border-[var(--border)] bg-white px-6 py-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+    <>
+      <DriveStatsBar
+        items={[
+          { label: 'Carpetas', value: folders.length },
+          { label: 'Editables', value: `${conEditable}/${documentos.length}`, tone: 'sky' },
+          { label: 'Cubiertos', value: `${completados}/${documentos.length}`, tone: 'emerald' },
+          { label: 'Definitivos', value: `${conDefinitivo}/${documentos.length}`, tone: 'emerald' },
+        ]}
+      />
+
+      <section className="card overflow-hidden" aria-labelledby="drive-documental-title">
+        <div className="sgc-panel-head">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{rondaCodigo}</p>
-            <h2 id="drive-documental-title" className="mt-1 text-xl font-semibold text-[var(--foreground)]">Drive documental SGC</h2>
+            <h2 id="drive-documental-title">Drive documental SGC</h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {driveGoogleReady && (
-              <span className="rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">Drive conectado</span>
+              <span className="sgc-badge">Drive conectado</span>
             )}
             <form action={inicializarDriveRondaAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
@@ -301,7 +310,7 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
         </div>
 
         {!driveGoogleReady && (
-          <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <div className="m-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
             <div className="font-semibold">Automatizacion Google Drive pendiente de configuracion</div>
             <div className="mt-1">
               Cuenta: {driveGoogleConfig.clientEmail ? 'configurada' : 'faltante'} · Llave: {driveGoogleConfig.privateKey ? 'configurada' : 'faltante'} · Raiz: {driveGoogleConfig.rootFolderId ? 'configurada' : 'faltante'} · Plantillas: {driveGoogleConfig.templateMap ? 'mapeadas' : 'sin mapa'}
@@ -309,19 +318,8 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
           </div>
         )}
 
-        <div className="mt-4">
-          <DriveStatsBar
-            items={[
-              { label: 'Carpetas', value: folders.length },
-              { label: 'Editables', value: `${conEditable}/${documentos.length}`, tone: 'sky' },
-              { label: 'Cubiertos', value: `${completados}/${documentos.length}`, tone: 'emerald' },
-              { label: 'Definitivos', value: `${conDefinitivo}/${documentos.length}`, tone: 'emerald' },
-            ]}
-          />
-        </div>
-
         {root && (
-          <details className="mt-4 rounded-lg border border-[var(--border)] bg-slate-50">
+          <details className="m-5 rounded-lg border border-[var(--border)] bg-slate-50">
             <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[var(--foreground)]">Administrar carpeta raiz</summary>
             <div className="border-t border-[var(--border)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -332,116 +330,116 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
             </div>
           </details>
         )}
-      </div>
 
-      {!root && (
-        <div className="px-6 py-8 text-sm text-[var(--foreground-muted)]">
-          Inicializa el expediente para crear el arbol virtual de carpetas y documentos esperados de esta ronda.
-        </div>
-      )}
+        {!root && (
+          <div className="px-6 py-8 text-sm text-[var(--foreground-muted)]">
+            Inicializa el expediente para crear el arbol virtual de carpetas y documentos esperados de esta ronda.
+          </div>
+        )}
 
-      {root && (
-        <div>
-          <DriveBreadcrumb
-            rootLabel={`Expediente ${rondaCodigo}`}
-            rootHref={basePath}
-            folderLabel={activeFolder?.nombre ?? null}
-          />
+        {root && (
+          <div>
+            <DriveBreadcrumb
+              rootLabel={`Expediente ${rondaCodigo}`}
+              rootHref={basePath}
+              folderLabel={activeFolder?.nombre ?? null}
+            />
 
-          {!activeFolder ? (
-            /* Nivel raiz: tarjetas de carpeta */
-            <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
-              {folders.map((folder) => {
-                const folderChildren = childrenOf(recursos, folder._id).filter((recurso) => recurso.tipo !== 'carpeta')
-                const folderDone = folderChildren.filter((recurso) => recurso.estado === 'diligenciado' || recurso.estado === 'no_aplica').length
-                return (
-                  <FolderCard
-                    key={folder._id}
-                    href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}`}
-                    nombre={folder.nombre}
-                    sublabel={`Carpeta · ${folderChildren.length} documento${folderChildren.length === 1 ? '' : 's'}`}
-                    badge={`${folderDone}/${folderChildren.length}`}
-                  />
-                )
-              })}
-              {folders.length === 0 && (
-                <p className="text-sm text-[var(--foreground-muted)]">Este expediente aun no tiene carpetas. Usa &quot;Reparar expediente&quot;.</p>
-              )}
-            </div>
-          ) : (
-            /* Dentro de una carpeta: items compactos + panel de detalle */
-            <div className={selectedDoc ? driveSplitGrid : ''}>
-              <div className="p-6">
-                <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
-                    <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.notas ?? activeFolder.codigo}</p>
-                  </div>
-                  <LinkActions recurso={activeFolder} />
-                </div>
-                <DocGrid collapsed={Boolean(selectedDoc)}>
-                  {folderDocs.map((recurso) => (
-                    <DocRow
-                      key={recurso._id}
-                      href={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}&doc=${recurso._id}`}
-                      active={recurso._id === selectedDocId}
-                      iconTone={tipoTone(recurso.tipo)}
-                      estado={recurso.estado}
-                      estadoLabel={ESTADO_LABELS[recurso.estado]}
-                      codigo={recurso.codigo}
-                      nombre={recurso.nombre}
-                      meta={
-                        <>
-                          <span>{tipoLabel(recurso.tipo)}</span>
-                          {recurso.webUrl && <DocMetaDot label="Enlace editable disponible" tone="sky" />}
-                          {recurso.definitivo && <DocMetaDot label="Version definitiva disponible" tone="emerald" />}
-                          {recurso.publicaParticipante && <DocMetaDot label="Publico para participantes" tone="violet" />}
-                          {recurso.critico && <DocMetaDot label="Critico" tone="rose" />}
-                        </>
-                      }
-                      trailing={
-                        <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${estadoBadgeTone(recurso.estado)}`}>
-                          {ESTADO_LABELS[recurso.estado]}
-                        </span>
-                      }
+            {!activeFolder ? (
+              /* Nivel raiz: tarjetas de carpeta */
+              <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
+                {folders.map((folder) => {
+                  const folderChildren = childrenOf(recursos, folder._id).filter((recurso) => recurso.tipo !== 'carpeta')
+                  const folderDone = folderChildren.filter((recurso) => recurso.estado === 'diligenciado' || recurso.estado === 'no_aplica').length
+                  return (
+                    <FolderCard
+                      key={folder._id}
+                      href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}`}
+                      nombre={folder.nombre}
+                      sublabel={`Carpeta · ${folderChildren.length} documento${folderChildren.length === 1 ? '' : 's'}`}
+                      badge={`${folderDone}/${folderChildren.length}`}
                     />
-                  ))}
-                  {folderDocs.length === 0 && (
-                    <p className="text-sm text-[var(--foreground-muted)]">Esta carpeta no tiene documentos.</p>
-                  )}
-                </DocGrid>
+                  )
+                })}
+                {folders.length === 0 && (
+                  <p className="text-sm text-[var(--foreground-muted)]">Este expediente aun no tiene carpetas. Usa &quot;Reparar expediente&quot;.</p>
+                )}
               </div>
-
-              {selectedDoc && (
-                <DriveDetailAside
-                  chips={
-                    <>
-                      <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{tipoLabel(selectedDoc.tipo)}</span>
-                      <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoBadgeTone(selectedDoc.estado)}`}>{ESTADO_LABELS[selectedDoc.estado]}</span>
-                      {selectedDoc.formatoRelacionado && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.formatoRelacionado}</span>}
-                    </>
-                  }
-                  codigo={selectedDoc.codigo}
-                  nombre={selectedDoc.nombre}
-                  subtitle={
-                    <>
-                      {selectedDoc.notas && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.notas}</p>}
-                      <div className="mt-2 text-xs text-[var(--foreground-muted)]">Actualizado: {fmtDate(selectedDoc.updatedAt)} por {selectedDoc.updatedBy}</div>
-                    </>
-                  }
-                  closeHref={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}`}
-                >
-                  <div className="mb-3">
-                    <LinkActions recurso={selectedDoc} />
+            ) : (
+              /* Dentro de una carpeta: items compactos + panel de detalle */
+              <div className={selectedDoc ? driveSplitGrid : ''}>
+                <div className="p-6">
+                  <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <div>
+                      <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
+                      <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.notas ?? activeFolder.codigo}</p>
+                    </div>
+                    <LinkActions recurso={activeFolder} />
                   </div>
-                  <RecursoForms recurso={selectedDoc} rondaId={rondaId} />
-                  <SgcRegistroDiligenciable codigo={selectedDoc.codigo} panel={panel} rondaId={rondaId} />
-                </DriveDetailAside>
-              )}
-            </div>
-          )}
-        </div>
-      )}
-    </section>
+                  <DocGrid collapsed={Boolean(selectedDoc)}>
+                    {folderDocs.map((recurso) => (
+                      <DocRow
+                        key={recurso._id}
+                        href={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}&doc=${recurso._id}`}
+                        active={recurso._id === selectedDocId}
+                        iconTone={tipoTone(recurso.tipo)}
+                        estado={recurso.estado}
+                        estadoLabel={ESTADO_LABELS[recurso.estado]}
+                        codigo={recurso.codigo}
+                        nombre={recurso.nombre}
+                        meta={
+                          <>
+                            <span>{tipoLabel(recurso.tipo)}</span>
+                            {recurso.webUrl && <DocMetaDot label="Enlace editable disponible" tone="sky" />}
+                            {recurso.definitivo && <DocMetaDot label="Version definitiva disponible" tone="emerald" />}
+                            {recurso.publicaParticipante && <DocMetaDot label="Publico para participantes" tone="violet" />}
+                            {recurso.critico && <DocMetaDot label="Critico" tone="rose" />}
+                          </>
+                        }
+                        trailing={
+                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${estadoBadgeTone(recurso.estado)}`}>
+                            {ESTADO_LABELS[recurso.estado]}
+                          </span>
+                        }
+                      />
+                    ))}
+                    {folderDocs.length === 0 && (
+                      <p className="text-sm text-[var(--foreground-muted)]">Esta carpeta no tiene documentos.</p>
+                    )}
+                  </DocGrid>
+                </div>
+
+                {selectedDoc && (
+                  <DriveDetailAside
+                    chips={
+                      <>
+                        <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{tipoLabel(selectedDoc.tipo)}</span>
+                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoBadgeTone(selectedDoc.estado)}`}>{ESTADO_LABELS[selectedDoc.estado]}</span>
+                        {selectedDoc.formatoRelacionado && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.formatoRelacionado}</span>}
+                      </>
+                    }
+                    codigo={selectedDoc.codigo}
+                    nombre={selectedDoc.nombre}
+                    subtitle={
+                      <>
+                        {selectedDoc.notas && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.notas}</p>}
+                        <div className="mt-2 text-xs text-[var(--foreground-muted)]">Actualizado: {fmtDate(selectedDoc.updatedAt)} por {selectedDoc.updatedBy}</div>
+                      </>
+                    }
+                    closeHref={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}`}
+                  >
+                    <div className="mb-3">
+                      <LinkActions recurso={selectedDoc} />
+                    </div>
+                    <RecursoForms recurso={selectedDoc} rondaId={rondaId} />
+                    <SgcRegistroDiligenciable codigo={selectedDoc.codigo} panel={panel} rondaId={rondaId} />
+                  </DriveDetailAside>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+    </>
   )
 }

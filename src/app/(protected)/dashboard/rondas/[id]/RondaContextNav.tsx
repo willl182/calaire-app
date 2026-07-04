@@ -28,7 +28,6 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
 
   return (
     <nav className="card overflow-hidden p-0">
-      {/* Breadcrumb */}
       <div className="flex items-center gap-2 px-5 pt-3 pb-0">
         <Link
           href="/dashboard"
@@ -44,7 +43,6 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
           {rondaCodigo}
         </Link>
       </div>
-      {/* Tabs */}
       <div className="tab-nav overflow-x-auto px-2">
         {TABS.map((tab) => {
           const active = isActive(tab)
