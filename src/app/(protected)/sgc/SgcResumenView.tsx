@@ -21,6 +21,7 @@ export function SgcResumenView({
   backendOffline,
   basePath,
 }: SgcResumenViewProps) {
+  const inDashboard = basePath === '/dashboard/sgc'
   const totalDocumentos = documentos.resumen.total
   const sinVersion = documentos.resumen.sinVersion
   const requisitos = normativa.resumen.requisitos
@@ -31,8 +32,9 @@ export function SgcResumenView({
       <SgcHeader
         title={<>Sistema de Gestión Maestro <span className="font-medium text-[var(--foreground-muted)]">CALAIRE</span></>}
         accent="Repositorio global de documentos, versiones, requisitos y mapa documental"
-        description="Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín"
+        description={inDashboard ? null : 'Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín'}
         email={email}
+        compact={inDashboard}
       />
 
       {backendOffline && (

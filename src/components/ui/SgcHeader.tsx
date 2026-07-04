@@ -12,7 +12,7 @@ export function SgcHeader({
 }: {
   title: ReactNode
   accent: ReactNode
-  description: ReactNode
+  description?: ReactNode
   email?: string | null
   actions?: ReactNode
   compact?: boolean
@@ -25,7 +25,7 @@ export function SgcHeader({
           <div className="min-w-0 space-y-0.5">
             <h1 className={`font-bold leading-tight text-[var(--foreground)] ${compact ? 'text-lg' : 'text-xl'}`}>{title}</h1>
             <p className="text-base font-medium leading-snug text-[var(--pt-primary-dark)]">{accent}</p>
-            <p className="text-sm leading-snug text-[var(--foreground-muted)]">{description}</p>
+            {description && <p className="text-sm leading-snug text-[var(--foreground-muted)]">{description}</p>}
             {email && <p className="text-sm text-[var(--foreground-muted)]">{email} · Coordinador</p>}
           </div>
         </div>
