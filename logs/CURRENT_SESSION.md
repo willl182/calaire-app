@@ -1,47 +1,32 @@
-# Session State: calaire-app2
+# Session State: calaire-app2 (feat-drive-sgc)
 
-**Last Updated**: 2026-07-01 23:24 -05
+**Last Updated**: 2026-07-04 11:35
 
 ## Session Objective
 
-Rediseñar el mapa de navegación del SGC (`/sgc/mapa`) para que siga el estilo
-visual de la app (fuentes, colores) y reorganizar su layout.
+Implementar `plan_ui_homogeneo.md`: homogeneizar UI/UX del navegador documental SGC entre el centro documental (`/sgc/documentos`) y el drive de ronda (`/dashboard/rondas/[id]/sgc`).
 
 ## Current State
 
-- [x] Reestilizado el HTML embebido del mapa (`data/sgc/mapa_navegacion_sgc_pea.html`)
-      para usar Droid Sans + tokens de marca (dorado `#FDB913`, grises de superficie)
-      igual que `src/app/globals.css`.
-- [x] Códigos y números en fuente monoespaciada con `tabular-nums`.
-- [x] Componentes alineados a la app: header con borde dorado, botones/chips con
-      gradiente, tarjetas con borde izquierdo dorado, foco dorado, scrollbar dorada.
-- [x] Recodificadas las 5 familias documentales con paleta armónica + leyenda sincronizada.
-- [x] Movidos los controles laterales (`aside`) a una **barra horizontal arriba** del mapa.
-- [x] Columnas más juntas: Procedimientos x40, Documentos/instructivos x360, Formatos x680;
-      `viewBox` 970×1400.
-- [x] Los 22 formatos ahora en **una sola columna en orden numérico** (F-PSEA-01 … 18).
-- [x] Usuario confirmó: "tuvo bien".
-- [ ] (Pendiente de sesión previa, auth) Verificar `/dashboard` y `/sgc` en producción tras deploy de Convex.
-- [ ] Commit de los cambios pendientes en la rama.
+- [x] Fase 1: primitivas compartidas creadas en `src/components/ui/drive/` (DriveIcons, DriveBreadcrumb, FolderCard, DocRow + DocMetaDot, DocGrid + `driveSplitGrid`, DriveDetailAside, DriveStatsBar, estadoTone).
+- [x] Fase 2: centro documental (`src/app/(protected)/dashboard/sgc/documentos/page.tsx`) sobre primitivas: encabezados fusionados, KPIs como franja, filtros en línea (preservan carpeta activa), tabs falsos eliminados, "Crear documento maestro" en `<details>`, DocGrid de dos modos.
+- [x] Fase 3: drive de ronda (`DriveDocumentalSgc.tsx`): DocRow compactos, root admin en `<details>` "Administrar carpeta raiz", banner Google solo si `!driveGoogleReady` (chip "Drive conectado" si listo), stats compartidas, aside con RecursoForms en secciones colapsables.
+- [x] Fase 4 parcial: `pnpm build`, `pnpm lint`, `pnpm test` en verde; e2e del centro documental pasan.
+- [ ] E2E de ronda (`sgc-fase2.auth.spec.ts`) fallan por 404: el `rondaId` fijo no existe en el backend Convex actual (dato, no UI).
+- [ ] Revisión visual manual del drive de ronda pendiente (requiere ronda seed).
+- [ ] Commits sin hacer (plan sugiere 3: primitivas / centro documental / ronda).
 
 ## Critical Technical Context
 
-- Project uses `pnpm`; do not use `npm` for scripts.
-- El mapa es un HTML estático en `data/sgc/mapa_navegacion_sgc_pea.html`, servido por
-  `src/app/(protected)/dashboard/sgc/mapa/embed/route.ts` dentro de un `<iframe>` desde
-  `src/app/(protected)/dashboard/sgc/mapa/page.tsx`. `/sgc/mapa` re-exporta esa página.
-- La ruta embed aplica CSP `default-src 'self'`; las fuentes `@font-face url('/fonts/...')`
-  cargan bien porque `font-src` hereda `'self'` (mismo origen). No usar fuentes externas.
-- Solo Droid Sans existe localmente en `public/fonts/`; la stack mono cae a fuentes de sistema.
-- Los edges del SVG se recalculan desde las coordenadas de los nodos, así que reordenar
-  nodos no rompe las relaciones.
-- No se pudo renderizar en vivo: la extensión de Chrome no está conectada. Copia autónoma
-  de preview (con rutas de fuente locales) en el scratchpad de la sesión.
-- Contexto previo (auth, sin resolver del todo): producción en `https://calaire-app.vercel.app`,
-  Convex prod `https://steady-kiwi-725.convex.cloud`. Ver `logs/history` para detalle.
+- El repo YA está migrado a `src/` pese a lo que dice AGENTS.md (rutas en `src/app`, alias `@/*` apunta a `src`).
+- `/sgc/documentos` re-exporta `src/app/(protected)/dashboard/sgc/documentos/page.tsx` — ambas URLs sirven la misma página.
+- `tests/e2e/sgc-fase2.auth.spec.ts` actualizado: espera "Administrar carpeta raiz" en vez de "Carpeta raiz Drive".
+- Al correr e2e justo después de `pnpm build`, el dev server puede arrancar con `.next` viejo y todas las páginas fallan con `adapterFn is not a function`; reintentar arregla.
+- El e2e "keeps the legacy SGC expedientes URL as a compatibility redirect" falla también sin estos cambios (preexistente).
+- Server actions de ronda no cambiaron de contrato; todo es capa de presentación.
 
 ## Next Steps
 
-1. Commitear el rediseño del mapa cuando el usuario lo pida.
-2. Verificar visualmente en producción tras desplegar (`/sgc/mapa`).
-3. Retomar verificación pendiente de auth en `/dashboard` y `/sgc` si aplica.
+1. Hacer los 3 commits sugeridos por el plan (o uno solo si se prefiere).
+2. Conseguir/crear ronda seed y hacer revisión visual de las 4 URLs (raíz y carpeta en ambas vistas, breakpoints sm/lg).
+3. Revisar el fallo preexistente del redirect legacy de expedientes.
