@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { usePathname, useSearchParams } from 'next/navigation'
 import { Suspense } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
+import { signOutAction } from './actions'
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
@@ -23,7 +24,7 @@ const GESTION_NAV_ITEMS: NavItem[] = [
 ]
 
 const SGC_NAV_ITEMS: NavItem[] = [
-  { label: 'Inicio SGC', href: '/dashboard/sgc', tabKey: '__sgc_home__' },
+  { label: 'Inicio Sistema de Gestión', href: '/dashboard/sgc', tabKey: '__sgc_home__' },
   { label: 'Documentos', href: '/dashboard/sgc/documentos', tabKey: '__sgc_documentos__' },
   { label: 'Normativa', href: '/dashboard/sgc/normativa', tabKey: '__sgc_normativa__' },
   { label: 'Mapa', href: '/dashboard/sgc/mapa', tabKey: '__sgc_mapa__' },
@@ -111,7 +112,7 @@ function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
   const navItems = !canViewSgcMaestro ? [] : isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
   const areaItems: NavItem[] = [
     { label: 'Gestión de rondas', href: '/dashboard', tabKey: '__gestion__' },
-    ...(canViewSgcMaestro ? [{ label: 'SGC', href: '/dashboard/sgc', tabKey: '__sgc__' }] : []),
+    ...(canViewSgcMaestro ? [{ label: 'Sistema de Gestión', href: '/dashboard/sgc', tabKey: '__sgc__' }] : []),
     { label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true },
   ]
 
@@ -126,7 +127,7 @@ function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
     return tab === item.tabKey
   }
 
-  return (
+  const header = (
     <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)] bg-[var(--surface-panel)] shadow-sm">
       <div className="flex items-stretch gap-5 px-6 max-w-screen-2xl mx-auto">
         <div className="flex items-center gap-3 pr-6 border-r border-[var(--border-soft)] py-4">
@@ -151,7 +152,7 @@ function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
 
         <nav
           className="flex min-w-0 flex-1 items-stretch gap-5 overflow-x-auto"
-          aria-label={isSgcDashboard ? 'Secciones SGC' : 'Secciones gestión de ronda'}
+          aria-label={isSgcDashboard ? 'Secciones Sistema de Gestión' : 'Secciones gestión de ronda'}
         >
           {navItems.map((item) => (
             <NavLink key={item.label} item={item} isActive={isActive(item)} />
@@ -159,6 +160,35 @@ function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
         </nav>
       </div>
     </header>
+  )
+
+  return (
+    <>
+      {header}
+      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-panel)]">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
+          <div className="flex min-w-0 items-center gap-5">
+            <LogoUnal height={56} />
+            <div className="min-w-0 space-y-0.5">
+              <h1 className="text-xl font-bold text-[var(--foreground)]">
+                CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
+              </h1>
+              <p className="text-base font-medium text-[var(--pt-primary-dark)]">
+                Gases Contaminantes Criterio
+              </p>
+              <p className="text-sm text-[var(--foreground-muted)]">
+                Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
+              </p>
+            </div>
+          </div>
+          <form action={signOutAction} className="shrink-0">
+            <button type="submit" className="btn-outline">
+              Cerrar sesión
+            </button>
+          </form>
+        </div>
+      </div>
+    </>
   )
 }
 

@@ -53,7 +53,7 @@ export default async function InicioPage() {
           <Link href="/sgc" className="card-accent min-h-40 px-6 py-5 hover:no-underline">
             <div className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">Calidad</div>
             <h2 className="mt-4 text-xl font-semibold text-[var(--foreground)]">Sistema de Gestión de Calidad</h2>
-            <p className="mt-2 text-sm text-[var(--foreground-muted)]">Documentos maestros, matriz normativa y mapa documental del SGC.</p>
+            <p className="mt-2 text-sm text-[var(--foreground-muted)]">Documentos maestros, matriz normativa y mapa documental del Sistema de Gestión.</p>
           </Link>
 
           <a href={PT_APP_URL} target="_blank" rel="noopener noreferrer" className="card-accent min-h-40 px-6 py-5 hover:no-underline">

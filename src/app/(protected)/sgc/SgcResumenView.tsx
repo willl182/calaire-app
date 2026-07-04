@@ -29,7 +29,7 @@ export function SgcResumenView({
   return (
     <div className="app-workspace min-w-0">
       <SgcHeader
-        title={<>SGC Maestro <span className="font-medium text-[var(--foreground-muted)]">CALAIRE</span></>}
+        title={<>Sistema de Gestión Maestro <span className="font-medium text-[var(--foreground-muted)]">CALAIRE</span></>}
         accent="Repositorio global de documentos, versiones, requisitos y mapa documental"
         description="Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín"
         email={email}
