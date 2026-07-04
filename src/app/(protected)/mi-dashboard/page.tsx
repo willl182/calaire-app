@@ -215,7 +215,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
             <p className="text-sm font-medium text-[var(--foreground)]">Comentarios</p>
             <form action={crearComentarioParticipanteAction} className="grid gap-2">
               <input type="hidden" name="ronda_id" value={ronda.id} />
-              <textarea className="input min-h-20" name="mensaje" placeholder="Escriba un comentario para el equipo SGC" required />
+              <textarea className="input min-h-20" name="mensaje" placeholder="Escriba un comentario para el equipo del Sistema de Gestión" required />
               <button className="btn-primary justify-self-start" type="submit">Enviar comentario</button>
             </form>
             <div className="grid gap-2">

@@ -1,7 +1,5 @@
 import { redirect } from 'next/navigation'
-import { signOut } from '@workos-inc/authkit-nextjs'
 
-import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgcWithStatus } from '@/server/sgc'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
@@ -23,22 +21,11 @@ export default async function MapaSgcPage() {
   return (
     <div className="app-workspace min-w-0">
       <SgcHeader
-        title="Mapa SGC vivo"
+        compact
+        title="Mapa vivo del Sistema de Gestión"
         accent="Navegación documental del inventario maestro"
         description="Relaciones entre documentos, registros, requisitos y sistemas externos."
         email={auth.user.email}
-        actions={
-          <form
-            action={async () => {
-              'use server'
-              await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
-            }}
-          >
-            <button type="submit" className="btn-outline">
-              Cerrar sesión
-            </button>
-          </form>
-        }
       />
       {mapa.offline && (
         <BackendOfflineBanner detail="El mapa SGC se muestra sin relaciones mientras Convex no responde." />
@@ -64,7 +51,7 @@ export default async function MapaSgcPage() {
       </section>
 
       {mapa.data.relaciones.length > 0 ? (
-        <MapaSgcFrame src="/dashboard/sgc/mapa/embed" title="Mapa interactivo de navegación del SGC" />
+        <MapaSgcFrame src="/dashboard/sgc/mapa/embed" title="Mapa interactivo de navegación del Sistema de Gestión" />
       ) : (
         <section className="card p-8 text-center">
           <h2 className="text-lg font-semibold text-[var(--foreground)]">Mapa SGC sin relaciones</h2>

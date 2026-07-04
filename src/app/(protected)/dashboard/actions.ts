@@ -3,7 +3,9 @@
 import { randomBytes } from 'node:crypto'
 import { redirect } from 'next/navigation'
 import { revalidatePath } from 'next/cache'
+import { signOut } from '@workos-inc/authkit-nextjs'
 
+import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
   CONTAMINANTES,
@@ -22,6 +24,10 @@ type ConfigContaminante = {
   contaminante: Contaminante
   niveles: number
   replicas: 2 | 3
+}
+
+export async function signOutAction() {
+  await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
 }
 
 async function requireAdmin() {

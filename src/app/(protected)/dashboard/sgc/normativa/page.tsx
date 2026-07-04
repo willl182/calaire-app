@@ -99,6 +99,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
   return (
     <div className="app-workspace min-w-0">
       <SgcHeader
+        compact
         title="Matriz normativa"
         accent="Requisitos operativos y cobertura documental"
         description="Las relaciones documento-requisito son explicitas y auditables."

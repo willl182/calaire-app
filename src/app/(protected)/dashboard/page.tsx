@@ -1,6 +1,3 @@
-import { signOut } from '@workos-inc/authkit-nextjs'
-
-import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
@@ -93,16 +90,6 @@ export default async function DashboardPage({ searchParams }: DashboardPageProps
                   ＋ Nueva ronda
                 </Link>
               )}
-              <form
-                action={async () => {
-                  'use server'
-                  await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
-                }}
-              >
-                <button type="submit" className="btn-outline">
-                  Cerrar sesión
-                </button>
-              </form>
             </div>
           </div>
         </header>
