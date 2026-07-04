@@ -6,9 +6,19 @@ type MailDelivery =
   | { status: 'failed'; provider: 'resend'; reason: string }
   | { status: 'skipped'; reason: 'missing_resend_api_key' | 'missing_mail_from' }
 
-const resendApiKey = env.RESEND_API_KEY
-const mailFrom = env.MAIL_FROM
-const resend = resendApiKey ? new Resend(resendApiKey) : null
+let _resend: Resend | null | undefined
+
+function getResend(): Resend | null {
+  if (_resend === undefined) {
+    const apiKey = env.RESEND_API_KEY
+    _resend = apiKey ? new Resend(apiKey) : null
+  }
+  return _resend
+}
+
+function getMailFrom(): string | undefined {
+  return env.MAIL_FROM ?? undefined
+}
 
 function escapeHtml(value: string) {
   return value
@@ -24,9 +34,11 @@ export async function sendAgentClaimEmail(args: {
   claimViewUrl: string
   expiresInMinutes: number
 }): Promise<MailDelivery> {
+  const resend = getResend()
   if (!resend) {
     return { status: 'skipped', reason: 'missing_resend_api_key' }
   }
+  const mailFrom = getMailFrom()
   if (!mailFrom) {
     return { status: 'skipped', reason: 'missing_mail_from' }
   }

@@ -4,46 +4,28 @@
 
 ## Current State
 
-- UI standardization changes are live in production at `https://calaire-app.vercel.app`.
-- Vercel production deployment is `dpl_G2beWf2oBseJFryVPdeYgy53GiNL`, status `READY`.
-- Local verification passed: `pnpm lint`, `pnpm build`, and `pnpm test`.
-- Global results copy was corrected from "Dashboard global..." to "Matriz global de resultados por ronda o contaminante."
-- KPI strips were normalized for global Registros/Participantes and SGC map.
-- Round pages now share `RondaPageHeader` and follow the same page order across summary, configuración PT, participantes, resultados, and SGC.
-- SGC map now has app-owned filters/KPIs and the embedded HTML no longer renders its own page hero.
+- Vista final de Rondas afinada: header compacto, único botón `+ Nueva ronda`, tabla limpia (`Ingresar` → `Gestionar`), skeleton del dashboard alineado.
+- Ajustes visuales globales de dashboard/SGC (panels, layout, SgcHeader, DriveStatsBar, globals.css +368 líneas).
+- Verificación local completa: `pnpm lint`, `pnpm build`, `pnpm test` pasan.
+- Commit `1e1583f` (33 archivos, +3052/-694) pusheado a `origin/feat-drive-sgc`.
+- Deploy de producción por Vercel git integration sobre la rama `feat-drive-sgc`.
 
 ## Critical Technical Context
 
-- The UI standard means consistent page anatomy: nav, optional entity subnav, context header, KPI strip, filters/tabs, primary content.
-- Use `sgc-kpis` / `sgc-kpi` for KPI rows; avoid `card-accent` for comparable KPI bands.
-- Round pages should keep the round name as the main H1 through `RondaPageHeader`.
-- `/dashboard/sgc/mapa/embed` should remain an embedded map surface, not a nested standalone page.
-- Production was deployed directly from the dirty local working tree; changes are live but not committed.
+- Deploy a producción via push a `feat-drive-sgc` (Vercel git integration).
+- Primitiva nueva `RondaPageHeader` centraliza el header contextual de rondas; no duplicar branding dentro del contenido.
+- `MapaSgcFrame` desacopla el contenido del HTML del mapa del wrapper de la app.
+- Estándar de UI = anatomía de página (nav → subnav → header → KPI strip → filtros → contenido).
 
 ## Next Steps
 
-1. Visually verify authenticated production routes with an admin account.
-2. Commit only the intended UI standardization files, keeping unrelated dirty work separate.
-3. Consider extracting more shared shell primitives if future SGC/dashboard pages drift again.
+1. Verificar el deploy de Vercel para `feat-drive-sgc` y la URL de producción.
+2. Revisión visual con sesión admin real.
+3. Si más deriva de UI: extraer anatomía repetida a shell components compartidos.
 
 ## Branch Status
 
 - Branch: `feat-drive-sgc`
-- Status: dirty
-- Pending changes:
-  - `data/sgc/mapa_navegacion_sgc_pea.html`
-  - `logs/CURRENT_SESSION.md`
-  - `logs/260704_rundown.md`
-  - `src/app/(protected)/dashboard/components/DirectorioPanel.tsx`
-  - `src/app/(protected)/dashboard/components/RegistrosPanel.tsx`
-  - `src/app/(protected)/dashboard/components/ResultadosPanel.tsx`
-  - `src/app/(protected)/dashboard/rondas/[id]/RondaPageHeader.tsx`
-  - `src/app/(protected)/dashboard/rondas/[id]/page.tsx`
-  - `src/app/(protected)/dashboard/rondas/[id]/configuracion-pt/page.tsx`
-  - `src/app/(protected)/dashboard/rondas/[id]/participantes/page.tsx`
-  - `src/app/(protected)/dashboard/rondas/[id]/resultados/page.tsx`
-  - `src/app/(protected)/dashboard/rondas/[id]/sgc/page.tsx`
-  - `src/app/(protected)/dashboard/sgc/mapa/page.tsx`
-  - `src/app/(protected)/dashboard/sgc/mapa/MapaSgcFrame.tsx`
-  - `src/app/globals.css`
-  - Additional pre-existing dirty UI/SGC/log files remain in the worktree.
+- Status: clean (recién pusheado)
+- Pending changes: none
+- HEAD: `1e1583f refactor(ui): vista final de Rondas compacta y afinación visual dashboard/SGC`

@@ -3,9 +3,16 @@ import { ConvexHttpClient } from 'convex/browser'
 import { anyApi, type FunctionReference } from 'convex/server'
 import { env } from '@/env'
 
-const convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
-  skipConvexDeploymentUrlCheck: true,
-})
+let _convex: ConvexHttpClient | null = null
+
+function getConvex(): ConvexHttpClient {
+  if (!_convex) {
+    _convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
+      skipConvexDeploymentUrlCheck: true,
+    })
+  }
+  return _convex
+}
 
 const agentAuthApi = anyApi.agent.auth as unknown as {
   createClaim: FunctionReference<'mutation'>
@@ -44,7 +51,7 @@ export async function createAgentClaim(email: string) {
   const claimExpiresAt = Date.now() + 60 * 60 * 1000
   const scopes = ['calaire.agent.me', 'calaire.agent.admin']
 
-  const claimId = await convex.mutation(agentAuthApi.createClaim, {
+  const claimId = await getConvex().mutation(agentAuthApi.createClaim, {
     claimTokenHash,
     claimViewTokenHash,
     email: email.toLowerCase(),
@@ -65,25 +72,25 @@ export async function createAgentClaim(email: string) {
 }
 
 export async function getClaimByToken(claimToken: string) {
-  return await convex.query(agentAuthApi.getClaimByTokenHash, {
+  return await getConvex().query(agentAuthApi.getClaimByTokenHash, {
     claimTokenHash: sha256(claimToken),
   })
 }
 
 export async function getClaimByViewToken(claimViewToken: string) {
-  return await convex.query(agentAuthApi.getClaimByViewTokenHash, {
+  return await getConvex().query(agentAuthApi.getClaimByViewTokenHash, {
     claimViewTokenHash: sha256(claimViewToken),
   })
 }
 
 export async function getApiKeyRecord(apiKey: string) {
-  return await convex.query(agentAuthApi.getApiKeyRecord, {
+  return await getConvex().query(agentAuthApi.getApiKeyRecord, {
     apiKeyHash: sha256(apiKey),
   })
 }
 
 export async function saveOtp(claimId: string, otp: string) {
-  await convex.mutation(agentAuthApi.rotateOtp, {
+  await getConvex().mutation(agentAuthApi.rotateOtp, {
     claimId,
     otpHash: sha256(otp),
     otpExpiresAt: Date.now() + 10 * 60 * 1000,
@@ -94,7 +101,7 @@ export async function completeClaim(claimId: string) {
   const apiKey = randomToken(32)
   const apiKeyHash = sha256(apiKey)
   const apiKeyExpiresAt = Date.now() + 7 * 24 * 60 * 60 * 1000
-  await convex.mutation(agentAuthApi.completeClaim, {
+  await getConvex().mutation(agentAuthApi.completeClaim, {
     claimId,
     apiKeyHash,
     apiKeyExpiresAt,
