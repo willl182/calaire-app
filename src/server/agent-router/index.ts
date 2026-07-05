@@ -1,12 +1,12 @@
 import { ConvexHttpClient } from 'convex/browser'
 import { anyApi, type FunctionReference } from 'convex/server'
-import { env } from '@/env'
+import { env, requireEnv } from '@/env'
 
 let _convex: ConvexHttpClient | null = null
 
 function getConvex(): ConvexHttpClient {
   if (!_convex) {
-    _convex = new ConvexHttpClient(env.NEXT_PUBLIC_CONVEX_URL, {
+    _convex = new ConvexHttpClient(requireEnv('NEXT_PUBLIC_CONVEX_URL', env.NEXT_PUBLIC_CONVEX_URL), {
       skipConvexDeploymentUrlCheck: true,
     })
   }

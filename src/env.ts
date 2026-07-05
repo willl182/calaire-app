@@ -3,15 +3,15 @@ import { z } from 'zod'
 
 export const env = createEnv({
   server: {
-    WORKOS_API_KEY: z.string().min(1),
-    WORKOS_CLIENT_ID: z.string().min(1),
+    WORKOS_API_KEY: z.string().min(1).optional(),
+    WORKOS_CLIENT_ID: z.string().min(1).optional(),
     WORKOS_SECRET: z.string().min(1).optional(),
     RESEND_API_KEY: z.string().min(1).optional(),
     MAIL_FROM: z.string().email().optional(),
   },
 
   client: {
-    NEXT_PUBLIC_CONVEX_URL: z.string().url(),
+    NEXT_PUBLIC_CONVEX_URL: z.string().url().optional(),
     NEXT_PUBLIC_APP_URL: z.string().url().optional(),
     NEXT_PUBLIC_WORKOS_REDIRECT_URI: z.string().url().optional(),
   },
@@ -29,3 +29,10 @@ export const env = createEnv({
 
   emptyStringAsUndefined: true,
 })
+
+export function requireEnv(name: string, value: string | undefined): string {
+  if (!value) {
+    throw new Error(`${name} must be set`)
+  }
+  return value
+}
