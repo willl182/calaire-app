@@ -29,7 +29,7 @@ export async function upsertDirectorioParticipanteAction(formData: FormData) {
   const workosUserId = parseText(formData, 'workos_user_id') || null
 
   if (!nit || !correo) {
-    redirect('/dashboard?tab=participantes&error=' + encodeURIComponent('NIT y correo son obligatorios.'))
+    redirect('/dashboard/participantes?error=' + encodeURIComponent('NIT y correo son obligatorios.'))
   }
 
   await upsertDirectorioParticipante({
@@ -44,6 +44,6 @@ export async function upsertDirectorioParticipanteAction(formData: FormData) {
     workosUserId,
   })
 
-  revalidatePath('/dashboard')
-  redirect('/dashboard?tab=participantes&success=' + encodeURIComponent('Directorio actualizado correctamente.'))
+  revalidatePath('/dashboard/participantes')
+  redirect('/dashboard/participantes?success=' + encodeURIComponent('Directorio actualizado correctamente.'))
 }

@@ -24,7 +24,6 @@ export default async function MapaSgcPage() {
         compact
         title="Mapa vivo del Sistema de Gestión"
         accent="Navegación documental del inventario maestro"
-        description="Relaciones entre documentos, registros, requisitos y sistemas externos."
         email={auth.user.email}
       />
       {mapa.offline && (

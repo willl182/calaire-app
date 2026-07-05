@@ -95,14 +95,14 @@ function normalizeCodigo(rawCodigo: string) {
 }
 
 function buildErrorUrl(message: string) {
-  return `/dashboard?error=${encodeURIComponent(message)}`
+  return `/dashboard/rondas?error=${encodeURIComponent(message)}`
 }
 
 function buildSuccessUrl(message: string, rondaId?: string) {
   if (rondaId) {
     return `/dashboard/rondas/${rondaId}/configuracion-pt?success=${encodeURIComponent(message)}`
   }
-  return `/dashboard?tab=rondas&success=${encodeURIComponent(message)}`
+  return `/dashboard/rondas?success=${encodeURIComponent(message)}`
 }
 
 export async function createRondaAction(formData: FormData) {

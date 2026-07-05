@@ -11,7 +11,7 @@ import {
 import { listWorkOSUsers } from '@/server/auth/workos'
 import type { ResultadoDashboardRonda } from './view-model'
 
-export type AdminDashboardData = Awaited<ReturnType<typeof loadAdminDashboardData>>
+export type AdminDashboardBaseData = Awaited<ReturnType<typeof loadDashboardBaseData>>
 
 export async function loadResultadosDashboard(rondas: Ronda[]): Promise<ResultadoDashboardRonda[]> {
   const resultados = await Promise.all(
@@ -63,16 +63,9 @@ export async function loadResultadosDashboardWithStatus(rondas: Ronda[]) {
   }
 }
 
-export async function loadAdminDashboardData(activeTab: string) {
-  const [rondasResult, allParticipantesResult, workosUsers] = await Promise.all([
-    listRondasWithStatus(),
-    listAllParticipantesWithStatus(),
-    listWorkOSUsers(),
-  ])
+async function loadDashboardBaseData() {
+  const rondasResult = await listRondasWithStatus()
   const rondas = rondasResult.data
-  const rondasResultadosResult = activeTab === 'resultados'
-    ? await loadResultadosDashboardWithStatus(rondas)
-    : { data: [], offline: false }
   const rondasActivas = rondas.filter((r) => r.estado === 'activa')
   const participantesRondasActivasResults = await Promise.all(
     rondasActivas.map((r) => listParticipantesRondaResumenWithStatus(r.id))
@@ -80,17 +73,59 @@ export async function loadAdminDashboardData(activeTab: string) {
 
   return {
     rondas,
-    allParticipantes: allParticipantesResult.data,
-    workosUsers,
-    rondasResultados: rondasResultadosResult.data,
     rondasActivas,
     participantesRondasActivas: participantesRondasActivasResults.map((result) => result.data),
     backendOffline: (
       rondasResult.offline ||
-      allParticipantesResult.offline ||
-      rondasResultadosResult.offline ||
       participantesRondasActivasResults.some((result) => result.offline)
     ),
+  }
+}
+
+export async function loadDashboardHomeData() {
+  return loadDashboardBaseData()
+}
+
+export async function loadDashboardRondasData() {
+  return loadDashboardBaseData()
+}
+
+export async function loadDashboardRegistrosData() {
+  const [base, allParticipantesResult, workosUsers] = await Promise.all([
+    loadDashboardBaseData(),
+    listAllParticipantesWithStatus(),
+    listWorkOSUsers(),
+  ])
+
+  return {
+    ...base,
+    allParticipantes: allParticipantesResult.data,
+    workosUsers,
+    backendOffline: base.backendOffline || allParticipantesResult.offline,
+  }
+}
+
+export async function loadDashboardParticipantesData() {
+  const [base, allParticipantesResult] = await Promise.all([
+    loadDashboardBaseData(),
+    listAllParticipantesWithStatus(),
+  ])
+
+  return {
+    ...base,
+    allParticipantes: allParticipantesResult.data,
+    backendOffline: base.backendOffline || allParticipantesResult.offline,
+  }
+}
+
+export async function loadDashboardResultadosData() {
+  const base = await loadDashboardBaseData()
+  const rondasResultadosResult = await loadResultadosDashboardWithStatus(base.rondas)
+
+  return {
+    ...base,
+    rondasResultados: rondasResultadosResult.data,
+    backendOffline: base.backendOffline || rondasResultadosResult.offline,
   }
 }
 

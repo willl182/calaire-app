@@ -15,7 +15,7 @@ test('@screenshots captures SGC coverage board screenshots', async ({ page }) =>
   })
 
   await page.goto('/dashboard/rondas/expedientes')
-  await expect(page).toHaveURL(/\/dashboard\?tab=rondas/)
+  await expect(page).toHaveURL(/\/dashboard\/rondas/)
   await expect(page.getByRole('heading', { name: /CALAIRE-APP/i })).toBeVisible()
   await page.screenshot({
     path: `${screenshotDir}/06-expedientes-ronda.png`,

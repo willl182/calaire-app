@@ -1,7 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname, useSearchParams } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { Suspense } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
 import { signOutAction } from './actions'
@@ -16,11 +16,11 @@ type NavItem = {
 }
 
 const GESTION_NAV_ITEMS: NavItem[] = [
-  { label: 'Inicio', href: '/dashboard', tabKey: null },
-  { label: 'Rondas', href: '/dashboard?tab=rondas', tabKey: 'rondas' },
-  { label: 'Registros', href: '/dashboard?tab=registros', tabKey: 'registros' },
-  { label: 'Participantes', href: '/dashboard?tab=participantes', tabKey: 'participantes' },
-  { label: 'Resultados', href: '/dashboard?tab=resultados', tabKey: 'resultados' },
+  { label: 'Inicio', href: '/dashboard', tabKey: '__gestion_home__' },
+  { label: 'Rondas', href: '/dashboard/rondas', tabKey: '__gestion_rondas__' },
+  { label: 'Registros', href: '/dashboard/registros', tabKey: '__gestion_registros__' },
+  { label: 'Participantes', href: '/dashboard/participantes', tabKey: '__gestion_participantes__' },
+  { label: 'Resultados', href: '/dashboard/resultados', tabKey: '__gestion_resultados__' },
 ]
 
 const SGC_NAV_ITEMS: NavItem[] = [
@@ -106,8 +106,6 @@ function AreaLink({
 
 function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
   const pathname   = usePathname()
-  const searchParams = useSearchParams()
-  const tab = searchParams.get('tab')
   const isSgcDashboard = pathname.startsWith('/dashboard/sgc')
   const navItems = !canViewSgcMaestro ? [] : isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
   const areaItems: NavItem[] = [
@@ -118,13 +116,16 @@ function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
 
   function isActive(item: NavItem): boolean {
     if (item.external) return false
-    if (item.tabKey === null) return pathname === '/dashboard' && !tab
+    if (item.tabKey === '__gestion_home__') return pathname === '/dashboard'
+    if (item.tabKey === '__gestion_rondas__') return pathname.startsWith('/dashboard/rondas')
+    if (item.tabKey === '__gestion_registros__') return pathname.startsWith('/dashboard/registros')
+    if (item.tabKey === '__gestion_participantes__') return pathname.startsWith('/dashboard/participantes')
+    if (item.tabKey === '__gestion_resultados__') return pathname.startsWith('/dashboard/resultados')
     if (item.tabKey === '__sgc_documentos__') return pathname.startsWith('/dashboard/sgc/documentos')
     if (item.tabKey === '__sgc_normativa__') return pathname.startsWith('/dashboard/sgc/normativa')
     if (item.tabKey === '__sgc_mapa__') return pathname.startsWith('/dashboard/sgc/mapa')
     if (item.tabKey === '__sgc_home__') return pathname === '/dashboard/sgc'
-    if (item.tabKey === 'registros') return tab === 'registros'
-    return tab === item.tabKey
+    return false
   }
 
   const header = (

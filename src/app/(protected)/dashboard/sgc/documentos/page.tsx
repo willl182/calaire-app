@@ -107,7 +107,6 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
         compact
         title="Centro documental"
         accent="Inventario maestro de documentos del Sistema de Gestión"
-        description="Las versiones oficiales, registros, normativa y mapa leen estos mismos documentos."
         email={auth.user.email}
         actions={<Link className="btn-outline" href="/dashboard/sgc/documentos">Administrar documentos</Link>}
       />

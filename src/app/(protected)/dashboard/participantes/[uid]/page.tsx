@@ -225,7 +225,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
             </Link>
             <span className="text-xs text-[var(--border)]">/</span>
             <Link
-              href="/dashboard?tab=participantes"
+              href="/dashboard/participantes"
               className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]"
             >
               Participantes

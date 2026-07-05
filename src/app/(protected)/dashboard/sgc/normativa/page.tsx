@@ -102,7 +102,6 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
         compact
         title="Matriz normativa"
         accent="Requisitos operativos y cobertura documental"
-        description="Las relaciones documento-requisito son explicitas y auditables."
         email={auth.user.email}
       />
 

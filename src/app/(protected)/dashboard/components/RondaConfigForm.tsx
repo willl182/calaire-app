@@ -86,7 +86,7 @@ export function RondaConfigForm({ round }: { round: Ronda }) {
       </div>
 
       <div className="flex flex-wrap items-center justify-end gap-3 border-t border-[var(--border-soft)] pt-4">
-        <Link href="/dashboard?tab=rondas" className="btn-outline">
+        <Link href="/dashboard/rondas" className="btn-outline">
           Cancelar
         </Link>
         <button type="submit" className="btn-primary">
