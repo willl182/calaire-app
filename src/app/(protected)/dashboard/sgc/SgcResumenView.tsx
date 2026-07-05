@@ -4,13 +4,14 @@ import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
 import type { listMapaSgc, listNormativaSgc, listSgcMaestro } from '@/server/sgc'
 
+const SGC_BASE_PATH = '/dashboard/sgc'
+
 type SgcResumenViewProps = {
   email: string
   documentos: Awaited<ReturnType<typeof listSgcMaestro>>
   normativa: Awaited<ReturnType<typeof listNormativaSgc>>
   mapa: Awaited<ReturnType<typeof listMapaSgc>>
   backendOffline: boolean
-  basePath: '/sgc' | '/dashboard/sgc'
 }
 
 export function SgcResumenView({
@@ -19,9 +20,7 @@ export function SgcResumenView({
   normativa,
   mapa,
   backendOffline,
-  basePath,
 }: SgcResumenViewProps) {
-  const inDashboard = basePath === '/dashboard/sgc'
   const totalDocumentos = documentos.resumen.total
   const sinVersion = documentos.resumen.sinVersion
   const requisitos = normativa.resumen.requisitos
@@ -32,9 +31,9 @@ export function SgcResumenView({
       <SgcHeader
         title={<>Sistema de Gestión Maestro <span className="font-medium text-[var(--foreground-muted)]">CALAIRE</span></>}
         accent="Repositorio global de documentos, versiones, requisitos y mapa documental"
-        description={inDashboard ? null : 'Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín'}
+        description={null}
         email={email}
-        compact={inDashboard}
+        compact
       />
 
       {backendOffline && (
@@ -62,9 +61,9 @@ export function SgcResumenView({
 
       <nav className="sgc-quicknav" aria-label="Accesos SGC">
         {[
-          ['Centro documental', `${basePath}/documentos`, 'Documentos maestros, fuente editable y version oficial.'],
-          ['Matriz normativa', `${basePath}/normativa`, 'Requisitos 17043/13528 y cobertura documental.'],
-          ['Mapa SGC', `${basePath}/mapa`, 'Relaciones navegables desde el inventario maestro.'],
+          ['Centro documental', `${SGC_BASE_PATH}/documentos`, 'Documentos maestros, fuente editable y version oficial.'],
+          ['Matriz normativa', `${SGC_BASE_PATH}/normativa`, 'Requisitos 17043/13528 y cobertura documental.'],
+          ['Mapa SGC', `${SGC_BASE_PATH}/mapa`, 'Relaciones navegables desde el inventario maestro.'],
         ].map(([label, href, description]) => (
           <Link key={href} href={href}>
             <div>{label}</div>

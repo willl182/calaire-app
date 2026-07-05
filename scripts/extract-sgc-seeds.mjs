@@ -173,7 +173,6 @@ function blockForCode(code) {
 
 async function extractMapRelations(documentos) {
   const source = await firstExistingPath([
-    'public/sgc/mapa_navegacion_sgc_pea.html',
     'data/sgc/mapa_navegacion_sgc_pea.html',
   ])
   const html = await readFile(join(root, source), 'utf8')
