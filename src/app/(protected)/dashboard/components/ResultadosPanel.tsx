@@ -26,7 +26,7 @@ export function ResultadosGlobalView({
   }
 
   const { rondasConConfig, totalParticipantes, totalEnviosFinales, contaminantes, activeTab } = getResultadosSummary(rondasResultados, activeContaminante)
-  const baseHref = '/dashboard?tab=resultados'
+  const baseHref = '/dashboard/resultados'
 
   return (
     <div className="grid gap-6">
@@ -77,7 +77,7 @@ export function ResultadosGlobalView({
           {contaminantes.map((contaminante) => (
             <Link
               key={contaminante}
-              href={`${baseHref}&contaminante=${contaminante}`}
+              href={`${baseHref}?contaminante=${contaminante}`}
               aria-current={activeTab === contaminante ? 'page' : undefined}
               className={`whitespace-nowrap border-b-2 px-4 py-3 text-sm font-medium transition-colors ${
                 activeTab === contaminante

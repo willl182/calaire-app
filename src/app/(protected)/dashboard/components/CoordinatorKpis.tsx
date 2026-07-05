@@ -21,31 +21,31 @@ function CoordinatorKpiBar({
     {
       label: 'Rondas activas',
       value: rondasActivas,
-      href: '/dashboard?tab=rondas',
+      href: '/dashboard/rondas',
       negative: false,
     },
     {
       label: 'Fichas pendientes',
       value: fichasPendientes,
-      href: '/dashboard?tab=participantes',
+      href: '/dashboard/participantes',
       negative: true,
     },
     {
       label: 'Cupos sin reclamar',
       value: enlacesSinReclamar,
-      href: '/dashboard?tab=participantes',
+      href: '/dashboard/participantes',
       negative: true,
     },
     {
       label: 'Listas para exportar',
       value: rondasListasParaExportar,
-      href: '/dashboard?tab=resultados',
+      href: '/dashboard/resultados',
       negative: false,
     },
     {
       label: 'En borrador',
       value: rondasBorrador,
-      href: '/dashboard?tab=rondas',
+      href: '/dashboard/rondas',
       negative: false,
     },
   ]

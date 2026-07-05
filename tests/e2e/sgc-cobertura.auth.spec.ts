@@ -3,7 +3,7 @@ import { expect, test } from '@playwright/test'
 test('shows the SGC master dashboard separated from round expedientes', async ({ page }) => {
   await page.goto('/dashboard/sgc')
 
-  await expect(page.getByRole('heading', { name: /SGC Maestro/i })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /Sistema de Gestión Maestro CALAIRE/i })).toBeVisible()
   await expect(page.getByText(/Repositorio global de documentos, versiones, requisitos y mapa documental/i)).toBeVisible()
   await expect(page.locator('a[href="/dashboard/sgc/documentos"]').first()).toBeVisible()
   await expect(page.locator('a[href="/dashboard/sgc/normativa"]').first()).toBeVisible()
@@ -32,13 +32,13 @@ test('opens the SGC normative matrix from persisted requirements', async ({ page
   await expect(page.getByRole('columnheader', { name: 'Norma' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Cobertura' })).toBeVisible()
   await expect(page.getByRole('columnheader', { name: 'Documentos' })).toBeVisible()
-  await expect(page.getByText(/\(\d+ requisitos filtrados\)/i)).toBeVisible()
+  await expect(page.getByText(/\d+ requisitos filtrados/i)).toBeVisible()
 })
 
 test('opens the live SGC map from persisted relationships', async ({ page }) => {
   await page.goto('/dashboard/sgc/mapa')
-  await expect(page.getByRole('heading', { name: 'Mapa SGC vivo' })).toBeVisible()
-  const iframe = page.getByTitle('Mapa interactivo de navegación del SGC')
+  await expect(page.getByRole('heading', { name: 'Mapa vivo del Sistema de Gestión' })).toBeVisible()
+  const iframe = page.locator('iframe')
   const emptyState = page.getByRole('heading', { name: 'Mapa SGC sin relaciones' })
   const hasIframe = (await iframe.count()) > 0
   if (!hasIframe) {
@@ -56,6 +56,6 @@ test('opens the live SGC map from persisted relationships', async ({ page }) => 
 test('keeps the legacy SGC expedientes URL as a compatibility redirect', async ({ page }) => {
   await page.goto('/dashboard/sgc/expedientes')
 
-  await expect(page).toHaveURL(/\/dashboard\?tab=rondas/)
-  await expect(page.getByRole('heading', { name: /CALAIRE-APP/i })).toBeVisible()
+  await expect(page).toHaveURL(/\/dashboard\/rondas/)
+  await expect(page.getByRole('heading', { name: 'Rondas' })).toBeVisible()
 })

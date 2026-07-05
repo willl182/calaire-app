@@ -122,7 +122,7 @@ export function buildAttentionItems(
     items.push({
       id: 'rondas-sin-config-pt',
       message: `${rondasSinConfigPT.length === 1 ? '1 ronda activa' : `${rondasSinConfigPT.length} rondas activas`} sin configuración PT`,
-      href: '/dashboard?tab=rondas',
+      href: '/dashboard/rondas',
       count: rondasSinConfigPT.length,
       severity: 'warning',
     })
@@ -136,7 +136,7 @@ export function buildAttentionItems(
     items.push({
       id: 'cupos-sin-reclamar',
       message: `${enlacesSinReclamar} ${enlacesSinReclamar === 1 ? 'cupo sin reclamar' : 'cupos sin reclamar'} en rondas activas`,
-      href: '/dashboard?tab=participantes',
+      href: '/dashboard/participantes',
       count: enlacesSinReclamar,
       severity: 'info',
     })
@@ -150,7 +150,7 @@ export function buildAttentionItems(
     items.push({
       id: 'fichas-pendientes',
       message: `${fichasPendientes} ${fichasPendientes === 1 ? 'ficha pendiente' : 'fichas pendientes'} de envío`,
-      href: '/dashboard?tab=participantes',
+      href: '/dashboard/participantes',
       count: fichasPendientes,
       severity: 'warning',
     })
@@ -162,7 +162,7 @@ export function buildAttentionItems(
     items.push({
       id: 'rondas-en-borrador',
       message: `${borrador} ${borrador === 1 ? 'ronda en borrador' : 'rondas en borrador'} — publicar cuando esté lista`,
-      href: '/dashboard?tab=rondas',
+      href: '/dashboard/rondas',
       count: borrador,
       severity: 'info',
     })

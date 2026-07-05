@@ -1,8 +1,8 @@
 import { expect, type Page, test } from '@playwright/test'
 
 export async function discoverRoundSgcUrl(page: Page): Promise<string | null> {
-  await page.goto('/dashboard?tab=rondas')
-  await expect(page.getByRole('heading', { name: /CALAIRE-APP/i })).toBeVisible()
+  await page.goto('/dashboard/rondas')
+  await expect(page.getByRole('heading', { name: 'Rondas' })).toBeVisible()
 
   const roundLinks = page.locator('a[href^="/dashboard/rondas/"]:not([href*="/nueva"])')
   const count = await roundLinks.count()

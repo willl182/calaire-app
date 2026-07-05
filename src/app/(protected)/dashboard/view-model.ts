@@ -25,6 +25,34 @@ export function getParamValue(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
+export function getLegacyDashboardTabRedirect(params: Record<string, string | string[] | undefined>) {
+  const targetByTab: Record<string, string> = {
+    inicio: '/dashboard',
+    rondas: '/dashboard/rondas',
+    registros: '/dashboard/registros',
+    participantes: '/dashboard/participantes',
+    resultados: '/dashboard/resultados',
+  }
+  const tab = getParamValue(params.tab)
+  if (!tab) return null
+
+  const pathname = targetByTab[tab]
+  if (!pathname) return null
+
+  const nextParams = new URLSearchParams()
+  for (const [key, value] of Object.entries(params)) {
+    if (key === 'tab' || value === undefined) continue
+    if (Array.isArray(value)) {
+      value.forEach((item) => nextParams.append(key, item))
+      continue
+    }
+    nextParams.set(key, value)
+  }
+
+  const query = nextParams.toString()
+  return query ? `${pathname}?${query}` : pathname
+}
+
 export function formatDate(value: string) {
   return new Intl.DateTimeFormat('es-CO', {
     dateStyle: 'medium',

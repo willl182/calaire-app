@@ -15,7 +15,7 @@ export default async function NuevaRondaPage() {
 
         <div className="flex items-center gap-3">
           <Link
-            href="/dashboard?tab=rondas"
+            href="/dashboard/rondas"
             className="text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground)] transition-colors"
           >
             ← Rondas
@@ -132,7 +132,7 @@ export default async function NuevaRondaPage() {
 
           <div className="flex items-center justify-between border-t border-[var(--border-soft)] pt-4">
             <Link
-              href="/dashboard?tab=rondas"
+              href="/dashboard/rondas"
               className="btn-outline"
             >
               Cancelar
