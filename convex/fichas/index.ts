@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { query, mutation, QueryCtx, MutationCtx } from '../_generated/server'
 import { Doc, Id } from '../_generated/dataModel'
-import { requireAdminIdentity, requireIdentity, requireParticipantOrAdminForFicha, requireParticipantOrAdminForRondaParticipante } from '../access'
+import { requireIdentity, requireManagerIdentity, requireParticipantOrAdminForFicha, requireParticipantOrAdminForRondaParticipante } from '../access'
 
 async function getLatestFichaByRondaParticipante(
   ctx: QueryCtx | MutationCtx,
@@ -106,7 +106,7 @@ export const getFichaByRondaParticipante = query({
 export const getFichaDirectorioPreview = query({
   args: { lookup: v.string() },
   handler: async (ctx, { lookup }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const directorio = await getDirectorioByLookup(ctx, lookup)
     if (!directorio) return null
     return {
@@ -139,7 +139,7 @@ export const findFichaTemplateByLookup = query({
     excludeFichaId: v.optional(v.id('fichasRegistro')),
   },
   handler: async (ctx, { lookup, excludeFichaId }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const normalizedLookup = normalizeLookupValue(lookup)
     if (!normalizedLookup) return null
 
@@ -190,7 +190,7 @@ export const generateFichaUploadUrl = mutation({
 export const listFichaResumenesByRpIds = query({
   args: { rpIds: v.array(v.id('rondaParticipantes')) },
   handler: async (ctx, { rpIds }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     if (rpIds.length === 0) return {}
     const fichas = await Promise.all(
       rpIds.map((rpId) => getLatestFichaByRondaParticipante(ctx, rpId))
@@ -206,7 +206,7 @@ export const listFichaResumenesByRpIds = query({
 export const listFichaResumenesByRonda = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const participantes = await ctx.db
       .query('rondaParticipantes')
       .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
@@ -370,7 +370,7 @@ export const adminUpsertFichaScalar = mutation({
     valueBoolean: v.optional(v.boolean()),
   },
   handler: async (ctx, { fichaId, field, valueString, valueBoolean }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
@@ -436,7 +436,7 @@ export const adminReplaceAcompanantes = mutation({
     })),
   },
   handler: async (ctx, { fichaId, items }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
@@ -501,7 +501,7 @@ export const adminReplaceAnalizadores = mutation({
     })),
   },
   handler: async (ctx, { fichaId, items }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
@@ -556,7 +556,7 @@ export const adminReplaceInstrumentos = mutation({
     })),
   },
   handler: async (ctx, { fichaId, items }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
@@ -588,7 +588,7 @@ export const submitFicha = mutation({
 export const reabrirFicha = mutation({
   args: { fichaId: v.id('fichasRegistro') },
   handler: async (ctx, { fichaId }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
     if (ficha.estado !== 'enviado') throw new Error('Ficha no enviada')

@@ -2,7 +2,7 @@ import { v } from 'convex/values'
 import { contaminanteValidator } from './validators'
 import { defineRondaMutation, defineRondaQuery } from './definitions'
 import { PENDING_PREFIX, contaminanteIdx } from './state'
-import { requireAdminIdentity, requireIdentity } from '../access'
+import { requireIdentity, requireManagerIdentity } from '../access'
 
 export const listEnviosDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
@@ -50,7 +50,7 @@ export const getEstadoEnvioParticipanteDefinition = defineRondaQuery({
 export const listResultadosDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) return []
 
@@ -115,7 +115,7 @@ export const listResultadosDefinition = defineRondaQuery({
 export const listResultadosRondaDefinition = defineRondaQuery({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
-    await requireAdminIdentity(ctx)
+    await requireManagerIdentity(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
 

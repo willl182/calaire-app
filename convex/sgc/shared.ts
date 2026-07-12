@@ -103,8 +103,8 @@ export function identityRoles(identity: unknown): string[] {
 // tambien 'admin_sgc'/'coordinador_proceso', creando autorizacion inconsistente.
 export const ADMIN_ROLES = ['admin', 'admin_sgc', 'coordinador_proceso'] as const
 
-// Staff: gestiona SGC (salvo publicar) y ve rondas como consulta. No es admin ni
-// participante. El slug proviene del rol de WorkOS (claim `role`/`org_role`).
+// Staff: gestiona SGC y rondas salvo publicar. No es admin ni participante. El
+// slug proviene del rol de WorkOS (claim `role`/`org_role`).
 export const STAFF_ROLES = ['staff'] as const
 
 export function isAdminRole(roles: readonly string[]): boolean {
@@ -115,7 +115,7 @@ export function isStaffRole(roles: readonly string[]): boolean {
   return roles.some((role) => (STAFF_ROLES as readonly string[]).includes(role))
 }
 
-// "Manager" = admin o staff. Cubre gestion de SGC y lectura de rondas.
+// "Manager" = admin o staff. Cubre gestion de SGC y rondas.
 export function isManagerRole(roles: readonly string[]): boolean {
   return isAdminRole(roles) || isStaffRole(roles)
 }

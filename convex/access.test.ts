@@ -176,8 +176,7 @@ test('listRondasParticipante: solo un admin puede consultar las rondas de otro u
   ).resolves.toBeInstanceOf(Array)
 })
 
-// Rol staff: gestiona SGC (salvo publicar) y ve rondas como consulta; no escribe
-// rondas ni publica.
+// Rol staff: gestiona SGC y rondas, pero no publica.
 test('staff lee las superficies de rondas como viewer', async () => {
   const t = convexTest(schema, modules)
 
@@ -190,7 +189,7 @@ test('staff lee las superficies de rondas como viewer', async () => {
   ).resolves.toBeInstanceOf(Array)
 })
 
-test('staff gestiona SGC (crea hito) pero no puede publicar', async () => {
+test('staff edita rondas y gestiona SGC, pero no puede publicar', async () => {
   const t = convexTest(schema, modules)
 
   const rondaId = await t.run(async (ctx) =>
@@ -203,6 +202,14 @@ test('staff gestiona SGC (crea hito) pero no puede publicar', async () => {
   )
 
   const asStaff = t.withIdentity({ subject: 'staff-2', role: 'staff' })
+
+  await expect(
+    asStaff.mutation(api.rondas.index.updateRondaBasicInfo, {
+      id: rondaId,
+      codigo: 'R-STAFF-EDITADA',
+      nombre: 'Ronda editada por staff',
+    })
+  ).resolves.toBeNull()
 
   // Gestion SGC: staff crea un hito.
   await expect(

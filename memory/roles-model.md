@@ -12,7 +12,8 @@ Three tiers. Two different mechanisms.
 
 Guard map:
 - SGC writes: `requireSgcManage` (admin+staff). Publish (`publicaciones.ts`): `requireSgcAdmin` (admin only).
-- Rounds reads: `requireViewerIdentity`/`isViewerIdentity` (admin+staff). Rounds writes: `requireAdminIdentity` (admin only).
+- Rounds reads/writes: `requireViewerIdentity`/`requireManagerIdentity` (admin+staff).
+- Publication (`convex/sgc/publicaciones.ts`) remains admin-only through `requireSgcAdmin`.
 - Tests in `convex/access.test.ts`. Note convex-test needs `api.sgc.index.*` path (not `api.sgc.*`).
 
 WorkOS gotcha: assigning `staff` role errors "user not found" unless the user already exists — invite user first, add to org, then set membership role. Participants need zero WorkOS role config.

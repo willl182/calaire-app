@@ -21,8 +21,8 @@ export async function requireAdminIdentity(ctx: ConvexAuthCtx, message = 'Permis
   return identity
 }
 
-// Viewer de rondas: admin o staff. Solo lectura; las escrituras siguen exigiendo
-// `requireAdminIdentity`. Participantes acceden a lo suyo por tabla, no por rol.
+// Manager de rondas: admin o staff. Participantes acceden a lo suyo por tabla,
+// no por rol. Publicar sigue usando el guard admin-only de SGC.
 export function isViewerIdentity(identity: unknown) {
   return isManagerRole(identityRoles(identity))
 }
@@ -32,6 +32,8 @@ export async function requireViewerIdentity(ctx: ConvexAuthCtx, message = 'Permi
   if (!isViewerIdentity(identity)) throw new Error(message)
   return identity
 }
+
+export const requireManagerIdentity = requireViewerIdentity
 
 export async function requireParticipantForRonda(
   ctx: ConvexAuthCtx,
