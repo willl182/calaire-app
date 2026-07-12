@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, requireParticipante, writeAudit, SgcMutationConfig, SgcQueryConfig } from './shared'
+import { requireSgcManage, requireParticipante, writeAudit, SgcMutationConfig, SgcQueryConfig } from './shared'
 
 const crearNotificacionArgs = {
     rondaId: v.id('rondas'),
@@ -13,7 +13,7 @@ const crearNotificacionArgs = {
 export const crearNotificacionConfig = {
   args: crearNotificacionArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     let destinatarioEmail = args.destinatarioEmail.trim()
     if (args.rondaParticipanteId) {
       const participante = await ctx.db.get(args.rondaParticipanteId)

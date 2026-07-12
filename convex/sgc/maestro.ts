@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import type { Id } from '../_generated/dataModel'
 import type { QueryCtx } from '../_generated/server'
-import { canReadDocumentoSgc, DOCUMENTO_SGC_CONTENT_TYPES, normalizeCodigoDocumento, requireSgcAdmin, requireSgcViewer, requireSgcViewerAccess, SgcMutationConfig, SgcQueryConfig, writeGlobalAudit } from './shared'
+import { canReadDocumentoSgc, DOCUMENTO_SGC_CONTENT_TYPES, normalizeCodigoDocumento, requireSgcManage, requireSgcViewer, requireSgcViewerAccess, SgcMutationConfig, SgcQueryConfig, writeGlobalAudit } from './shared'
 
 const familiaValidator = v.union(v.literal('DG'), v.literal('P'), v.literal('I'), v.literal('F'), v.literal('OTRO'))
 const estadoDocumentoValidator = v.union(v.literal('borrador'), v.literal('vigente'), v.literal('obsoleto'), v.literal('en_revision'))
@@ -309,7 +309,7 @@ const upsertDocumentoMaestroArgs = {
 export const upsertDocumentoMaestroConfig = {
   args: upsertDocumentoMaestroArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const codigo = normalizeCodigoDocumento(args.codigo)
     const nombre = args.nombre.trim()
     const proceso = args.proceso.trim()
@@ -371,7 +371,7 @@ const registrarVersionOficialArgs = {
 export const registrarVersionOficialConfig = {
   args: registrarVersionOficialArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const documento = await ctx.db.get(args.documentoId)
     if (!documento) throw new Error('Documento SGC no encontrado.')
     if (!DOCUMENTO_SGC_CONTENT_TYPES.includes(args.contentType as (typeof DOCUMENTO_SGC_CONTENT_TYPES)[number])) throw new Error('Tipo de archivo no permitido para documento SGC.')
@@ -434,7 +434,7 @@ const crearRegistroSgcArgs = {
 export const crearRegistroSgcConfig = {
   args: crearRegistroSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const documento = await ctx.db.get(args.documentoId)
     if (!documento) throw new Error('Documento SGC no encontrado.')
     if (args.versionBaseId) {
@@ -488,7 +488,7 @@ const upsertDocumentoRequisitoArgs = {
 export const upsertDocumentoRequisitoConfig = {
   args: upsertDocumentoRequisitoArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const [documento, requisito] = await Promise.all([
       ctx.db.get(args.documentoId),
       ctx.db.get(args.requisitoId),
@@ -576,7 +576,7 @@ const importarSeedSgcArgs = {
 export const importarSeedSgcConfig = {
   args: importarSeedSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const documentIds = new Map<string, Id<'documentosSgc'>>()
     let documentosUpserted = 0
@@ -682,7 +682,7 @@ const importarDocumentosSeedSgcArgs = { documentos: v.array(seedDocumentoValidat
 export const importarDocumentosSeedSgcConfig = {
   args: importarDocumentosSeedSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     let documentosUpserted = 0
     for (const item of args.documentos) {
@@ -729,7 +729,7 @@ const importarRequisitosSeedSgcArgs = { requisitos: v.array(seedRequisitoValidat
 export const importarRequisitosSeedSgcConfig = {
   args: importarRequisitosSeedSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     let requisitosUpserted = 0
     for (const item of args.requisitos) {
@@ -767,7 +767,7 @@ const importarMapaSeedSgcArgs = {
 export const importarMapaSeedSgcConfig = {
   args: importarMapaSeedSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const documentos = await ctx.db.query('documentosSgc').collect()
     const documentIds = new Map(documentos.map((documento) => [documento.codigo, documento._id]))

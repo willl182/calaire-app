@@ -1,12 +1,12 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, requireParticipanteOAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { requireSgcManage, requireParticipanteOAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listHitosRondaArgs = { rondaId: v.id('rondas') }
 
 export const listHitosRondaConfig = {
   args: listHitosRondaArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return ctx.db.query('sgcHitosRonda').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
   },
 } satisfies SgcQueryConfig<typeof listHitosRondaArgs>
@@ -29,7 +29,7 @@ const createHitoRondaArgs = {
 export const createHitoRondaConfig = {
   args: createHitoRondaArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const id = await ctx.db.insert('sgcHitosRonda', {
       rondaId: args.rondaId,
@@ -72,7 +72,7 @@ const updateHitoRondaArgs = {
 export const updateHitoRondaConfig = {
   args: updateHitoRondaArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const hito = await ctx.db.get(args.hitoId)
     if (!hito) throw new Error('Hito no encontrado.')
     await ctx.db.patch(args.hitoId, {

@@ -1,12 +1,12 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, writeAudit, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, createSnapshot, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { requireSgcManage, writeAudit, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, createSnapshot, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const getRevisionDatosArgs = { rondaId: v.id('rondas') }
 
 export const getRevisionDatosConfig = {
   args: getRevisionDatosArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return getRevision(ctx, rondaId)
   },
 } satisfies SgcQueryConfig<typeof getRevisionDatosArgs>
@@ -16,7 +16,7 @@ const getRevisionHomogeneidadArgs = { rondaId: v.id('rondas') }
 export const getRevisionHomogeneidadConfig = {
   args: getRevisionHomogeneidadArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return getRevisionHomogeneidadDoc(ctx, rondaId)
   },
 } satisfies SgcQueryConfig<typeof getRevisionHomogeneidadArgs>
@@ -30,7 +30,7 @@ const createOrUpdateRevisionDatosArgs = {
 export const createOrUpdateRevisionDatosConfig = {
   args: createOrUpdateRevisionDatosArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const coverage = await collectCoverage(ctx, args.rondaId)
     const metricas = { ...buildRevisionMetricas(coverage), ...args.metricas }
@@ -65,7 +65,7 @@ const finalizarRevisionDatosArgs = { rondaId: v.id('rondas') }
 export const finalizarRevisionDatosConfig = {
   args: finalizarRevisionDatosArgs,
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const revision = await getRevision(ctx, rondaId)
     if (!revision) throw new Error('No existe revision de datos.')
     for (const [key, check] of Object.entries(revision.checks)) {
@@ -91,7 +91,7 @@ const createOrUpdateRevisionHomogeneidadArgs = {
 export const createOrUpdateRevisionHomogeneidadConfig = {
   args: createOrUpdateRevisionHomogeneidadArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const coverage = await collectCoverage(ctx, args.rondaId)
     const resultados = await ctx.db
@@ -143,7 +143,7 @@ const finalizarRevisionHomogeneidadArgs = { rondaId: v.id('rondas') }
 export const finalizarRevisionHomogeneidadConfig = {
   args: finalizarRevisionHomogeneidadArgs,
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const revision = await getRevisionHomogeneidadDoc(ctx, rondaId)
     if (!revision) throw new Error('No existe revision F-PSEA-08.')
     if (!revision.conclusiones?.trim()) throw new Error('Finalizar F-PSEA-08 exige una conclusion documentada.')

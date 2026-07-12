@@ -1,32 +1,36 @@
 # Session State: calaire-app2
 
-**Last Updated**: 2026-07-04 15:36 -0500
+**Last Updated**: 2026-07-12 16:22 -05
 
 ## Session Objective
 
-Afinar la vista final de Rondas (header compacto, tabla limpia) y desplegar la rama `feat-drive-sgc` a producción vía commit + push.
+Consolidar y corregir el plan, workflow y criterios de aceptación para evaluación PT, resultados de participantes, certificados opcionales, casos correctivos y calendario.
 
 ## Current State
 
-- [x] Header interno de Rondas compacto y contextual: `Rondas`, usuario y acciones (sin branding duplicado).
-- [x] Un solo botón `+ Nueva ronda` arriba; se eliminó el segundo botón dentro del contenido.
-- [x] Tabla de rondas limpiada: acciones más pequeñas, sin botones deshabilitados visibles, `Ingresar` → `Gestionar`.
-- [x] Skeleton del dashboard ajustado al nuevo header compacto.
-- [x] Ajustes visuales globales de dashboard/SGC (panels, layout, SgcHeader, DriveStatsBar, globals.css).
-- [x] Verificado localmente: `pnpm lint`, `pnpm build`, `pnpm test` pasan.
-- [x] Commit `1e1583f` con todo el working tree (33 archivos) y push a `origin/feat-drive-sgc`.
-- [x] Vercel desplegará automáticamente la rama `feat-drive-sgc` por git integration.
+- [x] Se compararon `f_final_p.md` y `s_final_p.md`; `s_final_p.md` quedó como documento canónico por respetar el layout raíz sin `src/`.
+
+- [x] Se validó `_workspace/Puntajes_Finales_PT_2026-07-12.csv`: 20 filas, 17 columnas, un participante, 12 `Satisfactorio`, 8 `No satisfactorio`, sin vacíos ni duplicados de la clave completa.
+
+- [x] Se sincronizaron `_workspace/grills/s_final_p.md`, `s_final_w.md` y `s_final_t.md` con el contrato real y las decisiones del usuario.
+
+- [x] Se leyeron `convex/_generated/ai/guidelines.md` y las guías instaladas de Next.js sobre Route Handlers.
+
+- [ ] No se ha implementado código del plan ni ejecutado la matriz de pruebas.
 
 ## Critical Technical Context
 
-- El deploy a producción se realiza vía push a `feat-drive-sgc`; Vercel git integration lo construye y publica.
-- El commit incluye `_workspace/ui-mockups/` (mockups HTML sueltos); mantenerlos fuera del `src/`.
-- Primitiva nueva: `RondaPageHeader` (`src/app/(protected)/dashboard/rondas/[id]/RondaPageHeader.tsx`) es el header contextual de cada ronda; no duplicar branding dentro del contenido.
-- `MapaSgcFrame` separa el contenido del mapa HTML del wrapper de la app que gestiona filtros/KPIs.
-- El estándar de UI es anatomía de página: nav superior, subnav de entidad opcional, header contextual, KPI strip, filtros/tabs, contenido principal.
+- Mantener `app/`, `lib/`, `app/components/` y `convex/`; no crear `src/`.
+- La identidad única de un puntaje es participante × ítem × método. El fixture contiene dos métodos por ítem y colisiona si se omite `metodo`.
+- Normalizar únicamente `Satisfactorio` → `satisfactorio` y `No satisfactorio` → `no_satisfactorio`; Calaire no reclasifica.
+- Todos los valores de evaluación se importan. Solo `n` y bins pueden derivarse para visualización anónima.
+- La publicación atómica se logra cambiando una única cabecera a `publicada`; todas las queries deben usar esa cabecera como compuerta de visibilidad.
+- Casos, notificaciones y certificados opcionales son jobs posteriores idempotentes. Un certificado fallido no revierte resultados.
+- Eficacia posterior: mismo participante + contaminante + nivel + método; vínculo admin auditado si cambian identificadores.
+- Convex no ofrece índices únicos: las mutations deben impedir duplicados y las consultas singulares usar `.unique()`.
 
 ## Next Steps
 
-1. Verificar el deploy de Vercel para `feat-drive-sgc` (revisar URL de preview y producción).
-2. Revisar visualmente con sesión admin real en `https://calaire-app.vercel.app`.
-3. Si aparece más deriva de UI, extraer la anatomía repetida en shell components compartidos en lugar de editar cada página.
+1. Revisar/aprobar los documentos canónicos `s_final_p.md`, `s_final_w.md` y `s_final_t.md`.
+2. Iniciar la Fase 0 de seguridad PT y verificarla con tests.
+3. Documentar el contrato CSV y convertir el export real en fixture de pruebas antes de implementar el importador.

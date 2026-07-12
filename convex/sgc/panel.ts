@@ -1,13 +1,13 @@
 import { v } from 'convex/values'
 import { calcularChecklistSgc, derivarBloqueantes } from '../_lib/sgc/checklist'
-import { FORMATOS_ARCHIVO, REVISION_CHECKS, HOMOGENEIDAD_CHECKS, requireSgcAdmin, writeAudit, getPlan, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, collectChecklistFaltantes, collectChecklistFaltantesDocumentacionPendiente, collectDriveCierreCalidad, summarizeSnapshotPayload, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { FORMATOS_ARCHIVO, REVISION_CHECKS, HOMOGENEIDAD_CHECKS, requireSgcManage, writeAudit, getPlan, getRevision, getRevisionHomogeneidadDoc, collectCoverage, buildRevisionMetricas, buildHomogeneidadMetricas, collectChecklistFaltantes, collectChecklistFaltantesDocumentacionPendiente, collectDriveCierreCalidad, summarizeSnapshotPayload, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const getPanelSgcArgs = { rondaId: v.id('rondas') }
 
 export const getPanelSgcConfig = {
   args: getPanelSgcArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) return null
     const [plan, revision, revisionHomogeneidad, hitos, series, justificaciones, snapshots, audit, comentarios, notificaciones, resultadosPtApp, casos, participantes] = await Promise.all([
@@ -67,7 +67,7 @@ const generateUploadUrlArgs = {}
 export const generateUploadUrlConfig = {
   args: generateUploadUrlArgs,
   handler: async (ctx) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return ctx.storage.generateUploadUrl()
   },
 } satisfies SgcMutationConfig<typeof generateUploadUrlArgs>
@@ -77,7 +77,7 @@ const transitionRondaToDocumentacionPendienteArgs = { rondaId: v.id('rondas') }
 export const transitionRondaToDocumentacionPendienteConfig = {
   args: transitionRondaToDocumentacionPendienteArgs,
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado !== 'activa') throw new Error('Solo una ronda activa puede pasar a documentacion pendiente.')
@@ -102,7 +102,7 @@ const transitionRondaToCerradaArgs = { rondaId: v.id('rondas') }
 export const transitionRondaToCerradaConfig = {
   args: transitionRondaToCerradaArgs,
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
     if (ronda.estado !== 'documentacion_pendiente') throw new Error('Solo una ronda en documentacion pendiente puede cerrarse.')
@@ -126,7 +126,7 @@ const reabrirRondaSgcArgs = { rondaId: v.id('rondas'), motivo: v.string() }
 export const reabrirRondaSgcConfig = {
   args: reabrirRondaSgcArgs,
   handler: async (ctx, { rondaId, motivo }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     if (!motivo.trim()) throw new Error('Reabrir una ronda cerrada exige motivo.')
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('La ronda no existe.')
@@ -141,7 +141,7 @@ const inicializarPanelSgcArgs = { rondaId: v.id('rondas') }
 export const inicializarPanelSgcConfig = {
   args: inicializarPanelSgcArgs,
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const existingRevision = await getRevision(ctx, rondaId)
     if (!existingRevision) {

@@ -3,7 +3,7 @@ import type { Doc, Id } from '../_generated/dataModel'
 import { defineRondaQuery } from './definitions'
 import { PENDING_PREFIX, contaminanteIdx } from './state'
 import { getLatestFichaByRondaParticipante } from './fichas'
-import { isAdminIdentity, requireAdminIdentity, requireIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante } from '../access'
+import { isViewerIdentity, requireIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante, requireViewerIdentity } from '../access'
 
 export const getRondaDefinition = defineRondaQuery({
   args: { id: v.id('rondas') },
@@ -41,7 +41,7 @@ export const getRondaByCodigoDefinition = defineRondaQuery({
 export const listRondasDefinition = defineRondaQuery({
   args: {},
   handler: async (ctx) => {
-    await requireAdminIdentity(ctx)
+    await requireViewerIdentity(ctx)
     const rondas = await ctx.db.query('rondas').order('desc').collect()
 
     const results = await Promise.all(
@@ -192,7 +192,7 @@ export const listRondasParticipanteDefinition = defineRondaQuery({
     const identity = await requireIdentity(ctx)
     let targetUserId = identity.subject
     if (userId && userId !== identity.subject) {
-      if (!isAdminIdentity(identity)) throw new Error('No tiene acceso a estas rondas.')
+      if (!isViewerIdentity(identity)) throw new Error('No tiene acceso a estas rondas.')
       targetUserId = userId
     }
     const rpRows = await ctx.db
@@ -243,7 +243,7 @@ export const listRondasParticipanteDefinition = defineRondaQuery({
 export const listAllParticipantesDefinition = defineRondaQuery({
   args: {},
   handler: async (ctx) => {
-    await requireAdminIdentity(ctx)
+    await requireViewerIdentity(ctx)
     const directorioRows = await ctx.db.query('directorioParticipantes').collect()
     const rows = await ctx.db.query('rondaParticipantes').collect()
 

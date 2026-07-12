@@ -1,12 +1,12 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, writeAudit, getPlan, createSnapshot, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { requireSgcManage, writeAudit, getPlan, createSnapshot, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const getPlanRondaArgs = { rondaId: v.id('rondas') }
 
 export const getPlanRondaConfig = {
   args: getPlanRondaArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return getPlan(ctx, rondaId)
   },
 } satisfies SgcQueryConfig<typeof getPlanRondaArgs>
@@ -21,7 +21,7 @@ const createOrUpdatePlanRondaArgs = {
 export const createOrUpdatePlanRondaConfig = {
   args: createOrUpdatePlanRondaArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const existing = await getPlan(ctx, args.rondaId)
     if (existing?.estado === 'finalizado' && !args.motivoRevision?.trim()) {
@@ -62,7 +62,7 @@ const finalizarPlanRondaArgs = { rondaId: v.id('rondas') }
 export const finalizarPlanRondaConfig = {
   args: finalizarPlanRondaArgs,
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const plan = await getPlan(ctx, rondaId)
     if (!plan) throw new Error('No existe plan de ronda.')
     const now = Date.now()

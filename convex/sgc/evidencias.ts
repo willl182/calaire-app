@@ -1,13 +1,13 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { FORMATOS_ARCHIVO, formatoValidator, requireSgcAdmin, requireParticipanteOAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { FORMATOS_ARCHIVO, formatoValidator, requireSgcManage, requireParticipanteOAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listEvidenciaSeriesArgs = { rondaId: v.id('rondas') }
 
 export const listEvidenciaSeriesConfig = {
   args: listEvidenciaSeriesArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return ctx.db.query('sgcEvidenciaSeries').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
   },
 } satisfies SgcQueryConfig<typeof listEvidenciaSeriesArgs>
@@ -17,7 +17,7 @@ const listEvidenciaVersionesArgs = { serieId: v.id('sgcEvidenciaSeries'), pagina
 export const listEvidenciaVersionesConfig = {
   args: listEvidenciaVersionesArgs,
   handler: async (ctx, { serieId, paginationOpts }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return ctx.db.query('sgcEvidenciaVersiones').withIndex('by_serieId', (q) => q.eq('serieId', serieId)).order('desc').paginate(paginationOpts)
   },
 } satisfies SgcQueryConfig<typeof listEvidenciaVersionesArgs>
@@ -27,7 +27,7 @@ const getDownloadUrlArgs = { evidenciaVersionId: v.id('sgcEvidenciaVersiones') }
 export const getDownloadUrlConfig = {
   args: getDownloadUrlArgs,
   handler: async (ctx, { evidenciaVersionId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     const version = await ctx.db.get(evidenciaVersionId)
     if (!version) return null
     return ctx.storage.getUrl(version.storageId)
@@ -39,7 +39,7 @@ const getEvidenciaVersionContextArgs = { evidenciaVersionId: v.id('sgcEvidenciaV
 export const getEvidenciaVersionContextConfig = {
   args: getEvidenciaVersionContextArgs,
   handler: async (ctx, { evidenciaVersionId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     const version = await ctx.db.get(evidenciaVersionId)
     if (!version) return null
     return {
@@ -64,7 +64,7 @@ const createEvidenciaSeriesArgs = {
 export const createEvidenciaSeriesConfig = {
   args: createEvidenciaSeriesArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const existing = await ctx.db
       .query('sgcEvidenciaSeries')
       .withIndex('by_rondaId_and_formato', (q) => q.eq('rondaId', args.rondaId).eq('formato', args.formato))
@@ -92,7 +92,7 @@ const registrarEvidenciaVersionArgs = {
 export const registrarEvidenciaVersionConfig = {
   args: registrarEvidenciaVersionArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const serie = await ctx.db.get(args.serieId)
     if (!serie) throw new Error('Serie de evidencia no encontrada.')
     if (!FORMATOS_ARCHIVO.includes(serie.formato as (typeof FORMATOS_ARCHIVO)[number])) {
@@ -133,7 +133,7 @@ const retirarEvidenciaVersionArgs = { evidenciaVersionId: v.id('sgcEvidenciaVers
 export const retirarEvidenciaVersionConfig = {
   args: retirarEvidenciaVersionArgs,
   handler: async (ctx, { evidenciaVersionId, motivo }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     if (!motivo.trim()) throw new Error('Retirar evidencia exige motivo.')
     const version = await ctx.db.get(evidenciaVersionId)
     if (!version) throw new Error('Version no encontrada.')
@@ -152,7 +152,7 @@ const upsertJustificacionArgs = {
 export const upsertJustificacionConfig = {
   args: upsertJustificacionArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     if (!args.razon.trim()) throw new Error('La justificacion exige una razon documentada.')
     const now = Date.now()
     const anteriores = await ctx.db
@@ -186,7 +186,7 @@ const retirarJustificacionArgs = {
 export const retirarJustificacionConfig = {
   args: retirarJustificacionArgs,
   handler: async (ctx, { justificacionId, motivo }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     if (!motivo.trim()) throw new Error('Retirar una justificacion exige motivo.')
     const justificacion = await ctx.db.get(justificacionId)
     if (!justificacion) throw new Error('Justificacion no encontrada.')

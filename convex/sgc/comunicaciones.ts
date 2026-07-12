@@ -1,12 +1,12 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { requireSgcManage, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listComunicacionesArgs = { rondaId: v.id('rondas') }
 
 export const listComunicacionesConfig = {
   args: listComunicacionesArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return ctx.db.query('sgcComunicaciones').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).order('desc').collect()
   },
 } satisfies SgcQueryConfig<typeof listComunicacionesArgs>
@@ -24,7 +24,7 @@ const createComunicacionArgs = {
 export const createComunicacionConfig = {
   args: createComunicacionArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const now = Date.now()
     const id = await ctx.db.insert('sgcComunicaciones', {
       rondaId: args.rondaId,
@@ -57,7 +57,7 @@ const updateComunicacionArgs = {
 export const updateComunicacionConfig = {
   args: updateComunicacionArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const comunicacion = await ctx.db.get(args.comunicacionId)
     if (!comunicacion) throw new Error('Comunicacion no encontrada.')
     await ctx.db.patch(args.comunicacionId, {
@@ -79,7 +79,7 @@ const deleteComunicacionArgs = { comunicacionId: v.id('sgcComunicaciones') }
 export const deleteComunicacionConfig = {
   args: deleteComunicacionArgs,
   handler: async (ctx, { comunicacionId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const comunicacion = await ctx.db.get(comunicacionId)
     if (!comunicacion) throw new Error('Comunicacion no encontrada.')
     await ctx.db.delete(comunicacionId)

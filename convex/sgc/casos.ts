@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, writeAudit, buildCodigoCaso, SgcMutationConfig } from './shared'
+import { requireSgcManage, writeAudit, buildCodigoCaso, SgcMutationConfig } from './shared'
 
 const upsertResultadoPtAppArgs = {
     rondaId: v.id('rondas'),
@@ -14,7 +14,7 @@ const upsertResultadoPtAppArgs = {
 export const upsertResultadoPtAppConfig = {
   args: upsertResultadoPtAppArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const serie = await ctx.db.get(args.evidenciaSerieId)
     if (!serie || serie.rondaId !== args.rondaId) throw new Error('La serie de evidencia no pertenece a esta ronda.')
     if (args.evidenciaVersionId) {
@@ -81,7 +81,7 @@ const crearCasoSgcArgs = {
 export const crearCasoSgcConfig = {
   args: crearCasoSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const titulo = args.titulo.trim()
     const descripcion = args.descripcion.trim()
     if (!titulo) throw new Error('El caso SGC exige titulo.')
@@ -138,7 +138,7 @@ const actualizarCasoSgcArgs = {
 export const actualizarCasoSgcConfig = {
   args: actualizarCasoSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const caso = await ctx.db.get(args.casoId)
     if (!caso) throw new Error('Caso SGC no encontrado.')
     const resolucion = args.resolucion?.trim() || null

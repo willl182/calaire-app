@@ -3,7 +3,7 @@ import { v, type GenericValidator, type ObjectType, type PropertyValidators } fr
 import { SGC_FORMATOS_FASE_1, SGC_RONDA_ETAPAS } from '../_lib/sgc/catalog'
 import type { Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
-import { normalizeCodigoDocumento, requireParticipanteOAdmin, requireSgcAdmin, requireSgcViewer, writeAudit } from './shared'
+import { normalizeCodigoDocumento, requireParticipanteOAdmin, requireSgcManage, requireSgcViewer, writeAudit } from './shared'
 import { esRecursoVisibleParaParticipante } from '../../src/server/sgc/drive-visibility'
 
 const DRIVE_ROOT_CODIGO = 'DRIVE_ROOT'
@@ -241,7 +241,7 @@ export const inicializarDriveRondaConfig = {
     reparados: v.number(),
   }),
   handler: async (ctx, { rondaId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('Ronda no encontrada.')
 
@@ -472,7 +472,7 @@ export const upsertDriveRecursoConfig = {
   args: upsertDriveRecursoArgs,
   returns: v.id('sgcDriveRecursos'),
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const ronda = await ctx.db.get(args.rondaId)
     if (!ronda) throw new Error('Ronda no encontrada.')
     const codigo = normalizeCodigoDocumento(args.codigo)
@@ -604,7 +604,7 @@ export const reemplazarDriveRecursoConfig = {
   args: reemplazarDriveRecursoArgs,
   returns: v.null(),
   handler: async (ctx, { recursoId, webUrl, motivo, tipo: tipoArg }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const recurso = await ctx.db.get(recursoId)
     if (!recurso) throw new Error('Recurso Drive no encontrado.')
     const nuevoWebUrl = trimToNull(webUrl)
@@ -647,7 +647,7 @@ export const actualizarEstadoDriveRecursoConfig = {
   args: actualizarEstadoDriveRecursoArgs,
   returns: v.null(),
   handler: async (ctx, { recursoId, estado, notas }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const recurso = await ctx.db.get(recursoId)
     if (!recurso) throw new Error('Recurso Drive no encontrado.')
     const detalle = trimToNull(notas)
@@ -682,7 +682,7 @@ export const retirarDriveRecursoConfig = {
   args: retirarDriveRecursoArgs,
   returns: v.null(),
   handler: async (ctx, { recursoId, motivo }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const detalle = motivo.trim()
     if (!detalle) throw new Error('Retirar un recurso exige motivo.')
     const recurso = await ctx.db.get(recursoId)
@@ -714,7 +714,7 @@ export const actualizarVisibilidadDriveRecursoConfig = {
   args: actualizarVisibilidadDriveRecursoArgs,
   returns: v.null(),
   handler: async (ctx, { recursoId, publicaParticipante }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const recurso = await ctx.db.get(recursoId)
     if (!recurso) throw new Error('Recurso Drive no encontrado.')
     if (publicaParticipante && recurso.tipo === 'carpeta') {
@@ -771,7 +771,7 @@ export const registrarAutomatizacionDriveConfig = {
   args: registrarAutomatizacionDriveArgs,
   returns: v.null(),
   handler: async (ctx, { rondaId, evento, detalle, targetId }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('Ronda no encontrada.')
 

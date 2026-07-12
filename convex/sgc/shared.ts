@@ -103,8 +103,21 @@ export function identityRoles(identity: unknown): string[] {
 // tambien 'admin_sgc'/'coordinador_proceso', creando autorizacion inconsistente.
 export const ADMIN_ROLES = ['admin', 'admin_sgc', 'coordinador_proceso'] as const
 
+// Staff: gestiona SGC (salvo publicar) y ve rondas como consulta. No es admin ni
+// participante. El slug proviene del rol de WorkOS (claim `role`/`org_role`).
+export const STAFF_ROLES = ['staff'] as const
+
 export function isAdminRole(roles: readonly string[]): boolean {
   return roles.some((role) => (ADMIN_ROLES as readonly string[]).includes(role))
+}
+
+export function isStaffRole(roles: readonly string[]): boolean {
+  return roles.some((role) => (STAFF_ROLES as readonly string[]).includes(role))
+}
+
+// "Manager" = admin o staff. Cubre gestion de SGC y lectura de rondas.
+export function isManagerRole(roles: readonly string[]): boolean {
+  return isAdminRole(roles) || isStaffRole(roles)
 }
 
 export async function requireSgcAdmin(ctx: SgcAuthCtx) {
@@ -112,6 +125,18 @@ export async function requireSgcAdmin(ctx: SgcAuthCtx) {
   if (!identity) throw new Error('Autenticacion requerida para operar SGC.')
   const roles = identityRoles(identity)
   if (!isAdminRole(roles)) {
+    throw new Error('Permisos insuficientes para operar SGC.')
+  }
+  return identity.email ?? identity.name ?? identity.tokenIdentifier
+}
+
+// Gestion de SGC: admin o staff. Usar en todas las escrituras SGC salvo
+// publicaciones (que sigue siendo admin-only via `requireSgcAdmin`).
+export async function requireSgcManage(ctx: SgcAuthCtx) {
+  const identity = await ctx.auth.getUserIdentity()
+  if (!identity) throw new Error('Autenticacion requerida para operar SGC.')
+  const roles = identityRoles(identity)
+  if (!isManagerRole(roles)) {
     throw new Error('Permisos insuficientes para operar SGC.')
   }
   return identity.email ?? identity.name ?? identity.tokenIdentifier
@@ -126,13 +151,13 @@ export async function requireSgcViewerAccess(ctx: SgcAuthCtx) {
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Autenticacion requerida para consultar SGC.')
   const roles = identityRoles(identity)
-  if (!roles.some((role) => [...ADMIN_ROLES, 'consulta'].includes(role))) {
+  if (!roles.some((role) => [...ADMIN_ROLES, ...STAFF_ROLES, 'consulta'].includes(role))) {
     throw new Error('Permisos insuficientes para consultar SGC.')
   }
   return {
     actor: identity.email ?? identity.name ?? identity.tokenIdentifier,
     roles,
-    canReadInternal: isAdminRole(roles),
+    canReadInternal: isManagerRole(roles),
   }
 }
 
@@ -148,7 +173,8 @@ export async function requireParticipanteOAdmin(ctx: SgcAuthCtx, rondaId: Id<'ro
   const identity = await ctx.auth.getUserIdentity()
   if (!identity) throw new Error('Autenticacion requerida.')
   const roles = identityRoles(identity)
-  if (isAdminRole(roles)) {
+  // admin y staff (manager) leen cualquier ronda; participante solo la suya.
+  if (isManagerRole(roles)) {
     return identity.email ?? identity.name ?? identity.tokenIdentifier
   }
   const participante = await ctx.db

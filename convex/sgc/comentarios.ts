@@ -1,12 +1,12 @@
 import { v } from 'convex/values'
-import { requireSgcAdmin, requireParticipante, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { requireSgcManage, requireParticipante, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listComentariosRondaArgs = { rondaId: v.id('rondas') }
 
 export const listComentariosRondaConfig = {
   args: listComentariosRondaArgs,
   handler: async (ctx, { rondaId }) => {
-    await requireSgcAdmin(ctx)
+    await requireSgcManage(ctx)
     return ctx.db.query('sgcComentariosRonda').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).order('desc').collect()
   },
 } satisfies SgcQueryConfig<typeof listComentariosRondaArgs>
@@ -63,7 +63,7 @@ const responderComentarioRondaArgs = {
 export const responderComentarioRondaConfig = {
   args: responderComentarioRondaArgs,
   handler: async (ctx, { comentarioId, respuesta, cerrar }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const comentario = await ctx.db.get(comentarioId)
     if (!comentario) throw new Error('Comentario no encontrado.')
     const trimmed = respuesta.trim()

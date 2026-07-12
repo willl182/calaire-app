@@ -175,3 +175,94 @@ test('listRondasParticipante: solo un admin puede consultar las rondas de otro u
     asAdmin.query(api.rondas.index.listRondasParticipante, { userId: 'otro-user' })
   ).resolves.toBeInstanceOf(Array)
 })
+
+// Rol staff: gestiona SGC (salvo publicar) y ve rondas como consulta; no escribe
+// rondas ni publica.
+test('staff lee las superficies de rondas como viewer', async () => {
+  const t = convexTest(schema, modules)
+
+  const asStaff = t.withIdentity({ subject: 'staff-1', role: 'staff' })
+
+  await expect(asStaff.query(api.rondas.index.listRondas, {})).resolves.toBeInstanceOf(Array)
+  await expect(asStaff.query(api.rondas.index.listAllParticipantes, {})).resolves.toBeInstanceOf(Array)
+  await expect(
+    asStaff.query(api.rondas.index.listRondasParticipante, { userId: 'otro-user' })
+  ).resolves.toBeInstanceOf(Array)
+})
+
+test('staff gestiona SGC (crea hito) pero no puede publicar', async () => {
+  const t = convexTest(schema, modules)
+
+  const rondaId = await t.run(async (ctx) =>
+    ctx.db.insert('rondas', {
+      codigo: 'R-STAFF',
+      nombre: 'Ronda staff',
+      estado: 'borrador',
+      createdAt: Date.now(),
+    })
+  )
+
+  const asStaff = t.withIdentity({ subject: 'staff-2', role: 'staff' })
+
+  // Gestion SGC: staff crea un hito.
+  await expect(
+    asStaff.mutation(api.sgc.index.createHitoRonda, {
+      rondaId,
+      codigo: 'H1',
+      nombre: 'Hito 1',
+      fase: 'planificacion',
+      fechaObjetivo: null,
+      fechaReal: null,
+      estado: 'pendiente',
+      responsable: 'staff',
+      visibleParticipante: false,
+      bloqueaCierre: false,
+      formatoRelacionado: null,
+      notas: null,
+    })
+  ).resolves.toBeDefined()
+
+  // Publicar sigue siendo admin-only: staff es rechazado.
+  await expect(
+    asStaff.mutation(api.sgc.index.createPublicacion, {
+      rondaId,
+      titulo: 'No permitido',
+      contenido: 'x',
+      tipo: 'comunicado',
+      visibleDesde: Date.now(),
+      visibleHasta: null,
+    })
+  ).rejects.toThrow(/Permisos insuficientes/)
+})
+
+test('un participante (sin rol) no puede gestionar SGC', async () => {
+  const t = convexTest(schema, modules)
+
+  const rondaId = await t.run(async (ctx) =>
+    ctx.db.insert('rondas', {
+      codigo: 'R-NOSTAFF',
+      nombre: 'Ronda sin staff',
+      estado: 'borrador',
+      createdAt: Date.now(),
+    })
+  )
+
+  const asMember = t.withIdentity({ subject: 'user-plain' })
+
+  await expect(
+    asMember.mutation(api.sgc.index.createHitoRonda, {
+      rondaId,
+      codigo: 'H1',
+      nombre: 'Hito 1',
+      fase: 'planificacion',
+      fechaObjetivo: null,
+      fechaReal: null,
+      estado: 'pendiente',
+      responsable: 'x',
+      visibleParticipante: false,
+      bloqueaCierre: false,
+      formatoRelacionado: null,
+      notas: null,
+    })
+  ).rejects.toThrow(/Permisos insuficientes/)
+})

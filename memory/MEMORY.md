@@ -1,0 +1,1 @@
+- [Roles model](roles-model.md) — admin/staff = WorkOS roles, participant = DB table row; guard map

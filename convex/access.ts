@@ -1,6 +1,6 @@
 import type { Doc, Id } from './_generated/dataModel'
 import type { MutationCtx, QueryCtx } from './_generated/server'
-import { identityRoles, isAdminRole } from './sgc/shared'
+import { identityRoles, isAdminRole, isManagerRole } from './sgc/shared'
 
 export type ConvexAuthCtx = QueryCtx | MutationCtx
 
@@ -18,6 +18,18 @@ export function isAdminIdentity(identity: unknown) {
 export async function requireAdminIdentity(ctx: ConvexAuthCtx, message = 'Permisos insuficientes.') {
   const identity = await requireIdentity(ctx)
   if (!isAdminIdentity(identity)) throw new Error(message)
+  return identity
+}
+
+// Viewer de rondas: admin o staff. Solo lectura; las escrituras siguen exigiendo
+// `requireAdminIdentity`. Participantes acceden a lo suyo por tabla, no por rol.
+export function isViewerIdentity(identity: unknown) {
+  return isManagerRole(identityRoles(identity))
+}
+
+export async function requireViewerIdentity(ctx: ConvexAuthCtx, message = 'Permisos insuficientes.') {
+  const identity = await requireIdentity(ctx)
+  if (!isViewerIdentity(identity)) throw new Error(message)
   return identity
 }
 

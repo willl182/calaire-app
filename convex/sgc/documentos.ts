@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { canReadDocumentoSgc, DOCUMENTO_SGC_CONTENT_TYPES, requireSgcAdmin, requireSgcViewerAccess, writeGlobalAudit, normalizeCodigoDocumento, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { canReadDocumentoSgc, DOCUMENTO_SGC_CONTENT_TYPES, requireSgcManage, requireSgcViewerAccess, writeGlobalAudit, normalizeCodigoDocumento, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listDocumentosSgcArgs = {
     proceso: v.optional(v.union(v.string(), v.null())),
@@ -127,7 +127,7 @@ const upsertDocumentoSgcArgs = {
 export const upsertDocumentoSgcConfig = {
   args: upsertDocumentoSgcArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const codigo = normalizeCodigoDocumento(args.codigo)
     const nombre = args.nombre.trim()
     const proceso = args.proceso.trim()
@@ -182,7 +182,7 @@ const registrarDocumentoSgcVersionArgs = {
 export const registrarDocumentoSgcVersionConfig = {
   args: registrarDocumentoSgcVersionArgs,
   handler: async (ctx, args) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const documento = await ctx.db.get(args.documentoId)
     if (!documento) throw new Error('Documento SGC no encontrado.')
     const resumen = args.resumenCambios.trim()
@@ -231,7 +231,7 @@ const retirarDocumentoSgcVersionArgs = { versionId: v.id('documentoSgcVersiones'
 export const retirarDocumentoSgcVersionConfig = {
   args: retirarDocumentoSgcVersionArgs,
   handler: async (ctx, { versionId, motivo }) => {
-    const actor = await requireSgcAdmin(ctx)
+    const actor = await requireSgcManage(ctx)
     const version = await ctx.db.get(versionId)
     if (!version) throw new Error('Version de documento no encontrada.')
     if (!motivo.trim()) throw new Error('Retirar una version exige motivo.')
