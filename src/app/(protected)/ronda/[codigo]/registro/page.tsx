@@ -49,16 +49,19 @@ export default async function RegistroPage({ params }: Props) {
     )
   }
 
-  try {
-    await getOrCreateFicha(rp.id)
-  } catch (error) {
-    if (!isConvexOffline(error)) throw error
-    return <RegistroOfflineState codigo={codigo} />
+  let ficha = await getFichaByRondaParticipante(rp.id)
+  if (ronda.estado === 'activa' && !ficha) {
+    try {
+      await getOrCreateFicha(rp.id)
+    } catch (error) {
+      if (!isConvexOffline(error)) throw error
+      return <RegistroOfflineState codigo={codigo} />
+    }
+    ficha = await getFichaByRondaParticipante(rp.id)
   }
-  const ficha = await getFichaByRondaParticipante(rp.id)
   if (!ficha) notFound()
 
-  const soloLectura = ronda.estado === 'cerrada'
+  const soloLectura = ronda.estado !== 'activa'
 
   return (
     <FormularioRegistro
