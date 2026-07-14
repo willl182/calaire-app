@@ -3,6 +3,7 @@
 import { requireAdminAuth } from '@/server/auth'
 import {
   getRequiredPTReplicateCount,
+  getRonda,
   listPTItems,
   listPTSampleGroups,
   upsertEnvioPT,
@@ -33,6 +34,10 @@ export async function adminGuardarDatoPTAction(
   if (!rondaId || !participanteId || !ptItemId || !sampleGroupId) {
     return { error: 'Datos incompletos para guardar.' }
   }
+
+  const ronda = await getRonda(rondaId)
+  if (!ronda) return { error: 'La ronda no existe o ya no está disponible.' }
+  if (ronda.estado !== 'activa') return { error: 'La ronda no está activa y no admite edición' }
 
   const [items, sampleGroups] = await Promise.all([listPTItems(rondaId), listPTSampleGroups(rondaId)])
   const item = items.find((candidate) => candidate.id === ptItemId)

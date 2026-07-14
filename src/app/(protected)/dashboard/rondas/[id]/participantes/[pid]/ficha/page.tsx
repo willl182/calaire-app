@@ -22,8 +22,11 @@ export default async function FichaAdminPage({ params }: Props) {
   ])
   if (!ronda || !participante || participante.ronda_id !== rondaId) notFound()
 
-  await getOrCreateFicha(rondaParticipanteId)
-  const fichaCompleta = await getFichaByRondaParticipante(rondaParticipanteId)
+  let fichaCompleta = await getFichaByRondaParticipante(rondaParticipanteId)
+  if (ronda.estado === 'activa' && !fichaCompleta) {
+    await getOrCreateFicha(rondaParticipanteId)
+    fichaCompleta = await getFichaByRondaParticipante(rondaParticipanteId)
+  }
   if (!fichaCompleta) notFound()
 
   return (

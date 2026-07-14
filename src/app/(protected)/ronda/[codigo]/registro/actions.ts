@@ -22,6 +22,12 @@ import {
 } from '@/server/rondas/fichas'
 
 const MAX_ACOMPANANTE_PDF_SIZE = 10 * 1024 * 1024
+const RONDA_NO_ACTIVA_ERROR = 'La ronda no está activa y no admite edición'
+
+function assertRondaActiva(estado: string) {
+  if (estado !== 'activa') return { error: RONDA_NO_ACTIVA_ERROR }
+  return null
+}
 
 async function uploadAcompanantePdf(file: File) {
   if (file.type && file.type !== 'application/pdf') {
@@ -75,7 +81,8 @@ export async function guardarCampoFichaAction(
     return { error: 'Campo no permitido' }
   }
 
-  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite edición' }
+  const estadoError = assertRondaActiva(result.ronda.estado)
+  if (estadoError) return estadoError
 
   const ficha = await getOrCreateFicha(result.rp.id)
   await upsertFichaScalars(ficha.id, field as FichaScalarField, value)
@@ -91,7 +98,8 @@ export async function guardarListasAction(
   const result = await resolveRondaParticipante(codigoRonda)
   if ('error' in result) return { error: result.error }
 
-  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite edición' }
+  const estadoError = assertRondaActiva(result.ronda.estado)
+  if (estadoError) return estadoError
 
   const ficha = await getOrCreateFicha(result.rp.id)
 
@@ -115,7 +123,8 @@ export async function cargarPdfAcompananteAction(
   const result = await resolveRondaParticipante(codigoRonda)
   if ('error' in result) return { error: result.error }
 
-  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite edición' }
+  const estadoError = assertRondaActiva(result.ronda.estado)
+  if (estadoError) return estadoError
 
   const file = formData.get('archivo')
   if (!(file instanceof File) || file.size === 0) return { error: 'Seleccione un PDF.' }
@@ -133,7 +142,8 @@ export async function enviarFichaFinalAction(
   const result = await resolveRondaParticipante(codigoRonda)
   if ('error' in result) return { error: result.error }
 
-  if (result.ronda.estado === 'cerrada') return { error: 'La ronda está cerrada y no admite envíos' }
+  const estadoError = assertRondaActiva(result.ronda.estado)
+  if (estadoError) return { error: 'La ronda no está activa y no admite envíos' }
 
   const ficha = await getFichaByRondaParticipante(result.rp.id)
   if (!ficha) return { error: 'No existe la ficha de registro' }

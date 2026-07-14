@@ -1,6 +1,29 @@
 import { v } from 'convex/values'
-import { query, mutation } from '../_generated/server'
+import { query, mutation, MutationCtx } from '../_generated/server'
+import { Id } from '../_generated/dataModel'
 import { requireManagerIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante } from '../access'
+
+
+async function requireActiveRondaPTReferences(
+  ctx: MutationCtx,
+  rondaId: Id<'rondas'>,
+  rondaParticipanteId: Id<'rondaParticipantes'>,
+  ptItemId: Id<'rondaPtItems'>,
+  sampleGroupId: Id<'rondaPtSampleGroups'>
+) {
+  const [participante, ptItem, sampleGroup, ronda] = await Promise.all([
+    ctx.db.get(rondaParticipanteId),
+    ctx.db.get(ptItemId),
+    ctx.db.get(sampleGroupId),
+    ctx.db.get(rondaId),
+  ])
+  if (!participante || !ptItem || !sampleGroup || !ronda) throw new Error('Referencia inválida')
+  if (participante.rondaId !== rondaId || ptItem.rondaId !== rondaId || sampleGroup.rondaId !== rondaId) {
+    throw new Error('Los identificadores no pertenecen a la ronda')
+  }
+  if (ronda.estado !== 'activa') throw new Error('La ronda no está activa')
+  return { participante, ptItem, sampleGroup, ronda }
+}
 
 // ---------------------------------------------------------------------------
 // PT Items & Sample Groups — read
@@ -332,6 +355,7 @@ export const upsertEnvioPT = mutation({
   },
   handler: async (ctx, { rondaId, rondaParticipanteId, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, k, uxExp }) => {
     await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
+    await requireActiveRondaPTReferences(ctx, rondaId, rondaParticipanteId, ptItemId, sampleGroupId)
     const now = Date.now()
 
     const existing = await ctx.db
@@ -342,6 +366,7 @@ export const upsertEnvioPT = mutation({
       .unique()
 
     if (existing) {
+      if (existing.finalSubmittedAt != null) throw new Error('El envio final ya fue enviado y no admite edición')
       await ctx.db.patch(existing._id, { d1, d2, d3, meanValue, sdValue, ux, k, uxExp, draftSavedAt: now, updatedAt: now })
       return existing._id
     }
@@ -374,6 +399,9 @@ export const submitFinalPT = mutation({
       .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
       .unique()
     if (!participante) throw new Error('Participante no encontrado')
+    const ronda = await ctx.db.get(rondaId)
+    if (!ronda) throw new Error('Ronda no encontrada')
+    if (ronda.estado !== 'activa') throw new Error('La ronda no está activa')
 
     const [items, sampleGroups] = await Promise.all([
       ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
@@ -381,10 +409,10 @@ export const submitFinalPT = mutation({
     ])
     const expectedCount = items.length * sampleGroups.length
 
-    const envios = await ctx.db
+    const envios = (await ctx.db
       .query('enviosPt')
       .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', participante._id))
-      .collect()
+      .collect()).filter((envio) => envio.rondaId === rondaId)
 
     if (envios.length !== expectedCount) {
       throw new Error('Faltan datos para completar el envio final')

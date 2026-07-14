@@ -55,9 +55,10 @@ async function getRondaByFichaId(
   return ctx.db.get(rp.rondaId)
 }
 
-function assertRondaAbierta(ronda: Doc<'rondas'> | null) {
-  if (ronda?.estado === 'cerrada') {
-    throw new Error('La ronda está cerrada y no admite edición')
+function assertRondaActiva(ronda: Doc<'rondas'> | null) {
+  if (!ronda) throw new Error('Ronda no encontrada')
+  if (ronda.estado !== 'activa') {
+    throw new Error('La ronda no está activa y no admite edición')
   }
 }
 
@@ -234,6 +235,8 @@ export const getOrCreateFicha = mutation({
     await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
     const participante = await ctx.db.get(rondaParticipanteId)
     if (!participante) throw new Error('Participante no encontrado.')
+    const ronda = await ctx.db.get(participante.rondaId)
+    assertRondaActiva(ronda)
 
     const existing = await getLatestFichaByRondaParticipante(ctx, rondaParticipanteId)
     if (existing) return existing._id
@@ -300,7 +303,7 @@ export const upsertFichaScalar = mutation({
     if (!ficha) throw new Error('Ficha no encontrada')
 
     const ronda = await getRondaByFichaId(ctx, fichaId)
-    assertRondaAbierta(ronda)
+    assertRondaActiva(ronda)
 
     const hasValue = valueBoolean !== undefined || valueString !== undefined
     if (!hasValue) {
@@ -374,6 +377,9 @@ export const adminUpsertFichaScalar = mutation({
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaActiva(ronda)
+
     const hasValue = valueBoolean !== undefined || valueString !== undefined
     if (!hasValue) {
       await ctx.db.patch(fichaId, { updatedAt: Date.now() })
@@ -407,7 +413,7 @@ export const replaceAcompanantes = mutation({
     if (!ficha) throw new Error('Ficha no encontrada')
 
     const ronda = await getRondaByFichaId(ctx, fichaId)
-    assertRondaAbierta(ronda)
+    assertRondaActiva(ronda)
 
     const existing = await ctx.db
       .query('fichasAcompanantes')
@@ -439,6 +445,9 @@ export const adminReplaceAcompanantes = mutation({
     await requireManagerIdentity(ctx)
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaActiva(ronda)
 
     const existing = await ctx.db
       .query('fichasAcompanantes')
@@ -472,7 +481,7 @@ export const replaceAnalizadores = mutation({
     if (!ficha) throw new Error('Ficha no encontrada')
 
     const ronda = await getRondaByFichaId(ctx, fichaId)
-    assertRondaAbierta(ronda)
+    assertRondaActiva(ronda)
 
     const existing = await ctx.db
       .query('fichasAnalizadores')
@@ -505,6 +514,9 @@ export const adminReplaceAnalizadores = mutation({
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaActiva(ronda)
+
     const existing = await ctx.db
       .query('fichasAnalizadores')
       .withIndex('by_ficha', (q) => q.eq('fichaId', fichaId))
@@ -532,7 +544,7 @@ export const replaceInstrumentos = mutation({
     if (!ficha) throw new Error('Ficha no encontrada')
 
     const ronda = await getRondaByFichaId(ctx, fichaId)
-    assertRondaAbierta(ronda)
+    assertRondaActiva(ronda)
 
     const existing = await ctx.db
       .query('fichasInstrumentos')
@@ -560,6 +572,9 @@ export const adminReplaceInstrumentos = mutation({
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
 
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaActiva(ronda)
+
     const existing = await ctx.db
       .query('fichasInstrumentos')
       .withIndex('by_ficha', (q) => q.eq('fichaId', fichaId))
@@ -579,7 +594,7 @@ export const submitFicha = mutation({
     if (ficha.estado !== 'borrador') throw new Error('Ficha no en estado borrador')
 
     const ronda = await getRondaByFichaId(ctx, fichaId)
-    assertRondaAbierta(ronda)
+    assertRondaActiva(ronda)
 
     await ctx.db.patch(fichaId, { estado: 'enviado', updatedAt: Date.now() })
   },
@@ -592,6 +607,9 @@ export const reabrirFicha = mutation({
     const ficha = await ctx.db.get(fichaId)
     if (!ficha) throw new Error('Ficha no encontrada')
     if (ficha.estado !== 'enviado') throw new Error('Ficha no enviada')
+
+    const ronda = await getRondaByFichaId(ctx, fichaId)
+    assertRondaActiva(ronda)
 
     await ctx.db.patch(fichaId, { estado: 'borrador', updatedAt: Date.now() })
   },
