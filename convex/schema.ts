@@ -132,6 +132,61 @@ export default defineSchema({
     // índice compuesto para buscar antes de insertar; no es un UNIQUE constraint.
     .index('by_participante_item_group', ['rondaParticipanteId', 'ptItemId', 'sampleGroupId']),
 
+  ptEvaluaciones: defineTable({
+    rondaId: v.id('rondas'),
+    estado: v.union(v.literal('sin_cargar'), v.literal('importando'), v.literal('borrador_validado'), v.literal('publicada')),
+    importToken: v.optional(v.union(v.string(), v.null())),
+    filasEsperadas: v.optional(v.union(v.number(), v.null())),
+    filasImportadas: v.optional(v.union(v.number(), v.null())),
+    csvStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    informeStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    informeNombreArchivo: v.optional(v.union(v.string(), v.null())),
+    publicadaAt: v.optional(v.union(v.number(), v.null())),
+    publicadaBy: v.optional(v.union(v.string(), v.null())),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  }).index('by_rondaId', ['rondaId']),
+
+  ptScores: defineTable({
+    rondaId: v.id('rondas'), rondaParticipanteId: v.id('rondaParticipantes'), ptItemId: v.id('rondaPtItems'),
+    metodo: v.string(), valorAsignado: v.number(), incertidumbreAsignada: v.union(v.number(), v.null()),
+    sigmaPt: v.union(v.number(), v.null()), valorParticipante: v.number(), uParticipante: v.union(v.number(), v.null()),
+    UParticipante: v.union(v.number(), v.null()), unidad: v.string(), z: v.union(v.number(), v.null()),
+    zPrima: v.union(v.number(), v.null()), zeta: v.union(v.number(), v.null()), en: v.union(v.number(), v.null()),
+    clasificacion: v.union(v.literal('satisfactorio'), v.literal('no_satisfactorio')),
+    importToken: v.string(), importadoAt: v.number(), importadoBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_importToken', ['rondaId', 'importToken'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId'])
+    .index('by_rondaParticipanteId_and_ptItemId_and_metodo', ['rondaParticipanteId', 'ptItemId', 'metodo']),
+
+  ptScoreRondaStats: defineTable({
+    rondaId: v.id('rondas'), ptItemId: v.id('rondaPtItems'), metodo: v.string(), n: v.number(),
+    bins: v.array(v.object({ desde: v.number(), hasta: v.number(), n: v.number() })),
+    importToken: v.string(), importadoAt: v.number(), importadoBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaId_and_importToken', ['rondaId', 'importToken'])
+    .index('by_rondaId_and_ptItemId_and_metodo', ['rondaId', 'ptItemId', 'metodo']),
+
+  ptInformes: defineTable({
+    rondaId: v.id('rondas'), rondaParticipanteId: v.union(v.id('rondaParticipantes'), v.null()),
+    storageId: v.id('_storage'), nombreArchivo: v.string(), publicado: v.boolean(), createdAt: v.number(), createdBy: v.string(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId']),
+
+  ptCertificados: defineTable({
+    rondaId: v.id('rondas'), rondaParticipanteId: v.id('rondaParticipantes'),
+    estado: v.union(v.literal('pendiente'), v.literal('generando'), v.literal('generado'), v.literal('fallido')),
+    storageId: v.optional(v.union(v.id('_storage'), v.null())), error: v.optional(v.union(v.string(), v.null())),
+    intentos: v.number(), createdAt: v.number(), createdBy: v.string(), updatedAt: v.number(),
+  })
+    .index('by_rondaId', ['rondaId'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId'])
+    .index('by_rondaId_and_rondaParticipanteId', ['rondaId', 'rondaParticipanteId']),
+
   // -------------------------------------------------------------------------
   // envios  (resultados regulares — no PT)
   // -------------------------------------------------------------------------
@@ -318,7 +373,21 @@ export default defineSchema({
     updatedBy: v.string(),
   })
     .index('by_rondaId', ['rondaId'])
-    .index('by_rondaId_and_estado', ['rondaId', 'estado']),
+    .index('by_rondaId_and_estado', ['rondaId', 'estado'])
+    .index('by_rondaId_and_visibleParticipante', ['rondaId', 'visibleParticipante'])
+    .index('by_visibleParticipante_and_fechaObjetivo', ['visibleParticipante', 'fechaObjetivo']),
+
+  sgcHitoRecordatorios: defineTable({
+    hitoId: v.id('sgcHitosRonda'),
+    rondaId: v.id('rondas'),
+    rondaParticipanteId: v.id('rondaParticipantes'),
+    umbralDias: v.union(v.literal(7), v.literal(3), v.literal(1)),
+    fechaObjetivoNotificada: v.string(),
+    notificacionId: v.id('sgcNotificaciones'),
+    createdAt: v.number(),
+  })
+    .index('by_hitoId_and_rondaParticipanteId_and_umbralDias', ['hitoId', 'rondaParticipanteId', 'umbralDias'])
+    .index('by_rondaParticipanteId', ['rondaParticipanteId']),
 
   sgcJustificaciones: defineTable({
     rondaId: v.id('rondas'),
@@ -599,6 +668,9 @@ export default defineSchema({
     formatoRelacionado: v.optional(v.union(v.string(), v.null())),
     evidenciaSerieId: v.optional(v.union(v.id('sgcEvidenciaSeries'), v.null())),
     fechaObjetivo: v.optional(v.union(v.string(), v.null())),
+    automatico: v.optional(v.boolean()),
+    documentacionAceptadaAt: v.optional(v.union(v.number(), v.null())),
+    documentacionAceptadaBy: v.optional(v.union(v.string(), v.null())),
     resolucion: v.optional(v.union(v.string(), v.null())),
     cerradoAt: v.optional(v.union(v.number(), v.null())),
     cerradoBy: v.optional(v.union(v.string(), v.null())),
@@ -609,7 +681,52 @@ export default defineSchema({
   })
     .index('by_rondaId', ['rondaId'])
     .index('by_rondaId_and_estado', ['rondaId', 'estado'])
-    .index('by_rondaParticipanteId', ['rondaParticipanteId']),
+    .index('by_rondaParticipanteId', ['rondaParticipanteId'])
+    .index('by_rondaId_and_rondaParticipanteId_and_tipo', ['rondaId', 'rondaParticipanteId', 'tipo'])
+    .index('by_rondaId_and_rondaParticipanteId_and_tipo_and_automatico', ['rondaId', 'rondaParticipanteId', 'tipo', 'automatico']),
+
+  sgcCasoMensajes: defineTable({
+    casoId: v.id('sgcCasos'),
+    autorTipo: v.union(v.literal('participante'), v.literal('admin')),
+    autorId: v.string(),
+    texto: v.string(),
+    createdAt: v.number(),
+  }).index('by_casoId', ['casoId']),
+
+  casoResultadosOrigen: defineTable({
+    casoId: v.id('sgcCasos'),
+    ptScoreId: v.id('ptScores'),
+  }).index('by_casoId', ['casoId']).index('by_ptScoreId', ['ptScoreId']),
+
+  casoDocumentos: defineTable({
+    casoId: v.id('sgcCasos'),
+    categoria: v.union(v.literal('analisis_causa'), v.literal('plan_accion'), v.literal('implementacion'), v.literal('verificacion_eficacia')),
+    createdAt: v.number(),
+    createdBy: v.string(),
+  }).index('by_casoId', ['casoId']).index('by_casoId_and_categoria', ['casoId', 'categoria']),
+
+  casoDocumentoVersiones: defineTable({
+    documentoId: v.id('casoDocumentos'),
+    version: v.number(),
+    storageId: v.id('_storage'),
+    nombreArchivo: v.string(),
+    contentType: v.string(),
+    estado: v.union(v.literal('borrador'), v.literal('enviada')),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    enviadaAt: v.optional(v.union(v.number(), v.null())),
+  }).index('by_documentoId', ['documentoId']),
+
+  casoVerificaciones: defineTable({
+    casoId: v.id('sgcCasos'),
+    ptScoreOrigenId: v.id('ptScores'),
+    ptScorePosteriorId: v.union(v.id('ptScores'), v.null()),
+    rondaPosteriorId: v.union(v.id('rondas'), v.null()),
+    resultado: v.union(v.literal('pendiente'), v.literal('satisfactorio'), v.literal('no_satisfactorio')),
+    vinculacion: v.union(v.literal('automatica'), v.literal('manual'), v.null()),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  }).index('by_casoId', ['casoId']).index('by_ptScoreOrigenId', ['ptScoreOrigenId']),
 
   documentosSgc: defineTable({
     codigo: v.string(),

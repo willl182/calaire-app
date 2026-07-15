@@ -25,6 +25,14 @@ export function ParticipantTopNav({ hasRondas }: { hasRondas: boolean }) {
             Inicio
           </Link>
           {hasRondas && (
+            <Link
+              href="/calendario"
+              className="relative inline-flex self-stretch items-center px-4 py-0 text-sm font-medium whitespace-nowrap text-[var(--foreground-muted)] transition-colors duration-150 hover:text-[var(--foreground)]"
+            >
+              Calendario
+            </Link>
+          )}
+          {hasRondas && (
             <a
               href="/guia.html"
               target="_blank"

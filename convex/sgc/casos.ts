@@ -113,6 +113,7 @@ export const crearCasoSgcConfig = {
       formatoRelacionado: args.formatoRelacionado?.trim() || null,
       evidenciaSerieId: args.evidenciaSerieId,
       fechaObjetivo: args.fechaObjetivo,
+      automatico: false,
       resolucion: null,
       cerradoAt: null,
       cerradoBy: null,
@@ -160,4 +161,3 @@ export const actualizarCasoSgcConfig = {
     await writeAudit(ctx, { rondaId: caso.rondaId, actor, evento: 'sgc.caso.actualizado', detalle: `${caso.codigo}: ${args.estado}`, targetTipo: 'sgcCasos', targetId: args.casoId })
   },
 } satisfies SgcMutationConfig<typeof actualizarCasoSgcArgs>
-

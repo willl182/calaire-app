@@ -1,4 +1,5 @@
 import { notFound, redirect } from 'next/navigation'
+import Link from 'next/link'
 import { withAuth } from '@workos-inc/authkit-nextjs'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import {
@@ -6,6 +7,7 @@ import {
   getEstadoEnvioPTParticipanteWithStatus,
   getRondaByCodigoWithStatus,
   getRondaParticipantePTWithStatus,
+  getMyPtResults,
   isInvitadoWithStatus,
   listEnviosPTWithStatus,
   listPTItemsWithStatus,
@@ -81,17 +83,31 @@ export default async function RondaPage({
     }
 
     if (ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada') {
+      const [evaluacion, envio] = await Promise.all([
+        getMyPtResults(ronda.id),
+        getEstadoEnvioPTParticipanteWithStatus(ronda.id),
+      ])
+      if (envio.offline) return <RondaOfflineState codigo={codigo} />
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-          <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
-            <div className="text-4xl mb-4">🔒</div>
+        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+          <div className="w-full max-w-lg rounded-xl bg-white p-10 text-center shadow">
+            <div className="text-4xl mb-4">{evaluacion.estado === 'publicada' ? '📊' : '⏳'}</div>
             <h2 className="text-lg font-semibold text-gray-800 mb-2">
-              {ronda.estado === 'cerrada' ? 'Ronda cerrada' : 'Ronda en cierre documental'}
+              {evaluacion.estado === 'publicada' ? 'Resultados disponibles' : 'En evaluación'}
             </h2>
             <p className="text-gray-500 text-sm">
-              La ronda <strong>{codigo}</strong> no admite nuevos ingresos mientras el coordinador
-              completa el cierre documental.
+              {evaluacion.estado === 'publicada' ? 'La evaluación oficial ya fue publicada.' : 'El envío fue cerrado y la evaluación aún no ha sido publicada.'}
             </p>
+            {evaluacion.estado !== 'publicada' && envio.data.enviado && (
+              <p className="mt-3 text-xs text-gray-500">
+                Envío final confirmado{envio.data.enviados_at ? ` el ${new Intl.DateTimeFormat('es-CO', { dateStyle: 'long' }).format(new Date(envio.data.enviados_at))}` : ''}.
+              </p>
+            )}
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              {evaluacion.estado === 'publicada' && <Link className="btn-primary" href={`/ronda/${codigo}/resultados`}>Consultar resultados</Link>}
+              <Link className="btn-outline" href="/calendario">Ver calendario</Link>
+              <Link className="btn-outline" href={`/ronda/${codigo}/casos`}>Casos y expedientes</Link>
+            </div>
           </div>
         </div>
       )

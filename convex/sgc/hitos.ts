@@ -104,9 +104,8 @@ export const getHitosVisibleParticipanteConfig = {
     if (!ronda) throw new Error('Ronda no encontrada.')
     return ctx.db
       .query('sgcHitosRonda')
-      .withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId))
-      .filter((q) => q.eq(q.field('visibleParticipante'), true))
-      .collect()
+      .withIndex('by_rondaId_and_visibleParticipante', (q) =>
+        q.eq('rondaId', rondaId).eq('visibleParticipante', true))
+      .take(250)
   },
 } satisfies SgcQueryConfig<typeof getHitosVisibleParticipanteArgs>
-

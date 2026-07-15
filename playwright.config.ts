@@ -45,7 +45,7 @@ const manualAuthProjects = isManualAuth
           ...devices['Desktop Chrome'],
           headless: false,
           launchOptions: {
-            executablePath: '/usr/bin/chromium',
+            executablePath: '/usr/bin/google-chrome-stable',
           },
         },
       },

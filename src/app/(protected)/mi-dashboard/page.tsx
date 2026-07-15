@@ -7,7 +7,7 @@ import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/server/auth'
-import { getRondaParticipanteLandingPath, listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
+import { getMyPtPerformance, getRondaParticipanteLandingPath, listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
 import {
   getHitosVisibleParticipanteWithStatus,
   getEvidenciasPublicasWithStatus,
@@ -16,6 +16,7 @@ import {
   listMisNotificacionesWithStatus,
 } from '@/server/sgc'
 import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from './actions'
+import { PerformanceDashboard } from './PerformanceDashboard'
 
 function estadoParticipanteBadge(estado: Ronda['estado']) {
   if (estado === 'activa') return 'bg-emerald-100 text-emerald-800'
@@ -341,6 +342,7 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
     })
   )
   const backendOffline = rondasResult.offline || sgcOfflineResults.some(Boolean)
+  const performance = backendOffline ? { fechaConsulta: 0, series: [], rondas: [] } : await getMyPtPerformance()
   return (
     <div className="min-h-screen px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -386,6 +388,7 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
         )}
 
         <section className="grid gap-6">
+          <PerformanceDashboard data={performance} />
           {backendOffline && rondas.length === 0 ? (
             <OfflineParticipantState />
           ) : rondas.length === 0 ? (

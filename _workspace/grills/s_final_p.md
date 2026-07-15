@@ -81,7 +81,7 @@ ptScores: defineTable({
   rondaId: v.id('rondas'),
   rondaParticipanteId: v.id('rondaParticipantes'),
   ptItemId: v.id('rondaPtItems'),          // resuelve contaminante + runCode + levelLabel
-  metodo: v.optional(v.union(v.string(), v.null())),
+  metodo: v.string(),                       // obligatorio: el contrato CSV siempre lo trae y es parte de la clave única
   valorAsignado: v.number(),
   incertidumbreAsignada: v.optional(v.union(v.number(), v.null())), // u(xpt)
   sigmaPt: v.optional(v.union(v.number(), v.null())),
@@ -230,7 +230,7 @@ Reglas:
 - Bitácora de toda actuación (actor, fecha, cambio).
 - Vencimiento documental no bloquea: marca el caso vencido, permite entrega extemporánea, queda en bitácora; Calaire puede mover el plazo conservando historial.
 
-Flujo: `Pendiente de análisis → En revisión por Calaire → (Ajustes requeridos → En revisión)* → En espera de verificación → Cerrado`.
+Flujo: `Pendiente de análisis → En revisión por Calaire → (Ajustes requeridos → En revisión)* → En espera de verificación → Cerrado`. Mapeo sobre los estados existentes de `sgcCasos`: `abierto → en_revision → esperando_participante → resuelto → cerrado`; `resuelto` representa "en espera de verificación" (documentación aceptada, eficacia pendiente).
 
 ### 5.2 Verificación de eficacia
 

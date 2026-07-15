@@ -237,6 +237,13 @@ export type ResultadoParticipantePT = {
 export type Contaminante = (typeof CONTAMINANTES)[number]
 export type EstadoRonda = 'borrador' | 'activa' | 'documentacion_pendiente' | 'cerrada'
 
+export type PtScoreImportRow = {
+  participantCode: string; contaminante: string; runCode: string; levelLabel: string; unidad: string; metodo: string
+  valorAsignado: number; incertidumbreAsignada: number | null; sigmaPt: number | null; valorParticipante: number
+  uParticipante: number | null; UParticipante: number | null; z: number | null; zPrima: number | null; zeta: number | null; en: number | null
+  clasificacion: 'satisfactorio' | 'no_satisfactorio'
+}
+
 export type RondaContaminante = {
   id: string
   ronda_id: string
@@ -528,6 +535,114 @@ function mapEnvioPTDoc(e: any): EnvioPT {
 
 export async function getRonda(id: string): Promise<Ronda | null> {
   return (await getRondaWithStatus(id)).data
+}
+
+export async function previewPtScoreImport(rondaId: string, rows: PtScoreImportRow[]) {
+  return fetchQuery(api.pt.scores.previewImport, { rondaId: rondaId as Id<'rondas'>, rows })
+}
+
+export async function importPtScoreDraft(rondaId: string, rows: PtScoreImportRow[]) {
+  const importToken = crypto.randomUUID()
+  await fetchMutation(api.pt.scores.startDraftImport, { rondaId: rondaId as Id<'rondas'>, importToken, filasEsperadas: rows.length })
+  for (let offset = 0; offset < rows.length; offset += 100) {
+    await fetchMutation(api.pt.scores.importDraftBatch, { rondaId: rondaId as Id<'rondas'>, importToken, offset, rows: rows.slice(offset, offset + 100) })
+  }
+  return fetchMutation(api.pt.scores.finishDraftImport, { rondaId: rondaId as Id<'rondas'>, importToken })
+}
+
+export async function getPtEvaluationAdmin(rondaId: string) {
+  return fetchQuery(api.pt.scores.getEstadoEvaluacionAdmin, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function uploadPtGeneralReport(rondaId: string, file: File) {
+  const uploadUrl = await fetchMutation(api.pt.scores.generateUploadUrl, {})
+  const response = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file })
+  if (!response.ok) throw new Error('No se pudo subir el informe a storage.')
+  const uploaded = await response.json() as { storageId: string }
+  await fetchMutation(api.pt.scores.registrarInformeGeneral, {
+    rondaId: rondaId as Id<'rondas'>, storageId: uploaded.storageId as Id<'_storage'>,
+    nombreArchivo: file.name, contentType: file.type, size: file.size,
+  })
+}
+
+export async function publishPtResults(rondaId: string) {
+  return fetchMutation(api.pt.scores.publicarResultados, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function getMyPtResults(rondaId: string) {
+  return fetchQuery(api.pt.scores.getMisResultados, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function getMyPtPerformance() {
+  return fetchQuery(api.pt.scores.getMiDesempeno, {})
+}
+
+export async function getMyCalendar() {
+  return fetchQuery(api.pt.calendar.getMiCalendario, {})
+}
+
+export async function getMyPtReport(rondaId: string) {
+  return fetchQuery(api.pt.scores.getMiInformeUrl, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function getMyPtCertificate(rondaId: string) {
+  return fetchQuery(api.pt.certificates.getMine, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function getMyPtCases(rondaId: string) {
+  return fetchQuery(api.pt.cases.misCasos, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function getPtCase(casoId: string) {
+  return fetchQuery(api.pt.cases.getCaso, { casoId: casoId as Id<'sgcCasos'> })
+}
+
+export async function getPtCaseDocument(casoId: string, versionId: string) {
+  return fetchQuery(api.pt.cases.getDocumentDownload, { casoId: casoId as Id<'sgcCasos'>, versionId: versionId as Id<'casoDocumentoVersiones'> })
+}
+
+export async function createPtCase(input: { rondaId: string; tipo: 'consulta' | 'queja' | 'apelacion'; titulo: string; descripcion: string }) {
+  return fetchMutation(api.pt.cases.createVoluntaryCase, { ...input, rondaId: input.rondaId as Id<'rondas'> })
+}
+
+export async function generatePtCaseUploadUrl(casoId: string) {
+  return fetchMutation(api.pt.cases.generateUploadUrl, { casoId: casoId as Id<'sgcCasos'> })
+}
+
+export async function addPtCaseDocument(input: { casoId: string; categoria: 'analisis_causa' | 'plan_accion' | 'implementacion' | 'verificacion_eficacia'; storageId: string; nombreArchivo: string; contentType: string }) {
+  return fetchMutation(api.pt.cases.addDocumentVersion, { ...input, casoId: input.casoId as Id<'sgcCasos'>, storageId: input.storageId as Id<'_storage'> })
+}
+
+export async function submitPtCase(casoId: string) {
+  return fetchMutation(api.pt.cases.submitForReview, { casoId: casoId as Id<'sgcCasos'> })
+}
+
+export async function addPtCaseMessage(casoId: string, texto: string) {
+  return fetchMutation(api.pt.cases.addMessage, { casoId: casoId as Id<'sgcCasos'>, texto })
+}
+
+export async function getPtCaseArchive(casoId: string) {
+  return fetchQuery(api.pt.cases.getArchiveData, { casoId: casoId as Id<'sgcCasos'> })
+}
+
+export async function listPtCasesAdmin(rondaId: string) {
+  return fetchQuery(api.pt.cases.listCasesAdmin, { rondaId: rondaId as Id<'rondas'> })
+}
+
+export async function reviewPtCase(casoId: string, decision: 'aceptar' | 'ajustes', observacion: string) {
+  return fetchMutation(api.pt.cases.reviewDocumentation, { casoId: casoId as Id<'sgcCasos'>, decision, observacion })
+}
+
+export async function getPtVerificationCandidates(casoId: string, originId: string) {
+  return fetchQuery(api.pt.cases.verificationCandidates, { casoId: casoId as Id<'sgcCasos'>, ptScoreOrigenId: originId as Id<'ptScores'> })
+}
+
+export async function linkPtVerification(input: { casoId: string; originId: string; posteriorId: string; motivo: string }) {
+  return fetchMutation(api.pt.cases.linkVerificationManually, { casoId: input.casoId as Id<'sgcCasos'>, ptScoreOrigenId: input.originId as Id<'ptScores'>, ptScorePosteriorId: input.posteriorId as Id<'ptScores'>, motivo: input.motivo })
+}
+
+export async function getMyPtCertificateDownload(rondaId: string) {
+  return fetchMutation(api.pt.certificates.getMineDownload, { rondaId: rondaId as Id<'rondas'> })
 }
 
 export async function getRondaWithStatus(id: string) {

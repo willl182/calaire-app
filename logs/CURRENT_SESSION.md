@@ -1,36 +1,37 @@
-# Session State: calaire-app2
+# Session State: calaire-app
 
-**Last Updated**: 2026-07-12 16:22 -05
+**Last Updated**: 2026-07-14 16:41 -05
 
 ## Session Objective
 
-Consolidar y corregir el plan, workflow y criterios de aceptación para evaluación PT, resultados de participantes, certificados opcionales, casos correctivos y calendario.
+Implementar la fase 9 del plan final: verificación posterior de eficacia de expedientes correctivos PT.
 
 ## Current State
 
-- [x] Se compararon `f_final_p.md` y `s_final_p.md`; `s_final_p.md` quedó como documento canónico por respetar el layout raíz sin `src/`.
-
-- [x] Se validó `_workspace/Puntajes_Finales_PT_2026-07-12.csv`: 20 filas, 17 columnas, un participante, 12 `Satisfactorio`, 8 `No satisfactorio`, sin vacíos ni duplicados de la clave completa.
-
-- [x] Se sincronizaron `_workspace/grills/s_final_p.md`, `s_final_w.md` y `s_final_t.md` con el contrato real y las decisiones del usuario.
-
-- [x] Se leyeron `convex/_generated/ai/guidelines.md` y las guías instaladas de Next.js sobre Route Handlers.
-
-- [ ] No se ha implementado código del plan ni ejecutado la matriz de pruebas.
+- [x] Matching automático por participante, contaminante, nivel y método sobre resultados posteriores publicados.
+- [x] Solo se aceptan puntajes del `importToken` actualmente publicado de la ronda posterior.
+- [x] Vínculo manual administrativo corregido para participaciones distintas del mismo participante y protegido con justificación/auditoría.
+- [x] Cada resultado origen se evalúa por separado; ausencia, parcialidad o resultado no satisfactorio mantienen abierto el expediente.
+- [x] El cierre exige conjuntamente documentación aceptada y todas las verificaciones satisfactorias.
+- [x] Un resultado posterior no satisfactorio reabre la iteración documental, limpia la aceptación previa, audita y notifica.
+- [x] UI admin y participante muestran progreso y referencia del resultado posterior por origen.
+- [x] `convex codegen`, lint, 12 pruebas focalizadas, suite general y build pasan.
+- [ ] E2E terminó con 7 pasadas, 1 omitida y 1 fallo ajeno a fase 9 por `502 Bad Gateway` de Convex/Cloudflare en `/dashboard/sgc`.
+- [ ] Cambios acumulados de varias fases siguen sin commit en el worktree compartido.
 
 ## Critical Technical Context
 
-- Mantener `app/`, `lib/`, `app/components/` y `convex/`; no crear `src/`.
-- La identidad única de un puntaje es participante × ítem × método. El fixture contiene dos métodos por ítem y colisiona si se omite `metodo`.
-- Normalizar únicamente `Satisfactorio` → `satisfactorio` y `No satisfactorio` → `no_satisfactorio`; Calaire no reclasifica.
-- Todos los valores de evaluación se importan. Solo `n` y bins pueden derivarse para visualización anónima.
-- La publicación atómica se logra cambiando una única cabecera a `publicada`; todas las queries deben usar esa cabecera como compuerta de visibilidad.
-- Casos, notificaciones y certificados opcionales son jobs posteriores idempotentes. Un certificado fallido no revierte resultados.
-- Eficacia posterior: mismo participante + contaminante + nivel + método; vínculo admin auditado si cambian identificadores.
-- Convex no ofrece índices únicos: las mutations deben impedir duplicados y las consultas singulares usar `.unique()`.
+- Implementación principal: `convex/pt/cases.ts`; pruebas: `convex/cases.test.ts`.
+- El bug corregido comparaba `rondaParticipanteId` entre rondas; esos IDs son distintos aunque sea el mismo participante. La identidad se valida por `workosUserId` o `directorioParticipanteId`.
+- Tanto matching automático como candidatos/vínculo manual deben comprobar la cabecera publicada y que el score pertenezca a su `importToken` vigente.
+- `closeIfComplete` no cierra con verificaciones pendientes/no satisfactorias ni sin `documentacionAceptadaAt`.
+- Un fallo posterior tras aceptación cambia el caso a `esperando_participante` y exige una nueva versión documental.
+- Las pruebas Convex focalizadas se ejecutan explícitamente con `pnpm exec vitest run convex/cases.test.ts`.
+- No descartar ni restaurar globalmente el worktree; contiene fases previas y archivos del usuario.
 
 ## Next Steps
 
-1. Revisar/aprobar los documentos canónicos `s_final_p.md`, `s_final_w.md` y `s_final_t.md`.
-2. Iniciar la Fase 0 de seguridad PT y verificarla con tests.
-3. Documentar el contrato CSV y convertir el export real en fixture de pruebas antes de implementar el importador.
+1. Reintentar `pnpm test:e2e:start` cuando Convex/Cloudflare esté estable y añadir escenarios E2E específicos de fase 9.
+2. Validar en despliegue el matching automático al publicar una ronda posterior y la idempotencia de auditoría/notificaciones.
+3. Implementar/auditar la fase 10 (expediente ZIP) contra T10.
+4. Separar commits o PRs acotados preservando el diff acumulado.

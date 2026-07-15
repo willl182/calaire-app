@@ -4,11 +4,13 @@ import { notFound, redirect } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import {
   getRonda,
+  getPtEvaluationAdmin,
   listPTItems,
   listPTSampleGroups,
   listResultadosPTRonda,
   type ResultadoParticipantePT,
 } from '@/server/rondas'
+import { importPtScoresAction, publishPtResultsAction, uploadPtReportAction } from './actions'
 import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
 
@@ -197,10 +199,11 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
   const ronda = await getRonda(rondaId)
   if (!ronda) notFound()
 
-  const [ptItems, sampleGroups, resultados] = await Promise.all([
+  const [ptItems, sampleGroups, resultados, evaluacion] = await Promise.all([
     listPTItems(rondaId),
     listPTSampleGroups(rondaId),
     listResultadosPTRonda(rondaId),
+    getPtEvaluationAdmin(rondaId),
   ])
 
   const columnas: ColumnaPT[] = ptItems.flatMap((item) =>
@@ -243,6 +246,38 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
             </>
           }
         />
+
+        {getParam(resolvedSearchParams.error) && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{getParam(resolvedSearchParams.error)}</div>}
+        {getParam(resolvedSearchParams.success) && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{getParam(resolvedSearchParams.success)}</div>}
+
+        <section className="card p-6">
+          <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
+            <div><h2 className="text-lg font-semibold">Evaluación importada</h2><p className="text-sm text-[var(--foreground-muted)]">Preview estricto, borrador reemplazable y publicación irreversible.</p></div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{evaluacion?.estado ?? 'sin_cargar'}</span>
+          </div>
+          {evaluacion?.estado !== 'publicada' ? <div className="grid gap-5 lg:grid-cols-3">
+            <form action={importPtScoresAction} className="rounded-xl border border-[var(--border-soft)] p-4">
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <label className="mb-2 block text-sm font-semibold">1. Puntajes CSV</label>
+              <input required name="csv" type="file" accept=".csv,text/csv" className="block w-full text-sm" />
+              <button className="btn-outline mt-4" type="submit">Validar e importar borrador</button>
+            </form>
+            <form action={uploadPtReportAction} className="rounded-xl border border-[var(--border-soft)] p-4">
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <label className="mb-2 block text-sm font-semibold">2. Informe general PDF</label>
+              <input required name="informe" type="file" accept="application/pdf" className="block w-full text-sm" />
+              <button className="btn-outline mt-4" type="submit">Subir informe</button>
+              {evaluacion?.informeNombreArchivo && <p className="mt-2 text-xs text-emerald-700">Actual: {evaluacion.informeNombreArchivo}</p>}
+            </form>
+            <form action={publishPtResultsAction} className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <label className="block text-sm font-semibold text-amber-900">3. Publicar</label>
+              <p className="my-2 text-xs text-amber-800">No se puede editar, reemplazar ni despublicar después.</p>
+              <input required name="confirmacion" placeholder="Escriba PUBLICAR" className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm" />
+              <button disabled={evaluacion?.estado !== 'borrador_validado' || !evaluacion.informeStorageId} className="btn-primary mt-4 disabled:cursor-not-allowed disabled:opacity-50" type="submit">Publicar resultados</button>
+            </form>
+          </div> : <p className="text-sm text-emerald-700">Publicada el {evaluacion.publicadaAt ? formatDate(new Date(evaluacion.publicadaAt).toISOString()) : '—'} por {evaluacion.publicadaBy}.</p>}
+        </section>
 
         <section className="sgc-kpis">
           <MetricaCard label="Participantes" value={resultados.length} />

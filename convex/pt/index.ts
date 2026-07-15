@@ -1,4 +1,4 @@
-import { v } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
 import { query, mutation, MutationCtx } from '../_generated/server'
 import { Id } from '../_generated/dataModel'
 import { requireManagerIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante } from '../access'
@@ -17,11 +17,11 @@ async function requireActiveRondaPTReferences(
     ctx.db.get(sampleGroupId),
     ctx.db.get(rondaId),
   ])
-  if (!participante || !ptItem || !sampleGroup || !ronda) throw new Error('Referencia inválida')
+  if (!participante || !ptItem || !sampleGroup || !ronda) throw new ConvexError('Referencia inválida.')
   if (participante.rondaId !== rondaId || ptItem.rondaId !== rondaId || sampleGroup.rondaId !== rondaId) {
-    throw new Error('Los identificadores no pertenecen a la ronda')
+    throw new ConvexError('Los identificadores no pertenecen a la ronda.')
   }
-  if (ronda.estado !== 'activa') throw new Error('La ronda no está activa')
+  if (ronda.estado !== 'activa') throw new ConvexError('La ronda no está activa.')
   return { participante, ptItem, sampleGroup, ronda }
 }
 
@@ -366,7 +366,7 @@ export const upsertEnvioPT = mutation({
       .unique()
 
     if (existing) {
-      if (existing.finalSubmittedAt != null) throw new Error('El envio final ya fue enviado y no admite edición')
+      if (existing.finalSubmittedAt) throw new ConvexError('El envio final ya fue enviado y no admite edición')
       await ctx.db.patch(existing._id, { d1, d2, d3, meanValue, sdValue, ux, k, uxExp, draftSavedAt: now, updatedAt: now })
       return existing._id
     }
@@ -400,8 +400,7 @@ export const submitFinalPT = mutation({
       .unique()
     if (!participante) throw new Error('Participante no encontrado')
     const ronda = await ctx.db.get(rondaId)
-    if (!ronda) throw new Error('Ronda no encontrada')
-    if (ronda.estado !== 'activa') throw new Error('La ronda no está activa')
+    if (!ronda || ronda.estado !== 'activa') throw new ConvexError('La ronda no está activa.')
 
     const [items, sampleGroups] = await Promise.all([
       ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
