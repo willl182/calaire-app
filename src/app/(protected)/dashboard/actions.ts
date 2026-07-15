@@ -146,6 +146,7 @@ export async function createRondaAction(formData: FormData) {
     const rondaId = await createConfiguredRonda(nombre, codigo, contaminantes, slots)
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
     targetUrl = buildSuccessUrl(
       includeReference
         ? 'Ronda creada con analitos y enlaces. Configure los niveles PT.'
@@ -182,6 +183,8 @@ export async function updateRondaAction(formData: FormData) {
     await updateRondaConfig(rondaId, nombre, codigo, contaminantes)
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
+    revalidatePath(`/dashboard/rondas/${rondaId}`)
     targetUrl = buildSuccessUrl('Configuración de ronda actualizada.')
   } catch (error) {
     const message =
@@ -213,6 +216,7 @@ export async function updateRondaBasicInfoAction(formData: FormData) {
     await updateRondaBasicInfo(rondaId, nombre, codigo)
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
     revalidatePath(`/dashboard/rondas/${rondaId}`)
     targetUrl = buildSuccessUrl('Datos básicos de la ronda actualizados.')
   } catch (error) {
@@ -240,6 +244,7 @@ export async function changeRondaStatusAction(formData: FormData) {
     await transitionRondaEstado(rondaId, 'activa')
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
     targetUrl = buildSuccessUrl('Ronda publicada y disponible para asignaciones.')
   } catch (error) {
     const message =
@@ -262,6 +267,7 @@ export async function reabrirRondaAction(formData: FormData) {
     await reabrirRonda(rondaId)
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
     targetUrl = buildSuccessUrl('Ronda reabierta correctamente.')
   } catch (error) {
     const message = error instanceof Error ? error.message : 'No fue posible reabrir la ronda.'
@@ -286,6 +292,7 @@ export async function deleteRondaAction(formData: FormData) {
     const nombre = await deleteRonda(rondaId)
 
     revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
     targetUrl = buildSuccessUrl(`Ronda "${nombre}" eliminada correctamente.`)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'No fue posible eliminar la ronda.'
