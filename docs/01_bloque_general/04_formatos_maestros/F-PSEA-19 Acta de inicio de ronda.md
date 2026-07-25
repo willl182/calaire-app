@@ -5,7 +5,9 @@
 **Nombre:** Acta de inicio de ronda  
 **Version:** 1.0  
 **Fecha:** 2026-07-25  
-**Estado:** Activo
+**Estado:** Activo  
+**Requisitos normativos:** ISO/IEC 17043:2023 7.1 (revision de acuerdos y confirmacion de participantes), 7.3.5 (informacion a participantes al inicio de la ronda), 8.4 (control de registros); ISO/IEC 17025:2017 7.5 (registros tecnicos)  
+**Procedimientos que lo gobiernan:** `P-PSEA-04` (planificacion e hito `INICIO_RONDA`), `P-PSEA-03` (control de registros), `P-PSEA-19` (confidencialidad operativa)
 
 ---
 

@@ -738,6 +738,9 @@ export const actualizarVisibilidadDriveRecursoConfig = {
     if (publicaParticipante && (recurso.codigo === 'F-PSEA-20' || recurso.codigo === 'F-PSEA-21')) {
       throw new Error('F-PSEA-20 y F-PSEA-21 son documentos internos y no pueden publicarse.')
     }
+    if (publicaParticipante && recurso.codigo === 'F-PSEA-19') {
+      throw new Error('La publicacion de F-PSEA-19 se realiza desde el acta de inicio (requiere admin y PDF firmado).')
+    }
 
     const now = Date.now()
     // La visibilidad Drive es independiente de sgcEvidenciaSeries.publicaParticipante

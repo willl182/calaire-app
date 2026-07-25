@@ -4,13 +4,14 @@ import { signOut } from '@workos-inc/authkit-nextjs'
 
 import { LogoUnal } from '@/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
-import { requireAuth } from '@/server/auth'
+import { isStaff, requireAuth } from '@/server/auth'
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
 export default async function InicioPage() {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
+  if (!isStaff(auth)) redirect('/mi-dashboard')
 
   return (
     <main className="min-h-screen px-6 py-8">

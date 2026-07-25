@@ -19,7 +19,13 @@ export async function solicitarUploadF19Action() {
 
 export async function registrarPdfFirmadoF19Action(rondaId: string, args: { actaId: string; storageId: string; fileName: string; contentType: string; size: number }) {
   await requireEditor()
-  await registrarArchivoActaInicio({ ...args, tipo: 'pdf' })
+  if (args.contentType !== 'application/pdf') throw new Error('El acta firmada debe ser PDF.')
+  const fileName = args.fileName.trim()
+  if (!fileName || !fileName.toLowerCase().endsWith('.pdf')) throw new Error('El acta firmada debe tener nombre de archivo .pdf.')
+  if (!Number.isFinite(args.size) || args.size <= 0 || args.size > 25 * 1024 * 1024) throw new Error('PDF vacio o superior a 25 MB.')
+  if (!args.storageId.trim() || !args.actaId.trim()) throw new Error('Referencia de acta o archivo invalida.')
+  // La validacion definitiva (contentType y tamano del objeto almacenado) ocurre en Convex.
+  await registrarArchivoActaInicio({ ...args, fileName, contentType: 'application/pdf', tipo: 'pdf' })
   revalidatePath(path(rondaId))
 }
 

@@ -186,7 +186,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     modo: 'archivo',
     critico: true,
     bloqueaCierre: true,
-    descripcion: 'Registro de queja, trabajo no conforme, no conformidad o accion correctiva si aplica.',
+    descripcion: 'Registro de queja, trabajo no conforme, no conformidad o accion correctiva; admite no aplica justificado cuando no existe caso.',
   },
   {
     codigo: 'F-PSEA-19',

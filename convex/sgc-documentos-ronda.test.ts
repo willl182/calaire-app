@@ -214,6 +214,11 @@ describe('F-PSEA-19', () => {
       estado: 'pendiente',
       publicaParticipante: false,
     })
+
+    // La publicacion de F-PSEA-19 solo pasa por cambiarPublicacionActaInicio (admin + PDF firmado).
+    await expect(
+      staff.mutation(api.sgc.index.actualizarVisibilidadDriveRecurso, { recursoId, publicaParticipante: true })
+    ).rejects.toThrow(/acta de inicio/)
   })
 })
 
@@ -355,25 +360,54 @@ describe('F-PSEA-21', () => {
     })
 
     const pdf = await store(t, '%PDF-1.4 instrumentos', 'application/pdf')
+    const xlsx = await store(t, 'instrumentos xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+    const exportaciones = {
+      pdf: { ...pdf, fileName: 'instrumentos.pdf', contentType: 'application/pdf' },
+      xlsx: {
+        ...xlsx,
+        fileName: 'instrumentos.xlsx',
+        contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      },
+    }
     await expect(
-      staff.mutation(api.sgc.index.registrarExportacionInstrumentos, {
+      staff.mutation(api.sgc.index.registrarExportacionesInstrumentos, {
         relacionId,
-        tipo: 'pdf',
-        ...pdf,
-        fileName: 'instrumentos.pdf',
-        contentType: 'application/pdf',
         revision: 3,
+        ...exportaciones,
       })
     ).rejects.toThrow(/revision exportada/)
-    await staff.mutation(api.sgc.index.registrarExportacionInstrumentos, {
-      relacionId,
-      tipo: 'pdf',
-      ...pdf,
-      fileName: 'instrumentos.pdf',
-      contentType: 'application/pdf',
-      revision: 4,
+    await expect(
+      staff.mutation(api.sgc.index.registrarExportacionesInstrumentos, {
+        relacionId,
+        revision: 4,
+        ...exportaciones,
+        xlsx: { ...exportaciones.xlsx, size: exportaciones.xlsx.size + 1 },
+      })
+    ).rejects.toThrow(/XLSX no disponible/)
+    expect(await t.run((ctx) => ctx.db.get(relacionId))).toMatchObject({
+      pdfStorageId: null,
+      pdfRevision: null,
+      xlsxStorageId: null,
+      xlsxRevision: null,
     })
-    expect(await t.run((ctx) => ctx.db.get(recursoId))).toMatchObject({ estado: 'diligenciado', publicaParticipante: false })
+    expect(await t.run((ctx) => ctx.db.get(recursoId))).toMatchObject({ estado: 'pendiente', definitivo: null })
+
+    await staff.mutation(api.sgc.index.registrarExportacionesInstrumentos, {
+      relacionId,
+      revision: 4,
+      ...exportaciones,
+    })
+    expect(await t.run((ctx) => ctx.db.get(relacionId))).toMatchObject({
+      pdfStorageId: pdf.storageId,
+      pdfRevision: 4,
+      xlsxStorageId: xlsx.storageId,
+      xlsxRevision: 4,
+    })
+    expect(await t.run((ctx) => ctx.db.get(recursoId))).toMatchObject({
+      estado: 'diligenciado',
+      publicaParticipante: false,
+      definitivo: { storageId: pdf.storageId, tipo: 'pdf' },
+    })
     await expect(
       participante.query(api.sgc.index.getExportacionInstrumentosUrl, { rondaId, tipo: 'pdf' })
     ).rejects.toThrow(/Permisos insuficientes/)

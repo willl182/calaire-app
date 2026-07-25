@@ -4,6 +4,7 @@ import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgcWithStatus } from '@/server/sgc'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
+import { DirectorioServicio } from './DirectorioServicio'
 import { MapaSgcFrame } from './MapaSgcFrame'
 
 export default async function MapaSgcPage() {
@@ -48,6 +49,8 @@ export default async function MapaSgcPage() {
           <div className="sgc-kpi-value numeric">{mapa.data.pendientes}</div>
         </div>
       </section>
+
+      <DirectorioServicio />
 
       {mapa.data.relaciones.length > 0 ? (
         <MapaSgcFrame src="/dashboard/sgc/mapa/embed" title="Mapa interactivo de navegación del Sistema de Gestión" />

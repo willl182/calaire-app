@@ -11,7 +11,7 @@ import {
   generateSgcUploadUrl,
   getPanelSgc,
   getRelacionInstrumentosRonda,
-  registrarExportacionInstrumentos,
+  registrarExportacionesInstrumentos,
   registrarFotoInstrumentoRonda,
   retirarFotoInstrumentoRonda,
   validarRelacionInstrumentos,
@@ -123,18 +123,26 @@ export async function generarExportacionesF21Action(rondaId: string) {
     coordinadorNombre: relacion.coordinadorNombre,
     items,
   }
-  const outputs = [
-    { tipo: 'pdf' as const, bytes: await crearInstrumentosPdf(data), contentType: 'application/pdf', fileName: `F-PSEA-21_${panel.ronda.codigo}_rev${relacion.revision}.pdf` },
-    { tipo: 'xlsx' as const, bytes: await crearInstrumentosXlsx(data.items), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileName: `F-PSEA-21_${panel.ronda.codigo}_rev${relacion.revision}.xlsx` },
-  ]
-  for (const output of outputs) {
+  const outputs = {
+    pdf: { bytes: await crearInstrumentosPdf(data), contentType: 'application/pdf', fileName: `F-PSEA-21_${panel.ronda.codigo}_rev${relacion.revision}.pdf` },
+    xlsx: { bytes: await crearInstrumentosXlsx(data.items), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileName: `F-PSEA-21_${panel.ronda.codigo}_rev${relacion.revision}.xlsx` },
+  }
+  const almacenados = {} as Record<keyof typeof outputs, { storageId: string; fileName: string; contentType: string; size: number }>
+  for (const tipo of ['pdf', 'xlsx'] as const) {
+    const output = outputs[tipo]
     const uploadUrl = await generateSgcUploadUrl()
     const body = new ArrayBuffer(output.bytes.byteLength)
     new Uint8Array(body).set(output.bytes)
     const response = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': output.contentType }, body })
-    if (!response.ok) throw new Error(`No fue posible almacenar ${output.tipo.toUpperCase()}.`)
+    if (!response.ok) throw new Error(`No fue posible almacenar ${tipo.toUpperCase()}.`)
     const { storageId } = await response.json() as { storageId: string }
-    await registrarExportacionInstrumentos({ relacionId: relacion._id, tipo: output.tipo, storageId, fileName: output.fileName, contentType: output.contentType, size: output.bytes.byteLength, revision: relacion.revision })
+    almacenados[tipo] = { storageId, fileName: output.fileName, contentType: output.contentType, size: output.bytes.byteLength }
   }
+  await registrarExportacionesInstrumentos({
+    relacionId: relacion._id,
+    revision: relacion.revision,
+    pdf: almacenados.pdf,
+    xlsx: almacenados.xlsx,
+  })
   revalidatePath(path(rondaId))
 }

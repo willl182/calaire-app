@@ -213,6 +213,9 @@ export const enviarRelacionInstrumentosAValidacionConfig = {
     const actor = await requireSgcManage(ctx)
     const relacion = await ctx.db.get(args.relacionId)
     if (!relacion) throw new Error('Relacion no encontrada.')
+    if (relacion.estado !== 'borrador' && relacion.estado !== 'requiere_ajustes') {
+      throw new Error('Solo una relacion en borrador o con ajustes pendientes puede enviarse a validacion.')
+    }
     const resumen = evaluar(await getItems(ctx, relacion._id))
     if (!resumen.completo) throw new Error(resumen.errores.join(' '))
     if (!args.tecnicoNombre.trim()) throw new Error('Nombre del tecnico es obligatorio.')
@@ -248,6 +251,7 @@ export const devolverRelacionInstrumentosConfig = {
     const actor = await requireSgcAdmin(ctx)
     const relacion = await ctx.db.get(args.relacionId)
     if (!relacion) throw new Error('Relacion no encontrada.')
+    if (relacion.estado !== 'pendiente_validacion') throw new Error('Relacion no esta pendiente de validacion.')
     if (!args.observacion.trim()) throw new Error('Observacion es obligatoria.')
     await ctx.db.patch(relacion._id, { estado: 'requiere_ajustes', observacionDevolucion: args.observacion.trim(), updatedAt: Date.now(), updatedBy: actor })
     await writeAudit(ctx, { rondaId: relacion.rondaId, actor, evento: 'sgc.f21.devuelta', detalle: args.observacion.trim(), targetTipo: 'sgcInstrumentosRonda', targetId: relacion._id })
@@ -290,17 +294,20 @@ export const retirarFotoInstrumentoRondaConfig = {
   },
 } satisfies SgcMutationConfig<typeof retirarFotoArgs>
 
-const registrarExportacionArgs = {
-  relacionId: v.id('sgcInstrumentosRonda'),
-  tipo: v.union(v.literal('pdf'), v.literal('xlsx')),
+const archivoExportacionValidator = v.object({
   storageId: v.id('_storage'),
   fileName: v.string(),
   contentType: v.string(),
   size: v.number(),
+})
+const registrarExportacionesArgs = {
+  relacionId: v.id('sgcInstrumentosRonda'),
   revision: v.number(),
+  pdf: archivoExportacionValidator,
+  xlsx: archivoExportacionValidator,
 }
-export const registrarExportacionInstrumentosConfig = {
-  args: registrarExportacionArgs,
+export const registrarExportacionesInstrumentosConfig = {
+  args: registrarExportacionesArgs,
   returns: v.null(),
   handler: async (ctx, args) => {
     const actor = await requireSgcManage(ctx)
@@ -308,32 +315,65 @@ export const registrarExportacionInstrumentosConfig = {
     if (!relacion) throw new Error('Relacion no encontrada.')
     if (relacion.estado !== 'validado') throw new Error('Valide la relacion antes de exportar.')
     if (relacion.revision !== args.revision) throw new Error('La revision exportada no coincide con la revision vigente.')
-    const expected = args.tipo === 'pdf'
-      ? 'application/pdf'
-      : 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    if (args.contentType !== expected) throw new Error(`Tipo de archivo ${args.tipo.toUpperCase()} invalido.`)
-    const stored = await ctx.db.system.get(args.storageId)
-    if (!stored || stored.size !== args.size) throw new Error('Exportacion no disponible o metadata inconsistente.')
-    const now = Date.now()
-    if (args.tipo === 'pdf') {
-      await ctx.db.patch(relacion._id, { pdfStorageId: args.storageId, pdfRevision: args.revision, updatedAt: now, updatedBy: actor })
-      const recurso = await getRecurso(ctx, relacion.rondaId)
-      if (recurso) {
-        await ctx.db.patch(recurso._id, {
-          definitivo: { storageId: args.storageId, fileName: args.fileName, contentType: args.contentType, size: args.size, tipo: 'pdf' },
-          estado: 'diligenciado',
-          publicaParticipante: false,
-          updatedAt: now,
-          updatedBy: actor,
-        })
-      }
-    } else {
-      await ctx.db.patch(relacion._id, { xlsxStorageId: args.storageId, xlsxRevision: args.revision, updatedAt: now, updatedBy: actor })
+    if (!args.pdf.fileName.trim() || !args.xlsx.fileName.trim()) throw new Error('Nombre de exportacion obligatorio.')
+    if (args.pdf.storageId === args.xlsx.storageId) throw new Error('PDF y XLSX deben ser archivos diferentes.')
+    if (args.pdf.contentType !== 'application/pdf') throw new Error('Tipo de archivo PDF invalido.')
+    if (args.xlsx.contentType !== 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet') {
+      throw new Error('Tipo de archivo XLSX invalido.')
     }
-    await writeAudit(ctx, { rondaId: relacion.rondaId, actor, evento: `sgc.f21.${args.tipo}_generado`, detalle: `revision=${args.revision}`, targetTipo: 'sgcInstrumentosRonda', targetId: relacion._id })
+    if (args.pdf.size <= 0 || args.xlsx.size <= 0) throw new Error('Exportacion vacia.')
+    const [storedPdf, storedXlsx, recurso] = await Promise.all([
+      ctx.db.system.get(args.pdf.storageId),
+      ctx.db.system.get(args.xlsx.storageId),
+      getRecurso(ctx, relacion.rondaId),
+    ])
+    if (!storedPdf || storedPdf.size !== args.pdf.size) {
+      throw new Error('Exportacion PDF no disponible o metadata inconsistente.')
+    }
+    if (storedPdf.contentType && storedPdf.contentType !== args.pdf.contentType) {
+      throw new Error('El objeto almacenado no es un PDF.')
+    }
+    if (!storedXlsx || storedXlsx.size !== args.xlsx.size) {
+      throw new Error('Exportacion XLSX no disponible o metadata inconsistente.')
+    }
+    if (storedXlsx.contentType && storedXlsx.contentType !== args.xlsx.contentType) {
+      throw new Error('El objeto almacenado no es un XLSX.')
+    }
+    if (!recurso) throw new Error('Recurso Drive F-PSEA-21 no encontrado.')
+
+    const now = Date.now()
+    await ctx.db.patch(relacion._id, {
+      pdfStorageId: args.pdf.storageId,
+      pdfRevision: args.revision,
+      xlsxStorageId: args.xlsx.storageId,
+      xlsxRevision: args.revision,
+      updatedAt: now,
+      updatedBy: actor,
+    })
+    await ctx.db.patch(recurso._id, {
+      definitivo: {
+        storageId: args.pdf.storageId,
+        fileName: args.pdf.fileName.trim(),
+        contentType: args.pdf.contentType,
+        size: args.pdf.size,
+        tipo: 'pdf',
+      },
+      estado: 'diligenciado',
+      publicaParticipante: false,
+      updatedAt: now,
+      updatedBy: actor,
+    })
+    await writeAudit(ctx, {
+      rondaId: relacion.rondaId,
+      actor,
+      evento: 'sgc.f21.exportaciones_generadas',
+      detalle: `revision=${args.revision}`,
+      targetTipo: 'sgcInstrumentosRonda',
+      targetId: relacion._id,
+    })
     return null
   },
-} satisfies SgcMutationConfig<typeof registrarExportacionArgs>
+} satisfies SgcMutationConfig<typeof registrarExportacionesArgs>
 
 const downloadArgs = {
   rondaId: v.id('rondas'),

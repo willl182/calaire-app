@@ -1,6 +1,6 @@
 import { paginationOptsValidator } from 'convex/server'
 import { v } from 'convex/values'
-import { FORMATOS_ARCHIVO, formatoValidator, requireSgcManage, requireParticipanteOAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
+import { FORMATOS_ARCHIVO_SUBIBLES, formatoValidator, requireSgcManage, requireParticipanteOAdmin, writeAudit, SgcQueryConfig, SgcMutationConfig } from './shared'
 
 const listEvidenciaSeriesArgs = { rondaId: v.id('rondas') }
 
@@ -95,7 +95,7 @@ export const registrarEvidenciaVersionConfig = {
     const actor = await requireSgcManage(ctx)
     const serie = await ctx.db.get(args.serieId)
     if (!serie) throw new Error('Serie de evidencia no encontrada.')
-    if (!FORMATOS_ARCHIVO.includes(serie.formato as (typeof FORMATOS_ARCHIVO)[number])) {
+    if (!FORMATOS_ARCHIVO_SUBIBLES.includes(serie.formato as (typeof FORMATOS_ARCHIVO_SUBIBLES)[number])) {
       throw new Error('Este formato no admite evidencia de archivo en Fase 1.')
     }
     if (args.size > 10 * 1024 * 1024) throw new Error('El archivo excede el limite de 10 MB.')
@@ -144,7 +144,7 @@ export const retirarEvidenciaVersionConfig = {
 
 const upsertJustificacionArgs = {
     rondaId: v.id('rondas'),
-    formato: v.union(v.literal('F-PSEA-05'), v.literal('F-PSEA-05A'), v.literal('F-PSEA-12')),
+    formato: v.union(v.literal('F-PSEA-05'), v.literal('F-PSEA-05A'), v.literal('F-PSEA-12'), v.literal('F-PSEA-14')),
     alcance: v.string(),
     razon: v.string(),
   }

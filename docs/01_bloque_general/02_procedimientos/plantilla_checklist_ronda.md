@@ -15,8 +15,14 @@
 - [ ] Respuestas o acuses de recibo del participante
 - [ ] Comunicaciones de aclaracion o cambios, si aplica
 
+## 02A_inicio_ronda
+- [ ] F-PSEA-19 - Acta de inicio de ronda generada, firmada, escaneada y confirmada
+- [ ] Confirmacion de publicacion del acta al participante, cuando corresponda
+
 ## 03_preparacion_item
 - [ ] F-PSEA-07 - Preparacion y control del item
+- [ ] F-PSEA-20 - Rotulado anonimo usado en la ronda, documento interno
+- [ ] F-PSEA-21 - Relacion de instrumentos Calaire usados, validada por coordinacion
 - [ ] Certificados de gases, equipos o patrones usados
 - [ ] Evidencia de montaje, configuracion o verificacion tecnica
 

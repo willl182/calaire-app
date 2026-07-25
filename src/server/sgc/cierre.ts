@@ -19,7 +19,12 @@ export type DriveCierreRecursoInput = {
 }
 
 export type DriveCierreEtapaInput = {
-  documentos: readonly { codigo: string; nombre: string }[]
+  documentos: readonly {
+    codigo: string
+    nombre: string
+    critico?: boolean | null
+    bloqueaCierre?: boolean | null
+  }[]
 }
 
 export type DriveCierreCalidad = {
@@ -55,10 +60,13 @@ export function evaluateDriveCierreCalidad(
   const pendientesCriticos: string[] = []
   const advertencias: string[] = []
 
-  const reportarPendiente = (mensaje: string, recurso: DriveCierreRecursoInput) => {
-    const bloqueaCierre = recurso.bloqueaCierre ?? true
+  const reportarPendiente = (
+    mensaje: string,
+    politica: Pick<DriveCierreRecursoInput, 'critico' | 'bloqueaCierre'>
+  ) => {
+    const bloqueaCierre = politica.bloqueaCierre ?? true
     if (bloqueaCierre) bloqueantes.push(mensaje)
-    else if (recurso.critico === true) pendientesCriticos.push(mensaje)
+    else if (politica.critico === true) pendientesCriticos.push(mensaje)
     else advertencias.push(mensaje)
   }
 
@@ -68,7 +76,7 @@ export function evaluateDriveCierreCalidad(
       const recurso = byCodigo.get(codigo)
       const label = `${codigo} ${documento.nombre}`
       if (!recurso) {
-        bloqueantes.push(`${label}: recurso Drive faltante`)
+        reportarPendiente(`${label}: recurso Drive faltante`, documento)
         continue
       }
 

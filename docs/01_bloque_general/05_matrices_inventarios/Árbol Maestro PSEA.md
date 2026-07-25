@@ -88,6 +88,20 @@ flowchart LR
   P14 --> P20["P-PSEA-20\nCompetencia"]
   P14 --> P21["P-PSEA-21\nProveedores"]
   P05 --> F18["F-PSEA-18\nComunicacion participantes"]
+  P04 --> F19["F-PSEA-19\nActa de inicio de ronda"]
+  P01 --> F19
+  P19 --> F19
+  P06 --> F20["F-PSEA-20\nRotulado anonimo"]
+  P01 --> F20
+  P19 --> F20
+  P06 --> F21["F-PSEA-21\nRelacion instrumentos Calaire"]
+  P01 --> F21
+  P20 --> F21
+  P19 --> F21
+  F19 --> F21
+  P03 --> F19
+  P03 --> F20
+  P03 --> F21
   P15 --> F14["F-PSEA-14\nQueja o NC"]
   P17 --> F14
   P18 --> F15["F-PSEA-15\nApelaciones"]
@@ -101,13 +115,14 @@ flowchart LR
 
 ## Estructura operativa de ronda
 
-Cada ronda se materializa bajo `02_despliegue_rondas/<codigo_ronda>/`. La raiz de la ronda contiene solo `checklist_ronda.md` y las siete carpetas de etapa definidas por `P-PSEA-03`:
+Cada ronda se materializa bajo `02_despliegue_rondas/<codigo_ronda>/`. La raiz de la ronda contiene solo `checklist_ronda.md` y las ocho carpetas de etapa definidas por `P-PSEA-03`, incluida la etapa de inicio `02A_inicio_ronda`:
 
 ```text
 02_despliegue_rondas/<codigo_ronda>/
   checklist_ronda.md
   01_planificacion_ronda/
   02_comunicaciones_participantes/
+  02A_inicio_ronda/
   03_preparacion_item/
   04_datos_y_preprocesamiento/
   05_homogeneidad_estabilidad/
@@ -147,8 +162,9 @@ Cada ronda se materializa bajo `02_despliegue_rondas/<codigo_ronda>/`. La raiz d
 | Grupo | Codigos | Funcion |
 |---|---|---|
 | Planificacion | `F-PSEA-01`, `F-PSEA-02`, `F-PSEA-03`, `F-PSEA-04`, `F-PSEA-05`, `F-PSEA-06`, `F-PSEA-16`, `F-PSEA-17` | Calendario, cronograma, registro participante, equipos, ficha basica, planificacion completa, competencia y proveedores cuando aplique. |
+| Inicio de ronda | `F-PSEA-19` | Acta de inicio de ronda generada, firmada, escaneada y publicada cuando corresponda. |
 | Datos y aplicativos | `F-PSEA-04`, `F-PSEA-08`, `F-PSEA-09`, `F-PSEA-10`, `F-PSEA-12` | Equipos, datos reportados, exportacion PT, preprocesamiento y dataset oficial. |
-| Item y H/E | `F-PSEA-07`, `F-PSEA-11`, `F-PSEA-11A` a `F-PSEA-11D` | Control del item, homogeneidad y estabilidad. |
+| Item y H/E | `F-PSEA-07`, `F-PSEA-11`, `F-PSEA-11A` a `F-PSEA-11D`, `F-PSEA-20`, `F-PSEA-21` | Control del item, rotulado anonimo interno, relacion de instrumentos Calaire usados, homogeneidad y estabilidad. |
 | Informe | `F-PSEA-13` | Informe final de resultados. |
 | Comunicaciones | `F-PSEA-18` | Comunicaciones formales y evidencia de envio/respuesta. |
 | Cierre SGC | `F-PSEA-14`, `F-PSEA-15` | Cierre documental, queja/NC y apelaciones cuando apliquen. |
@@ -159,6 +175,6 @@ Cada ronda se materializa bajo `02_despliegue_rondas/<codigo_ronda>/`. La raiz d
 |---|---|
 | Flujo oficial de datos | `P-PSEA-08` -> `DG-PSEA-02` -> `I-PSEA-02` -> `F-PSEA-08` -> `F-PSEA-09` -> `DG-PSEA-03` -> `I-PSEA-04` -> `F-PSEA-10` -> `F-PSEA-12` -> `I-PSEA-05` -> `F-PSEA-13` |
 | Homogeneidad y estabilidad | `P-PSEA-06` -> `F-PSEA-07` -> `P-PSEA-07` -> `F-PSEA-11` / `F-PSEA-11A` a `F-PSEA-11D` -> `I-PSEA-05` -> `F-PSEA-13` |
-| Planificacion de ronda | `P-PSEA-04` -> `P-PSEA-05` -> `DG-PSEA-02` -> `I-PSEA-03` -> `F-PSEA-03` -> `F-PSEA-04` -> `F-PSEA-06` -> `F-PSEA-05` -> `F-PSEA-01` -> `F-PSEA-02` -> `F-PSEA-16` -> `F-PSEA-17` -> `F-PSEA-18` -> `P-PSEA-06` |
-| Estructura de ronda | `P-PSEA-03` -> `P-PSEA-05` -> `F-PSEA-01` -> `F-PSEA-02` -> `F-PSEA-03` -> `F-PSEA-04` -> `F-PSEA-05` -> `F-PSEA-06` -> `F-PSEA-16` -> `F-PSEA-17` -> `F-PSEA-18` -> `F-PSEA-07` -> `F-PSEA-08` -> `F-PSEA-09` -> `F-PSEA-10` -> `F-PSEA-12` -> `F-PSEA-11` -> `F-PSEA-11A` a `F-PSEA-11D` -> `F-PSEA-13` -> `F-PSEA-14` -> `F-PSEA-15` |
+| Planificacion de ronda | `P-PSEA-04` -> `P-PSEA-05` -> `DG-PSEA-02` -> `I-PSEA-03` -> `F-PSEA-03` -> `F-PSEA-04` -> `F-PSEA-06` -> `F-PSEA-05` -> `F-PSEA-01` -> `F-PSEA-02` -> `F-PSEA-16` -> `F-PSEA-17` -> `F-PSEA-18` -> `F-PSEA-19` -> `P-PSEA-06` |
+| Estructura de ronda | `P-PSEA-03` -> `P-PSEA-05` -> `F-PSEA-01` -> `F-PSEA-02` -> `F-PSEA-03` -> `F-PSEA-04` -> `F-PSEA-05` -> `F-PSEA-06` -> `F-PSEA-16` -> `F-PSEA-17` -> `F-PSEA-18` -> `F-PSEA-19` -> `F-PSEA-07` -> `F-PSEA-20` -> `F-PSEA-21` -> `F-PSEA-08` -> `F-PSEA-09` -> `F-PSEA-10` -> `F-PSEA-12` -> `F-PSEA-11` -> `F-PSEA-11A` a `F-PSEA-11D` -> `F-PSEA-13` -> `F-PSEA-14` -> `F-PSEA-15` |
 | Cierre y gestion SGC | `P-PSEA-03` -> `P-PSEA-14` / `P-PSEA-15` / `P-PSEA-17` / `P-PSEA-18` / `P-PSEA-20` / `P-PSEA-21` -> `F-PSEA-14` / `F-PSEA-15` / `F-PSEA-16` / `F-PSEA-17` |

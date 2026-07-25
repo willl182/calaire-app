@@ -86,7 +86,7 @@ El analisis debe registrar como minimo:
 
 ## 8. Controles
 
-- El dataset consolidado (F-PSEA-12) debe ser la unica entrada del modulo de analisis.
+- El dataset consolidado (F-PSEA-12) es el dataset oficial y unica entrada de evaluacion del modulo de analisis; F-PSEA-11A y F-PSEA-11B se mantienen como insumos de soporte obligatorios de homogeneidad y estabilidad conforme al procedimiento.
 - Los criterios estadisticos aplicados deben corresponder a P-PSEA-07.
 - Los resultados de H/E deben ser revisados antes de emitir el informe final.
 - La version del informe (F-PSEA-13) debe estar trazable al analisis ejecutado.

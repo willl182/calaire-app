@@ -3,8 +3,8 @@
 **Codigo:** `F-PSEA-08`  
 **Tipo:** Formato / registro digital  
 **Sistema fuente:** `calaire-app`  
-**Estado:** pendiente de consolidacion como maestro documental  
-**Ubicacion esperada:** `01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.docx`
+**Estado:** activo (version controlada)  
+**Ubicacion maestra:** `01_bloque_general/04_formatos_maestros/F-PSEA-08 Datos reportados por participante.md`
 
 ---
 

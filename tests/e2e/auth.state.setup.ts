@@ -17,7 +17,7 @@ test('validate stored WorkOS session', async ({ page }) => {
     )
   }
 
-  if (!authenticated || response.status() >= 500) {
+  if (!authenticated || !response.ok()) {
     throw new Error('La aplicación no alcanzó /dashboard al validar la sesión E2E almacenada.')
   }
 })

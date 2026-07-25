@@ -1,6 +1,6 @@
 # Matriz Maestra de Cumplimiento Normativo - CALAIRE-EA
 
-Actualizado: 2026-06-27  
+Actualizado: 2026-07-25  
 Fuente vigente: `P-PSEA-02 Matriz documental basica del PEA`, `P-PSEA-03`, `P-PSEA-08` y `mapa_navegacion_sgc_pea.html`.
 
 ## Criterio de lectura
@@ -12,16 +12,16 @@ Esta matriz conserva la trazabilidad normativa a ISO/IEC 17043:2023, ISO/IEC 170
 | Clausula | Tema | Documento vigente | Evidencia / salida | Estado |
 |---|---|---|---|---|
 | 4.1 | Imparcialidad | `DG-PSEA-01`, `P-PSEA-14`, `P-PSEA-19` | Politica, controles de colusion/falsificacion y confidencialidad | Cubierto transversalmente |
-| 4.2 | Confidencialidad | `P-PSEA-19`, `DG-PSEA-02`, `DG-PSEA-03` | Controles de acceso, flujo digital, manejo de datos | Cubierto |
+| 4.2 | Confidencialidad | `P-PSEA-19`, `DG-PSEA-02`, `DG-PSEA-03`, `F-PSEA-20`, `F-PSEA-21` | Controles de acceso, flujo digital, manejo de datos, rotulado anonimo y relacion interna de instrumentos (documentos internos no publicables); `F-PSEA-20` permanece como placeholder controlado | Cubierto con reserva |
 | 5.1-5.3 | Entidad, direccion y alcance | `DG-PSEA-01`, `P-PSEA-01` | Protocolo marco y alcance del PEA | Revisar al cierre |
 | 5.4-5.6 | Estructura, responsabilidades y autoridades | `DG-PSEA-01`, `P-PSEA-02`, `P-PSEA-20`, `F-PSEA-16` | Arquitectura documental y matriz de competencia/autorizacion | Cubierto |
-| 6.1 | Recursos generales | `P-PSEA-04`, `F-PSEA-05`, `F-PSEA-06` | Plan de ronda y ficha digital | Cubierto |
+| 6.1 | Recursos generales | `P-PSEA-04`, `F-PSEA-05`, `F-PSEA-06`, `F-PSEA-21` | Plan de ronda, ficha digital y relacion validada de instrumentos Calaire usados | Cubierto |
 | 6.2 | Personal | `P-PSEA-20`, `F-PSEA-16` | Competencia y autorizacion | Cubierto |
-| 6.3 | Instalaciones y ambiente | `P-PSEA-06`, `F-PSEA-07` | Preparacion y control del item | Cubierto por ronda |
+| 6.3 | Instalaciones y ambiente | `P-PSEA-06`, `F-PSEA-07`, `F-PSEA-21` | Preparacion y control del item, con evidencia fotografica e identificacion de los instrumentos montados | Cubierto por ronda |
 | 6.4 | Proveedores externos | `P-PSEA-21`, `F-PSEA-17` | Evaluacion de proveedores criticos | Cubierto |
-| 7.1 | Revision de solicitudes/ofertas/contratos | `P-PSEA-04`, `P-PSEA-05`, `F-PSEA-05`, `F-PSEA-18` | Planificacion y comunicaciones | Cubierto |
+| 7.1 | Revision de solicitudes/ofertas/contratos | `P-PSEA-04`, `P-PSEA-05`, `F-PSEA-05`, `F-PSEA-18`, `F-PSEA-19` | Planificacion, comunicaciones y acta de inicio de ronda | Cubierto |
 | 7.2 | Diseno del esquema PT | `P-PSEA-04`, `P-PSEA-07`, `F-PSEA-05`, `F-PSEA-06` | Plan de ronda, ficha y diseno estadistico | Cubierto |
-| 7.3 | Produccion, preparacion y manejo del item | `P-PSEA-06`, `P-PSEA-10` a `P-PSEA-13`, `F-PSEA-07`, `F-PSEA-11` | Control del item, H/E y procedimientos por analito | Cubierto |
+| 7.3 | Produccion, preparacion y manejo del item | `P-PSEA-06`, `P-PSEA-10` a `P-PSEA-13`, `F-PSEA-07`, `F-PSEA-11`, `F-PSEA-20`, `F-PSEA-21` | Control del item, rotulado anonimo, relacion de instrumentos Calaire, H/E y procedimientos por analito; diseño definitivo de `F-PSEA-20` pendiente | Cubierto con reserva |
 | 7.4.1-7.4.2 | Evaluacion de desempeno | `P-PSEA-07`, `I-PSEA-05`, `F-PSEA-12`, `F-PSEA-13` | Dataset oficial, analisis PT e informe | Cubierto |
 | 7.4.3 | Informe PT | `P-PSEA-09`, `F-PSEA-13` | Informe final de resultados | Cubierto |
 | 7.5 | Gestion de datos e informacion | `P-PSEA-08`, `DG-PSEA-02`, `DG-PSEA-03`, `I-PSEA-02` a `I-PSEA-05`, `F-PSEA-08` a `F-PSEA-12` | Flujo digital completo desde captura hasta analisis | Cubierto |
@@ -42,10 +42,10 @@ Esta matriz conserva la trazabilidad normativa a ISO/IEC 17043:2023, ISO/IEC 170
 | 4.2 | Confidencialidad | `P-PSEA-19`, `P-PSEA-08` | Control de informacion y flujo digital | Cubierto |
 | 5 | Requisitos estructurales | `DG-PSEA-01`, `P-PSEA-01`, `P-PSEA-02` | Estructura del PEA y arquitectura documental | Revisar al cierre |
 | 6.2 | Personal | `P-PSEA-20`, `F-PSEA-16` | Competencia y autorizacion | Cubierto |
-| 6.4 | Equipamiento | `F-PSEA-04`, `F-PSEA-07` | Equipos/instrumentos y control del item | Cubierto |
+| 6.4 | Equipamiento | `F-PSEA-04`, `F-PSEA-07`, `F-PSEA-21` | Equipos/instrumentos del participante, control del item y relacion validada de instrumentos Calaire usados | Cubierto |
 | 6.6 | Productos y servicios externos | `P-PSEA-21`, `F-PSEA-17` | Evaluacion de proveedores criticos | Cubierto |
 | 7.2 | Seleccion/verificacion de metodos | `P-PSEA-07`, `P-PSEA-10` a `P-PSEA-13` | Diseno estadistico y procedimientos por analito | Cubierto |
-| 7.5 | Registros tecnicos | `P-PSEA-03`, `P-PSEA-08`, `F-PSEA-07` a `F-PSEA-13` | Registros y evidencias de ronda | Cubierto |
+| 7.5 | Registros tecnicos | `P-PSEA-03`, `P-PSEA-08`, `F-PSEA-07` a `F-PSEA-13`, `F-PSEA-19` a `F-PSEA-21` | Registros y evidencias de ronda, incluidos acta de inicio, rotulado anonimo y relacion de instrumentos; `F-PSEA-20` aporta cobertura provisional como placeholder controlado | Cubierto con reserva |
 | 7.7 | Aseguramiento de validez | `P-PSEA-07`, `F-PSEA-11`, `F-PSEA-12` | H/E, dataset consolidado y controles estadisticos | Cubierto |
 | 7.8 | Informe de resultados | `P-PSEA-09`, `F-PSEA-13` | Informe final | Cubierto |
 | 7.9 | Quejas | `P-PSEA-17`, `F-PSEA-14` | Registro de queja o NC | Cubierto |
@@ -75,4 +75,5 @@ Esta matriz conserva la trazabilidad normativa a ISO/IEC 17043:2023, ISO/IEC 170
 |---|---|---|
 | `DG-PSEA-01` y `P-PSEA-01` estan marcados como revisar al cierre | El marco debe citar la arquitectura digital final | Actualizar al cierre del mapa documental. |
 | `P-PSEA-23` esta reservado/placeholder | Mejora continua queda parcialmente cubierta | Definir si se activa como procedimiento o si se cubre por SGC institucional. |
+| `F-PSEA-20` permanece como placeholder controlado | La cobertura de rotulado anonimo es provisional, no evidencia un diseño final aprobado | Aprobar el diseño definitivo o adoptar formalmente el placeholder como formato operativo. |
 | `02_despliegue_rondas` no aparece materializado en el arbol de carpetas actual | Diferencia entre arquitectura prevista y carpeta operativa existente `02_prueba_piloto_rondas` | Migrar, renombrar o documentar equivalencia formal en `P-PSEA-03`. |

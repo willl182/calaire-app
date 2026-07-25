@@ -308,7 +308,7 @@ export const upsertJustificacionDefinition = defineAgentMutation({
   args: {
     apiKey: v.string(),
     rondaId: v.id('rondas'),
-    formato: v.union(v.literal('F-PSEA-05'), v.literal('F-PSEA-05A'), v.literal('F-PSEA-12')),
+    formato: v.union(v.literal('F-PSEA-05'), v.literal('F-PSEA-05A'), v.literal('F-PSEA-12'), v.literal('F-PSEA-14')),
     alcance: v.string(),
     razon: v.string(),
   },

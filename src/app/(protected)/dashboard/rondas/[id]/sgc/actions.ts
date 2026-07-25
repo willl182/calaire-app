@@ -64,7 +64,7 @@ function parseHitoEstado(value: string) {
 }
 
 function parseFormatoJustificable(value: string) {
-  if (value === 'F-PSEA-05' || value === 'F-PSEA-05A' || value === 'F-PSEA-12') return value
+  if (value === 'F-PSEA-05' || value === 'F-PSEA-05A' || value === 'F-PSEA-12' || value === 'F-PSEA-14') return value
   throw new Error('Formato no justificable en Fase 1.')
 }
 

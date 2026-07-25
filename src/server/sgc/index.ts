@@ -487,7 +487,7 @@ export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
 
 export async function guardarJustificacionSgc(
   rondaId: string,
-  formato: 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12',
+  formato: 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12' | 'F-PSEA-14',
   alcance: string,
   razon: string
 ) {
@@ -1340,9 +1340,26 @@ export async function devolverRelacionInstrumentos(relacionId: string, observaci
   return fetchMutation(api.sgc.index.devolverRelacionInstrumentos, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, observacion }, { token })
 }
 
-export async function registrarExportacionInstrumentos(args: { relacionId: string; tipo: 'pdf' | 'xlsx'; storageId: string; fileName: string; contentType: string; size: number; revision: number }) {
+type ExportacionInstrumentosArchivo = {
+  storageId: string
+  fileName: string
+  contentType: string
+  size: number
+}
+
+export async function registrarExportacionesInstrumentos(args: {
+  relacionId: string
+  revision: number
+  pdf: ExportacionInstrumentosArchivo
+  xlsx: ExportacionInstrumentosArchivo
+}) {
   const token = await sgcToken()
-  return fetchMutation(api.sgc.index.registrarExportacionInstrumentos, { ...args, relacionId: args.relacionId as Id<'sgcInstrumentosRonda'>, storageId: args.storageId as Id<'_storage'> }, { token })
+  return fetchMutation(api.sgc.index.registrarExportacionesInstrumentos, {
+    relacionId: args.relacionId as Id<'sgcInstrumentosRonda'>,
+    revision: args.revision,
+    pdf: { ...args.pdf, storageId: args.pdf.storageId as Id<'_storage'> },
+    xlsx: { ...args.xlsx, storageId: args.xlsx.storageId as Id<'_storage'> },
+  }, { token })
 }
 
 export async function getExportacionInstrumentosUrl(rondaId: string, tipo: 'pdf' | 'xlsx') {

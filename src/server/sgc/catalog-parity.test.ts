@@ -24,5 +24,12 @@ test('etapa Inicio agrega F19 sin renombrar carpetas existentes', () => {
   const inicio = serverEtapas.find((etapa) => etapa.key === 'inicio_ronda')
   assert.equal(inicio?.carpeta, '02A_inicio_ronda')
   assert.deepEqual(inicio?.documentos.map((documento) => documento.codigo), ['F-PSEA-19'])
-  assert.equal(serverEtapas.find((etapa) => etapa.key === 'preparacion_item')?.carpeta, '03_preparacion_item')
+  const preparacion = serverEtapas.find((etapa) => etapa.key === 'preparacion_item')
+  assert.equal(preparacion?.carpeta, '03_preparacion_item')
+  for (const codigo of ['F-PSEA-20', 'F-PSEA-21'] as const) {
+    assert.ok(
+      preparacion?.documentos.some((documento) => documento.codigo === codigo),
+      `${codigo} debe estar en la etapa de preparacion del item`
+    )
+  }
 })

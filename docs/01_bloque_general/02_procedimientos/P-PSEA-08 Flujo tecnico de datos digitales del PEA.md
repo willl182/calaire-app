@@ -35,6 +35,8 @@ Aplica a datos, archivos CSV simples, exportaciones oficiales, registros de proc
 | `F-PSEA-10` | Registro de preprocesamiento | evidencia_oficial |
 | `F-PSEA-11A` | Datos preprocesados de homogeneidad | soporte_trazable |
 | `F-PSEA-11B` | Datos preprocesados de estabilidad | soporte_trazable |
+| `F-PSEA-11C` | Resultados de homogeneidad | evidencia_oficial |
+| `F-PSEA-11D` | Resultados de estabilidad | evidencia_oficial |
 | `F-PSEA-12` | Dataset oficial consolidado | evidencia_oficial |
 | `F-PSEA-13` | Informe final de resultados | evidencia_oficial |
 

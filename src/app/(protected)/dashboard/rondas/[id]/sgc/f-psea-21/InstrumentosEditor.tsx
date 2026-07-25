@@ -68,7 +68,7 @@ export default function InstrumentosEditor(props: Props) {
     setError('')
     setUploading(`${itemId}:${tipoFoto}`)
     try {
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Seleccione imagen JPEG, PNG o WebP.')
+      if (!['image/jpeg', 'image/png'].includes(file.type)) throw new Error('Seleccione imagen JPEG o PNG.')
       if (file.size > 10 * 1024 * 1024) throw new Error('Imagen supera 10 MB.')
       const uploadUrl = await solicitarUploadF21Action()
       const response = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file })
@@ -105,7 +105,7 @@ export default function InstrumentosEditor(props: Props) {
                 const current = tipoFoto === 'general' ? item.fotoGeneralStorageId : item.fotoPlacaStorageId
                 const fileName = tipoFoto === 'general' ? item.fotoGeneralFileName : item.fotoPlacaFileName
                 const key = `${item._id}:${tipoFoto}`
-                return <div className="rounded-lg border border-[var(--border)] p-3" key={tipoFoto}><div className="mb-2 text-xs font-semibold uppercase">{tipoFoto === 'general' ? 'Foto general' : 'Foto placa/serial'}</div><input type="file" accept="image/jpeg,image/png" disabled={uploading === key || pending} onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(item._id, tipoFoto, file) }} />{current && <div className="mt-2 flex items-center justify-between gap-2 text-xs"><span>{fileName ?? 'Imagen cargada'}</span><button type="button" className="text-red-700 underline" onClick={() => run(() => retirarFotoF21Action(props.rondaId, item._id, tipoFoto))}>Retirar</button></div>}</div>
+                return <div className="rounded-lg border border-[var(--border)] p-3" key={tipoFoto}><div className="mb-2 text-xs font-semibold uppercase">{tipoFoto === 'general' ? 'Foto general' : 'Foto placa/serial'}</div><input type="file" accept="image/jpeg,image/png" disabled={uploading === key || pending} onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (file) void upload(item._id, tipoFoto, file).finally(() => { input.value = '' }) }} />{current && <div className="mt-2 flex items-center justify-between gap-2 text-xs"><span>{fileName ?? 'Imagen cargada'}</span><button type="button" className="text-red-700 underline" onClick={() => run(() => retirarFotoF21Action(props.rondaId, item._id, tipoFoto))}>Retirar</button></div>}</div>
               })}
             </div>
             <button className="btn-outline justify-self-start" disabled={pending}>Guardar instrumento</button>

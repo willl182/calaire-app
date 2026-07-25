@@ -31,7 +31,7 @@ No incluye:
 
 - Definicion de criterios tecnicos o estadisticos del PEA (P-PSEA-07).
 - Procedimiento formal de planificacion de ronda (P-PSEA-04).
-- Gestion formal de comunicaciones, quejas o NC/CAPA (P-PSEA-05, P-PSEA-17, P-PSEA-16).
+- Gestion formal de comunicaciones, quejas o NC/CAPA (P-PSEA-05, P-PSEA-17, P-PSEA-15).
 - Uso del aplicativo por el participante (I-PSEA-02).
 - Preprocesamiento o analisis en pt_app (I-PSEA-04, I-PSEA-05).
 
@@ -95,7 +95,7 @@ La administracion de una ronda debe controlar como minimo:
 - Los cambios en calendario o cronograma deben estar justificados y comunicados.
 - La planificacion de ronda (F-PSEA-06) debe reflejar lo definido en P-PSEA-04; la ficha basica (F-PSEA-05) resume esa planificacion.
 - La exportacion hacia pt_app debe ser la version oficial y conservarse como F-PSEA-09.
-- Los casos SGC de queja deben alinearse con P-PSEA-17 y escalar a P-PSEA-16 cuando deriven en NC/CAPA.
+- Los casos SGC de queja deben alinearse con P-PSEA-17 y escalar a P-PSEA-15 cuando deriven en trabajo no conforme, NC o accion correctiva. P-PSEA-16 solo aplica a divulgacion y control de valores sensibles.
 - El acceso administrativo debe estar restringido a roles autorizados.
 
 ## 9. Relaciones documentales
@@ -106,6 +106,7 @@ La administracion de una ronda debe controlar como minimo:
 | P-PSEA-04 | Procedimiento de planificacion de ronda. |
 | P-PSEA-05 | Procedimiento de comunicaciones operativas. |
 | P-PSEA-08 | Flujo tecnico que recibe exportaciones. |
+| P-PSEA-15 | Procedimiento de trabajo no conforme, no conformidades y acciones correctivas al que escalan los casos SGC. |
 | P-PSEA-17 | Procedimiento de quejas gestionadas como casos SGC. |
 | F-PSEA-05 | Ficha basica de ronda generada o actualizada en calaire-app. |
 | F-PSEA-06 | Planificacion completa de ronda generada o consolidada desde calaire-app. |

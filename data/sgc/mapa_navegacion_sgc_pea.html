@@ -736,6 +736,74 @@
       "F-PSEA-21": { status: "DOCX implementado", note: "Maestro MD/DOCX; registro nativo exportable a PDF/XLSX." }
     };
 
+    // Trazabilidad normativa por documento. Fuente: "Matriz Maestra de Cumplimiento Normativo"
+    // y "trazabilidad_normativa_sgc" en 01_bloque_general/05_matrices_inventarios.
+    const normaCoverage = {
+      "DG-PSEA-01": { i17043: "4.1, 5.1-5.3, 8.8-8.9", i17025: "4, 5, 8.8-8.9", i13528: "" },
+      "DG-PSEA-02": { i17043: "4.2, 7.5", i17025: "7.11", i13528: "" },
+      "DG-PSEA-03": { i17043: "4.2, 7.5", i17025: "7.11", i13528: "" },
+      "P-PSEA-01": { i17043: "5.1-5.3", i17025: "5", i13528: "" },
+      "P-PSEA-02": { i17043: "5.4-5.6, 8.2-8.4", i17025: "5, 8.2-8.4", i13528: "" },
+      "P-PSEA-03": { i17043: "8.4", i17025: "7.5, 8.2-8.4", i13528: "" },
+      "P-PSEA-04": { i17043: "6.1, 7.1, 7.2", i17025: "7.1", i13528: "5" },
+      "P-PSEA-05": { i17043: "7.1, 7.3.5", i17025: "7.1", i13528: "" },
+      "P-PSEA-06": { i17043: "6.3, 7.3", i17025: "6.3, 6.4", i13528: "Anexo B" },
+      "P-PSEA-07": { i17043: "7.2, 7.4.1-7.4.2", i17025: "7.2, 7.7", i13528: "4, 5, 7, 8, 9, Anexo B, Anexo C" },
+      "P-PSEA-08": { i17043: "4.2, 7.5", i17025: "7.11", i13528: "6" },
+      "P-PSEA-09": { i17043: "7.4.3", i17025: "7.8", i13528: "" },
+      "P-PSEA-10": { i17043: "7.3", i17025: "7.2", i13528: "" },
+      "P-PSEA-11": { i17043: "7.3", i17025: "7.2", i13528: "" },
+      "P-PSEA-12": { i17043: "7.3", i17025: "7.2", i13528: "" },
+      "P-PSEA-13": { i17043: "7.3", i17025: "7.2", i13528: "" },
+      "P-PSEA-14": { i17043: "4.1, 8.5", i17025: "4, 8.5-8.7", i13528: "" },
+      "P-PSEA-15": { i17043: "8.7", i17025: "7.10, 8.5-8.7", i13528: "" },
+      "P-PSEA-16": { i17043: "7.4", i17025: "4.2", i13528: "" },
+      "P-PSEA-17": { i17043: "8.9 quejas", i17025: "7.9", i13528: "" },
+      "P-PSEA-18": { i17043: "8.9 apelaciones", i17025: "7.9", i13528: "" },
+      "P-PSEA-19": { i17043: "4.1, 4.2", i17025: "4", i13528: "" },
+      "P-PSEA-20": { i17043: "5.4-5.6, 6.2", i17025: "6.2", i13528: "" },
+      "P-PSEA-21": { i17043: "6.4", i17025: "6.6", i13528: "" },
+      "I-PSEA-02": { i17043: "7.5", i17025: "7.11", i13528: "" },
+      "I-PSEA-03": { i17043: "7.5", i17025: "7.11", i13528: "" },
+      "I-PSEA-04": { i17043: "7.5", i17025: "7.11", i13528: "6" },
+      "I-PSEA-05": { i17043: "7.4.1-7.4.2, 7.5", i17025: "7.11", i13528: "4, 7, 8, 9, 10, Anexo C" },
+      "F-PSEA-01": { i17043: "6.1, 7.1", i17025: "7.1", i13528: "5" },
+      "F-PSEA-02": { i17043: "6.1, 7.1", i17025: "7.1", i13528: "5" },
+      "F-PSEA-03": { i17043: "7.1, 7.5", i17025: "7.1, 7.11", i13528: "" },
+      "F-PSEA-04": { i17043: "6.4, 7.5", i17025: "6.4", i13528: "" },
+      "F-PSEA-05": { i17043: "6.1, 7.1, 7.2", i17025: "7.1", i13528: "5" },
+      "F-PSEA-06": { i17043: "6.1, 7.2", i17025: "7.1", i13528: "5" },
+      "F-PSEA-07": { i17043: "6.3, 7.3", i17025: "6.4, 7.5", i13528: "Anexo B" },
+      "F-PSEA-08": { i17043: "7.5", i17025: "7.5, 7.11", i13528: "6" },
+      "F-PSEA-09": { i17043: "7.5", i17025: "7.5, 7.11", i13528: "6" },
+      "F-PSEA-10": { i17043: "7.5", i17025: "7.5", i13528: "6" },
+      "F-PSEA-11": { i17043: "7.3", i17025: "7.5, 7.7", i13528: "Anexo B" },
+      "F-PSEA-11A": { i17043: "7.3", i17025: "7.5", i13528: "Anexo B" },
+      "F-PSEA-11B": { i17043: "7.3", i17025: "7.5", i13528: "Anexo B" },
+      "F-PSEA-11C": { i17043: "7.3", i17025: "7.5", i13528: "Anexo B" },
+      "F-PSEA-11D": { i17043: "7.3", i17025: "7.5", i13528: "Anexo B" },
+      "F-PSEA-12": { i17043: "7.4.1-7.4.2, 7.5", i17025: "7.5, 7.7", i13528: "6, 7, 9" },
+      "F-PSEA-13": { i17043: "7.4.3", i17025: "7.5, 7.8", i13528: "8, 9, 10" },
+      "F-PSEA-14": { i17043: "8.7", i17025: "7.9, 7.10", i13528: "" },
+      "F-PSEA-15": { i17043: "8.9 apelaciones", i17025: "7.9", i13528: "" },
+      "F-PSEA-16": { i17043: "5.4-5.6, 6.2", i17025: "6.2", i13528: "" },
+      "F-PSEA-17": { i17043: "6.4", i17025: "6.6", i13528: "" },
+      "F-PSEA-18": { i17043: "7.1, 7.3.5", i17025: "7.1", i13528: "" },
+      "F-PSEA-19": { i17043: "7.1, 7.3.5, 8.4", i17025: "7.5", i13528: "" },
+      "F-PSEA-20": { i17043: "4.2, 7.3, 8.4", i17025: "7.5", i13528: "" },
+      "F-PSEA-21": { i17043: "4.2, 6.1, 6.3, 7.3, 8.4", i17025: "6.4, 7.5", i13528: "" }
+    };
+
+    function normaTexto(id) {
+      const n = normaCoverage[id];
+      if (!n) return "Sin clausula declarada en las matrices de cumplimiento.";
+      const partes = [];
+      if (n.i17043) partes.push(`ISO/IEC 17043:2023 ${n.i17043}`);
+      if (n.i17025) partes.push(`ISO/IEC 17025:2017 ${n.i17025}`);
+      if (n.i13528) partes.push(`ISO 13528:2022 ${n.i13528}`);
+      return partes.length ? partes.join(" | ") : "Sin clausula declarada en las matrices de cumplimiento.";
+    }
+
     const familyNames = { DG: "DG", P: "P", I: "I", F: "F", OUT: "Fuera" };
     const fichaGroups = {};
     const svg = document.getElementById("map");
@@ -835,6 +903,7 @@
         <span class="pill">${familyNames[node.family] || node.family}</span>
         <span class="pill">${node.state}</span>
         <span class="pill">${docxCoverage[id]?.status || "Formato activo"}</span>
+        <span class="pill">${normaCoverage[id] ? "Clausulas declaradas" : "Sin clausula declarada"}</span>
       `;
       document.getElementById("detailText").textContent = node.text;
       const incoming = edges.filter(e => e[1] === id).map(e => e[0]);
@@ -848,6 +917,7 @@
           ${fichas.map(code => `<li><a href="${fichaFile(code)}" target="_blank" rel="noopener">${code} · abrir ficha HTML</a></li>`).join("")}
         </ul>
         <p><strong>Revision formatos:</strong> ${docxCoverage[id]?.note || "Archivo maestro activo encontrado para este codigo en la auditoria actualizada."}</p>
+        <p><strong>Requisitos normativos:</strong> ${normaTexto(id)}</p>
         <p class="context-note">Vista enfocada en nodo seleccionado. Use una ruta critica o limpiar vista para volver al contexto completo del flujo.</p>
       `;
       selected.clear();
@@ -858,7 +928,7 @@
 
     function matchesFilters(n) {
       const q = searchQuery.trim().toLowerCase();
-      const text = `${n.id} ${n.label} ${n.family} ${n.state} ${n.text}`.toLowerCase();
+      const text = `${n.id} ${n.label} ${n.family} ${n.state} ${n.text} ${normaTexto(n.id)}`.toLowerCase();
       const familyOk = activeFamily === "Todos" || n.family === activeFamily;
       const stateOk = activeState === "Todos" || n.state === activeState;
       const searchOk = !q || text.includes(q);
