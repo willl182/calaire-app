@@ -18,6 +18,9 @@ export default async function MapaSgcPage() {
       relacion.documentoDestinoId,
     ]).filter(Boolean)
   ).size
+  const fichasPorCodigo = Object.fromEntries(
+    mapa.data.documentos.map((documento) => [documento.codigo, documento._id]),
+  )
 
   return (
     <div className="app-workspace min-w-0">
@@ -52,7 +55,7 @@ export default async function MapaSgcPage() {
 
       <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(240px,300px)_minmax(0,1fr)] lg:items-start">
         <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-6rem)]">
-          <ArbolSgc documentos={mapa.data.documentos} />
+          <ArbolSgc fichasPorCodigo={fichasPorCodigo} />
         </div>
 
         <div className="min-w-0 space-y-4">
