@@ -5,7 +5,9 @@
 **Nombre:** Relacion de instrumentos Calaire usados  
 **Version:** 1.0  
 **Fecha:** 2026-07-25  
-**Estado:** Activo
+**Estado:** Activo  
+**Requisitos normativos:** ISO/IEC 17043:2023 4.2 (confidencialidad), 6.1 y 6.3 (recursos, instalaciones y equipamiento), 7.3 (produccion y manejo del item), 8.4 (control de registros); ISO/IEC 17025:2017 6.4 (equipamiento) y 7.5 (registros tecnicos)  
+**Procedimientos que lo gobiernan:** `P-PSEA-06` (preparacion y control del item), `P-PSEA-03` (control de registros), `P-PSEA-19` (confidencialidad operativa; documento interno no publicable)
 
 ---
 

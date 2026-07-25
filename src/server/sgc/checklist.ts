@@ -130,6 +130,22 @@ export function calcularChecklistSgc(input: SgcCoverageInput): SgcChecklistItem[
       observaciones = completo
         ? `Revision finalizada con ${input.snapshotsRevision} snapshot(s).`
         : 'Revision pendiente o sin snapshot.'
+    } else if (formato.codigo === 'F-PSEA-14') {
+      const vigente = Boolean(input.evidenciasVigentes['F-PSEA-14'])
+      if (vigente) {
+        estado = 'completo'
+        vinculo = 'Evidencia vigente'
+        observaciones = 'Evidencia de queja, NC o accion correctiva cargada.'
+      } else if (justificacion) {
+        estado = 'no_aplica'
+        vinculo = 'No aplica'
+        observaciones = `No aplica: ${justificacion.razon}`
+        responsable = justificacion.updatedBy
+        ultimaActualizacion = new Date(justificacion.updatedAt).toISOString()
+      } else {
+        estado = 'pendiente'
+        observaciones = 'Cargue la evidencia del caso o documente que no aplica.'
+      }
     } else if (formato.codigo === 'F-PSEA-11') {
       const completo = input.fPsea11NoAplica && Boolean(input.fPsea11Razon?.trim())
       estado = completo ? 'no_aplica' : 'pendiente'
@@ -159,7 +175,7 @@ export function calcularChecklistSgc(input: SgcCoverageInput): SgcChecklistItem[
       ultimaActualizacion,
       vinculo,
       observaciones,
-      bloqueante: formato.bloqueaCierre && estado === 'pendiente',
+      bloqueante: formato.bloqueaCierre && (estado === 'pendiente' || estado === 'advertencia'),
     }
   })
 }

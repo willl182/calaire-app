@@ -487,7 +487,7 @@ export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
 
 export async function guardarJustificacionSgc(
   rondaId: string,
-  formato: 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12',
+  formato: 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12' | 'F-PSEA-14',
   alcance: string,
   razon: string
 ) {

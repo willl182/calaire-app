@@ -8,7 +8,6 @@ const xml = (value: unknown) => String(value ?? '')
   .replaceAll('"', '&quot;')
   .replaceAll("'", '&apos;')
 
-const ascii = (value: string) => value.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\x20-\x7E]/g, '')
 
 export type ActaInicioExport = {
   rondaCodigo: string
@@ -70,9 +69,53 @@ export async function crearInstrumentosPdf(data: { rondaCodigo: string; rondaNom
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
   let page = pdf.addPage([842, 595])
   let y = 550
+  const maxWidth = 842 - 70
+  // El PDF es evidencia: el texto se dibuja sin normalizar ni recortar. Si la fuente no puede
+  // representar un caracter se falla explicitamente en lugar de exportar contenido alterado.
+  const medir = (activeFont: typeof font, text: string, size: number) => {
+    try {
+      return activeFont.widthOfTextAtSize(text, size)
+    } catch {
+      throw new Error(`El texto "${text}" contiene caracteres que la fuente del PDF no puede representar.`)
+    }
+  }
+  const partirPalabra = (activeFont: typeof font, word: string, size: number) => {
+    const partes: string[] = []
+    let actual = ''
+    for (const char of word) {
+      if (actual && medir(activeFont, actual + char, size) > maxWidth) {
+        partes.push(actual)
+        actual = char
+      } else {
+        actual += char
+      }
+    }
+    if (actual) partes.push(actual)
+    return partes
+  }
+  const envolver = (activeFont: typeof font, text: string, size: number) => {
+    const lineas: string[] = []
+    let actual = ''
+    for (const word of text.split(/\s+/).filter(Boolean)) {
+      const candidato = actual ? `${actual} ${word}` : word
+      if (medir(activeFont, candidato, size) <= maxWidth) {
+        actual = candidato
+        continue
+      }
+      if (actual) lineas.push(actual)
+      const partes = partirPalabra(activeFont, word, size)
+      lineas.push(...partes.slice(0, -1))
+      actual = partes[partes.length - 1] ?? ''
+    }
+    if (actual) lineas.push(actual)
+    return lineas.length > 0 ? lineas : ['']
+  }
   const line = (text: string, size = 9, strong = false) => {
-    page.drawText(ascii(text).slice(0, 145), { x: 35, y, size, font: strong ? bold : font, color: rgb(0.08, 0.12, 0.16) })
-    y -= size + 7
+    const activeFont = strong ? bold : font
+    for (const fragmento of envolver(activeFont, text, size)) {
+      page.drawText(fragmento, { x: 35, y, size, font: activeFont, color: rgb(0.08, 0.12, 0.16) })
+      y -= size + 7
+    }
   }
   const drawPhoto = async (foto: FotoInstrumentoExport, x: number, label: string) => {
     const image = foto.contentType === 'image/jpeg'

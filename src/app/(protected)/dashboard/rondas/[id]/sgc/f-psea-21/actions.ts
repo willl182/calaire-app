@@ -127,6 +127,9 @@ export async function generarExportacionesF21Action(rondaId: string) {
     { tipo: 'pdf' as const, bytes: await crearInstrumentosPdf(data), contentType: 'application/pdf', fileName: `F-PSEA-21_${panel.ronda.codigo}_rev${relacion.revision}.pdf` },
     { tipo: 'xlsx' as const, bytes: await crearInstrumentosXlsx(data.items), contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', fileName: `F-PSEA-21_${panel.ronda.codigo}_rev${relacion.revision}.xlsx` },
   ]
+  // Ambos formatos se suben primero: solo cuando los dos archivos existen se registran las
+  // exportaciones, para que la relacion nunca quede con un unico formato persistido.
+  const almacenados: Array<{ tipo: 'pdf' | 'xlsx'; storageId: string; fileName: string; contentType: string; size: number }> = []
   for (const output of outputs) {
     const uploadUrl = await generateSgcUploadUrl()
     const body = new ArrayBuffer(output.bytes.byteLength)
@@ -134,7 +137,10 @@ export async function generarExportacionesF21Action(rondaId: string) {
     const response = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': output.contentType }, body })
     if (!response.ok) throw new Error(`No fue posible almacenar ${output.tipo.toUpperCase()}.`)
     const { storageId } = await response.json() as { storageId: string }
-    await registrarExportacionInstrumentos({ relacionId: relacion._id, tipo: output.tipo, storageId, fileName: output.fileName, contentType: output.contentType, size: output.bytes.byteLength, revision: relacion.revision })
+    almacenados.push({ tipo: output.tipo, storageId, fileName: output.fileName, contentType: output.contentType, size: output.bytes.byteLength })
+  }
+  for (const almacenado of almacenados) {
+    await registrarExportacionInstrumentos({ relacionId: relacion._id, ...almacenado, revision: relacion.revision })
   }
   revalidatePath(path(rondaId))
 }

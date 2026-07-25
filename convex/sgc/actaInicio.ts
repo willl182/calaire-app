@@ -180,6 +180,7 @@ export const registrarDocxActaInicioConfig = {
     if (args.contentType !== 'application/vnd.openxmlformats-officedocument.wordprocessingml.document') throw new Error('El archivo generado debe ser DOCX.')
     const stored = await ctx.db.system.get(args.storageId)
     if (!stored || stored.size !== args.size) throw new Error('Archivo DOCX no disponible o metadata inconsistente.')
+    if (stored.contentType && stored.contentType !== args.contentType) throw new Error('El objeto almacenado no es un DOCX.')
     const organizadores = (await getFirmantes(ctx, acta._id)).filter((item) => item.tipo === 'organizador')
     if (organizadores.length !== 2 || organizadores.some((item) => !item.nombre.trim() || !item.entidad.trim())) throw new Error('Complete exactamente dos organizadores antes de generar.')
     await ctx.db.patch(acta._id, { docxStorageId: args.storageId, docxFileName: args.fileName, estado: 'docx_generado', updatedAt: Date.now(), updatedBy: actor })
@@ -196,13 +197,18 @@ export const registrarPdfFirmadoActaInicioConfig = {
     const acta = await ctx.db.get(args.actaId)
     if (!acta) throw new Error('Acta no encontrada.')
     if (args.contentType !== 'application/pdf') throw new Error('El acta firmada debe ser PDF.')
+    const fileName = args.fileName.trim()
+    if (!fileName || !fileName.toLowerCase().endsWith('.pdf')) throw new Error('El acta firmada debe tener nombre de archivo .pdf.')
+    if (args.size <= 0 || args.size > 25 * 1024 * 1024) throw new Error('PDF vacio o superior a 25 MB.')
     const stored = await ctx.db.system.get(args.storageId)
     if (!stored || stored.size !== args.size) throw new Error('PDF no disponible o metadata inconsistente.')
-    await ctx.db.patch(acta._id, { pdfStorageId: args.storageId, pdfFileName: args.fileName, publicaParticipante: false, estado: 'pdf_firmado_cargado', updatedAt: Date.now(), updatedBy: actor })
+    // El contentType confiable es el registrado por storage, no el enviado por el cliente.
+    if (stored.contentType && stored.contentType !== 'application/pdf') throw new Error('El objeto almacenado no es un PDF.')
+    await ctx.db.patch(acta._id, { pdfStorageId: args.storageId, pdfFileName: fileName, publicaParticipante: false, estado: 'pdf_firmado_cargado', updatedAt: Date.now(), updatedBy: actor })
     const recurso = await getRecurso(ctx, acta.rondaId)
     if (recurso) {
       await ctx.db.patch(recurso._id, {
-        definitivo: { storageId: args.storageId, fileName: args.fileName, contentType: args.contentType, size: args.size, tipo: 'pdf' },
+        definitivo: { storageId: args.storageId, fileName, contentType: args.contentType, size: args.size, tipo: 'pdf' },
         estado: 'diligenciado',
         publicaParticipante: false,
         updatedAt: Date.now(),

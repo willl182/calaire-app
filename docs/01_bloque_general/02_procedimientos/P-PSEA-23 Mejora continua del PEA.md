@@ -1,8 +1,10 @@
 # P-PSEA-23 Mejora continua del PEA
 
+**Estado documental:** borrador (no aprobado, no vigente)
+
 ## Estado documental
 
-Documento activo reservado para el procedimiento de mejora continua del PEA.
+Documento en borrador reservado para el procedimiento de mejora continua del PEA. Mientras su contenido no se desarrolle y apruebe, no debe citarse ni aplicarse como procedimiento vigente.
 
 El contenido anterior de este archivo correspondia a gestion de datos y fue retirado del documento activo por conflicto de alcance. La fuente retirada se conserva como historico en `para_quitar/01_bloque_general/02_procedimientos/P-PSEA-23 Gestion de Datos contenido retirado.md`.
 

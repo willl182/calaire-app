@@ -5,7 +5,9 @@
 **Nombre:** Rotulado anonimo  
 **Version:** 1.0  
 **Fecha:** 2026-07-25  
-**Estado:** Placeholder controlado
+**Estado:** Placeholder controlado  
+**Requisitos normativos:** ISO/IEC 17043:2023 4.2 (confidencialidad), 7.3 (manejo e identificacion del item de ensayo), 8.4 (control de registros); ISO/IEC 17025:2017 7.5 (registros tecnicos)  
+**Procedimientos que lo gobiernan:** `P-PSEA-06` (preparacion y control del item), `P-PSEA-03` (control de registros), `P-PSEA-19` (confidencialidad operativa; documento interno no publicable)
 
 ---
 

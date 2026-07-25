@@ -58,7 +58,7 @@ Los formatos maestros viven en `01_bloque_general/04_formatos_maestros/`. Las co
 | `P-PSEA-19` | Confidencialidad operativa interna del PEA | P | Procedimiento de gestion | Elaborado | `01_bloque_general/02_procedimientos/P-PSEA-19 Confidencialidad operativa interna del PEA.md` |
 | `P-PSEA-20` | Competencia y autorizacion operativa del PEA | P | Procedimiento de gestion | Elaborado | `01_bloque_general/02_procedimientos/P-PSEA-20 Competencia y autorizacion operativa del PEA.md` |
 | `P-PSEA-21` | Proveedores criticos del PEA | P | Procedimiento de gestion | Elaborado | `01_bloque_general/02_procedimientos/P-PSEA-21 Proveedores criticos del PEA.md` |
-| `P-PSEA-23` | Mejora continua del PEA | P | Procedimiento de gestion | Reservado / placeholder | `01_bloque_general/02_procedimientos/P-PSEA-23 Mejora continua del PEA.md` |
+| `P-PSEA-23` | Mejora continua del PEA | P | Procedimiento de gestion | Borrador reservado (no vigente) | `01_bloque_general/02_procedimientos/P-PSEA-23 Mejora continua del PEA.md` |
 | `I-PSEA-02` | Instructivo participante calaire-app | I | Instructivo | Elaborado | `01_bloque_general/03_instructivos/I-PSEA-02 Instructivo participante calaire-app.md` |
 | `I-PSEA-03` | Instructivo administracion rondas calaire-app | I | Instructivo | Elaborado | `01_bloque_general/03_instructivos/I-PSEA-03 Instructivo administracion rondas calaire-app.md` |
 | `I-PSEA-04` | Instructivo preprocesador pt_app | I | Instructivo | Elaborado | `01_bloque_general/03_instructivos/I-PSEA-04 Instructivo preprocesador pt_app.md` |
@@ -84,6 +84,9 @@ Los formatos maestros viven en `01_bloque_general/04_formatos_maestros/`. Las co
 | `F-PSEA-15` | Registro de apelaciones | F | Registro de gestion | Elaborado | `01_bloque_general/04_formatos_maestros/F-PSEA-15 Registro de apelaciones.md` |
 | `F-PSEA-16` | Matriz de competencia y autorizacion | F | Matriz de gestion | Elaborado | `01_bloque_general/04_formatos_maestros/F-PSEA-16 Matriz de competencia autorizacion.md` |
 | `F-PSEA-17` | Evaluacion de proveedores criticos | F | Registro de gestion | Elaborado | `01_bloque_general/04_formatos_maestros/F-PSEA-17 Evaluacion de proveedores criticos.md` |
+| `F-PSEA-19` | Acta de inicio de ronda | F | Formato maestro / registro nativo de ronda | Activo operativo | Maestro: `01_bloque_general/04_formatos_maestros/F-PSEA-19 Acta de inicio de ronda.md`; actas firmadas: `02_despliegue_rondas/<ronda>/02A_inicio_ronda/` |
+| `F-PSEA-20` | Rotulado anonimo | F | Formato maestro / registro manual interno | Activo operativo | Maestro: `01_bloque_general/04_formatos_maestros/F-PSEA-20 Rotulado anonimo.md`; copias diligenciadas: `02_despliegue_rondas/<ronda>/03_preparacion_item/` |
+| `F-PSEA-21` | Relacion de instrumentos Calaire usados | F | Formato maestro / registro nativo de ronda | Activo operativo | Maestro: `01_bloque_general/04_formatos_maestros/F-PSEA-21 Relacion de instrumentos Calaire usados.md`; exportaciones PDF/XLSX: `02_despliegue_rondas/<ronda>/03_preparacion_item/` |
 
 ## Documentos reservados, retirados o con conflicto historico
 

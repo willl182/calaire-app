@@ -213,6 +213,9 @@ export const enviarRelacionInstrumentosAValidacionConfig = {
     const actor = await requireSgcManage(ctx)
     const relacion = await ctx.db.get(args.relacionId)
     if (!relacion) throw new Error('Relacion no encontrada.')
+    if (relacion.estado !== 'borrador' && relacion.estado !== 'requiere_ajustes') {
+      throw new Error('Solo una relacion en borrador o con ajustes pendientes puede enviarse a validacion.')
+    }
     const resumen = evaluar(await getItems(ctx, relacion._id))
     if (!resumen.completo) throw new Error(resumen.errores.join(' '))
     if (!args.tecnicoNombre.trim()) throw new Error('Nombre del tecnico es obligatorio.')
@@ -248,6 +251,7 @@ export const devolverRelacionInstrumentosConfig = {
     const actor = await requireSgcAdmin(ctx)
     const relacion = await ctx.db.get(args.relacionId)
     if (!relacion) throw new Error('Relacion no encontrada.')
+    if (relacion.estado !== 'pendiente_validacion') throw new Error('Relacion no esta pendiente de validacion.')
     if (!args.observacion.trim()) throw new Error('Observacion es obligatoria.')
     await ctx.db.patch(relacion._id, { estado: 'requiere_ajustes', observacionDevolucion: args.observacion.trim(), updatedAt: Date.now(), updatedBy: actor })
     await writeAudit(ctx, { rondaId: relacion.rondaId, actor, evento: 'sgc.f21.devuelta', detalle: args.observacion.trim(), targetTipo: 'sgcInstrumentosRonda', targetId: relacion._id })

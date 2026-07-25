@@ -11,12 +11,142 @@ La planificacion debe crear el hito `INICIO_RONDA`, con fecha, lugar y responsab
 | **OBJETIVO:** El objetivo del procedimiento es definir los parámetros para el desarrollo del ensayo de aptitud. Esto se hace en estricto cumplimiento con la norma internacional ISO/IEC 17043:2023. |
 | **ALCANCE:** El procedimiento abarca todo el proceso desde la determinación de los niveles del ítem de ensayo y el procedimiento para la evaluación de la competencia para el gas ozono. |
 | **DEFINICIONES: Comparación Interlaboratorio (CIL)** La CIL, también conocida como prueba de competencia o prueba interlaboratorio, evalúa la comparabilidad de los resultados de análisis de la misma muestra, analizados por varios laboratorios en el mismo período. Mide la competencia mediante puntuaciones z. **Desviación estándar CIL** La desviación estándar CIL es la desviación estándar calculada para un mensurando en un material de prueba a partir de los resultados presentados por los participantes. **Desviación estándar para la evaluación de la competencia (σpt​)** La desviación estándar para la evaluación de la competencia (σpt​) es una desviación estándar preestablecida que se utiliza para el cálculo de puntuaciones Z en un CIL. Para contaminantes como O3​, σpt​ suele calcularse mediante interpolación lineal basada en el valor asignado (Xref​) utilizando parámetros específicos «a» (pendiente) y «b» (ordenada al origen), acordados por Laboratorios de Referencia. Esto garantiza la coherencia en la evaluación de aptitud, independientemente del nivel de concentración. **Ensayo de Aptitud (EA)** Evaluación del desempeño de un participante contra criterios preestablecidos por medio de comparaciones interlaboratorios. **Estadísticas robustas** Las estadísticas robustas se refieren a un método estadístico utilizado para minimizar la influencia de valores atípicos en la media y la desviación estándar calculadas. **Item de ensayo \- ozono** El ítem de ensayo es una atmósfera de ozono en aire cero generadas dinámicamente a partir de un generador de ozono con fotómetro nivel 2 en la cadena de trazabilidad de ozono suministradas a través de un colector de distribución. **Organizador** El Organizador es el laboratorio responsable de la organización de la CIL. **Participante** El Participante es el laboratorio que toma parte en una CIL. **Puntuación En o En-score** La puntuación En es un indicador de desempeño que evalúa la capacidad de un participante para proporcionar resultados cercanos a los valores de referencia, considerando sus incertidumbres de medición reportadas y la incertidumbre de los valores asignados. **Puntuación z/z’ o z/z’-score** La puntuación z/z’ es un valor utilizado para clasificar el desempeño de un laboratorio dentro de una CIL. **Valor Asignado o Valor de Referencia** El valor asignado es la concentración de un mensurando, considerada la mejor estimación del valor real de un material de prueba. En un ensayo de concentración in situ (CIL), las mediciones de CALAIRE, calibradas con valores de referencia certificados de Materiales de Referencia Certificados (MRC) y trazables a normas internacionales, sirven como valores asignados. **Valores atípicos** Los valores atípicos son resultados de análisis que se caracterizan como una desviación de los demás resultados de un estudio, de acuerdo con lo establecido en la ISO-IEC 13528:2022.  |
-| **DOCUMENTOS DE REFERENCIA:** ISO-IEC 17043:2023 ISO-IEC 13528:2022 P-PSEA-01 Protocolo General De Ensayo De Aptitud Para Gases Contaminantes Criterio P-PSEA-06 Procedimiento de Elaboración de Informe de Resultados  |
+| **DOCUMENTOS DE REFERENCIA:** ISO-IEC 17043:2023 ISO-IEC 13528:2022 P-PSEA-01 Protocolo General De Ensayo De Aptitud Para Gases Contaminantes Criterio P-PSEA-07 Diseno estadistico P-PSEA-09 Generacion y emision del informe de resultados P-PSEA-14 Colusion y falsificacion  |
 | **CONDICIONES GENERALES:** |
 
-| INFORMACIÓN ESPECÍFICA DEL PROCEDIMIENTO |
-| ----- |
-|   **Preparación del Ítem de Ensayo Ítem de Ensayo de Aptitud** El ítem de ensayo consiste en concentraciones de ozono troposférico en aire cero, .elaboradas dinámicamente mediante el uso de un generador de ozono con fotómetro nivel 2 en la cadena de trazabilidad. El gas es suministrado a través de un manifold de distribución de vidrio para asegurar la inercia del material y la homogeneidad de la muestra. **Generación de los Niveles de Concentración de Ensayo** Basado en el análisis de datos históricos y los umbrales regulatorios de calidad del aire, se han establecido cinco niveles de concentración nominal para el ensayo. Estos niveles cubren el rango de medición crítico para el O3. La concentración nominal se refiere a la concentración fijada en el calibrador dinámico. **Concentraciones de O3** **Tabla 1\. Concentraciones referencia para O3 ** **Serie** **Nivel de Concentración** **Concentración Nominal O3** **Tiempo corrida** **0** Cero 0 1 h **1** Bajo 45 1h 30 **2** Medio-Bajo 90 1h 30 **3** Medio-Alto 135 1h 30 **4** Alto 180 1h 30 **\*Todas las concentraciones en la tabla son nominales expresadas en nmol/mol** **Evaluación de Homogeneidad y Estabilidad del Item de Ensayo**  La evaluación de la homogeneidad del material de prueba se fundamenta en los métodos de la Sección 5.3 y los criterios de ISO 13528:2015/2022, comparando las lecturas de analizadores duplicados a lo largo del colector de muestreo. Se considera homogéneo si la desviación estándar entre muestras (ss) o las diferencias absolutas observadas son inferiores al valor crítico de homogeneidad (c), derivado de la desviación estándar esperada en la CIL (σpt), o a las diferencias máximas especificadas. La mezcla de prueba se preparan dinámicamente mediante el uso de un generador de ozono con fotómetro nivel 2 en la cadena de trazabilidad, y se distribuyen a través de un colector de vidrio para asegurar la inercia y homogeneidad. La prueba de cero directo al equipo se realiza conectando el calibrador directamente y luego a través del manifold para evaluar la línea calibrador-manifold-analizador. La estabilidad del material de prueba para una CIL se evalúa comparando los valores medios de las mediciones del analizador de referencia a lo largo de cada análisis de concentración, según la Sección 5.4, considerándose estables si las diferencias observadas están dentro de los umbrales porcentuales o absolutos. **Procesamiento de datos** CALAIRE procesa los resultados de las mediciones de cada laboratorio para cumplir con la ISO 17043:2023 en aseguramiento y confidencialidad de datos. Los laboratorios deben informar tres valores promedio de 30 minutos, más la incertidumbre asociada, para cada compuesto y nivel de concentración. **Detección de Valores Atípicos** CALAIRE, como organizador, realiza pruebas estadísticas para identificar valores atípicos y asegurar la consistencia de los datos. Errores obvios deben ser eliminados del conjunto de datos antes de aplicar procedimientos estadísticos robustos o pruebas formales de valores atípicos. Si existe incertidumbre sobre la naturaleza de un resultado anómalo, este debe permanecer en el conjunto de datos para su posterior tratamiento estadístico, y el laboratorio participante deberá investigar la discrepancia. Los datos deben revisarse visualmente usando histogramas y gráficos de densidad para identificar anomalías. La norma ISO 13528 prefiere métodos estadísticos robustos (basados en mediana y rango central del 50%) sobre la eliminación explícita de valores atípicos, ya que son menos sensibles a valores extremos. Aunque se prefieren los métodos robustos, las pruebas específicas de valores atípicos (Grubbs, Cochran) pueden complementar la revisión visual si se demuestran los supuestos estadísticos subyacentes. Es crucial documentar las pruebas usadas, el nivel de confianza y los límites de rechazo de datos. **Evaluación del Desempeño Determinación del Valor Asignado (xpt​)** El valor asignado para cada serie de concentración es la media de las mediciones obtenidas por el analizador de referencia de CALAIRE durante el período de medición establecido. Se determina al estimar la media de 3 concentraciones promedio de una hora. .  **Estimación de la Incertidumbre del Valor Asignado (Uxpt​)** La calidad del valor asignado (xpt) se define por su incertidumbre expandida asociada (U(xpt)). La evaluación sigue los principios de la Guía para la Expresión de la Incertidumbre en la Medición (GUM). La incertidumbre estándar del valor asignado, u(xpt), se calcula combinando la incertidumbre del valor de referencia del instrumento (uref) y la incertidumbre debida a la falta de homogeneidad (uhom). uX​=uref2​+uhom2​​ Ec 1 La incertidumbre expandida se calcula luego usando un factor de cobertura de k=2 (para un nivel de confianza de \~95%): UX​=2⋅uX​ Ec 2 La incertidumbre del instrumento de referencia, uref​, es una composición de varias fuentes de incertidumbre individuales, que se combinan en cuadratura: uref​=ucal2​+ur2​\+ulof2​+ud2​+uEC2​+uinfl2​​ Ec 3 Donde: **ucal**: Incertidumbre del gas de calibración y del sistema de dilución. **ur**: Incertidumbre por repetibilidad a corto plazo (ruido del instrumento). **ulof**: Incertidumbre por falta de ajuste (no linealidad). **ud**: Incertidumbre por deriva a largo plazo entre calibraciones. **uinfl**: Incertidumbre por influencias ambientales (temperatura, presión). **Tabla 6\. Resumen de componentes para la estimación de la incertidumbre**  **Componente de Incertidumbre Datos Específicos a Recolectar Frecuencia de Recolección Fuente del Procedimiento** **1\. Trazabilidad del Patrón de Calibración (Fotómetro)** Del certificado del fotómetro de referencia: ID del equipo, incertidumbre expandida, declaración de trazabilidad a un SRP de NIST o equivalente. Anual (al recibir certificado de calibración). USEPA 40 CFR Part 50, App. D; EN 14625 **2\. Linealidad (Falta de Ajuste)** Lecturas promedio del analizador para al menos 5 concentraciones que cubran el rango de trabajo (incluyendo cero). Anual, o después de un mantenimiento mayor. BS EN 14625 **3\. Repetibilidad (Ruido a Corto Plazo)** Una serie de 20 lecturas consecutivas e independientes del analizador a una concentración estable y conocida. Antes de cada ensayo de aptitud. BS EN 14625 **4\. Estabilidad (Deriva a Largo Plazo)** Lecturas de cero y de un gas de span conocido, registradas a lo largo del tiempo para determinar la deriva entre calibraciones. Continuamente, evaluado previo al EA. USEPA QA Handbook; 40 CFR Part 58 App A **5\. Influencias Ambientales** Temperatura y presión barométrica máximas y mínimas registradas en el laboratorio durante el ensayo. Continuamente durante el ensayo de aptitud. Mejor Práctica de Laboratorio; EN 14625 **6\. Homogeneidad del Gas de Ensayo** Lecturas de concentración del gas de ensayo tomadas desde al menos 3 puertos diferentes del colector de distribución. Antes del inicio del ensayo de aptitud. Protocolo AQUILA / ISO 13528  **Desviación Estándar para la Evaluación de la Aptitud (σpt)** Se debe determinar si la incertidumbre del valor de referencia es lo suficientemente grande como para afectar la evaluación del desempeño, es decir se evalúa si u2(xpt​) es de una magnitud comparable o significativa en relación con σp2​. La norma ISO 13528 recomienda determinar si u(xpt​)\>0.3σp. De este resultado depende el uso de los diferentes criterios de desempeño (puntuación z o z’). La estimación de se hace mediante la ecuación σpt​=(a⋅Xref​)+b Ec 4 Donde: σpt es la desviación estándar para la evaluación de la aptitud. a es la pendiente. Xref  es el valor de referencia o valor asignado. b es el intercepto **Tabla 5\. Parámetros tabulados para la determinación de la incertidumbre**   Pendiente Intercepto Gas a b (nmol/mol) O3 0.02 1   **Criterios de Desempeño y Parámetros de Evaluación Interna** La evaluación se basa en el cálculo del *z-score o del z'-score*, dado que la incertidumbre del valor asignado puede ser significativa, así como el *En-score*. ![][image1] Ec 5 ![][image2] Ec 6 ![][image3] Ec 7 En la siguiente tabla se resumen los criterios de aceptación de los indicadores de rendimiento **Tabla 6\. Criterios de evaluación para los indicadores de desempeño del EA** Indicador de Rendimiento Criterio de Evaluación Interpretación z/z'-score |z/z'| ≤ 2 Se considera satisfactorio. Aproximadamente el 95% de los z-scores deberían caer entre \-2 y \+2. 2 \< |z/z'| \< 3 Se considera cuestionable. Se espera que ocurran aproximadamente 1 de cada 20 veces. Estos valores merecen una revisión específica. |z/z'| ≥ 3 Se considera insatisfactorio. Los resultados en este rango son muy inusuales y se toman como evidencia de que ha ocurrido una anomalía que debe ser investigada y corregida. En-score |En-score| \< 1 Se considera satisfactorio. Los resultados son satisfactorios si las barras de error tocan o cruzan el eje x (o la línea roja que representa el valor de referencia en informes más recientes). |En-score| ≥ 1 Se considera insatisfactorio.  **Presentación Gráfica de Resultados** Para el análisis de resultados, se usan gráficos de barras (z/z' para puntuaciones con límites satisfactorios/cuestionables/insatisfactorios), gráficos de sesgo y barras de error (puntuaciones En, satisfactorio si la barra de error cruza el eje x), y gráficos de repetibilidad/reproducibilidad (evalúan precisión y tendencias, comparando límites grupales con criterios de normas europeas). En la carga de datos, los participantes pueden cometer "blunders" como errores de tipeo, decimales, formato o asignación. Aunque los sistemas web son seguros, estos errores humanos persisten. Si se detectan, se contacta a los participantes para corregirlos antes del informe final. **Contenido del Informe** El informe de ensayo de aptitud se elabora de acuerdo al P-PSEA-06 Procedimiento de Elaboración de Informe de Resultados.  |
+## Informacion especifica del procedimiento
+
+### Preparación del ítem de ensayo
+
+El ítem de ensayo consiste en concentraciones de ozono troposférico en aire cero, elaboradas dinámicamente mediante el uso de un generador de ozono con fotómetro nivel 2 en la cadena de trazabilidad. El gas es suministrado a través de un manifold de distribución de vidrio para asegurar la inercia del material y la homogeneidad de la muestra.
+
+### Generación de los niveles de concentración de ensayo
+
+Basado en el análisis de datos históricos y los umbrales regulatorios de calidad del aire, se han establecido cinco niveles de concentración nominal para el ensayo. Estos niveles cubren el rango de medición crítico para el O3. La concentración nominal se refiere a la concentración fijada en el calibrador dinámico.
+
+**Tabla 1. Concentraciones referencia para O3**
+
+| Serie | Nivel de concentración | Concentración nominal O3 | Tiempo corrida |
+|---|---|---|---|
+| 0 | Cero | 0 | 1 h |
+| 1 | Bajo | 45 | 1 h 30 |
+| 2 | Medio-Bajo | 90 | 1 h 30 |
+| 3 | Medio-Alto | 135 | 1 h 30 |
+| 4 | Alto | 180 | 1 h 30 |
+
+\*Todas las concentraciones en la tabla son nominales expresadas en nmol/mol.
+
+### Evaluación de homogeneidad y estabilidad del ítem de ensayo
+
+La evaluación de la homogeneidad del material de prueba se fundamenta en los métodos de la Sección 5.3 y los criterios de ISO 13528:2015/2022, comparando las lecturas de analizadores duplicados a lo largo del colector de muestreo. Se considera homogéneo si la desviación estándar entre muestras (ss) o las diferencias absolutas observadas son inferiores al valor crítico de homogeneidad (c), derivado de la desviación estándar esperada en la CIL (σpt), o a las diferencias máximas especificadas.
+
+La mezcla de prueba se prepara dinámicamente mediante el uso de un generador de ozono con fotómetro nivel 2 en la cadena de trazabilidad, y se distribuye a través de un colector de vidrio para asegurar la inercia y homogeneidad. La prueba de cero directo al equipo se realiza conectando el calibrador directamente y luego a través del manifold para evaluar la línea calibrador-manifold-analizador.
+
+La estabilidad del material de prueba para una CIL se evalúa comparando los valores medios de las mediciones del analizador de referencia a lo largo de cada análisis de concentración, según la Sección 5.4, considerándose estables si las diferencias observadas están dentro de los umbrales porcentuales o absolutos.
+
+### Procesamiento de datos
+
+CALAIRE procesa los resultados de las mediciones de cada laboratorio para cumplir con la ISO 17043:2023 en aseguramiento y confidencialidad de datos. Los laboratorios deben informar tres valores promedio de 30 minutos, más la incertidumbre asociada, para cada compuesto y nivel de concentración.
+
+### Detección de valores atípicos
+
+CALAIRE, como organizador, realiza pruebas estadísticas para identificar valores atípicos y asegurar la consistencia de los datos. Errores obvios deben ser eliminados del conjunto de datos antes de aplicar procedimientos estadísticos robustos o pruebas formales de valores atípicos. Si existe incertidumbre sobre la naturaleza de un resultado anómalo, este debe permanecer en el conjunto de datos para su posterior tratamiento estadístico, y el laboratorio participante deberá investigar la discrepancia.
+
+Los datos deben revisarse visualmente usando histogramas y gráficos de densidad para identificar anomalías. La norma ISO 13528 prefiere métodos estadísticos robustos (basados en mediana y rango central del 50 %) sobre la eliminación explícita de valores atípicos, ya que son menos sensibles a valores extremos. Aunque se prefieren los métodos robustos, las pruebas específicas de valores atípicos (Grubbs, Cochran) pueden complementar la revisión visual si se demuestran los supuestos estadísticos subyacentes. Es crucial documentar las pruebas usadas, el nivel de confianza y los límites de rechazo de datos.
+
+### Evaluación del desempeño: determinación del valor asignado (xpt)
+
+El valor asignado para cada serie de concentración es la media de las mediciones obtenidas por el analizador de referencia de CALAIRE durante el período de medición establecido. Se determina al estimar la media de 3 concentraciones promedio de una hora.
+
+### Estimación de la incertidumbre del valor asignado (Uxpt)
+
+La calidad del valor asignado (xpt) se define por su incertidumbre expandida asociada (U(xpt)). La evaluación sigue los principios de la Guía para la Expresión de la Incertidumbre en la Medición (GUM). La incertidumbre estándar del valor asignado, u(xpt), se calcula combinando la incertidumbre del valor de referencia del instrumento (uref) y la incertidumbre debida a la falta de homogeneidad (uhom).
+
+    uX = sqrt(uref^2 + uhom^2)                                    (Ec 1)
+
+La incertidumbre expandida se calcula luego usando un factor de cobertura de k = 2 (para un nivel de confianza de ~95 %):
+
+    UX = 2 * uX                                                   (Ec 2)
+
+La incertidumbre del instrumento de referencia, uref, es una composición de varias fuentes de incertidumbre individuales, que se combinan en cuadratura:
+
+    uref = sqrt(ucal^2 + ur^2 + ulof^2 + ud^2 + uEC^2 + uinfl^2)   (Ec 3)
+
+Donde:
+
+- **ucal**: incertidumbre del gas de calibración y del sistema de dilución.
+- **ur**: incertidumbre por repetibilidad a corto plazo (ruido del instrumento).
+- **ulof**: incertidumbre por falta de ajuste (no linealidad).
+- **ud**: incertidumbre por deriva a largo plazo entre calibraciones.
+- **uinfl**: incertidumbre por influencias ambientales (temperatura, presión).
+
+**Tabla 6. Resumen de componentes para la estimación de la incertidumbre**
+
+| Componente de incertidumbre | Datos específicos a recolectar | Frecuencia de recolección | Fuente del procedimiento |
+|---|---|---|---|
+| 1. Trazabilidad del patrón de calibración (fotómetro) | Del certificado del fotómetro de referencia: ID del equipo, incertidumbre expandida, declaración de trazabilidad a un SRP de NIST o equivalente. | Anual (al recibir certificado de calibración). | USEPA 40 CFR Part 50, App. D; EN 14625 |
+| 2. Linealidad (falta de ajuste) | Lecturas promedio del analizador para al menos 5 concentraciones que cubran el rango de trabajo (incluyendo cero). | Anual, o después de un mantenimiento mayor. | BS EN 14625 |
+| 3. Repetibilidad (ruido a corto plazo) | Una serie de 20 lecturas consecutivas e independientes del analizador a una concentración estable y conocida. | Antes de cada ensayo de aptitud. | BS EN 14625 |
+| 4. Estabilidad (deriva a largo plazo) | Lecturas de cero y de un gas de span conocido, registradas a lo largo del tiempo para determinar la deriva entre calibraciones. | Continuamente, evaluado previo al EA. | USEPA QA Handbook; 40 CFR Part 58 App A |
+| 5. Influencias ambientales | Temperatura y presión barométrica máximas y mínimas registradas en el laboratorio durante el ensayo. | Continuamente durante el ensayo de aptitud. | Mejor práctica de laboratorio; EN 14625 |
+| 6. Homogeneidad del gas de ensayo | Lecturas de concentración del gas de ensayo tomadas desde al menos 3 puertos diferentes del colector de distribución. | Antes del inicio del ensayo de aptitud. | Protocolo AQUILA / ISO 13528 |
+
+### Desviación estándar para la evaluación de la aptitud (σpt)
+
+Se debe determinar si la incertidumbre del valor de referencia es lo suficientemente grande como para afectar la evaluación del desempeño, es decir, se evalúa si u²(xpt) es de una magnitud comparable o significativa en relación con σp². La norma ISO 13528 recomienda determinar si u(xpt) > 0,3 σp. De este resultado depende el uso de los diferentes criterios de desempeño (puntuación z o z'). La estimación se hace mediante la ecuación:
+
+    σpt = (a * Xref) + b                                          (Ec 4)
+
+Donde:
+
+- σpt es la desviación estándar para la evaluación de la aptitud.
+- a es la pendiente.
+- Xref es el valor de referencia o valor asignado.
+- b es el intercepto.
+
+**Tabla 5. Parámetros tabulados para la determinación de la incertidumbre**
+
+| Gas | Pendiente a | Intercepto b (nmol/mol) |
+|---|---|---|
+| O3 | 0,02 | 1 |
+
+### Criterios de desempeño y parámetros de evaluación interna
+
+La evaluación se basa en el cálculo del *z-score* o del *z'-score*, dado que la incertidumbre del valor asignado puede ser significativa, así como el *En-score*.
+
+![Ecuacion del z-score: diferencia entre el resultado del participante y el valor asignado, dividida por la desviacion estandar para la evaluacion de la aptitud][image1]
+
+Ec 5
+
+![Ecuacion del z'-score: diferencia entre el resultado del participante y el valor asignado, dividida por la combinacion en cuadratura de la desviacion estandar de aptitud y la incertidumbre del valor asignado][image2]
+
+Ec 6
+
+![Ecuacion del En-score: diferencia entre el resultado del participante y el valor asignado, dividida por la incertidumbre expandida combinada de ambos valores][image3]
+
+Ec 7
+
+En la siguiente tabla se resumen los criterios de aceptación de los indicadores de rendimiento.
+
+**Tabla 6. Criterios de evaluación para los indicadores de desempeño del EA**
+
+| Indicador de rendimiento | Criterio de evaluación | Interpretación |
+|---|---|---|
+| z/z'-score | \|z/z'\| ≤ 2 | Se considera satisfactorio. Aproximadamente el 95 % de los z-scores deberían caer entre -2 y +2. |
+| z/z'-score | 2 < \|z/z'\| < 3 | Se considera cuestionable. Se espera que ocurran aproximadamente 1 de cada 20 veces. Estos valores merecen una revisión específica. |
+| z/z'-score | \|z/z'\| ≥ 3 | Se considera insatisfactorio. Los resultados en este rango son muy inusuales y se toman como evidencia de que ha ocurrido una anomalía que debe ser investigada y corregida. |
+| En-score | \|En-score\| < 1 | Se considera satisfactorio. Los resultados son satisfactorios si las barras de error tocan o cruzan el eje x (o la línea roja que representa el valor de referencia en informes más recientes). |
+| En-score | \|En-score\| ≥ 1 | Se considera insatisfactorio. |
+
+### Presentación gráfica de resultados
+
+Para el análisis de resultados, se usan gráficos de barras (z/z' para puntuaciones con límites satisfactorios/cuestionables/insatisfactorios), gráficos de sesgo y barras de error (puntuaciones En, satisfactorio si la barra de error cruza el eje x), y gráficos de repetibilidad/reproducibilidad (evalúan precisión y tendencias, comparando límites grupales con criterios de normas europeas).
+
+En la carga de datos, los participantes pueden cometer "blunders" como errores de tipeo, decimales, formato o asignación. Aunque los sistemas web son seguros, estos errores humanos persisten. Si se detectan, se contacta a los participantes para corregirlos antes del informe final.
+
+### Contenido del informe
+
+El informe de ensayo de aptitud se elabora de acuerdo al `P-PSEA-09` Generación y emisión del informe de resultados.
 
 | REVISÓ |  | APROBÓ |  |
 | ----- | :---- | :---- | :---- |

@@ -7,7 +7,9 @@ import { evaluateDriveCierreCalidad, normalizeCodigoDocumento } from '../../src/
 export { evaluateDriveCierreCalidad, normalizeCodigoDocumento }
 export type { DriveCierreRecursoInput, DriveCierreEtapaInput, DriveCierreCalidad } from '../../src/server/sgc/cierre'
 export const FORMATOS_ARCHIVO = ['F-PSEA-08', 'F-PSEA-09', 'F-PSEA-10', 'F-PSEA-14'] as const
-export type FormatoJustificable = 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12'
+// F-PSEA-20 admite carga de evidencia interna pero no condiciona el cierre (ver catalogo).
+export const FORMATOS_ARCHIVO_SUBIBLES = [...FORMATOS_ARCHIVO, 'F-PSEA-20'] as const
+export type FormatoJustificable = 'F-PSEA-05' | 'F-PSEA-05A' | 'F-PSEA-12' | 'F-PSEA-14'
 export const REVISION_CHECKS = [
   'participantes_revisados',
   'fichas_revisadas',
@@ -445,7 +447,11 @@ export function collectChecklistFaltantes(coverage: Awaited<ReturnType<typeof co
   if (!f05aOk) faltantes.push('F-PSEA-05A fichas enviadas o justificadas')
   if (!f07Ok) faltantes.push('F-PSEA-07 codigos unicos y no provisionales')
   for (const formato of FORMATOS_ARCHIVO) {
-    if (!coverage.evidenciasVigentes[formato]) faltantes.push(`${formato} evidencia vigente`)
+    if (coverage.evidenciasVigentes[formato]) continue
+    // F-PSEA-14 solo aplica cuando existe queja, trabajo no conforme, NC o accion correctiva:
+    // una justificacion vigente documenta el "no aplica" y libera el cierre.
+    if (formato === 'F-PSEA-14' && hasJustificacion(coverage, 'F-PSEA-14')) continue
+    faltantes.push(`${formato} evidencia vigente`)
   }
   if (!f11Ok) faltantes.push('F-PSEA-11 no aplica con razon')
   if (!f12Ok) faltantes.push('F-PSEA-12 envios finales completos o justificados')

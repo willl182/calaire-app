@@ -214,6 +214,11 @@ describe('F-PSEA-19', () => {
       estado: 'pendiente',
       publicaParticipante: false,
     })
+
+    // La publicacion de F-PSEA-19 solo pasa por cambiarPublicacionActaInicio (admin + PDF firmado).
+    await expect(
+      staff.mutation(api.sgc.index.actualizarVisibilidadDriveRecurso, { recursoId, publicaParticipante: true })
+    ).rejects.toThrow(/acta de inicio/)
   })
 })
 
