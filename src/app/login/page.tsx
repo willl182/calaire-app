@@ -2,10 +2,11 @@ import { withAuth } from '@workos-inc/authkit-nextjs'
 import { redirect } from 'next/navigation'
 
 import { LogoUnal } from '@/components/LogoUnal'
+import { getAuthenticatedLandingPath } from '@/server/auth'
 
 export default async function LoginPage() {
-  const { user } = await withAuth()
-  if (user) redirect('/inicio')
+  const auth = await withAuth()
+  if (auth.user) redirect(getAuthenticatedLandingPath(auth))
 
   return (
     <div

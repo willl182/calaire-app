@@ -33,6 +33,14 @@ function authRole(auth: AuthSession) {
   return String(auth.role ?? '').toLowerCase()
 }
 
+export function isStaff(auth: AuthSession): boolean {
+  return ['admin', 'admin_sgc', 'coordinador_proceso', 'consulta'].includes(authRole(auth))
+}
+
+export function getAuthenticatedLandingPath(auth: AuthSession): '/inicio' | '/mi-dashboard' {
+  return isStaff(auth) ? '/inicio' : '/mi-dashboard'
+}
+
 export function canViewSgcMaestro(auth: AuthSession): boolean {
   return ['admin', 'admin_sgc', 'coordinador_proceso', 'consulta'].includes(authRole(auth))
 }
