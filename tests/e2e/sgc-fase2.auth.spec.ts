@@ -1,6 +1,8 @@
 import { expect, test } from '@playwright/test'
 import { skipWhenNoRound } from './sgc-helpers'
 
+test.describe.configure({ mode: 'serial' })
+
 test('shows the SGC round panel sections', async ({ page }) => {
   const sgcUrl = await skipWhenNoRound(page)
   await page.goto(sgcUrl)
@@ -8,7 +10,9 @@ test('shows the SGC round panel sections', async ({ page }) => {
   await expect(page.getByText(/Expediente documental de la ronda/)).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Drive documental SGC' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Cierre documental SGC' })).toBeVisible()
-  await expect(page.getByText('Administrar carpeta raiz')).toBeVisible()
+  const inicializar = page.getByRole('button', { name: 'Inicializar expediente documental' })
+  if (await inicializar.isVisible()) await inicializar.click()
+  await expect(page.getByText('Administrar carpeta raiz')).toBeVisible({ timeout: 15_000 })
   await expect(page.getByRole('link', { name: /Planificacion de ronda/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /Analisis e informe/ })).toBeVisible()
   await expect(page.getByRole('link', { name: /Homogeneidad y estabilidad/ })).toBeVisible()

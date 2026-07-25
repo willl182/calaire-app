@@ -14,7 +14,9 @@ import { listComentariosRondaConfig, listMisComentariosRondaConfig, createComent
 import { crearNotificacionConfig, listMisNotificacionesConfig, marcarNotificacionLeidaConfig } from './notificaciones'
 import { upsertResultadoPtAppConfig, crearCasoSgcConfig, actualizarCasoSgcConfig } from './casos'
 import { crearRegistroSgcConfig, getDocumentoMaestroConfig, importarDocumentosSeedSgcConfig, importarMapaSeedSgcConfig, importarRequisitosSeedSgcConfig, importarSeedSgcConfig, listExpedientesSgcConfig, listMapaSgcConfig, listNormativaSgcConfig, listSgcMaestroConfig, registrarVersionOficialConfig, upsertDocumentoMaestroConfig, upsertDocumentoRequisitoConfig } from './maestro'
-import { actualizarEstadoDriveRecursoConfig, actualizarVisibilidadDriveRecursoConfig, getDriveTreeConfig, inicializarDriveRondaConfig, listDriveRecursosConfig, listDriveRecursosParticipanteConfig, registrarAutomatizacionDriveConfig, reemplazarDriveRecursoConfig, retirarDriveRecursoConfig, upsertDriveRecursoConfig } from './drive'
+import { actualizarEstadoDriveRecursoConfig, actualizarVisibilidadDriveRecursoConfig, getDriveTreeConfig, inicializarDriveRondaConfig, listDriveRecursosConfig, listDriveRecursosParticipanteConfig, marcarDriveRecursoUsadoConfig, registrarAutomatizacionDriveConfig, reemplazarDriveRecursoConfig, retirarDriveRecursoConfig, upsertDriveRecursoConfig } from './drive'
+import { actualizarActaInicioConfig, cambiarPublicacionActaInicioConfig, getActaInicioConfig, getActaInicioDownloadUrlConfig, inicializarActaInicioConfig, registrarDocxActaInicioConfig, registrarPdfFirmadoActaInicioConfig } from './actaInicio'
+import { actualizarInstrumentoRondaConfig, crearInstrumentoRondaConfig, devolverRelacionInstrumentosConfig, eliminarInstrumentoRondaConfig, enviarRelacionInstrumentosAValidacionConfig, getExportacionInstrumentosUrlConfig, getRelacionInstrumentosRondaConfig, inicializarRelacionInstrumentosConfig, registrarExportacionInstrumentosConfig, registrarFotoInstrumentoRondaConfig, retirarFotoInstrumentoRondaConfig, validarRelacionInstrumentosConfig } from './instrumentosRonda'
 
 export const getPanelSgc = query(getPanelSgcConfig)
 export const getPlanRonda = query(getPlanRondaConfig)
@@ -95,3 +97,25 @@ export const actualizarEstadoDriveRecurso = mutation(actualizarEstadoDriveRecurs
 export const actualizarVisibilidadDriveRecurso = mutation(actualizarVisibilidadDriveRecursoConfig)
 export const registrarAutomatizacionDrive = mutation(registrarAutomatizacionDriveConfig)
 export const retirarDriveRecurso = mutation(retirarDriveRecursoConfig)
+export const marcarDriveRecursoUsado = mutation(marcarDriveRecursoUsadoConfig)
+
+export const getActaInicio = query(getActaInicioConfig)
+export const getActaInicioDownloadUrl = query(getActaInicioDownloadUrlConfig)
+export const inicializarActaInicio = mutation(inicializarActaInicioConfig)
+export const actualizarActaInicio = mutation(actualizarActaInicioConfig)
+export const registrarDocxActaInicio = mutation(registrarDocxActaInicioConfig)
+export const registrarPdfFirmadoActaInicio = mutation(registrarPdfFirmadoActaInicioConfig)
+export const cambiarPublicacionActaInicio = mutation(cambiarPublicacionActaInicioConfig)
+
+export const getRelacionInstrumentosRonda = query(getRelacionInstrumentosRondaConfig)
+export const getExportacionInstrumentosUrl = query(getExportacionInstrumentosUrlConfig)
+export const inicializarRelacionInstrumentos = mutation(inicializarRelacionInstrumentosConfig)
+export const crearInstrumentoRonda = mutation(crearInstrumentoRondaConfig)
+export const actualizarInstrumentoRonda = mutation(actualizarInstrumentoRondaConfig)
+export const eliminarInstrumentoRonda = mutation(eliminarInstrumentoRondaConfig)
+export const registrarFotoInstrumentoRonda = mutation(registrarFotoInstrumentoRondaConfig)
+export const retirarFotoInstrumentoRonda = mutation(retirarFotoInstrumentoRondaConfig)
+export const enviarRelacionInstrumentosAValidacion = mutation(enviarRelacionInstrumentosAValidacionConfig)
+export const validarRelacionInstrumentos = mutation(validarRelacionInstrumentosConfig)
+export const devolverRelacionInstrumentos = mutation(devolverRelacionInstrumentosConfig)
+export const registrarExportacionInstrumentos = mutation(registrarExportacionInstrumentosConfig)

@@ -35,6 +35,9 @@ jobs:
       - name: Lint
         run: pnpm lint
 
+      - name: Validate SGC documents
+        run: pnpm sgc:validate-documents
+
       - name: Test
         run: pnpm test
 

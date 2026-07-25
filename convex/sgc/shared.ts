@@ -1,7 +1,7 @@
 import { v, type ObjectType, type PropertyValidators } from 'convex/values'
 import { type MutationCtx, type QueryCtx } from '../_generated/server'
 import type { Id } from '../_generated/dataModel'
-import { SGC_RONDA_ETAPAS } from '../_lib/sgc/catalog'
+import { getSgcFormato, SGC_RONDA_ETAPAS, type SgcFormatoCodigo } from '../_lib/sgc/catalog'
 import { evaluateDriveCierreCalidad, normalizeCodigoDocumento } from '../../src/server/sgc/cierre'
 
 export { evaluateDriveCierreCalidad, normalizeCodigoDocumento }
@@ -48,7 +48,10 @@ export const formatoValidator = v.union(
   v.literal('F-PSEA-11'),
   v.literal('F-PSEA-12'),
   v.literal('F-PSEA-13'),
-  v.literal('F-PSEA-14')
+  v.literal('F-PSEA-14'),
+  v.literal('F-PSEA-19'),
+  v.literal('F-PSEA-20'),
+  v.literal('F-PSEA-21')
 )
 
 export type SgcAuthCtx = QueryCtx | MutationCtx
@@ -467,7 +470,18 @@ export function collectChecklistFaltantesDocumentacionPendiente(coverage: Awaite
 
 export async function collectDriveCierreCalidad(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
   const recursos = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
-  const documentos = recursos.filter((recurso) => recurso.tipo !== 'carpeta')
+  const documentos = recursos
+    .filter((recurso) => recurso.tipo !== 'carpeta')
+    .map((recurso) => {
+      const formato = recurso.formatoRelacionado ? getSgcFormato(recurso.formatoRelacionado as SgcFormatoCodigo) : null
+      return {
+        ...recurso,
+        modo: formato?.modo ?? null,
+        nativoCompleto: formato?.modo === 'nativo' || formato?.modo === 'nativo_calculado'
+          ? recurso.estado === 'diligenciado'
+          : null,
+      }
+    })
   return evaluateDriveCierreCalidad(documentos, SGC_RONDA_ETAPAS)
 }
 
@@ -554,10 +568,12 @@ export async function writeGlobalAudit(
 
 export type SgcQueryConfig<Args extends PropertyValidators> = {
   args: Args
+  returns?: unknown
   handler: (ctx: QueryCtx, args: ObjectType<Args>) => unknown | Promise<unknown>
 }
 
 export type SgcMutationConfig<Args extends PropertyValidators> = {
   args: Args
+  returns?: unknown
   handler: (ctx: MutationCtx, args: ObjectType<Args>) => unknown | Promise<unknown>
 }

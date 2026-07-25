@@ -157,3 +157,27 @@ test('acumula multiples bloqueantes en orden de catalogo', () => {
     'F-PSEA-13 Informe final: recurso Drive faltante',
   ])
 })
+
+test('formato critico no bloqueante genera pendiente critico', () => {
+  const recursos = recursosCompletos().map((r) =>
+    r.codigo === 'F-PSEA-12'
+      ? { ...r, estado: 'creado', definitivo: null, critico: true, bloqueaCierre: false }
+      : r
+  )
+  const result = evaluateDriveCierreCalidad(recursos, ETAPAS)
+  assert.deepEqual(result.bloqueantes, [])
+  assert.deepEqual(result.pendientesCriticos, [
+    'F-PSEA-12 Datos oficiales: formato critico no diligenciado',
+  ])
+})
+
+test('registro nativo completo no exige enlace editable', () => {
+  const recursos = recursosCompletos().map((r) =>
+    r.codigo === 'F-PSEA-12'
+      ? { ...r, webUrl: null, modo: 'nativo', nativoCompleto: true, bloqueaCierre: false }
+      : r
+  )
+  const result = evaluateDriveCierreCalidad(recursos, ETAPAS)
+  assert.deepEqual(result.bloqueantes, [])
+  assert.deepEqual(result.pendientesCriticos, [])
+})

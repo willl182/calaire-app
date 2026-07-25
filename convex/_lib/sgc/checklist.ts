@@ -27,6 +27,7 @@ export type SgcChecklistItem = {
   fase: SgcFase
   modo: string
   critico: boolean
+  bloqueaCierre: boolean
   estado: SgcItemEstado
   responsable: string
   ultimaActualizacion: string | null
@@ -152,12 +153,13 @@ export function calcularChecklistSgc(input: SgcCoverageInput): SgcChecklistItem[
       fase: formato.fase,
       modo: formato.modo,
       critico: formato.critico,
+      bloqueaCierre: formato.bloqueaCierre,
       estado,
       responsable,
       ultimaActualizacion,
       vinculo,
       observaciones,
-      bloqueante: formato.critico && estado === 'pendiente',
+      bloqueante: formato.bloqueaCierre && estado === 'pendiente',
     }
   })
 }

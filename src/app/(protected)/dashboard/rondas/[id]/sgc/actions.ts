@@ -26,6 +26,7 @@ import {
   guardarRevisionDatos,
   guardarRevisionHomogeneidad,
   inicializarDriveRonda,
+  marcarDriveRecursoUsado,
   pasarADocumentacionPendiente,
   registrarEvidenciaVersion,
   reemplazarDriveRecurso,
@@ -487,6 +488,53 @@ export async function subirEvidenciaAction(formData: FormData) {
   } catch (error) {
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la evidencia.', formatoFocus)
   }
+}
+
+export async function solicitarUploadDriveAction() {
+  await requireAdmin()
+  return generateSgcUploadUrl()
+}
+
+export async function registrarDefinitivoF20Action(args: {
+  rondaId: string
+  recursoId: string
+  parentId?: string | null
+  codigo: string
+  nombre: string
+  fase?: string | null
+  tipo: SgcDriveTipo
+  formatoRelacionado?: string | null
+  webUrl?: string | null
+  templateUrl?: string | null
+  notas?: string | null
+  storageId: string
+  fileName: string
+  contentType: string
+  size: number
+}) {
+  await requireAdmin()
+  if (args.codigo !== 'F-PSEA-20') throw new Error('Carga especializada disponible solo para F-PSEA-20.')
+  await upsertDriveRecurso({
+    recursoId: args.recursoId,
+    rondaId: args.rondaId,
+    parentId: args.parentId,
+    codigo: args.codigo,
+    nombre: args.nombre,
+    fase: args.fase,
+    tipo: args.tipo,
+    formatoRelacionado: args.formatoRelacionado,
+    webUrl: args.webUrl,
+    templateUrl: args.templateUrl,
+    notas: args.notas,
+    definitivo: { storageId: args.storageId, fileName: args.fileName, contentType: args.contentType, size: args.size, tipo: 'archivo' },
+  })
+  revalidatePath(pageUrl(args.rondaId))
+}
+
+export async function marcarUsoF20Action(rondaId: string, recursoId: string, usado: boolean) {
+  await requireAdmin()
+  await marcarDriveRecursoUsado(recursoId, usado)
+  revalidatePath(pageUrl(rondaId))
 }
 
 export async function retirarEvidenciaAction(formData: FormData) {

@@ -597,7 +597,7 @@
   <main>
     <section class="workspace">
       <div class="diagram-shell">
-        <svg id="map" viewBox="0 0 970 1400" role="img" aria-label="Mapa de navegacion documental SGC PEA">
+        <svg id="map" viewBox="0 0 970 1600" role="img" aria-label="Mapa de navegacion documental SGC PEA">
           <defs>
             <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
               <path d="M 0 0 L 10 5 L 0 10 z" fill="#9aa3ad"></path>
@@ -623,7 +623,7 @@
     const nodes = [
       { id: "P-PSEA-01", label: "Protocolo general EA", family: "P", state: "Mantener", x: 40, y: 45, w: 250, h: 54, text: "Procedimiento/protocolo marco del ensayo de aptitud. Debe citar el flujo digital, aplicativos e instructivos cuando el mapa este estabilizado." },
       { id: "P-PSEA-02", label: "Matriz documental del PEA", family: "P", state: "Elaborado", x: 40, y: 105, w: 250, h: 54, text: "Matriz documental maestra. Fija 01_bloque_general como SGC maestro y 02_despliegue_rondas como registros/evidencias por ronda. Los formatos maestros viven en 01_bloque_general/04_formatos_maestros." },
-      { id: "P-PSEA-03", label: "Control de registros y evidencias", family: "P", state: "Elaborado", x: 40, y: 165, w: 250, h: 54, text: "Procedimiento para estructura simple de ronda: checklist en raiz, planificacion, comunicaciones, preparacion, datos, H/E, analisis-informe y cierre SGC. La raiz solo contiene checklist_ronda.md y las siete carpetas de etapa." },
+      { id: "P-PSEA-03", label: "Control de registros y evidencias", family: "P", state: "Elaborado", x: 40, y: 165, w: 250, h: 54, text: "Procedimiento para estructura simple de ronda: checklist en raiz, planificacion, comunicaciones, preparacion, datos, H/E, analisis-informe y cierre SGC. La raiz contiene checklist_ronda.md y las carpetas de etapa controladas, incluida 02A_inicio_ronda." },
       { id: "P-PSEA-04", label: "Planificacion de ronda EA", family: "P", state: "Actualizar", x: 40, y: 225, w: 250, h: 54, text: "Procedimiento transversal para planificar la ronda usando calaire-app, registro de participantes, equipos exportados, ficha basica y planificacion completa." },
       { id: "P-PSEA-05", label: "Comunicaciones", family: "P", state: "Implementado", x: 40, y: 285, w: 250, h: 54, text: "Procedimiento para comunicaciones del PEA, creado como base editable en MD y DOCX." },
       { id: "P-PSEA-06", label: "Preparacion y control del item", family: "P", state: "Actualizar", x: 40, y: 345, w: 250, h: 54, text: "Procedimiento para generar concentraciones con calibrador dinamico y cilindro; registra el control del item gaseoso." },
@@ -672,7 +672,10 @@
       { id: "F-PSEA-12", label: "Dataset oficial consolidado", family: "F", state: "Implementado", x: 680, y: 945, w: 250, h: 50, text: "Formato maestro/dataset oficial consolidado; el dataset de cada ronda se guarda en 04_datos_y_preprocesamiento." },
       { id: "F-PSEA-18", label: "Comunicacion participantes", family: "F", state: "Preliminar", x: 680, y: 1305, w: 250, h: 50, text: "Formato maestro para comunicaciones formales a participantes. Normaliza mensajes de fechas, documentos adjuntos, acciones requeridas y evidencia de envio/respuesta; las copias emitidas se conservan como evidencia de ronda." },
       { id: "F-PSEA-14", label: "Queja o no conformidad", family: "F", state: "Elaborado", x: 680, y: 1065, w: 250, h: 50, text: "Registro de queja, trabajo no conforme, no conformidad o accion correctiva cuando aplique. La evidencia de ronda se conserva en cierre SGC." },
-      { id: "F-PSEA-15", label: "Apelacion", family: "F", state: "Elaborado", x: 680, y: 1125, w: 250, h: 50, text: "Registro de apelacion cuando aplique. La evidencia de ronda se conserva en cierre SGC." }
+      { id: "F-PSEA-15", label: "Apelacion", family: "F", state: "Elaborado", x: 680, y: 1125, w: 250, h: 50, text: "Registro de apelacion cuando aplique. La evidencia de ronda se conserva en cierre SGC." },
+      { id: "F-PSEA-19", label: "Acta de inicio de ronda", family: "F", state: "Implementado", x: 680, y: 1365, w: 250, h: 50, text: "Registro nativo exportable: genera DOCX para firma manual y publica solo PDF firmado. Dos organizadores y participantes de F-PSEA-03." },
+      { id: "F-PSEA-20", label: "Rotulado anonimo", family: "F", state: "Implementado", x: 680, y: 1425, w: 250, h: 50, text: "Archivo interno de rotulado anonimo con confirmacion usadoEnRonda. Sustituir archivo reinicia confirmacion; nunca se publica." },
+      { id: "F-PSEA-21", label: "Instrumentos Calaire usados", family: "F", state: "Implementado", x: 680, y: 1485, w: 250, h: 50, text: "Registro nativo interno con minimo siete items, identificacion, dos fotos, validacion de coordinacion y exportaciones PDF/XLSX." }
     ];
 
     const edges = [
@@ -692,14 +695,14 @@
       ["P-PSEA-10", "P-PSEA-07"], ["P-PSEA-11", "P-PSEA-07"], ["P-PSEA-12", "P-PSEA-07"], ["P-PSEA-13", "P-PSEA-07"],
       ["P-PSEA-10", "P-PSEA-09"], ["P-PSEA-11", "P-PSEA-09"], ["P-PSEA-12", "P-PSEA-09"], ["P-PSEA-13", "P-PSEA-09"],
       ["P-PSEA-14", "P-PSEA-15"], ["P-PSEA-14", "P-PSEA-05"], ["P-PSEA-14", "P-PSEA-16"], ["P-PSEA-14", "P-PSEA-17"], ["P-PSEA-14", "P-PSEA-18"], ["P-PSEA-14", "P-PSEA-19"], ["P-PSEA-14", "P-PSEA-20"], ["P-PSEA-14", "P-PSEA-21"],
-      ["P-PSEA-05", "F-PSEA-18"], ["P-PSEA-05", "F-PSEA-13"], ["P-PSEA-15", "F-PSEA-14"], ["P-PSEA-17", "F-PSEA-14"], ["P-PSEA-18", "F-PSEA-15"], ["P-PSEA-20", "F-PSEA-16"], ["P-PSEA-21", "F-PSEA-17"], ["P-PSEA-03", "F-PSEA-14"], ["P-PSEA-03", "F-PSEA-15"], ["P-PSEA-03", "F-PSEA-16"], ["P-PSEA-03", "F-PSEA-17"], ["P-PSEA-16", "F-PSEA-13"], ["P-PSEA-17", "F-PSEA-13"], ["P-PSEA-18", "F-PSEA-13"], ["P-PSEA-19", "F-PSEA-13"], ["P-PSEA-20", "F-PSEA-13"], ["P-PSEA-21", "F-PSEA-13"]
+      ["P-PSEA-05", "F-PSEA-18"], ["P-PSEA-05", "F-PSEA-13"], ["P-PSEA-15", "F-PSEA-14"], ["P-PSEA-17", "F-PSEA-14"], ["P-PSEA-18", "F-PSEA-15"], ["P-PSEA-20", "F-PSEA-16"], ["P-PSEA-21", "F-PSEA-17"], ["P-PSEA-03", "F-PSEA-14"], ["P-PSEA-03", "F-PSEA-15"], ["P-PSEA-03", "F-PSEA-16"], ["P-PSEA-03", "F-PSEA-17"], ["P-PSEA-16", "F-PSEA-13"], ["P-PSEA-17", "F-PSEA-13"], ["P-PSEA-18", "F-PSEA-13"], ["P-PSEA-19", "F-PSEA-13"], ["P-PSEA-20", "F-PSEA-13"], ["P-PSEA-21", "F-PSEA-13"], ["P-PSEA-01", "F-PSEA-19"], ["P-PSEA-01", "F-PSEA-20"], ["P-PSEA-01", "F-PSEA-21"], ["P-PSEA-03", "F-PSEA-19"], ["P-PSEA-03", "F-PSEA-20"], ["P-PSEA-03", "F-PSEA-21"], ["P-PSEA-04", "F-PSEA-19"], ["P-PSEA-06", "F-PSEA-20"], ["P-PSEA-06", "F-PSEA-21"], ["P-PSEA-19", "F-PSEA-20"], ["P-PSEA-20", "F-PSEA-21"], ["F-PSEA-03", "F-PSEA-19"], ["F-PSEA-03", "F-PSEA-20"], ["F-PSEA-19", "F-PSEA-21"]
     ];
 
     const routes = [
       { id: "data", label: "Flujo oficial de datos", hint: "P-PSEA-08 > calaire-app > pt_app > informe", nodes: ["P-PSEA-08", "DG-PSEA-02", "I-PSEA-02", "F-PSEA-08", "F-PSEA-09", "DG-PSEA-03", "I-PSEA-04", "F-PSEA-10", "F-PSEA-12", "I-PSEA-05", "F-PSEA-13"] },
       { id: "he", label: "Homogeneidad y estabilidad", hint: "P-PSEA-06 + P-PSEA-07 > H/E > analisis", nodes: ["P-PSEA-06", "F-PSEA-07", "P-PSEA-07", "F-PSEA-11", "F-PSEA-11A", "F-PSEA-11B", "F-PSEA-11C", "F-PSEA-11D", "I-PSEA-05", "F-PSEA-13"] },
-      { id: "planning", label: "Planificacion de ronda", hint: "P-PSEA-04 > registro, equipos, planificacion y ficha", nodes: ["P-PSEA-04", "P-PSEA-05", "DG-PSEA-02", "I-PSEA-03", "F-PSEA-03", "F-PSEA-04", "F-PSEA-06", "F-PSEA-05", "F-PSEA-01", "F-PSEA-02", "F-PSEA-16", "F-PSEA-17", "F-PSEA-18", "P-PSEA-06"] },
-      { id: "round", label: "Estructura de ronda", hint: "P-PSEA-03 > etapas EA-PP-2026-R1", nodes: ["P-PSEA-03", "P-PSEA-05", "F-PSEA-01", "F-PSEA-02", "F-PSEA-03", "F-PSEA-04", "F-PSEA-05", "F-PSEA-06", "F-PSEA-16", "F-PSEA-17", "F-PSEA-18", "F-PSEA-07", "F-PSEA-08", "F-PSEA-09", "F-PSEA-10", "F-PSEA-12", "F-PSEA-11", "F-PSEA-11A", "F-PSEA-11B", "F-PSEA-11C", "F-PSEA-11D", "F-PSEA-13", "F-PSEA-14", "F-PSEA-15"] },
+      { id: "planning", label: "Planificacion de ronda", hint: "P-PSEA-04 > registro, equipos, planificacion y ficha", nodes: ["P-PSEA-04", "P-PSEA-05", "DG-PSEA-02", "I-PSEA-03", "F-PSEA-03", "F-PSEA-04", "F-PSEA-06", "F-PSEA-05", "F-PSEA-01", "F-PSEA-02", "F-PSEA-16", "F-PSEA-17", "F-PSEA-18", "F-PSEA-19", "F-PSEA-20", "F-PSEA-21", "P-PSEA-06"] },
+      { id: "round", label: "Estructura de ronda", hint: "P-PSEA-03 > etapas EA-PP-2026-R1", nodes: ["P-PSEA-03", "P-PSEA-05", "F-PSEA-01", "F-PSEA-02", "F-PSEA-03", "F-PSEA-04", "F-PSEA-05", "F-PSEA-06", "F-PSEA-16", "F-PSEA-17", "F-PSEA-18", "F-PSEA-07", "F-PSEA-08", "F-PSEA-09", "F-PSEA-10", "F-PSEA-12", "F-PSEA-11", "F-PSEA-11A", "F-PSEA-11B", "F-PSEA-11C", "F-PSEA-11D", "F-PSEA-13", "F-PSEA-14", "F-PSEA-15", "F-PSEA-19", "F-PSEA-20", "F-PSEA-21"] },
       { id: "sgc", label: "Cierre y gestion SGC", hint: "P-PSEA-03 > cierre SGC > casos, competencia y proveedores", nodes: ["P-PSEA-03", "P-PSEA-14", "P-PSEA-15", "P-PSEA-17", "P-PSEA-18", "P-PSEA-20", "P-PSEA-21", "F-PSEA-14", "F-PSEA-15", "F-PSEA-16", "F-PSEA-17"] },
       { id: "update", label: "Orden de elaboracion", hint: "procedimientos > formatos > instructivos > DG cierre", nodes: ["P-PSEA-01", "P-PSEA-02", "P-PSEA-03", "P-PSEA-08", "P-PSEA-04", "P-PSEA-06", "P-PSEA-07", "P-PSEA-09", "P-PSEA-10", "P-PSEA-11", "P-PSEA-12", "P-PSEA-13", "F-PSEA-06", "F-PSEA-10", "F-PSEA-11A", "F-PSEA-11B", "F-PSEA-11C", "F-PSEA-11D", "F-PSEA-12", "I-PSEA-04", "I-PSEA-05", "DG-PSEA-03", "DG-PSEA-01"] }
     ];
@@ -727,7 +730,10 @@
       "F-PSEA-15": { status: "DOCX implementado", note: "Formato maestro para registro de apelaciones." },
       "F-PSEA-16": { status: "DOCX implementado", note: "Formato maestro para matriz de competencia y autorizacion." },
       "F-PSEA-17": { status: "DOCX implementado", note: "Formato maestro para evaluacion de proveedores criticos." },
-      "F-PSEA-18": { status: "DOCX implementado", note: "Formato maestro creado en MD y convertido a DOCX con Pandoc usando un formato maestro DOCX del mismo bloque como referencia." }
+      "F-PSEA-18": { status: "DOCX implementado", note: "Formato maestro creado en MD y convertido a DOCX con Pandoc usando un formato maestro DOCX del mismo bloque como referencia." },
+      "F-PSEA-19": { status: "DOCX implementado", note: "Maestro MD/DOCX y flujo nativo con PDF firmado publicable." },
+      "F-PSEA-20": { status: "DOCX implementado", note: "Maestro MD/DOCX; archivo operativo siempre interno." },
+      "F-PSEA-21": { status: "DOCX implementado", note: "Maestro MD/DOCX; registro nativo exportable a PDF/XLSX." }
     };
 
     const familyNames = { DG: "DG", P: "P", I: "I", F: "F", OUT: "Fuera" };
