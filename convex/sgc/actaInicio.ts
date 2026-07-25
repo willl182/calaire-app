@@ -133,6 +133,7 @@ export const actualizarActaInicioConfig = {
         entidad: args.organizadores[index].entidad.trim(),
       })
     }
+    const now = Date.now()
     await ctx.db.patch(acta._id, {
       fecha: args.fecha.trim(),
       lugar: args.lugar.trim(),
@@ -140,9 +141,22 @@ export const actualizarActaInicioConfig = {
       estado: 'borrador',
       docxStorageId: null,
       docxFileName: null,
-      updatedAt: Date.now(),
+      pdfStorageId: null,
+      pdfFileName: null,
+      publicaParticipante: false,
+      updatedAt: now,
       updatedBy: actor,
     })
+    const recurso = await getRecurso(ctx, acta.rondaId)
+    if (recurso) {
+      await ctx.db.patch(recurso._id, {
+        definitivo: null,
+        estado: recurso.webUrl ? 'creado' : 'pendiente',
+        publicaParticipante: false,
+        updatedAt: now,
+        updatedBy: actor,
+      })
+    }
     await writeAudit(ctx, { rondaId: acta.rondaId, actor, evento: 'sgc.f19.actualizada', targetTipo: 'sgcActasInicio', targetId: acta._id })
     return null
   },

@@ -188,6 +188,32 @@ describe('F-PSEA-19', () => {
     }))
     expect(persisted.acta).toMatchObject({ estado: 'publicado', publicaParticipante: true })
     expect(persisted.recurso).toMatchObject({ estado: 'diligenciado', publicaParticipante: true })
+
+    await staff.mutation(api.sgc.index.actualizarActaInicio, {
+      actaId: primera.actaId,
+      fecha: '2026-08-02',
+      lugar: 'Calaire',
+      textoInicio: 'Inicio formal actualizado',
+      organizadores: [
+        { nombre: 'Organizador Uno', entidad: 'Calaire' },
+        { nombre: 'Organizador Dos', entidad: 'Calaire' },
+      ],
+    })
+    expect(await participante.query(api.sgc.index.getActaInicioDownloadUrl, { rondaId, tipo: 'pdf_firmado' })).toBeNull()
+    const invalidado = await t.run(async (ctx) => ({
+      acta: await ctx.db.get(primera.actaId),
+      recurso: await ctx.db.get(recursoId),
+    }))
+    expect(invalidado.acta).toMatchObject({
+      estado: 'borrador',
+      pdfStorageId: null,
+      publicaParticipante: false,
+    })
+    expect(invalidado.recurso).toMatchObject({
+      definitivo: null,
+      estado: 'pendiente',
+      publicaParticipante: false,
+    })
   })
 })
 
@@ -225,7 +251,10 @@ describe('F-PSEA-20', () => {
       contentType: 'application/pdf',
       tipo: 'pdf',
     }))
-    expect(await t.run((ctx) => ctx.db.get(recursoId))).toMatchObject({ usadoEnRonda: false })
+    expect(await t.run((ctx) => ctx.db.get(recursoId))).toMatchObject({
+      usadoEnRonda: false,
+      estado: 'creado',
+    })
 
     await expect(
       staff.mutation(api.sgc.index.actualizarVisibilidadDriveRecurso, {
@@ -247,6 +276,7 @@ describe('F-PSEA-21', () => {
     expect(primera).toMatchObject({ creada: true, minimosAgregados: 7 })
     expect(segunda).toMatchObject({ relacionId: primera.relacionId, creada: false })
     const relacion = await staff.query(api.sgc.index.getRelacionInstrumentosRonda, { rondaId })
+    if (!relacion) throw new Error('Relacion F21 no inicializada.')
     expect(relacion.items).toHaveLength(7)
     expect(relacion.resumen).toMatchObject({ analizadores: 4, aireCero: 1, calibradores: 1, cilindros: 1 })
     await expect(
@@ -372,6 +402,11 @@ describe('F-PSEA-21', () => {
       pdfRevision: null,
       xlsxStorageId: null,
       xlsxRevision: null,
+    })
+    expect(await t.run((ctx) => ctx.db.get(recursoId))).toMatchObject({
+      definitivo: null,
+      estado: 'pendiente',
+      publicaParticipante: false,
     })
   })
 })

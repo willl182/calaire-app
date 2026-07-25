@@ -3,6 +3,11 @@ import JSZip from 'jszip'
 import { PDFDocument } from 'pdf-lib'
 import { crearActaInicioDocx, crearInstrumentosPdf, crearInstrumentosXlsx } from './exports'
 
+const png = {
+  bytes: Uint8Array.from(Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAusB9Wl2nQAAAABJRU5ErkJggg==', 'base64')),
+  contentType: 'image/png' as const,
+}
+
 const items = [{
   tipo: 'analizador',
   codigoInterno: 'AN-01',
@@ -10,8 +15,10 @@ const items = [{
   modelo: 'Modelo',
   serialIdentificacion: 'SER-1',
   observaciones: 'Operativo',
-  fotoGeneralFileName: 'general.jpg',
-  fotoPlacaFileName: 'placa.jpg',
+  fotoGeneralFileName: 'general.png',
+  fotoPlacaFileName: 'placa.png',
+  fotoGeneral: png,
+  fotoPlaca: png,
 }]
 
 describe('exportaciones SGC', () => {
@@ -23,10 +30,20 @@ describe('exportaciones SGC', () => {
     expect(document).toContain('Responsable')
   })
 
-  test('genera PDF F-PSEA-21 válido', async () => {
+  test('genera PDF F-PSEA-21 válido con ambas fotos', async () => {
     const bytes = await crearInstrumentosPdf({ rondaCodigo: 'R-01', rondaNombre: 'Ronda', revision: 2, tecnicoNombre: 'Tecnico', coordinadorNombre: 'Coordinador', items })
     const pdf = await PDFDocument.load(bytes)
     expect(pdf.getPageCount()).toBeGreaterThan(0)
+    expect(bytes.byteLength).toBeGreaterThan(1_000)
+  })
+
+  test('rechaza PDF F-PSEA-21 sin ambas fotos', async () => {
+    await expect(crearInstrumentosPdf({
+      rondaCodigo: 'R-01',
+      rondaNombre: 'Ronda',
+      revision: 2,
+      items: [{ ...items[0], fotoPlaca: null }],
+    })).rejects.toThrow(/sin las dos fotos requeridas/)
   })
 
   test('genera XLSX F-PSEA-21 con datos', async () => {

@@ -514,7 +514,7 @@ export const upsertDriveRecursoConfig = {
     const editableSinCambios = existing && (existing.webUrl ?? null) === webUrl
     const reemplazoSinMotivo = existing?.webUrl && webUrl && existing.webUrl !== webUrl && !trimToNull(args.notas)
     if (reemplazoSinMotivo) throw new Error('Reemplazar un enlace Drive exige motivo.')
-    const estado: DriveEstado = editableSinCambios ? existing.estado : webUrl ? 'creado' : existing?.estado ?? 'pendiente'
+    const estadoBase: DriveEstado = editableSinCambios ? existing.estado : webUrl ? 'creado' : existing?.estado ?? 'pendiente'
     const definitivo: DefinitivoDoc = args.definitivo === undefined ? existing?.definitivo ?? null : args.definitivo
     const definitivoNormalizado: DefinitivoDoc =
       definitivo && 'webUrl' in definitivo
@@ -526,6 +526,9 @@ export const upsertDriveRecursoConfig = {
         !sameNullableString(definitivoDriveFileId(existing?.definitivo), definitivoDriveFileId(definitivoNormalizado)) ||
         !sameNullableString(definitivoStorageId(existing?.definitivo), definitivoStorageId(definitivoNormalizado)) ||
         !sameNullableString(existing?.definitivo?.tipo ?? undefined, definitivoNormalizado?.tipo ?? undefined))
+    const estado: DriveEstado = codigo === 'F-PSEA-20' && definitivoChanged
+      ? definitivoNormalizado ? 'creado' : 'pendiente'
+      : estadoBase
 
     const patch = {
       parentId: args.parentId ?? null,

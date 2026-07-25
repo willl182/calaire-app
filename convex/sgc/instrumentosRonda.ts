@@ -27,6 +27,16 @@ async function getRecurso(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
     .withIndex('by_rondaId_and_codigo', (q) => q.eq('rondaId', rondaId).eq('codigo', 'F-PSEA-21'))
     .first()
 }
+
+async function getFoto(ctx: QueryCtx, storageId?: Id<'_storage'> | null) {
+  if (!storageId) return { url: null, contentType: null }
+  const [url, metadata] = await Promise.all([
+    ctx.storage.getUrl(storageId),
+    ctx.db.system.get(storageId),
+  ])
+  return { url, contentType: metadata?.contentType ?? null }
+}
+
 function evaluar(items: Array<{
   tipo: TipoInstrumento
   codigoInterno: string
@@ -60,6 +70,7 @@ function evaluar(items: Array<{
 async function invalidar(ctx: MutationCtx, relacionId: Id<'sgcInstrumentosRonda'>, actor: string) {
   const relacion = await ctx.db.get(relacionId)
   if (!relacion) throw new Error('Relacion no encontrada.')
+  const now = Date.now()
   await ctx.db.patch(relacionId, {
     estado: relacion.estado === 'validado' ? 'requiere_ajustes' : 'borrador',
     revision: relacion.revision + 1,
@@ -69,9 +80,19 @@ async function invalidar(ctx: MutationCtx, relacionId: Id<'sgcInstrumentosRonda'
     pdfRevision: null,
     xlsxStorageId: null,
     xlsxRevision: null,
-    updatedAt: Date.now(),
+    updatedAt: now,
     updatedBy: actor,
   })
+  const recurso = await getRecurso(ctx, relacion.rondaId)
+  if (recurso) {
+    await ctx.db.patch(recurso._id, {
+      definitivo: null,
+      estado: recurso.webUrl ? 'creado' : 'pendiente',
+      publicaParticipante: false,
+      updatedAt: now,
+      updatedBy: actor,
+    })
+  }
   return relacion
 }
 
@@ -84,7 +105,20 @@ export const getRelacionInstrumentosRondaConfig = {
     const relacion = await getRelacion(ctx, rondaId)
     if (!relacion) return null
     const items = (await getItems(ctx, relacion._id)).sort((a, b) => a.sortOrder - b.sortOrder)
-    return { ...relacion, items, resumen: evaluar(items) }
+    const itemsConFotos = await Promise.all(items.map(async (item) => {
+      const [fotoGeneral, fotoPlaca] = await Promise.all([
+        getFoto(ctx, item.fotoGeneralStorageId),
+        getFoto(ctx, item.fotoPlacaStorageId),
+      ])
+      return {
+        ...item,
+        fotoGeneralUrl: fotoGeneral.url,
+        fotoGeneralContentType: fotoGeneral.contentType,
+        fotoPlacaUrl: fotoPlaca.url,
+        fotoPlacaContentType: fotoPlaca.contentType,
+      }
+    }))
+    return { ...relacion, items: itemsConFotos, resumen: evaluar(items) }
   },
 } satisfies SgcQueryConfig<typeof getArgs>
 
@@ -158,7 +192,7 @@ export const registrarFotoInstrumentoRondaConfig = {
     const actor = await requireSgcManage(ctx)
     const item = await ctx.db.get(args.itemId)
     if (!item) throw new Error('Instrumento no encontrado.')
-    if (!['image/jpeg', 'image/png', 'image/webp'].includes(args.contentType)) throw new Error('Foto debe ser JPEG, PNG o WebP.')
+    if (!['image/jpeg', 'image/png'].includes(args.contentType)) throw new Error('Foto debe ser JPEG o PNG.')
     if (args.size <= 0 || args.size > 10 * 1024 * 1024) throw new Error('Foto vacia o superior a 10 MB.')
     const stored = await ctx.db.system.get(args.storageId)
     if (!stored || stored.size !== args.size) throw new Error('Foto no disponible o metadata inconsistente.')

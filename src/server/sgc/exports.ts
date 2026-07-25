@@ -46,6 +46,11 @@ export async function crearActaInicioDocx(data: ActaInicioExport) {
   return zip.generateAsync({ type: 'uint8array' })
 }
 
+type FotoInstrumentoExport = {
+  bytes: Uint8Array
+  contentType: 'image/jpeg' | 'image/png'
+}
+
 export type InstrumentoExport = {
   tipo: string
   codigoInterno: string
@@ -55,6 +60,8 @@ export type InstrumentoExport = {
   observaciones: string
   fotoGeneralFileName?: string | null
   fotoPlacaFileName?: string | null
+  fotoGeneral?: FotoInstrumentoExport | null
+  fotoPlaca?: FotoInstrumentoExport | null
 }
 
 export async function crearInstrumentosPdf(data: { rondaCodigo: string; rondaNombre: string; revision: number; tecnicoNombre?: string | null; coordinadorNombre?: string | null; items: InstrumentoExport[] }) {
@@ -64,20 +71,35 @@ export async function crearInstrumentosPdf(data: { rondaCodigo: string; rondaNom
   let page = pdf.addPage([842, 595])
   let y = 550
   const line = (text: string, size = 9, strong = false) => {
-    if (y < 45) { page = pdf.addPage([842, 595]); y = 550 }
     page.drawText(ascii(text).slice(0, 145), { x: 35, y, size, font: strong ? bold : font, color: rgb(0.08, 0.12, 0.16) })
     y -= size + 7
   }
+  const drawPhoto = async (foto: FotoInstrumentoExport, x: number, label: string) => {
+    const image = foto.contentType === 'image/jpeg'
+      ? await pdf.embedJpg(foto.bytes)
+      : await pdf.embedPng(foto.bytes)
+    const scale = Math.min(360 / image.width, 150 / image.height)
+    page.drawText(label, { x, y: y - 10, size: 8, font: bold, color: rgb(0.08, 0.12, 0.16) })
+    page.drawImage(image, { x, y: y - 170, width: image.width * scale, height: image.height * scale })
+  }
+
   line('F-PSEA-21 RELACION DE INSTRUMENTOS CALAIRE USADOS', 16, true)
   line(`Ronda: ${data.rondaCodigo} - ${data.rondaNombre}`, 10, true)
   line(`Revision: ${data.revision} | Tecnico: ${data.tecnicoNombre ?? ''} | Coordinador: ${data.coordinadorNombre ?? ''}`)
   y -= 6
-  data.items.forEach((item, index) => {
+  for (let index = 0; index < data.items.length; index += 1) {
+    const item = data.items[index]
+    if (!item.fotoGeneral || !item.fotoPlaca) throw new Error(`Instrumento ${item.codigoInterno || index + 1} sin las dos fotos requeridas.`)
+    if (y < 230) {
+      page = pdf.addPage([842, 595])
+      y = 550
+    }
     line(`${index + 1}. ${item.tipo} | ${item.codigoInterno} | ${item.marca} | ${item.modelo} | ${item.serialIdentificacion}`, 9, true)
     line(`Observaciones: ${item.observaciones || 'Sin observaciones'}`, 8)
-    line(`Fotos: general=${item.fotoGeneralFileName ?? 'pendiente'}; placa/serial=${item.fotoPlacaFileName ?? 'pendiente'}`, 8)
-    y -= 4
-  })
+    await drawPhoto(item.fotoGeneral, 35, `Foto general: ${item.fotoGeneralFileName ?? ''}`)
+    await drawPhoto(item.fotoPlaca, 430, `Foto placa/serial: ${item.fotoPlacaFileName ?? ''}`)
+    y -= 185
+  }
   return pdf.save()
 }
 
