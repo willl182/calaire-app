@@ -4,7 +4,7 @@ import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgcWithStatus } from '@/server/sgc'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
-import { DirectorioServicio } from './DirectorioServicio'
+import { ArbolSgc } from './ArbolSgc'
 import { MapaSgcFrame } from './MapaSgcFrame'
 
 export default async function MapaSgcPage() {
@@ -50,20 +50,26 @@ export default async function MapaSgcPage() {
         </div>
       </section>
 
-      <DirectorioServicio />
+      <div className="grid min-w-0 gap-4 lg:grid-cols-[minmax(240px,300px)_minmax(0,1fr)] lg:items-start">
+        <div className="lg:sticky lg:top-4 lg:max-h-[calc(100vh-6rem)]">
+          <ArbolSgc documentos={mapa.data.documentos} />
+        </div>
 
-      {mapa.data.relaciones.length > 0 ? (
-        <MapaSgcFrame src="/dashboard/sgc/mapa/embed" title="Mapa interactivo de navegación del Sistema de Gestión" />
-      ) : (
-        <section className="card p-8 text-center">
-          <h2 className="text-lg font-semibold text-[var(--foreground)]">Mapa SGC sin relaciones</h2>
-          <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
-            {mapa.offline
-              ? 'No se pudieron cargar relaciones documentales porque Convex no esta disponible.'
-              : 'Todavia no hay relaciones documentales registradas para construir el mapa.'}
-          </p>
-        </section>
-      )}
+        <div className="min-w-0 space-y-4">
+          {mapa.data.relaciones.length > 0 ? (
+            <MapaSgcFrame src="/dashboard/sgc/mapa/embed" title="Mapa interactivo de navegación del Sistema de Gestión" />
+          ) : (
+            <section className="card p-8 text-center">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Mapa SGC sin relaciones</h2>
+              <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
+                {mapa.offline
+                  ? 'No se pudieron cargar relaciones documentales porque Convex no esta disponible.'
+                  : 'Todavia no hay relaciones documentales registradas para construir el mapa.'}
+              </p>
+            </section>
+          )}
+        </div>
+      </div>
     </div>
   )
 }
