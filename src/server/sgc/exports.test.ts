@@ -37,6 +37,31 @@ describe('exportaciones SGC', () => {
     expect(bytes.byteLength).toBeGreaterThan(1_000)
   })
 
+  test('pagina texto largo de F-PSEA-21 sin dibujarlo fuera del documento', async () => {
+    const bytes = await crearInstrumentosPdf({
+      rondaCodigo: 'R-01',
+      rondaNombre: 'Ronda',
+      revision: 2,
+      items: [{
+        ...items[0],
+        observaciones: Array.from({ length: 500 }, (_, index) => `observacion-${index}`).join(' '),
+      }],
+    })
+    const pdf = await PDFDocument.load(bytes)
+    expect(pdf.getPageCount()).toBeGreaterThan(1)
+  })
+
+  test('mueve instrumento completo a una pagina nueva cuando cabe unido', async () => {
+    const bytes = await crearInstrumentosPdf({
+      rondaCodigo: 'R-01',
+      rondaNombre: 'Ronda',
+      revision: 2,
+      items: [items[0], items[0], items[0]],
+    })
+    const pdf = await PDFDocument.load(bytes)
+    expect(pdf.getPageCount()).toBe(2)
+  })
+
   test('rechaza PDF F-PSEA-21 sin ambas fotos', async () => {
     await expect(crearInstrumentosPdf({
       rondaCodigo: 'R-01',

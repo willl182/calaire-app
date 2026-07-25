@@ -68,7 +68,7 @@ export default function InstrumentosEditor(props: Props) {
     setError('')
     setUploading(`${itemId}:${tipoFoto}`)
     try {
-      if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) throw new Error('Seleccione imagen JPEG, PNG o WebP.')
+      if (!['image/jpeg', 'image/png'].includes(file.type)) throw new Error('Seleccione imagen JPEG o PNG.')
       if (file.size > 10 * 1024 * 1024) throw new Error('Imagen supera 10 MB.')
       const uploadUrl = await solicitarUploadF21Action()
       const response = await fetch(uploadUrl, { method: 'POST', headers: { 'Content-Type': file.type }, body: file })

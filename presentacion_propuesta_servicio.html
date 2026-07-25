@@ -272,6 +272,7 @@
     transform: translateY(calc(100% + 40px)); transition: transform .22s ease; z-index: 50;
   }
   .detail.open { transform: translateY(0); }
+  .detail[hidden] { display: none; }
   .detail-head { display: flex; align-items: center; gap: .7rem; padding: .75rem 1rem; border-bottom: 4px solid var(--accent); }
   .detail-head strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .detail-head a { color: var(--ink); font-size: .82rem; font-weight: 700; text-decoration-color: var(--accent-dark); }
@@ -337,7 +338,7 @@
 <header class="hero">
   <div class="hero-inner">
     <div class="brandline">
-      <img src="../assets/logo.png" alt="Universidad Nacional de Colombia">
+      <img src="public/logo-unal.png" alt="Universidad Nacional de Colombia">
       <div class="brandline-copy"><strong>CALAIRE-EA</strong><span>Ensayos de Aptitud · Sistema comercial</span></div>
     </div>
     <div class="eyebrow">Propuesta de servicio comercial</div>
@@ -637,7 +638,7 @@
 
 </main>
 
-<section class="detail" id="fichaDetail" aria-live="polite" aria-label="Ficha del artefacto">
+<section class="detail" id="fichaDetail" role="dialog" aria-modal="true" aria-labelledby="fichaTitle" hidden inert>
   <div class="detail-head">
     <strong id="fichaTitle">Ficha del artefacto</strong>
     <a id="fichaOpen" href="fichas/indice.html" target="_blank" rel="noopener">Abrir aparte</a>
@@ -657,24 +658,53 @@
   const fichaOpen = document.getElementById('fichaOpen');
   const fichaClose = document.getElementById('fichaClose');
 
+  let fichaTrigger = null;
+
   document.querySelectorAll('.art .name a[href^="fichas/"]').forEach(link => {
     link.addEventListener('click', event => {
       event.preventDefault();
+      fichaTrigger = link;
       fichaTitle.textContent = link.textContent.trim();
       fichaFrame.src = link.href;
       fichaOpen.href = link.href;
-      fichaDetail.classList.add('open');
-      fichaClose.focus();
+      fichaDetail.hidden = false;
+      fichaDetail.inert = false;
+      requestAnimationFrame(() => {
+        fichaDetail.classList.add('open');
+        fichaClose.focus();
+      });
     });
   });
 
-  fichaClose.addEventListener('click', () => {
+  const closeFicha = () => {
     fichaDetail.classList.remove('open');
+    fichaTrigger?.focus();
+  };
+
+  fichaDetail.addEventListener('transitionend', event => {
+    if (event.propertyName !== 'transform' || fichaDetail.classList.contains('open')) return;
     fichaFrame.removeAttribute('src');
+    fichaDetail.inert = true;
+    fichaDetail.hidden = true;
   });
 
+  fichaClose.addEventListener('click', closeFicha);
+
   document.addEventListener('keydown', event => {
-    if (event.key === 'Escape' && fichaDetail.classList.contains('open')) fichaClose.click();
+    if (!fichaDetail.classList.contains('open')) return;
+    if (event.key === 'Escape') closeFicha();
+    if (event.key === 'Tab') {
+      const focusable = [...fichaDetail.querySelectorAll('a, button, iframe')];
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    }
   });
 </script>
 

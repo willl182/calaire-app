@@ -210,9 +210,12 @@ Planeación
 - F-PSEA-16: competencia y autorización.
 - F-PSEA-17: proveedores críticos.
 
-Preparación del ítem
+Inicio y preparación del ítem
 
 - F-PSEA-07: preparación y control del ítem.
+- F-PSEA-19: acta de inicio; DOCX de trabajo interno y PDF firmado visible a participantes.
+- F-PSEA-20: rotulado anónimo; documento interno no publicable, actualmente placeholder controlado.
+- F-PSEA-21: relación de instrumentos Calaire con dos fotos por instrumento; PDF/XLSX internos no publicables.
 
 Datos digitales
 

@@ -15,8 +15,9 @@ Definir plan y workflow técnico para incorporar nuevos documentos de ronda al S
 - [x] Definidos anexos A/B de I-PSEA-02.
 - [x] Definidos anclajes a P-PSEA-01, 03, 04, 05, 06, 08, 19 y 20.
 - [x] Definidas relaciones para mapa documental, seeds, endpoints y matriz de pruebas.
-- [ ] Implementación documental y de código no iniciada.
-- [ ] Modelo visual definitivo F-PSEA-20 pendiente de entrega por usuario.
+- [x] Implementación documental y funcional de F-PSEA-19, F-PSEA-20 y F-PSEA-21 completada.
+- [x] Cierre no bloqueante, paginación F-PSEA-21 y registro atómico PDF/XLSX implementados.
+- [ ] Modelo visual definitivo F-PSEA-20 pendiente de entrega por usuario; placeholder controlado vigente.
 
 ## Critical Technical Context
 
@@ -34,8 +35,8 @@ Definir plan y workflow técnico para incorporar nuevos documentos de ronda al S
 
 ## Next Steps
 
-1. Revisar y aprobar `plan_documentos_sgc.md` y `workflow_documentos_sgc.md`.
-2. Implementar primero documentos maestros, procedimientos, matrices y seeds del mapa.
-3. Separar criticidad de bloqueo antes de registrar formatos nuevos en expediente.
-4. Implementar F19, F20 y F21 por fases con pruebas descritas en workflow.
-5. Ejecutar `pnpm exec convex codegen`, `pnpm lint`, `pnpm test`, `pnpm build` y `pnpm test:e2e:start`.
+1. Completar `pnpm lint`, `pnpm test`, `pnpm build` y `pnpm test:e2e:start`.
+2. Revisar diff final y corregir cualquier regresión detectada.
+3. Preparar release y desplegar cambios Convex/Next.js.
+4. Verificar F19/F20/F21 en entorno desplegado.
+5. Aprobar o sustituir el placeholder visual definitivo de F-PSEA-20.

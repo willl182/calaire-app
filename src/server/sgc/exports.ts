@@ -67,9 +67,20 @@ export async function crearInstrumentosPdf(data: { rondaCodigo: string; rondaNom
   const pdf = await PDFDocument.create()
   const font = await pdf.embedFont(StandardFonts.Helvetica)
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold)
-  let page = pdf.addPage([842, 595])
-  let y = 550
-  const maxWidth = 842 - 70
+  const pageSize: [number, number] = [842, 595]
+  const topY = 550
+  const bottomY = 35
+  const photoBlockHeight = 185
+  let page = pdf.addPage(pageSize)
+  let y = topY
+  const maxWidth = pageSize[0] - 70
+  const addPage = () => {
+    page = pdf.addPage(pageSize)
+    y = topY
+  }
+  const ensureSpace = (height: number) => {
+    if (y - height < bottomY) addPage()
+  }
   // El PDF es evidencia: el texto se dibuja sin normalizar ni recortar. Si la fuente no puede
   // representar un caracter se falla explicitamente en lugar de exportar contenido alterado.
   const medir = (activeFont: typeof font, text: string, size: number) => {
@@ -112,18 +123,20 @@ export async function crearInstrumentosPdf(data: { rondaCodigo: string; rondaNom
   }
   const line = (text: string, size = 9, strong = false) => {
     const activeFont = strong ? bold : font
+    const lineHeight = size + 7
     for (const fragmento of envolver(activeFont, text, size)) {
+      ensureSpace(lineHeight)
       page.drawText(fragmento, { x: 35, y, size, font: activeFont, color: rgb(0.08, 0.12, 0.16) })
-      y -= size + 7
+      y -= lineHeight
     }
   }
-  const drawPhoto = async (foto: FotoInstrumentoExport, x: number, label: string) => {
+  const drawPhoto = async (foto: FotoInstrumentoExport, x: number, photoTopY: number, label: string) => {
     const image = foto.contentType === 'image/jpeg'
       ? await pdf.embedJpg(foto.bytes)
       : await pdf.embedPng(foto.bytes)
     const scale = Math.min(360 / image.width, 150 / image.height)
-    page.drawText(label, { x, y: y - 10, size: 8, font: bold, color: rgb(0.08, 0.12, 0.16) })
-    page.drawImage(image, { x, y: y - 170, width: image.width * scale, height: image.height * scale })
+    page.drawText(label, { x, y: photoTopY - 10, size: 8, font: bold, color: rgb(0.08, 0.12, 0.16) })
+    page.drawImage(image, { x, y: photoTopY - 170, width: image.width * scale, height: image.height * scale })
   }
 
   line('F-PSEA-21 RELACION DE INSTRUMENTOS CALAIRE USADOS', 16, true)
@@ -133,15 +146,19 @@ export async function crearInstrumentosPdf(data: { rondaCodigo: string; rondaNom
   for (let index = 0; index < data.items.length; index += 1) {
     const item = data.items[index]
     if (!item.fotoGeneral || !item.fotoPlaca) throw new Error(`Instrumento ${item.codigoInterno || index + 1} sin las dos fotos requeridas.`)
-    if (y < 230) {
-      page = pdf.addPage([842, 595])
-      y = 550
-    }
-    line(`${index + 1}. ${item.tipo} | ${item.codigoInterno} | ${item.marca} | ${item.modelo} | ${item.serialIdentificacion}`, 9, true)
-    line(`Observaciones: ${item.observaciones || 'Sin observaciones'}`, 8)
-    await drawPhoto(item.fotoGeneral, 35, `Foto general: ${item.fotoGeneralFileName ?? ''}`)
-    await drawPhoto(item.fotoPlaca, 430, `Foto placa/serial: ${item.fotoPlacaFileName ?? ''}`)
-    y -= 185
+    const identificacion = `${index + 1}. ${item.tipo} | ${item.codigoInterno} | ${item.marca} | ${item.modelo} | ${item.serialIdentificacion}`
+    const observaciones = `Observaciones: ${item.observaciones || 'Sin observaciones'}`
+    const textHeight = envolver(bold, identificacion, 9).length * 16 + envolver(font, observaciones, 8).length * 15
+    const itemHeight = textHeight + photoBlockHeight
+    if (itemHeight <= topY - bottomY && y - itemHeight < bottomY) addPage()
+
+    line(identificacion, 9, true)
+    line(observaciones, 8)
+    ensureSpace(photoBlockHeight)
+    const photoTopY = y
+    await drawPhoto(item.fotoGeneral, 35, photoTopY, `Foto general: ${item.fotoGeneralFileName ?? ''}`)
+    await drawPhoto(item.fotoPlaca, 430, photoTopY, `Foto placa/serial: ${item.fotoPlacaFileName ?? ''}`)
+    y = photoTopY - photoBlockHeight
   }
   return pdf.save()
 }

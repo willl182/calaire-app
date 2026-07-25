@@ -27,7 +27,7 @@ Contiene 4 plantillas para crear documentos homogéneos:
 - Documento general
 - Formato Excel
 
-Función: estandarizar estructura, encabezados, control de versiones y p
+Función: estandarizar estructura, encabezados, control de versiones y publicación de documentos.
 
 ---
 2. 01_documentos_marco
@@ -82,7 +82,7 @@ Operación de rondas
 - P-PSEA-08: flujo técnico digital
 - P-PSEA-09: generación del informe
 
-Varios figuran como “En actualización”, aunque ya tienen contenido sust
+Varios figuran como “En actualización”, aunque ya tienen contenido sustancial y uso operativo.
 
 Procedimientos técnicos por analito
 
@@ -136,7 +136,7 @@ Este documento no aparece en diccionario, inventario, árbol maestro ni matrices
 ---
 5. 04_formatos_maestros
 
-Serie F-PSEA-01 a F-PSEA-18.
+Serie F-PSEA-01 a F-PSEA-21.
 
 Planeación
 
@@ -158,14 +158,20 @@ Homogeneidad y estabilidad
 - F-PSEA-11: matriz principal
 - F-PSEA-11A a F-PSEA-11D: datos y resultados auxiliares
 
-F-PSEA-11 figura como “Parcial/operativo”. Punto importante para validaetodología del ítem.
+F-PSEA-11 figura como “Parcial/operativo”. Punto importante para validar la metodología del ítem.
+
+Inicio y preparación interna
+
+- F-PSEA-19: acta de inicio firmada; PDF controlado visible a participantes.
+- F-PSEA-20: rotulado anónimo interno; placeholder controlado con diseño definitivo pendiente.
+- F-PSEA-21: relación validada de instrumentos Calaire; PDF/XLSX internos no publicables.
 
 Cierre y gestión
 
 - F-PSEA-13: informe final
 - F-PSEA-14 a F-PSEA-18: registros de gestión, seguimiento y cierre
 
-Cobertura física: 18 de 18 formatos definidos.
+Cobertura física: 21 de 21 formatos definidos; F-PSEA-20 conserva cobertura provisional como placeholder controlado.
 
 ---
 6. 05_matrices_inventarios
@@ -212,7 +218,7 @@ Trazabilidad inversa: documento a requisito normativo.
 
 Procesamiento Mapa 1-1 ISO IEC 17025 SVCASC CALAIRE-EA.md
 
-Transforma mapa visual de ISO/IEC 17025 en matriz controlable y compara
+Transforma el mapa visual de ISO/IEC 17025 en una matriz controlable y compara su cobertura con los documentos vigentes.
 
 ---
 Archivos sueltos en raíz
@@ -220,7 +226,7 @@ Archivos sueltos en raíz
 - EA-PP2026-R1-1-z-4-2a.docx
 - EA-PP2026-R2-1-z-4-2a.docx
 
-Parecen documentos específicos de rondas piloto 2026. No aparecen codif Relación con 02_despliegue_rondas/EA-PP-2026-R1 y R2 necesitaaclaración documental.
+Parecen documentos específicos de rondas piloto 2026. No aparecen codificados en el inventario. Su relación con `02_despliegue_rondas/EA-PP-2026-R1` y R2 necesita aclaración documental.
 
 ---
 Flujo documental principal
@@ -272,4 +278,4 @@ Puntos de atención
 
 Diagnóstico corto
 
-SGC bien armado y casi completo. Mayor trabajo pendiente no es crear documentos nuevos: alinear codificación, estados, versiones Markdown y documentos fuera de inventario. Brecha normativa principal: cierre formal de mejora continua mediante P
+SGC bien armado y casi completo. Mayor trabajo pendiente no es crear documentos nuevos: alinear codificación, estados, versiones Markdown y documentos fuera de inventario. Brecha normativa principal: cierre formal de mejora continua mediante `P-PSEA-23` o evidencia equivalente del SGC institucional.

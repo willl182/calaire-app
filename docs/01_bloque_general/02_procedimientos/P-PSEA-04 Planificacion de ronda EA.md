@@ -78,9 +78,10 @@ Donde:
 - **ur**: incertidumbre por repetibilidad a corto plazo (ruido del instrumento).
 - **ulof**: incertidumbre por falta de ajuste (no linealidad).
 - **ud**: incertidumbre por deriva a largo plazo entre calibraciones.
+- **uEC**: incertidumbre asociada a la eficiencia de conversión del sistema de referencia, obtenida del certificado vigente o de la verificación documentada de dicha eficiencia.
 - **uinfl**: incertidumbre por influencias ambientales (temperatura, presión).
 
-**Tabla 6. Resumen de componentes para la estimación de la incertidumbre**
+**Tabla 2. Resumen de componentes para la estimación de la incertidumbre**
 
 | Componente de incertidumbre | Datos específicos a recolectar | Frecuencia de recolección | Fuente del procedimiento |
 |---|---|---|---|
@@ -104,7 +105,7 @@ Donde:
 - Xref es el valor de referencia o valor asignado.
 - b es el intercepto.
 
-**Tabla 5. Parámetros tabulados para la determinación de la incertidumbre**
+**Tabla 3. Parámetros tabulados para la determinación de la incertidumbre**
 
 | Gas | Pendiente a | Intercepto b (nmol/mol) |
 |---|---|---|
@@ -128,7 +129,7 @@ Ec 7
 
 En la siguiente tabla se resumen los criterios de aceptación de los indicadores de rendimiento.
 
-**Tabla 6. Criterios de evaluación para los indicadores de desempeño del EA**
+**Tabla 4. Criterios de evaluación para los indicadores de desempeño del EA**
 
 | Indicador de rendimiento | Criterio de evaluación | Interpretación |
 |---|---|---|

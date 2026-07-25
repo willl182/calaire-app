@@ -89,10 +89,16 @@ flowchart LR
   P14 --> P21["P-PSEA-21\nProveedores"]
   P05 --> F18["F-PSEA-18\nComunicacion participantes"]
   P04 --> F19["F-PSEA-19\nActa de inicio de ronda"]
+  P01 --> F19
   P19 --> F19
   P06 --> F20["F-PSEA-20\nRotulado anonimo"]
+  P01 --> F20
   P19 --> F20
   P06 --> F21["F-PSEA-21\nRelacion instrumentos Calaire"]
+  P01 --> F21
+  P20 --> F21
+  P19 --> F21
+  F19 --> F21
   P03 --> F19
   P03 --> F20
   P03 --> F21
@@ -109,13 +115,14 @@ flowchart LR
 
 ## Estructura operativa de ronda
 
-Cada ronda se materializa bajo `02_despliegue_rondas/<codigo_ronda>/`. La raiz de la ronda contiene solo `checklist_ronda.md` y las siete carpetas de etapa definidas por `P-PSEA-03`:
+Cada ronda se materializa bajo `02_despliegue_rondas/<codigo_ronda>/`. La raiz de la ronda contiene solo `checklist_ronda.md` y las ocho carpetas de etapa definidas por `P-PSEA-03`, incluida la etapa de inicio `02A_inicio_ronda`:
 
 ```text
 02_despliegue_rondas/<codigo_ronda>/
   checklist_ronda.md
   01_planificacion_ronda/
   02_comunicaciones_participantes/
+  02A_inicio_ronda/
   03_preparacion_item/
   04_datos_y_preprocesamiento/
   05_homogeneidad_estabilidad/

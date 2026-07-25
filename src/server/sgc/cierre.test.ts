@@ -67,6 +67,32 @@ test('documento del catalogo sin recurso Drive es un bloqueante concreto', () =>
   assert.deepEqual(result.bloqueantes, ['F-PSEA-13 Informe final: recurso Drive faltante'])
 })
 
+test('documento critico no bloqueante ausente genera pendiente critico', () => {
+  const etapas: DriveCierreEtapaInput[] = [
+    {
+      documentos: [
+        { codigo: 'F-PSEA-19', nombre: 'Acta de inicio', critico: true, bloqueaCierre: false },
+      ],
+    },
+  ]
+  const result = evaluateDriveCierreCalidad([recurso({ codigo: 'OTRO' })], etapas)
+  assert.deepEqual(result.bloqueantes, [])
+  assert.deepEqual(result.pendientesCriticos, ['F-PSEA-19 Acta de inicio: recurso Drive faltante'])
+})
+
+test('documento no critico ni bloqueante ausente genera advertencia', () => {
+  const etapas: DriveCierreEtapaInput[] = [
+    {
+      documentos: [
+        { codigo: 'F-PSEA-99', nombre: 'Auxiliar', critico: false, bloqueaCierre: false },
+      ],
+    },
+  ]
+  const result = evaluateDriveCierreCalidad([recurso({ codigo: 'OTRO' })], etapas)
+  assert.deepEqual(result.bloqueantes, [])
+  assert.deepEqual(result.advertencias, ['F-PSEA-99 Auxiliar: recurso Drive faltante'])
+})
+
 test('recurso sin enlace editable bloquea', () => {
   const recursos = recursosCompletos().map((r) => (r.codigo === 'F-PSEA-01' ? { ...r, webUrl: '   ' } : r))
   const result = evaluateDriveCierreCalidad(recursos, ETAPAS)

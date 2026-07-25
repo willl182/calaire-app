@@ -19,12 +19,12 @@ Este documento traza los requisitos normativos contra documentos vigentes del SG
 | Requisito | Documento(s) | Evidencia |
 |---|---|---|
 | 4.1 Imparcialidad | `DG-PSEA-01`, `P-PSEA-14`, `P-PSEA-19` | Politica marco, controles de colusion/falsificacion, confidencialidad. |
-| 4.2 Confidencialidad | `P-PSEA-19`, `P-PSEA-08`, `F-PSEA-20`, `F-PSEA-21` | Flujo digital, controles de informacion, rotulado anonimo y relacion interna de instrumentos; ambos son internos y no publicables al participante. |
+| 4.2 Confidencialidad | `P-PSEA-19`, `P-PSEA-08`, `F-PSEA-20`, `F-PSEA-21` | Flujo digital, controles de informacion, rotulado anonimo y relacion interna de instrumentos; ambos son internos y no publicables al participante. `F-PSEA-20` conserva cobertura provisional como placeholder controlado. |
 | 5 Estructura | `DG-PSEA-01`, `P-PSEA-01`, `P-PSEA-02`, `P-PSEA-20` | Alcance, arquitectura documental y autorizaciones. |
 | 6 Recursos | `P-PSEA-04`, `P-PSEA-20`, `P-PSEA-21`, `F-PSEA-04`, `F-PSEA-16`, `F-PSEA-17`, `F-PSEA-21` | Planificacion, competencia, equipos, relacion validada de instrumentos Calaire y proveedores. |
 | 7.1 Revision y acuerdos | `P-PSEA-04`, `P-PSEA-05`, `F-PSEA-05`, `F-PSEA-18`, `F-PSEA-19` | Plan de ronda, comunicaciones y acta de inicio firmada por organizadores y participantes. |
 | 7.2 Diseno PT | `P-PSEA-04`, `P-PSEA-07`, `F-PSEA-05`, `F-PSEA-06` | Diseno tecnico, ficha y plan de ronda. |
-| 7.3 Item PT | `P-PSEA-06`, `P-PSEA-10` a `P-PSEA-13`, `F-PSEA-07`, `F-PSEA-11`, `F-PSEA-19`, `F-PSEA-20`, `F-PSEA-21` | Inicio presencial, rotulado anonimo, instrumentos Calaire, preparacion, control del item y H/E. |
+| 7.3 Item PT | `P-PSEA-06`, `P-PSEA-10` a `P-PSEA-13`, `F-PSEA-07`, `F-PSEA-11`, `F-PSEA-19`, `F-PSEA-20`, `F-PSEA-21` | Inicio presencial, rotulado anonimo, instrumentos Calaire, preparacion, control del item y H/E; el diseño de `F-PSEA-20` sigue pendiente y su cobertura es parcial. |
 | 7.4 Evaluacion e informes | `P-PSEA-07`, `P-PSEA-09`, `I-PSEA-05`, `F-PSEA-12`, `F-PSEA-13` | Dataset oficial, analisis e informe final. |
 | 7.5 Datos e informacion | `P-PSEA-08`, `DG-PSEA-02`, `DG-PSEA-03`, `I-PSEA-02` a `I-PSEA-05`, `F-PSEA-08` a `F-PSEA-12` | Captura, exportacion, preprocesamiento, consolidacion y analisis. |
 | 8 Sistema de gestion | `DG-PSEA-01`, `P-PSEA-01`, `P-PSEA-02`, `P-PSEA-03`, `P-PSEA-15`, `P-PSEA-17`, `P-PSEA-18`, `P-PSEA-23` | Documentacion, registros, NC/CAPA, quejas, apelaciones y mejora. |
@@ -37,7 +37,7 @@ Este documento traza los requisitos normativos contra documentos vigentes del SG
 | 5 Estructura | `DG-PSEA-01`, `P-PSEA-01`, `P-PSEA-02` | Estructura documental y alcance. |
 | 6 Recursos | `P-PSEA-20`, `P-PSEA-21`, `F-PSEA-04`, `F-PSEA-16`, `F-PSEA-17`, `F-PSEA-21` | Personal, equipos, proveedores y relacion validada de instrumentos Calaire usados. |
 | 7.2 Metodos | `P-PSEA-07`, `P-PSEA-10` a `P-PSEA-13` | Diseno estadistico y procedimientos por analito. |
-| 7.5 Registros tecnicos | `P-PSEA-03`, `P-PSEA-08`, `F-PSEA-07` a `F-PSEA-13`, `F-PSEA-19` a `F-PSEA-21` | Registros de ronda y archivos controlados, incluidos acta de inicio, rotulado anonimo y relacion de instrumentos. |
+| 7.5 Registros tecnicos | `P-PSEA-03`, `P-PSEA-08`, `F-PSEA-07` a `F-PSEA-13`, `F-PSEA-19` a `F-PSEA-21` | Registros de ronda y archivos controlados, incluidos acta de inicio, rotulado anonimo y relacion de instrumentos; `F-PSEA-20` permanece provisional como placeholder controlado. |
 | 7.7 Validez de resultados | `P-PSEA-07`, `F-PSEA-11`, `F-PSEA-12` | H/E, dataset oficial y controles estadisticos. |
 | 7.8 Informes | `P-PSEA-09`, `F-PSEA-13` | Informe final de resultados. |
 | 7.9 Quejas | `P-PSEA-17`, `F-PSEA-14` | Registro de quejas. |

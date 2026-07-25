@@ -488,7 +488,18 @@ export async function collectDriveCierreCalidad(ctx: QueryCtx | MutationCtx, ron
           : null,
       }
     })
-  return evaluateDriveCierreCalidad(documentos, SGC_RONDA_ETAPAS)
+  const etapas = SGC_RONDA_ETAPAS.map((etapa) => ({
+    documentos: etapa.documentos.map((documento) => {
+      const formato = documento.formatoOperativo ? getSgcFormato(documento.formatoOperativo) : null
+      return {
+        codigo: documento.codigo,
+        nombre: documento.nombre,
+        critico: formato?.critico ?? null,
+        bloqueaCierre: formato?.bloqueaCierre ?? null,
+      }
+    }),
+  }))
+  return evaluateDriveCierreCalidad(documentos, etapas)
 }
 
 export async function createSnapshot(
