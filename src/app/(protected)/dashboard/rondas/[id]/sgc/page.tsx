@@ -37,6 +37,7 @@ function CierreDocumentalBar({ panel, rondaId }: { panel: SgcPanel; rondaId: str
   const bloqueantesDocumentacion = [...panel.checklistBloqueantesDocumentacionPendiente, ...drive.bloqueantes]
   const bloqueantesCierre = [...panel.checklistBloqueantesCierre, ...drive.bloqueantes]
   const bloqueantesActuales = puedePasarADocumentacion ? bloqueantesDocumentacion : bloqueantesCierre
+  const pendientesCriticos = drive.pendientesCriticos ?? []
   const sinBloqueantesActuales = bloqueantesActuales.length === 0
 
   return (
@@ -46,6 +47,14 @@ function CierreDocumentalBar({ panel, rondaId }: { panel: SgcPanel; rondaId: str
         <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
           {sinBloqueantesActuales ? 'Sin bloqueantes' : `${bloqueantesActuales.length} bloqueante(s)`}
         </span>
+        {pendientesCriticos.length > 0 && (
+          <details className="text-xs text-amber-900">
+            <summary className="cursor-pointer font-semibold">{pendientesCriticos.length} crítico(s), no bloquean cierre</summary>
+            <ul className="mt-2 list-disc space-y-1 pl-5">
+              {pendientesCriticos.map((pendiente) => <li key={pendiente}>{pendiente}</li>)}
+            </ul>
+          </details>
+        )}
         {!sinBloqueantesActuales && (
           <details className="text-xs text-rose-900">
             <summary className="cursor-pointer font-semibold">Ver faltantes</summary>

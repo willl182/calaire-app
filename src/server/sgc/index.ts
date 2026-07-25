@@ -183,6 +183,7 @@ export type SgcPanel = {
     totalDocumentos: number
     recursosDocumentales: number
     bloqueantes: string[]
+    pendientesCriticos: string[]
     advertencias: string[]
   }
 }
@@ -414,6 +415,8 @@ export type SgcDriveRecurso = {
   documentoSgcVersionId?: string | null
   evidenciaSerieId?: string | null
   critico?: boolean
+  bloqueaCierre?: boolean
+  usadoEnRonda?: boolean
   publicaParticipante?: boolean
   driveFileId?: string | null
   driveFolderId?: string | null
@@ -476,6 +479,7 @@ export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
       totalDocumentos: 0,
       recursosDocumentales: 0,
       bloqueantes: [],
+      pendientesCriticos: [],
       advertencias: [],
     },
   }
@@ -523,6 +527,10 @@ export async function listDriveRecursosParticipante(rondaId: string): Promise<Sg
   return fetchQuery(api.sgc.index.listDriveRecursosParticipante, {
     rondaId: rondaId as Id<'rondas'>
   }, { token }) as Promise<SgcDriveRecursoParticipante[]>
+}
+
+export async function listDriveRecursosParticipanteWithStatus(rondaId: string) {
+  return safeConvexCallWithStatus('listDriveRecursosParticipante', () => listDriveRecursosParticipante(rondaId), [])
 }
 
 export async function inicializarDriveRonda(rondaId: string) {
@@ -1250,4 +1258,104 @@ export async function actualizarCasoSgc(args: {
     ...args,
     casoId: args.casoId as Id<'sgcCasos'>
   }, { token })
+}
+
+export async function getActaInicio(rondaId: string) {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.index.getActaInicio, { rondaId: rondaId as Id<'rondas'> }, { token })
+}
+
+export async function inicializarActaInicio(rondaId: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.inicializarActaInicio, { rondaId: rondaId as Id<'rondas'> }, { token })
+}
+
+export async function actualizarActaInicio(args: { actaId: string; fecha: string; lugar: string; textoInicio: string; organizadores: Array<{ nombre: string; entidad: string }> }) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.actualizarActaInicio, { ...args, actaId: args.actaId as Id<'sgcActasInicio'> }, { token })
+}
+
+export async function registrarArchivoActaInicio(args: { actaId: string; storageId: string; fileName: string; contentType: string; size: number; tipo: 'docx' | 'pdf' }) {
+  const token = await sgcToken()
+  const payload = { actaId: args.actaId as Id<'sgcActasInicio'>, storageId: args.storageId as Id<'_storage'>, fileName: args.fileName, contentType: args.contentType, size: args.size }
+  if (args.tipo === 'docx') return fetchMutation(api.sgc.index.registrarDocxActaInicio, payload, { token })
+  return fetchMutation(api.sgc.index.registrarPdfFirmadoActaInicio, payload, { token })
+}
+
+export async function cambiarPublicacionActaInicio(actaId: string, publicaParticipante: boolean) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.cambiarPublicacionActaInicio, { actaId: actaId as Id<'sgcActasInicio'>, publicaParticipante }, { token })
+}
+
+export async function getRelacionInstrumentosRonda(rondaId: string) {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.index.getRelacionInstrumentosRonda, { rondaId: rondaId as Id<'rondas'> }, { token })
+}
+
+export async function inicializarRelacionInstrumentos(rondaId: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.inicializarRelacionInstrumentos, { rondaId: rondaId as Id<'rondas'> }, { token })
+}
+
+type InstrumentoTipo = 'analizador' | 'aire_cero' | 'calibrador_dinamico' | 'cilindro' | 'otro'
+type InstrumentoCampos = { tipo: InstrumentoTipo; codigoInterno: string; marca: string; modelo: string; serialIdentificacion: string; observaciones: string }
+
+export async function crearInstrumentoRonda(relacionId: string, campos: InstrumentoCampos) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.crearInstrumentoRonda, { ...campos, relacionId: relacionId as Id<'sgcInstrumentosRonda'> }, { token })
+}
+
+export async function actualizarInstrumentoRonda(itemId: string, campos: InstrumentoCampos) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.actualizarInstrumentoRonda, { ...campos, itemId: itemId as Id<'sgcInstrumentosRondaItems'> }, { token })
+}
+
+export async function eliminarInstrumentoRonda(itemId: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.eliminarInstrumentoRonda, { itemId: itemId as Id<'sgcInstrumentosRondaItems'> }, { token })
+}
+
+export async function registrarFotoInstrumentoRonda(args: { itemId: string; tipoFoto: 'general' | 'placa_serial'; storageId: string; fileName: string; contentType: string; size: number }) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.registrarFotoInstrumentoRonda, { ...args, itemId: args.itemId as Id<'sgcInstrumentosRondaItems'>, storageId: args.storageId as Id<'_storage'> }, { token })
+}
+
+export async function retirarFotoInstrumentoRonda(itemId: string, tipoFoto: 'general' | 'placa_serial') {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.retirarFotoInstrumentoRonda, { itemId: itemId as Id<'sgcInstrumentosRondaItems'>, tipoFoto }, { token })
+}
+
+export async function enviarRelacionInstrumentosAValidacion(relacionId: string, tecnicoNombre: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.enviarRelacionInstrumentosAValidacion, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, tecnicoNombre }, { token })
+}
+
+export async function validarRelacionInstrumentos(relacionId: string, coordinadorNombre: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.validarRelacionInstrumentos, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, coordinadorNombre }, { token })
+}
+
+export async function devolverRelacionInstrumentos(relacionId: string, observacion: string) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.devolverRelacionInstrumentos, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, observacion }, { token })
+}
+
+export async function registrarExportacionInstrumentos(args: { relacionId: string; tipo: 'pdf' | 'xlsx'; storageId: string; fileName: string; contentType: string; size: number; revision: number }) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.registrarExportacionInstrumentos, { ...args, relacionId: args.relacionId as Id<'sgcInstrumentosRonda'>, storageId: args.storageId as Id<'_storage'> }, { token })
+}
+
+export async function getExportacionInstrumentosUrl(rondaId: string, tipo: 'pdf' | 'xlsx') {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.index.getExportacionInstrumentosUrl, { rondaId: rondaId as Id<'rondas'>, tipo }, { token })
+}
+
+export async function getActaInicioDownloadUrl(rondaId: string, tipo: 'docx' | 'pdf_firmado' | 'pdf_firmado_interno') {
+  const token = await sgcToken()
+  return fetchQuery(api.sgc.index.getActaInicioDownloadUrl, { rondaId: rondaId as Id<'rondas'>, tipo }, { token })
+}
+
+export async function marcarDriveRecursoUsado(recursoId: string, usado: boolean) {
+  const token = await sgcToken()
+  return fetchMutation(api.sgc.index.marcarDriveRecursoUsado, { recursoId: recursoId as Id<'sgcDriveRecursos'>, usado }, { token })
 }

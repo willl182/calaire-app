@@ -10,6 +10,7 @@ import { FolderCard } from '@/components/ui/drive/FolderCard'
 import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
 import type { SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/server/sgc'
+import F20Control from './F20Control'
 import { SgcRegistroDiligenciable } from './SgcRegistroDiligenciable'
 import {
   cambiarEstadoDriveAction,
@@ -132,6 +133,7 @@ function FormSection({ title, children }: { title: string; children: ReactNode }
 function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId: string }) {
   return (
     <div className="grid gap-2">
+      {recurso.codigo === 'F-PSEA-20' && <F20Control rondaId={rondaId} recurso={recurso} />}
       <FormSection title={recurso.webUrl ? 'Reemplazar enlace editable' : 'Enlace editable'}>
         {!recurso.webUrl ? (
           <form action={guardarDriveEditableAction} className="grid gap-2">
@@ -156,7 +158,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
         )}
       </FormSection>
 
-      {recurso.tipo !== 'carpeta' && (
+      {recurso.tipo !== 'carpeta' && recurso.codigo !== 'F-PSEA-20' && (
         <FormSection title="Version definitiva">
           <div className="grid gap-3">
             <form action={guardarDriveDefinitivoAction} className="grid gap-2">
@@ -227,7 +229,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
         </div>
       </FormSection>
 
-      {recurso.tipo !== 'carpeta' && (
+      {recurso.tipo !== 'carpeta' && !['F-PSEA-20', 'F-PSEA-21'].includes(recurso.codigo) && (
         <FormSection title="Visibilidad">
           <form action={cambiarVisibilidadDriveAction} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-slate-50 px-3 py-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
@@ -428,8 +430,10 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
                     }
                     closeHref={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}`}
                   >
-                    <div className="mb-3">
+                    <div className="mb-3 flex flex-wrap gap-2">
                       <LinkActions recurso={selectedDoc} />
+                      {selectedDoc.codigo === 'F-PSEA-19' && <a className="btn-primary" href={`${basePath}/f-psea-19`}>Gestionar acta</a>}
+                      {selectedDoc.codigo === 'F-PSEA-21' && <a className="btn-primary" href={`${basePath}/f-psea-21`}>Gestionar instrumentos</a>}
                     </div>
                     <RecursoForms recurso={selectedDoc} rondaId={rondaId} />
                     <SgcRegistroDiligenciable codigo={selectedDoc.codigo} panel={panel} rondaId={rondaId} />

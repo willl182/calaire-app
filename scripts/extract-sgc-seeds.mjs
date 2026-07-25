@@ -33,9 +33,15 @@ function estadoFromInventory(raw) {
 }
 
 function modoFromCode(code) {
-  if (code.startsWith('F-PSEA-03') || code.startsWith('F-PSEA-05A') || code.startsWith('F-PSEA-08') || code.startsWith('F-PSEA-13')) {
-    return 'ui_nativo_exportable'
-  }
+  const nativosExportables = new Set([
+    'F-PSEA-03',
+    'F-PSEA-05A',
+    'F-PSEA-08',
+    'F-PSEA-13',
+    'F-PSEA-19',
+    'F-PSEA-21',
+  ])
+  if (nativosExportables.has(code)) return 'ui_nativo_exportable'
   if (code.startsWith('F-')) return 'solo_archivo'
   return 'no_diligenciable'
 }
@@ -218,6 +224,49 @@ async function extractMapRelations(documentos) {
         origenFuente: source,
       })
     }
+  }
+
+  const explicitRelations = [
+    ['P-PSEA-01', 'F-PSEA-19', 'usa'],
+    ['P-PSEA-01', 'F-PSEA-20', 'usa'],
+    ['P-PSEA-01', 'F-PSEA-21', 'usa'],
+    ['P-PSEA-03', 'F-PSEA-19', 'define'],
+    ['P-PSEA-03', 'F-PSEA-20', 'define'],
+    ['P-PSEA-03', 'F-PSEA-21', 'define'],
+    ['P-PSEA-04', 'F-PSEA-19', 'genera'],
+    ['P-PSEA-05', 'I-PSEA-02', 'usa'],
+    ['P-PSEA-05', 'F-PSEA-01', 'referencia'],
+    ['P-PSEA-05', 'F-PSEA-02', 'referencia'],
+    ['P-PSEA-05', 'F-PSEA-19', 'referencia'],
+    ['P-PSEA-06', 'F-PSEA-20', 'usa'],
+    ['P-PSEA-06', 'F-PSEA-21', 'usa'],
+    ['P-PSEA-08', 'I-PSEA-02', 'usa'],
+    ['P-PSEA-08', 'F-PSEA-08', 'genera'],
+    ['P-PSEA-19', 'F-PSEA-20', 'define'],
+    ['P-PSEA-20', 'F-PSEA-21', 'define'],
+    ['F-PSEA-03', 'F-PSEA-19', 'genera'],
+    ['F-PSEA-03', 'F-PSEA-20', 'genera'],
+    ['F-PSEA-19', 'F-PSEA-21', 'referencia'],
+    ['I-PSEA-02', 'F-PSEA-08', 'usa'],
+  ]
+  const keys = new Set(relations.map((item) => `${item.origenCodigo}|${item.destinoCodigo ?? ''}|${item.tipoRelacion}|${item.rutaCritica ?? ''}`))
+  for (const [origenCodigo, destinoCodigo, tipoRelacion] of explicitRelations) {
+    const key = `${origenCodigo}|${destinoCodigo}|${tipoRelacion}|Documentos de ronda`
+    if (keys.has(key)) continue
+    keys.add(key)
+    relations.push({
+      bloque: 'Formatos y registros',
+      rutaCritica: 'Documentos de ronda',
+      origenCodigo,
+      destinoCodigo,
+      tipoRelacion,
+      ambito: 'PEA / ISO 17043',
+      destinoTipo: 'documento',
+      externalSystem: null,
+      externalUrl: null,
+      estadoResolucion: knownCodes.includes(origenCodigo) && knownCodes.includes(destinoCodigo) ? 'resuelto' : 'pendiente',
+      origenFuente: source,
+    })
   }
   return relations
 }

@@ -459,6 +459,8 @@ export default defineSchema({
     documentoSgcVersionId: v.optional(v.union(v.id('documentoSgcVersiones'), v.null())),
     evidenciaSerieId: v.optional(v.union(v.id('sgcEvidenciaSeries'), v.null())),
     critico: v.optional(v.boolean()),
+    bloqueaCierre: v.optional(v.boolean()),
+    usadoEnRonda: v.optional(v.boolean()),
     publicaParticipante: v.optional(v.boolean()),
     // Enlace editable/principal: Google Doc/Sheet vivo, o carpeta para tipo 'carpeta'.
     driveFileId: v.optional(v.union(v.string(), v.null())),
@@ -507,6 +509,87 @@ export default defineSchema({
     .index('by_rondaId_and_tipo', ['rondaId', 'tipo'])
     .index('by_rondaId_and_publicaParticipante', ['rondaId', 'publicaParticipante'])
     .index('by_rondaId_and_formatoRelacionado', ['rondaId', 'formatoRelacionado']),
+
+  sgcActasInicio: defineTable({
+    rondaId: v.id('rondas'),
+    fecha: v.string(),
+    lugar: v.string(),
+    textoInicio: v.string(),
+    estado: v.union(
+      v.literal('borrador'),
+      v.literal('docx_generado'),
+      v.literal('pdf_firmado_cargado'),
+      v.literal('publicado')
+    ),
+    versionBaseId: v.optional(v.union(v.id('documentoSgcVersiones'), v.null())),
+    docxStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    docxFileName: v.optional(v.union(v.string(), v.null())),
+    pdfStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    pdfFileName: v.optional(v.union(v.string(), v.null())),
+    publicaParticipante: v.boolean(),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  }).index('by_rondaId', ['rondaId']),
+
+  sgcActaInicioFirmantes: defineTable({
+    actaId: v.id('sgcActasInicio'),
+    tipo: v.union(v.literal('participante'), v.literal('organizador')),
+    rondaParticipanteId: v.optional(v.union(v.id('rondaParticipantes'), v.null())),
+    nombre: v.string(),
+    entidad: v.string(),
+    sortOrder: v.number(),
+  }).index('by_actaId', ['actaId']),
+
+  sgcInstrumentosRonda: defineTable({
+    rondaId: v.id('rondas'),
+    estado: v.union(
+      v.literal('borrador'),
+      v.literal('pendiente_validacion'),
+      v.literal('validado'),
+      v.literal('requiere_ajustes')
+    ),
+    revision: v.number(),
+    tecnicoNombre: v.optional(v.union(v.string(), v.null())),
+    enviadoAt: v.optional(v.union(v.number(), v.null())),
+    coordinadorNombre: v.optional(v.union(v.string(), v.null())),
+    validadoAt: v.optional(v.union(v.number(), v.null())),
+    observacionDevolucion: v.optional(v.union(v.string(), v.null())),
+    pdfStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    pdfRevision: v.optional(v.union(v.number(), v.null())),
+    xlsxStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    xlsxRevision: v.optional(v.union(v.number(), v.null())),
+    createdAt: v.number(),
+    createdBy: v.string(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  }).index('by_rondaId', ['rondaId']),
+
+  sgcInstrumentosRondaItems: defineTable({
+    relacionId: v.id('sgcInstrumentosRonda'),
+    tipo: v.union(
+      v.literal('analizador'),
+      v.literal('aire_cero'),
+      v.literal('calibrador_dinamico'),
+      v.literal('cilindro'),
+      v.literal('otro')
+    ),
+    origen: v.union(v.literal('placeholder_minimo'), v.literal('manual')),
+    codigoInterno: v.string(),
+    marca: v.string(),
+    modelo: v.string(),
+    serialIdentificacion: v.string(),
+    observaciones: v.string(),
+    fotoGeneralStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    fotoGeneralFileName: v.optional(v.union(v.string(), v.null())),
+    fotoPlacaStorageId: v.optional(v.union(v.id('_storage'), v.null())),
+    fotoPlacaFileName: v.optional(v.union(v.string(), v.null())),
+    sortOrder: v.number(),
+    createdAt: v.number(),
+    updatedAt: v.number(),
+    updatedBy: v.string(),
+  }).index('by_relacionId', ['relacionId']),
 
   sgcRegistroSnapshots: defineTable({
     rondaId: v.id('rondas'),

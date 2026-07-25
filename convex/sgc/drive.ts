@@ -119,9 +119,9 @@ async function findRecursoByCodigo(ctx: QueryCtx | MutationCtx, rondaId: Id<'ron
     .first()
 }
 
-function isFormatoCritico(formatoRelacionado: string | null) {
-  if (!formatoRelacionado) return false
-  return SGC_FORMATOS_FASE_1.some((formato) => formato.codigo === formatoRelacionado && formato.critico)
+function getFormatoConfig(formatoRelacionado: string | null) {
+  if (!formatoRelacionado) return null
+  return SGC_FORMATOS_FASE_1.find((formato) => formato.codigo === formatoRelacionado) ?? null
 }
 
 async function resolveCatalogLinks(
@@ -151,11 +151,13 @@ async function resolveCatalogLinks(
     documentoSgcVersionId = vigente?._id ?? documento.versionVigenteId ?? null
   }
 
+  const formato = getFormatoConfig(formatoRelacionado)
   return {
     evidenciaSerieId: serie?._id ?? null,
     documentoSgcId: documento?._id ?? null,
     documentoSgcVersionId,
-    critico: isFormatoCritico(formatoRelacionado),
+    critico: formato?.critico ?? false,
+    bloqueaCierre: formato?.bloqueaCierre ?? true,
     publicaParticipante: serie?.publicaParticipante ?? false,
   }
 }
@@ -266,6 +268,7 @@ export const inicializarDriveRondaConfig = {
         documentoSgcVersionId: null,
         evidenciaSerieId: null,
         critico: false,
+        bloqueaCierre: false,
         publicaParticipante: false,
         driveFileId: null,
         driveFolderId: null,
@@ -290,6 +293,7 @@ export const inicializarDriveRondaConfig = {
         nombre: string
         fase: string
         critico: boolean
+        bloqueaCierre: boolean
         publicaParticipante: boolean
         updatedAt: number
         updatedBy: string
@@ -300,6 +304,7 @@ export const inicializarDriveRondaConfig = {
       if (root.nombre !== rootNombre) rootPatch.nombre = rootNombre
       if ((root.fase ?? null) !== 'raiz') rootPatch.fase = 'raiz'
       if ((root.critico ?? false) !== false) rootPatch.critico = false
+      if ((root.bloqueaCierre ?? false) !== false) rootPatch.bloqueaCierre = false
       if ((root.publicaParticipante ?? false) !== false) rootPatch.publicaParticipante = false
       if (Object.keys(rootPatch).length > 0) {
         await ctx.db.patch(root._id, { ...rootPatch, updatedAt: now, updatedBy: actor })
@@ -350,6 +355,7 @@ export const inicializarDriveRondaConfig = {
           nombre: string
           fase: string
           critico: boolean
+          bloqueaCierre: boolean
           publicaParticipante: boolean
           notas: string | null
           updatedAt: number
@@ -360,6 +366,7 @@ export const inicializarDriveRondaConfig = {
         if (carpeta.nombre !== carpetaNombre) carpetaPatch.nombre = carpetaNombre
         if (carpeta.fase !== etapa.foco) carpetaPatch.fase = etapa.foco
         if ((carpeta.critico ?? false) !== false) carpetaPatch.critico = false
+        if ((carpeta.bloqueaCierre ?? false) !== false) carpetaPatch.bloqueaCierre = false
         if ((carpeta.publicaParticipante ?? false) !== false) carpetaPatch.publicaParticipante = false
         if ((carpeta.notas ?? null) !== etapa.carpeta && !carpeta.webUrl) carpetaPatch.notas = etapa.carpeta
         if (Object.keys(carpetaPatch).length > 0) {
@@ -389,6 +396,7 @@ export const inicializarDriveRondaConfig = {
             documentoSgcVersionId: links.documentoSgcVersionId,
             evidenciaSerieId: links.evidenciaSerieId,
             critico: links.critico,
+            bloqueaCierre: links.bloqueaCierre,
             publicaParticipante: links.publicaParticipante,
             driveFileId: null,
             driveFolderId: null,
@@ -413,9 +421,9 @@ export const inicializarDriveRondaConfig = {
           fase: string
           formatoRelacionado: string | null
           documentoSgcId: Id<'documentosSgc'> | null
-          documentoSgcVersionId: Id<'documentoSgcVersiones'> | null
           evidenciaSerieId: Id<'sgcEvidenciaSeries'> | null
           critico: boolean
+          bloqueaCierre: boolean
           templateUrl: string | null
           notas: string | null
           updatedAt: number
@@ -426,9 +434,10 @@ export const inicializarDriveRondaConfig = {
         if (existing.fase !== etapa.foco) patch.fase = etapa.foco
         if ((existing.formatoRelacionado ?? null) !== formatoRelacionado) patch.formatoRelacionado = formatoRelacionado
         if ((existing.documentoSgcId ?? null) !== links.documentoSgcId) patch.documentoSgcId = links.documentoSgcId
-        if ((existing.documentoSgcVersionId ?? null) !== links.documentoSgcVersionId) patch.documentoSgcVersionId = links.documentoSgcVersionId
+        // La reparacion conserva la version documental adoptada por la ronda.
         if ((existing.evidenciaSerieId ?? null) !== links.evidenciaSerieId) patch.evidenciaSerieId = links.evidenciaSerieId
         if ((existing.critico ?? false) !== links.critico) patch.critico = links.critico
+        if ((existing.bloqueaCierre ?? false) !== links.bloqueaCierre) patch.bloqueaCierre = links.bloqueaCierre
         // No se re-hereda publicaParticipante desde la serie al reparar: la visibilidad Drive
         // es explicita y su fuente de verdad es sgcDriveRecursos.publicaParticipante (ver F1/F2).
         if ((existing.templateUrl ?? null) !== (documento.archivoBase ?? null)) patch.templateUrl = documento.archivoBase ?? null
@@ -527,9 +536,11 @@ export const upsertDriveRecursoConfig = {
       fase: trimToNull(args.fase),
       formatoRelacionado,
       documentoSgcId: links.documentoSgcId,
-      documentoSgcVersionId: links.documentoSgcVersionId,
+      documentoSgcVersionId: existing?.documentoSgcVersionId ?? links.documentoSgcVersionId,
       evidenciaSerieId: links.evidenciaSerieId,
       critico: links.critico,
+      bloqueaCierre: links.bloqueaCierre,
+      usadoEnRonda: codigo === 'F-PSEA-20' && definitivoChanged ? false : existing?.usadoEnRonda ?? false,
       // La visibilidad Drive es explicita: solo se hereda de la serie al crear el recurso;
       // al actualizar se preserva la decision existente (ver F1/F2 en review_drive.md).
       publicaParticipante: existing
@@ -689,6 +700,7 @@ export const retirarDriveRecursoConfig = {
     if (!recurso) throw new Error('Recurso Drive no encontrado.')
     await ctx.db.patch(recursoId, {
       estado: 'retirado',
+      usadoEnRonda: recurso.codigo === 'F-PSEA-20' ? false : recurso.usadoEnRonda ?? false,
       notas: detalle,
       updatedAt: Date.now(),
       updatedBy: actor,
@@ -719,6 +731,9 @@ export const actualizarVisibilidadDriveRecursoConfig = {
     if (!recurso) throw new Error('Recurso Drive no encontrado.')
     if (publicaParticipante && recurso.tipo === 'carpeta') {
       throw new Error('No se publican carpetas completas para participantes; publique documentos individuales.')
+    }
+    if (publicaParticipante && (recurso.codigo === 'F-PSEA-20' || recurso.codigo === 'F-PSEA-21')) {
+      throw new Error('F-PSEA-20 y F-PSEA-21 son documentos internos y no pueden publicarse.')
     }
 
     const now = Date.now()
@@ -755,6 +770,28 @@ export const actualizarVisibilidadDriveRecursoConfig = {
     return null
   },
 } satisfies DriveMutationConfig<typeof actualizarVisibilidadDriveRecursoArgs>
+
+const marcarDriveRecursoUsadoArgs = {
+  recursoId: v.id('sgcDriveRecursos'),
+  usado: v.boolean(),
+}
+
+export const marcarDriveRecursoUsadoConfig = {
+  args: marcarDriveRecursoUsadoArgs,
+  returns: v.null(),
+  handler: async (ctx, { recursoId, usado }) => {
+    const actor = await requireSgcManage(ctx)
+    const recurso = await ctx.db.get(recursoId)
+    if (!recurso) throw new Error('Recurso Drive no encontrado.')
+    if (recurso.codigo !== 'F-PSEA-20') throw new Error('La confirmacion de uso solo aplica a F-PSEA-20.')
+    if (usado && (!recurso.definitivo || !('storageId' in recurso.definitivo))) {
+      throw new Error('Cargue un archivo definitivo antes de confirmar uso en ronda.')
+    }
+    await ctx.db.patch(recursoId, { usadoEnRonda: usado, estado: usado ? 'diligenciado' : 'creado', updatedAt: Date.now(), updatedBy: actor })
+    await writeAudit(ctx, { rondaId: recurso.rondaId, actor, evento: usado ? 'sgc.f20.uso_confirmado' : 'sgc.f20.uso_retirado', targetTipo: 'sgcDriveRecursos', targetId: recursoId })
+    return null
+  },
+} satisfies DriveMutationConfig<typeof marcarDriveRecursoUsadoArgs>
 
 const registrarAutomatizacionDriveArgs = {
   rondaId: v.id('rondas'),
@@ -806,20 +843,18 @@ export const listDriveRecursosParticipanteConfig = {
   returns: v.array(participanteDtoValidator),
   handler: async (ctx, { rondaId }) => {
     await requireParticipanteOAdmin(ctx, rondaId)
-    // F5: los documentos Drive solo se exponen al participante cuando la ronda esta en
-    // documentacion o cerrada; en otros estados no hay expediente publicado que mostrar.
     const ronda = await ctx.db.get(rondaId)
     if (!ronda) throw new Error('Ronda no encontrada.')
-    if (ronda.estado !== 'documentacion_pendiente' && ronda.estado !== 'cerrada') {
-      return []
-    }
+    if (!['activa', 'documentacion_pendiente', 'cerrada'].includes(ronda.estado)) return []
     const recursos = await ctx.db
       .query('sgcDriveRecursos')
       .withIndex('by_rondaId_and_publicaParticipante', (q) => q.eq('rondaId', rondaId).eq('publicaParticipante', true))
       .collect()
     // Solo se exponen recursos con archivo subido por el admin (definitivo storage). El resolver
     // devuelve null para cualquier otro caso, asi que se descartan tras resolver.
+    const codigosPermitidos = new Set(['I-PSEA-02', 'F-PSEA-01', 'F-PSEA-02', 'F-PSEA-19'])
     const publicables = recursos
+      .filter((recurso) => codigosPermitidos.has(recurso.codigo))
       .filter(esRecursoVisibleParaParticipante)
       .sort((a, b) => a.codigo.localeCompare(b.codigo))
     const resueltos = await Promise.all(

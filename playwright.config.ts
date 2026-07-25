@@ -51,12 +51,33 @@ const manualAuthProjects = isManualAuth
       },
     ]
   : []
+const storedAuthProjects = !hasAuthCredentials && hasStoredAuth
+  ? [
+      {
+        name: 'stored-auth-check',
+        testMatch: '**/auth.state.setup.ts',
+        use: {
+          ...devices['Desktop Chrome'],
+          launchOptions: {
+            executablePath: '/usr/bin/chromium',
+            args: ['--disable-crashpad'],
+          },
+          storageState: authFile,
+        },
+      },
+    ]
+  : []
+const authDependencies = hasAuthCredentials
+  ? ['auth-setup']
+  : hasStoredAuth
+    ? ['stored-auth-check']
+    : []
 const authenticatedProjects =
   hasAuthCredentials || hasStoredAuth
     ? [
         {
           name: 'authenticated-chromium',
-          dependencies: hasAuthCredentials ? ['auth-setup'] : [],
+          dependencies: authDependencies,
           testMatch: '**/*.auth.spec.ts',
           testIgnore: screenshotSpecs,
           use: {
@@ -72,7 +93,7 @@ const authenticatedProjects =
           ? [
               {
                 name: 'screenshots-authenticated-chromium',
-                dependencies: hasAuthCredentials ? ['auth-setup'] : [],
+                dependencies: authDependencies,
                 testMatch: screenshotSpecs,
                 use: {
                   ...devices['Desktop Chrome'],
@@ -109,5 +130,11 @@ export default defineConfig({
         timeout: 120 * 1000,
       }
     : undefined,
-  projects: [publicProject, ...credentialAuthProjects, ...manualAuthProjects, ...authenticatedProjects],
+  projects: [
+    publicProject,
+    ...credentialAuthProjects,
+    ...manualAuthProjects,
+    ...storedAuthProjects,
+    ...authenticatedProjects,
+  ],
 })

@@ -61,7 +61,7 @@ export function assertAllowedEstadoTransition(current: string, next: string) {
   }
 }
 
-export const FORMATOS_ARCHIVO = ['F-PSEA-08', 'F-PSEA-09', 'F-PSEA-10', 'F-PSEA-14'] as const
+export const FORMATOS_ARCHIVO = ['F-PSEA-08', 'F-PSEA-09', 'F-PSEA-10', 'F-PSEA-14', 'F-PSEA-20'] as const
 export const REVISION_CHECKS = [
   'participantes_revisados',
   'fichas_revisadas',

@@ -92,7 +92,7 @@ export const transitionRondaToDocumentacionPendienteConfig = {
       rondaId,
       actor,
       evento: 'sgc.ronda.documentacion_pendiente',
-      detalle: `driveAdvertencias=${driveCierre.advertencias.length}`,
+      detalle: `driveAdvertencias=${driveCierre.advertencias.length}; pendientesCriticos=${driveCierre.pendientesCriticos.length}`,
     })
   },
 } satisfies SgcMutationConfig<typeof transitionRondaToDocumentacionPendienteArgs>
@@ -116,7 +116,7 @@ export const transitionRondaToCerradaConfig = {
       rondaId,
       actor,
       evento: 'sgc.ronda.cerrada',
-      detalle: `driveAdvertencias=${driveCierre.advertencias.length}`,
+      detalle: `driveAdvertencias=${driveCierre.advertencias.length}; pendientesCriticos=${driveCierre.pendientesCriticos.length}`,
     })
   },
 } satisfies SgcMutationConfig<typeof transitionRondaToCerradaArgs>

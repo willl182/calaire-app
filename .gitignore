@@ -58,8 +58,11 @@ CLAUDE.md
 .omit/
 skills-lock.json
 
-# PSEA procedural docs / formatos (loaded into the app as docx/xlsx/csv, not tracked as md)
-docs/01_bloque_general/
+# PSEA document sources: track Markdown, keep generated/binary artifacts local
+docs/01_bloque_general/**
+!docs/01_bloque_general/
+!docs/01_bloque_general/**/
+!docs/01_bloque_general/**/*.md
 docs/EA-PP-2026-R1/
 docs/EA-PP2026-R*-*.docx
 

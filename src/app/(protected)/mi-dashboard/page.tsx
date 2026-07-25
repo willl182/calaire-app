@@ -14,6 +14,7 @@ import {
   listPublicacionesParticipanteWithStatus,
   listMisComentariosRondaWithStatus,
   listMisNotificacionesWithStatus,
+  listDriveRecursosParticipanteWithStatus,
 } from '@/server/sgc'
 import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from './actions'
 import { PerformanceDashboard } from './PerformanceDashboard'
@@ -52,6 +53,7 @@ type SgcDatosParticipante = {
   publicaciones: Awaited<ReturnType<typeof listPublicacionesParticipanteWithStatus>>['data']
   comentarios: Awaited<ReturnType<typeof listMisComentariosRondaWithStatus>>['data']
   notificaciones: Awaited<ReturnType<typeof listMisNotificacionesWithStatus>>['data']
+  documentos: Awaited<ReturnType<typeof listDriveRecursosParticipanteWithStatus>>['data']
 }
 
 function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignada; sgc?: SgcDatosParticipante }) {
@@ -64,7 +66,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
         ? 'Continuar ficha'
         : 'Diligenciar ficha'
   const puedeCargarDatos = esActiva && fichaEnviada
-  const mostrarSgc = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
+  const mostrarSgc = ronda.estado === 'activa' || ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
 
   return (
     <article id={`cierre-documental-${ronda.codigo}`} className="card grid gap-4 p-6">
@@ -133,6 +135,26 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">
             Informacion de cierre documental
           </p>
+
+          {sgc.documentos.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-[var(--foreground)]">Documentos de la ronda</p>
+              <div className="grid gap-2">
+                {sgc.documentos.map((documento) => (
+                  <a
+                    key={documento._id}
+                    href={documento.definitivo?.webUrl ?? '#'}
+                    className="flex items-center justify-between rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm hover:border-[var(--pt-primary)]"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span className="font-medium">{documento.codigo} · {documento.nombre}</span>
+                    <span className="text-xs text-[var(--pt-primary-dark)]">Descargar</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          )}
 
           {sgc.hitos.length > 0 && (
             <div className="space-y-2">
@@ -232,7 +254,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
             </div>
           </div>
 
-          {sgc.hitos.length === 0 && sgc.evidencias.length === 0 && sgc.publicaciones.length === 0 && sgc.notificaciones.length === 0 && sgc.comentarios.length === 0 && (
+          {sgc.documentos.length === 0 && sgc.hitos.length === 0 && sgc.evidencias.length === 0 && sgc.publicaciones.length === 0 && sgc.notificaciones.length === 0 && sgc.comentarios.length === 0 && (
             <p className="text-sm text-[var(--foreground-muted)]">
               No hay informacion publicada visible en este momento.
             </p>
@@ -321,13 +343,14 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const rondasSgc = new Map<string, SgcDatosParticipante>()
   const sgcOfflineResults = await Promise.all(
     rondas.map(async (r) => {
-      if (r.estado === 'documentacion_pendiente' || r.estado === 'cerrada') {
-        const [hitos, evidencias, publicaciones, comentarios, notificaciones] = await Promise.all([
+      if (r.estado === 'activa' || r.estado === 'documentacion_pendiente' || r.estado === 'cerrada') {
+        const [hitos, evidencias, publicaciones, comentarios, notificaciones, documentos] = await Promise.all([
           getHitosVisibleParticipanteWithStatus(r.id),
           getEvidenciasPublicasWithStatus(r.id),
           listPublicacionesParticipanteWithStatus(r.id),
           listMisComentariosRondaWithStatus(r.id),
           listMisNotificacionesWithStatus(r.id),
+          listDriveRecursosParticipanteWithStatus(r.id),
         ])
         rondasSgc.set(r.id, {
           hitos: hitos.data,
@@ -335,8 +358,9 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
           publicaciones: publicaciones.data,
           comentarios: comentarios.data,
           notificaciones: notificaciones.data,
+          documentos: documentos.data,
         })
-        return hitos.offline || evidencias.offline || publicaciones.offline || comentarios.offline || notificaciones.offline
+        return hitos.offline || evidencias.offline || publicaciones.offline || comentarios.offline || notificaciones.offline || documentos.offline
       }
       return false
     })

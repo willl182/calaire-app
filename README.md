@@ -127,6 +127,8 @@ pnpm test
 pnpm test:e2e
 pnpm test:e2e:start
 pnpm test:e2e:auth:manual
+pnpm test:e2e:auth:cdp
+pnpm sgc:validate-documents
 pnpm release -- "mensaje del commit"
 ```
 
@@ -140,14 +142,31 @@ pnpm release -- "mensaje del commit"
 E2E_AUTH_EMAIL="usuario@example.com" E2E_AUTH_PASSWORD="..." pnpm test:e2e:start
 ```
 
-- Si prefieres login manual:
+- Si prefieres login manual, inicia Chrome con depuración remota, autentícate en
+  `http://localhost:3000/dashboard` y captura la sesión:
 
 ```bash
-pnpm test:e2e:auth:manual
-pnpm test:e2e
+google-chrome-stable --remote-debugging-port=9222 --user-data-dir=/tmp/calaire-e2e-chrome
+pnpm test:e2e:auth:cdp
+pnpm test:e2e:start
 ```
 
-La sesión local se guarda en `.auth/workos.json`, ignorado por git.
+`pnpm test:e2e:auth:manual` permanece como alternativa cuando el proveedor permite
+login en navegador automatizado. La sesión local se guarda en `.auth/workos.json`,
+es efímera y está ignorada por git. Si expira, `stored-auth-check` detiene las pruebas
+autenticadas con instrucciones de renovación.
+
+## Documentos SGC versionados
+
+Los archivos Markdown en `docs/01_bloque_general/` son fuentes versionadas. DOCX,
+XLSX, CSV, imágenes y demás binarios permanecen como artefactos locales. Validación:
+
+```bash
+pnpm sgc:validate-documents
+```
+
+El validador exige fuentes Markdown y, cuando encuentra DOCX locales, comprueba que
+no estén vacíos.
 
 ## Verificación mínima
 

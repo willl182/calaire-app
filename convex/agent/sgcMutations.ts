@@ -206,7 +206,8 @@ export const createEvidenciaSeriesDefinition = defineAgentMutation({
     formato: v.union(
       v.literal('F-PSEA-03'), v.literal('F-PSEA-05'), v.literal('F-PSEA-05A'), v.literal('F-PSEA-06'),
       v.literal('F-PSEA-07'), v.literal('F-PSEA-08'), v.literal('F-PSEA-09'), v.literal('F-PSEA-10'),
-      v.literal('F-PSEA-11'), v.literal('F-PSEA-12'), v.literal('F-PSEA-13'), v.literal('F-PSEA-14')
+      v.literal('F-PSEA-11'), v.literal('F-PSEA-12'), v.literal('F-PSEA-13'), v.literal('F-PSEA-14'),
+      v.literal('F-PSEA-19'), v.literal('F-PSEA-20'), v.literal('F-PSEA-21')
     ),
     seccion: v.union(v.string(), v.null()),
     nombre: v.string(),

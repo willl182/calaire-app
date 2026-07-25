@@ -11,6 +11,9 @@ export type SgcFormatoCodigo =
   | 'F-PSEA-12'
   | 'F-PSEA-13'
   | 'F-PSEA-14'
+  | 'F-PSEA-19'
+  | 'F-PSEA-20'
+  | 'F-PSEA-21'
 
 export type SgcFase = 'planeacion' | 'convocatoria' | 'ejecucion' | 'evaluacion' | 'cierre'
 export type SgcModo = 'nativo' | 'nativo_calculado' | 'archivo' | 'no_aplica_inicial'
@@ -21,6 +24,7 @@ export type SgcFormato = {
   fase: SgcFase
   modo: SgcModo
   critico: boolean
+  bloqueaCierre: boolean
   descripcion: string
 }
 
@@ -40,7 +44,7 @@ export type SgcRondaEtapa = {
   numero: string
   nombre: string
   carpeta: string
-  foco: 'planificacion' | 'comunicaciones' | 'item' | 'datos' | 'homogeneidad' | 'informe' | 'cierre'
+  foco: 'planificacion' | 'comunicaciones' | 'inicio' | 'item' | 'datos' | 'homogeneidad' | 'informe' | 'cierre'
   descripcion: string
   documentos: SgcRondaDocumento[]
 }
@@ -82,6 +86,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'planeacion',
     modo: 'nativo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Registro nativo de participacion, datos del laboratorio, equipos y condiciones aceptadas.',
   },
   {
@@ -90,6 +95,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'planeacion',
     modo: 'nativo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Plan finalizado, responsable, fecha, bloques ISO/IEC 17043 y snapshot.',
   },
   {
@@ -98,6 +104,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'convocatoria',
     modo: 'nativo_calculado',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Caratula de ronda, alcance, fechas, participantes previstos y registros asociados.',
   },
   {
@@ -106,6 +113,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'convocatoria',
     modo: 'nativo_calculado',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Fichas enviadas o justificacion documental.',
   },
   {
@@ -114,6 +122,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'convocatoria',
     modo: 'nativo_calculado',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Control de preparacion del item y codigos de participante unicos y sin provisionales.',
   },
   {
@@ -122,6 +131,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'ejecucion',
     modo: 'archivo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Copia o exportacion oficial de los datos reportados por participante.',
   },
   {
@@ -130,6 +140,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'ejecucion',
     modo: 'archivo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Exportacion oficial desde calaire-app hacia pt_app.',
   },
   {
@@ -138,6 +149,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'evaluacion',
     modo: 'archivo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Registro trazable de preprocesamiento, exclusiones y transformaciones.',
   },
   {
@@ -146,6 +158,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'evaluacion',
     modo: 'no_aplica_inicial',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Revision nativa o evidencia documentada de homogeneidad y estabilidad.',
   },
   {
@@ -154,6 +167,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'evaluacion',
     modo: 'nativo_calculado',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Dataset oficial consolidado con envios finales completos o justificados.',
   },
   {
@@ -162,6 +176,7 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'cierre',
     modo: 'nativo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Revision finalizada, metricas revisadas, snapshot e informe final de resultados.',
   },
   {
@@ -170,7 +185,35 @@ export const SGC_FORMATOS_FASE_1: SgcFormato[] = [
     fase: 'cierre',
     modo: 'archivo',
     critico: true,
+    bloqueaCierre: true,
     descripcion: 'Registro de queja, trabajo no conforme, no conformidad o accion correctiva si aplica.',
+  },
+  {
+    codigo: 'F-PSEA-19',
+    nombre: 'Acta de inicio de ronda',
+    fase: 'convocatoria',
+    modo: 'nativo',
+    critico: true,
+    bloqueaCierre: false,
+    descripcion: 'Acta presencial generada, firmada manualmente, escaneada y publicada cuando corresponda.',
+  },
+  {
+    codigo: 'F-PSEA-20',
+    nombre: 'Rotulado anonimo',
+    fase: 'convocatoria',
+    modo: 'archivo',
+    critico: true,
+    bloqueaCierre: false,
+    descripcion: 'Formato manual interno para evidenciar el rotulado anonimo usado en la ronda.',
+  },
+  {
+    codigo: 'F-PSEA-21',
+    nombre: 'Relacion de instrumentos Calaire usados',
+    fase: 'convocatoria',
+    modo: 'nativo',
+    critico: true,
+    bloqueaCierre: false,
+    descripcion: 'Registro nativo interno de instrumentos Calaire, identificacion, fotos y validacion.',
   },
 ]
 
@@ -205,9 +248,21 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'comunicaciones',
     descripcion: 'Conserva convocatorias, aclaraciones, respuestas, acuses y comunicaciones formales emitidas durante la ronda.',
     documentos: [
+      { codigo: 'I-PSEA-02', nombre: 'Instructivo participante calaire-app con anexos A y B', estado: 'disponible', archivoBase: 'I-PSEA-02 Instructivo participante calaire-app', nota: 'Version congelada y publicada para la ronda.' },
       { codigo: 'F-PSEA-18', nombre: 'Formato de comunicacion oficial al participante', estado: 'pendiente', nota: 'Pendiente de enlazar con publicaciones, plantillas y notificaciones.' },
       { codigo: 'EVID-COM', nombre: 'Respuestas o acuses de recibo del participante', estado: 'pendiente', nota: 'Evidencia operativa pendiente de carga o sincronizacion.' },
       { codigo: 'EVID-ACL', nombre: 'Comunicaciones de aclaracion o cambios, si aplica', estado: 'pendiente', nota: 'Se conserva cuando existan aclaraciones o cambios.' },
+    ],
+  },
+  {
+    key: 'inicio_ronda',
+    numero: '02A',
+    nombre: 'Inicio de ronda',
+    carpeta: '02A_inicio_ronda',
+    foco: 'inicio',
+    descripcion: 'Documenta el inicio presencial de la ronda y el acta firmada por participantes y organizadores.',
+    documentos: [
+      { codigo: 'F-PSEA-19', nombre: 'Acta de inicio de ronda', estado: 'disponible', archivoBase: 'F-PSEA-19 Acta de inicio de ronda', formatoOperativo: 'F-PSEA-19', nota: 'Se genera desde datos de ronda, se firma a mano y se publica solo como PDF firmado.' },
     ],
   },
   {
@@ -219,6 +274,8 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     descripcion: 'Agrupa la preparacion, control y verificaciones tecnicas del item de ensayo de aptitud.',
     documentos: [
       { codigo: 'F-PSEA-07', nombre: 'Preparacion y control del item', estado: 'disponible', archivoBase: 'F-PSEA-07 Preparacion y control del item', formatoOperativo: 'F-PSEA-07', nota: 'Existe en docs/EA-PP-2026-R1; la vista valida codigos y trazabilidad operativa.' },
+      { codigo: 'F-PSEA-20', nombre: 'Rotulado anonimo', estado: 'disponible', archivoBase: 'F-PSEA-20 Rotulado anonimo', formatoOperativo: 'F-PSEA-20', nota: 'Placeholder maestro y archivo manual interno usado en la ronda.' },
+      { codigo: 'F-PSEA-21', nombre: 'Relacion de instrumentos Calaire usados', estado: 'disponible', archivoBase: 'F-PSEA-21 Relacion de instrumentos Calaire usados', formatoOperativo: 'F-PSEA-21', nota: 'Registro nativo interno con identificacion, dos fotos por instrumento y validacion.' },
       { codigo: 'EVID-CERT', nombre: 'Certificados de gases, equipos o patrones usados', estado: 'pendiente', nota: 'Evidencia tecnica pendiente de carga cuando aplique.' },
       { codigo: 'EVID-MONT', nombre: 'Evidencia de montaje, configuracion o verificacion tecnica', estado: 'pendiente', nota: 'Evidencia tecnica pendiente de carga cuando aplique.' },
     ],
