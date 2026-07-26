@@ -321,7 +321,7 @@ test('pt bloquea edicion despues del envio final', async () => {
   const ids = await t.run(async (ctx) => {
     const rondaId = await ctx.db.insert('rondas', { codigo: 'PT-FINAL', nombre: 'PT final', estado: 'activa', createdAt: Date.now() })
     const participanteId = await ctx.db.insert('rondaParticipantes', {
-      rondaId, workosUserId: 'pt-final', email: 'pt-final@lab.test', invitadoAt: Date.now(), participantProfile: 'member'
+      rondaId, workosUserId: 'pt-final', email: 'pt-final@lab.test', invitadoAt: Date.now(), participantProfile: 'member', participantCode: 'P-001', replicateCode: 1
     })
     const ptItemId = await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'L1', sortOrder: 1, createdAt: Date.now() })
     const sampleGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'G1', sortOrder: 1, createdAt: Date.now() })
@@ -333,6 +333,81 @@ test('pt bloquea edicion despues del envio final', async () => {
   await asParticipant.mutation(api.pt.index.upsertEnvioPT, args)
   await asParticipant.mutation(api.pt.index.submitFinalPT, { rondaId: ids.rondaId })
   await expect(asParticipant.mutation(api.pt.index.upsertEnvioPT, { ...args, meanValue: 2 })).rejects.toThrow(/envio final ya fue enviado/)
+})
+
+test('admin reabre, corrige y reenvia PT sin perder valores', async () => {
+  const t = convexTest(schema, modules)
+  const ids = await t.run(async (ctx) => {
+    const rondaId = await ctx.db.insert('rondas', { codigo: 'PT-ADMIN', nombre: 'PT admin', estado: 'activa', createdAt: Date.now() })
+    const participanteId = await ctx.db.insert('rondaParticipantes', {
+      rondaId,
+      workosUserId: 'pt-admin-target',
+      email: 'pt-admin-target@lab.test',
+      invitadoAt: Date.now(),
+      participantProfile: 'member',
+      participantCode: 'P-ADMIN',
+      replicateCode: 7,
+    })
+    const otroParticipanteId = await ctx.db.insert('rondaParticipantes', {
+      rondaId,
+      workosUserId: 'pt-other',
+      email: 'pt-other@lab.test',
+      invitadoAt: Date.now(),
+      participantProfile: 'member',
+      participantCode: 'P-OTHER',
+      replicateCode: 8,
+    })
+    const ptItemId = await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'L1', sortOrder: 1, createdAt: Date.now() })
+    const sampleGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'G1', sortOrder: 1, createdAt: Date.now() })
+    return { rondaId, participanteId, otroParticipanteId, ptItemId, sampleGroupId }
+  })
+  const asAdmin = t.withIdentity({ subject: 'admin-pt', role: 'admin' })
+  const asParticipant = t.withIdentity({ subject: 'pt-admin-target' })
+  const args = {
+    rondaId: ids.rondaId,
+    rondaParticipanteId: ids.participanteId,
+    ptItemId: ids.ptItemId,
+    sampleGroupId: ids.sampleGroupId,
+    d1: 1,
+    meanValue: 1,
+    sdValue: 0,
+    ux: 0.1,
+    k: 2,
+    uxExp: 0.2,
+  }
+
+  await asAdmin.mutation(api.pt.index.upsertEnvioPT, args)
+  const firstSubmittedAt = await asAdmin.mutation(api.pt.index.submitFinalPTByParticipante, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  await expect(asAdmin.mutation(api.pt.index.upsertEnvioPT, { ...args, meanValue: 2 })).rejects.toThrow(/envio final ya fue enviado/)
+  await expect(asParticipant.mutation(api.pt.index.reabrirEnvioFinalPT, {
+    rondaParticipanteId: ids.participanteId,
+  })).rejects.toThrow(/Permisos insuficientes/)
+  await expect(asParticipant.query(api.pt.index.getEstadoEnvioPTByParticipante, {
+    rondaParticipanteId: ids.otroParticipanteId,
+  })).rejects.toThrow(/No tiene acceso a este participante/)
+
+  const reopened = await asAdmin.mutation(api.pt.index.reabrirEnvioFinalPT, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  expect(reopened.previousSubmittedAt).toBe(firstSubmittedAt)
+  expect(reopened.updatedCells).toBe(1)
+  const draft = await asAdmin.query(api.pt.index.listEnviosPTByParticipante, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  expect(draft[0]?.meanValue).toBe(1)
+  expect(draft[0]?.finalSubmittedAt).toBeUndefined()
+
+  await asAdmin.mutation(api.pt.index.upsertEnvioPT, { ...args, d2: undefined, d3: undefined, meanValue: 2 })
+  const secondSubmittedAt = await asAdmin.mutation(api.pt.index.submitFinalPTByParticipante, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  expect(secondSubmittedAt).toBeTruthy()
+  const finalState = await asAdmin.query(api.pt.index.getEstadoEnvioPTByParticipante, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  expect(finalState).toMatchObject({ completo: true, enviado: true, total_guardado: 1, total_esperado: 1 })
 })
 
 test('fichas no se crean ni editan fuera de una ronda activa', async () => {

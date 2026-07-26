@@ -14,6 +14,14 @@ import {
   parseReferenciaCsv,
   type ReferenciaImportPreview,
 } from '@/server/rondas/referencia-csv'
+import {
+  adminEnviarInformeFinalAction,
+  adminGuardarEnvioAction,
+  adminGuardarReferenciaCsvAction,
+  adminLimpiarEnviosReferenciaAction,
+  adminReabrirInformeFinalAction,
+} from '@/app/(protected)/dashboard/rondas/[id]/participantes/[pid]/datos/actions'
+import type { AdminPTTarget } from './FormularioRonda'
 import { enviarInformeFinalAction, guardarEnvioAction, guardarReferenciaCsvAction, limpiarEnviosReferenciaAction } from './actions'
 
 type CellKey = `${string}::${string}`
@@ -155,6 +163,7 @@ export default function FormularioReferencia({
   participantCode,
   replicateCode,
   participanteEmail,
+  adminTarget,
 }: {
   ronda: Ronda
   ptItems: RondaPTItem[]
@@ -165,6 +174,7 @@ export default function FormularioReferencia({
   participantCode: string | null
   replicateCode: number | null
   participanteEmail: string
+  adminTarget?: AdminPTTarget
 }) {
   const [submitDone, setSubmitDone] = useState(envioFinalizado)
   const [submittedAt, setSubmittedAt] = useState<string | null>(enviadoAt)
@@ -239,7 +249,9 @@ export default function FormularioReferencia({
     const uxExp = Number(data.uxExp)
     setSaveStatus((prev) => ({ ...prev, [key]: 'saving' }))
 
-    const result = await guardarEnvioAction(ronda.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp, k)
+    const result = adminTarget
+      ? await adminGuardarEnvioAction(ronda.id, adminTarget.rondaParticipanteId, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp, k)
+      : await guardarEnvioAction(ronda.id, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, uxExp, k)
 
     if (result.error) {
       setSaveStatus((prev) => ({ ...prev, [key]: 'error' }))
@@ -285,7 +297,9 @@ export default function FormularioReferencia({
     }
 
     setFormMessage(null)
-    const result = await enviarInformeFinalAction(ronda.id)
+    const result = adminTarget
+      ? await adminEnviarInformeFinalAction(ronda.id, adminTarget.rondaParticipanteId)
+      : await enviarInformeFinalAction(ronda.id)
     if (result.error) {
       setFormMessage(result.error)
       return
@@ -293,6 +307,23 @@ export default function FormularioReferencia({
 
     setSubmitDone(true)
     setSubmittedAt(result.submittedAt ?? new Date().toISOString())
+  }
+
+  async function handleReopen() {
+    if (!adminTarget || ronda.estado !== 'activa') return
+    const confirmed = window.confirm(
+      'Se conservarán los valores, pero el informe volverá a borrador y podrá editarse hasta enviarlo nuevamente. ¿Continuar?'
+    )
+    if (!confirmed) return
+    setFormMessage(null)
+    const result = await adminReabrirInformeFinalAction(ronda.id, adminTarget.rondaParticipanteId)
+    if (result.error) {
+      setFormMessage(result.error)
+      return
+    }
+    setSubmitDone(false)
+    setSubmittedAt(null)
+    setFormMessage(null)
   }
 
   async function handlePreviewImport() {
@@ -335,7 +366,9 @@ export default function FormularioReferencia({
     setImportStatus('saving')
     setImportMessage(null)
 
-    const result = await guardarReferenciaCsvAction(ronda.id, importPreview.cells)
+    const result = adminTarget
+      ? await adminGuardarReferenciaCsvAction(ronda.id, adminTarget.rondaParticipanteId, importPreview.cells)
+      : await guardarReferenciaCsvAction(ronda.id, importPreview.cells)
     if (result.error || (result.errors && result.errors.length > 0)) {
       setImportStatus('error')
       setImportMessage(result.error ?? result.errors?.join(' ') ?? 'No fue posible guardar la importación.')
@@ -384,7 +417,9 @@ export default function FormularioReferencia({
     setImportStatus('saving')
     setImportMessage(null)
 
-    const result = await limpiarEnviosReferenciaAction(ronda.id)
+    const result = adminTarget
+      ? await adminLimpiarEnviosReferenciaAction(ronda.id, adminTarget.rondaParticipanteId)
+      : await limpiarEnviosReferenciaAction(ronda.id)
     if (result.error) {
       setImportStatus('error')
       setImportMessage(result.error)
@@ -436,9 +471,9 @@ export default function FormularioReferencia({
   })).filter((entry) => entry.items.length > 0)
 
   return (
-    <div className="min-h-screen bg-[var(--background)] px-6 py-8">
+    <div className={adminTarget ? '' : 'min-h-screen bg-[var(--background)] px-6 py-8'}>
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-8 py-6">
+        {!adminTarget && <header className="header-bar px-8 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div className="flex items-center gap-6">
               <LogoUnal height={64} />
@@ -458,7 +493,13 @@ export default function FormularioReferencia({
               </div>
             </div>
           </div>
-        </header>
+        </header>}
+
+        {adminTarget && (
+          <section className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+            <span className="font-semibold">Modo administrativo.</span> Guardando resultados en nombre de {participanteEmail}.
+          </section>
+        )}
 
         <section className="card p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
@@ -553,9 +594,16 @@ export default function FormularioReferencia({
           )}
 
           {submitDone && (
-            <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
-              Tu informe final PT fue enviado correctamente.
-              {submittedAt ? ` Fecha de envío: ${new Date(submittedAt).toLocaleString('es-CO')}.` : ''}
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+              <span>
+                {adminTarget ? 'El informe final PT fue enviado correctamente.' : 'Tu informe final PT fue enviado correctamente.'}
+                {submittedAt ? ` Fecha de envío: ${new Date(submittedAt).toLocaleString('es-CO')}.` : ''}
+              </span>
+              {adminTarget && ronda.estado === 'activa' && (
+                <button type="button" onClick={() => void handleReopen()} className="btn-outline">
+                  Reabrir envío para corrección
+                </button>
+              )}
             </div>
           )}
 

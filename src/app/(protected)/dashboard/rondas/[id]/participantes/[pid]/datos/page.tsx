@@ -1,16 +1,18 @@
-import { notFound } from 'next/navigation'
 import Link from 'next/link'
+import { notFound } from 'next/navigation'
 
+import FormularioReferencia from '@/app/(protected)/ronda/[codigo]/FormularioReferencia'
+import FormularioRonda from '@/app/(protected)/ronda/[codigo]/FormularioRonda'
 import { requireAdminAuth } from '@/server/auth'
-import { RondaPageHeader } from '../../../RondaPageHeader'
 import {
+  getEstadoEnvioPTByParticipante,
   getParticipanteRondaResumen,
   getRonda,
   listEnviosPTByParticipante,
   listPTItems,
   listPTSampleGroups,
 } from '@/server/rondas'
-import DatosAdminEditor from './DatosAdminEditor'
+import { RondaPageHeader } from '../../../RondaPageHeader'
 
 type Props = {
   params: Promise<{ id: string; pid: string }>
@@ -26,106 +28,53 @@ export default async function DatosParticipanteAdminPage({ params }: Props) {
     getRonda(rondaId),
     getParticipanteRondaResumen(participanteId),
   ])
-
   if (!ronda || !participante || participante.ronda_id !== rondaId) notFound()
 
-  const [ptItems, sampleGroups, envios] = await Promise.all([
+  const [ptItems, sampleGroups, envios, estadoEnvio] = await Promise.all([
     listPTItems(rondaId),
     listPTSampleGroups(rondaId),
     listEnviosPTByParticipante(participanteId),
+    getEstadoEnvioPTByParticipante(participanteId),
   ])
-  const totalCells = ptItems.length * sampleGroups.length
-  const completedCells = envios.length
-  const progressPct = totalCells > 0 ? Math.round((completedCells / totalCells) * 100) : 0
   const isReferencia = participante.participant_profile === 'member_special'
+  const backHref = `/dashboard/rondas/${rondaId}/participantes`
+  const formProps = {
+    ronda,
+    ptItems,
+    sampleGroups,
+    enviosIniciales: envios,
+    envioFinalizado: estadoEnvio.enviado,
+    enviadoAt: estadoEnvio.enviados_at,
+    participantCode: participante.participant_code,
+    replicateCode: participante.replicate_code,
+    participanteEmail: participante.email,
+    adminTarget: {
+      rondaParticipanteId: participanteId,
+      backHref,
+    },
+  }
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         <RondaPageHeader
           ronda={ronda}
-          section="Resultados PT del participante"
+          section="Carga PT del participante"
           description={`${participante.email} · ${isReferencia ? 'Referencia' : 'Participante'}`}
           actions={(
-            <Link href={`/dashboard/rondas/${rondaId}/participantes`} className="btn-outline">
+            <Link href={backHref} className="btn-outline">
               ← Volver a participantes
             </Link>
           )}
         />
 
-        <section className="card p-6">
-          <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-            <div className="space-y-1">
-              {isReferencia && (
-                <div className="inline-flex items-center gap-2 rounded-full bg-violet-100 px-3 py-0.5 text-xs font-semibold uppercase tracking-[0.12em] text-violet-800">
-                  Laboratorio de Referencia
-                </div>
-              )}
-              <h2 className="text-lg font-semibold text-[var(--foreground)]">{ronda.nombre}</h2>
-              <p className="text-sm font-medium text-[var(--pt-primary-dark)]">Código de Ronda: {ronda.codigo}</p>
-            </div>
-            <div className="flex flex-wrap items-center gap-2 md:justify-end">
-              <span
-                className={`self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
-                  ronda.estado === 'activa'
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : ronda.estado === 'cerrada'
-                      ? 'bg-slate-200 text-slate-700'
-                      : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                Ronda {ronda.estado}
-              </span>
-            </div>
-          </div>
-        </section>
-
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="card-accent px-5 py-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Código PT</div>
-            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">{participante.participant_code ?? '—'}</div>
-          </div>
-          <div className="card-accent px-5 py-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Réplica</div>
-            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">{participante.replicate_code ?? '—'}</div>
-          </div>
-          <div className="card-accent px-5 py-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Completitud</div>
-            <div className="numeric mt-2 text-2xl font-semibold text-[var(--foreground)]">{completedCells}/{totalCells}</div>
-          </div>
-          <div className="card-accent px-5 py-4">
-            <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">Envío final</div>
-            <div className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-              {envios.some((envio) => envio.final_submitted_at) ? 'Enviado' : 'Sin envío'}
-            </div>
-          </div>
-        </div>
-
-        <section className="card grid gap-4 p-6">
-          <div>
-            <div className="mb-1 flex justify-between text-xs text-[var(--foreground-muted)]">
-              <span>Progreso PT</span>
-              <span>{progressPct}%</span>
-            </div>
-            <div className="h-2 rounded-full bg-[var(--border)]">
-              <div className="h-2 rounded-full transition-all" style={{ width: `${progressPct}%`, background: progressPct === 100 ? 'var(--success)' : 'var(--pt-primary)' }} />
-            </div>
-          </div>
-        </section>
-
-        <DatosAdminEditor
-          rondaId={rondaId}
-          participanteId={participanteId}
-          ptItems={ptItems}
-          sampleGroups={sampleGroups}
-          envios={envios}
-        />
+        {isReferencia ? <FormularioReferencia {...formProps} /> : <FormularioRonda {...formProps} />}
 
         <div className="flex flex-wrap gap-2">
           <Link href={`/dashboard/rondas/${rondaId}/participantes/${participanteId}/ficha`} className="btn-outline">
             Editar ficha
           </Link>
-          <Link href={`/dashboard/rondas/${rondaId}/participantes`} className="btn-outline">
+          <Link href={backHref} className="btn-outline">
             Volver a participantes
           </Link>
         </div>

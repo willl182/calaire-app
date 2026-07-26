@@ -1277,6 +1277,24 @@ export async function getEstadoEnvioPTParticipanteWithStatus(
   )
 }
 
+export async function getEstadoEnvioPTByParticipante(
+  rondaParticipanteId: string
+): Promise<EstadoEnvioParticipante> {
+  return safeConvexCall(
+    'getEstadoEnvioPTByParticipante',
+    () => fetchQuery(api.pt.index.getEstadoEnvioPTByParticipante, {
+      rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+    }),
+    {
+      completo: false,
+      enviado: false,
+      enviados_at: null,
+      total_esperado: 0,
+      total_guardado: 0,
+    },
+  )
+}
+
 export async function getParticipanteRondaResumen(
   participanteId: string
 ): Promise<ParticipanteRondaResumen | null> {
@@ -1362,6 +1380,21 @@ export async function deleteParticipanteEnviosPT(rondaId: string, rondaParticipa
 export async function submitFinalPT(rondaId: string): Promise<string> {
   return fetchMutation(api.pt.index.submitFinalPT, {
     rondaId: rondaId as Id<'rondas'>,
+  })
+}
+
+export async function submitFinalPTByParticipante(rondaParticipanteId: string): Promise<string> {
+  return fetchMutation(api.pt.index.submitFinalPTByParticipante, {
+    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
+  })
+}
+
+export async function reabrirEnvioFinalPT(rondaParticipanteId: string): Promise<{
+  previousSubmittedAt: string
+  updatedCells: number
+}> {
+  return fetchMutation(api.pt.index.reabrirEnvioFinalPT, {
+    rondaParticipanteId: rondaParticipanteId as Id<'rondaParticipantes'>,
   })
 }
 
