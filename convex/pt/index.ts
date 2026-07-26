@@ -1,8 +1,83 @@
 import { ConvexError, v } from 'convex/values'
-import { query, mutation, MutationCtx } from '../_generated/server'
-import { Id } from '../_generated/dataModel'
-import { requireManagerIdentity, requireParticipantOrAdminForRonda, requireParticipantOrAdminForRondaParticipante } from '../access'
+import { query, mutation, MutationCtx, QueryCtx } from '../_generated/server'
+import { Doc, Id } from '../_generated/dataModel'
+import {
+  requireAdminIdentity,
+  requireManagerIdentity,
+  requireParticipantOrAdminForRonda,
+  requireParticipantOrAdminForRondaParticipante,
+} from '../access'
 
+
+type PTReadCtx = QueryCtx | MutationCtx
+
+async function getEstadoEnvioPTForParticipante(
+  ctx: PTReadCtx,
+  participante: Doc<'rondaParticipantes'>
+) {
+  const rondaId = participante.rondaId
+  const [items, sampleGroups, envios] = await Promise.all([
+    ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
+    ctx.db.query('rondaPtSampleGroups').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
+    ctx.db
+      .query('enviosPt')
+      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', participante._id))
+      .collect(),
+  ])
+
+  const expectedKeys = new Set(
+    items.flatMap((item) => sampleGroups.map((group) => `${item._id}:${group._id}`))
+  )
+  const validEnvios = envios.filter(
+    (envio) =>
+      envio.rondaId === rondaId &&
+      expectedKeys.has(`${envio.ptItemId}:${envio.sampleGroupId}`)
+  )
+  const savedKeys = new Set(
+    validEnvios.map((envio) => `${envio.ptItemId}:${envio.sampleGroupId}`)
+  )
+  const totalEsperado = expectedKeys.size
+  const totalGuardado = savedKeys.size
+  const completo = totalEsperado > 0 && totalGuardado === totalEsperado
+  const submitted = validEnvios.filter((envio) => envio.finalSubmittedAt != null)
+  const finalTimes = new Set(submitted.map((envio) => envio.finalSubmittedAt as number))
+  const enviado = completo && submitted.length === validEnvios.length && finalTimes.size === 1
+  const finalTime = enviado ? submitted[0]?.finalSubmittedAt : undefined
+
+  return {
+    completo,
+    enviado,
+    enviados_at: finalTime != null ? new Date(finalTime).toISOString() : null,
+    total_esperado: totalEsperado,
+    total_guardado: totalGuardado,
+    envios: validEnvios,
+    hasPartialFinal: submitted.length > 0 && !enviado,
+  }
+}
+
+async function submitFinalPTForParticipante(
+  ctx: MutationCtx,
+  participante: Doc<'rondaParticipantes'>
+) {
+  const ronda = await ctx.db.get(participante.rondaId)
+  if (!ronda || ronda.estado !== 'activa') throw new ConvexError('La ronda no está activa.')
+  if (!participante.participantCode || participante.replicateCode == null) {
+    throw new ConvexError('El participante no tiene código PT y código de réplica asignados.')
+  }
+
+  const estado = await getEstadoEnvioPTForParticipante(ctx, participante)
+  if (estado.enviado && estado.enviados_at) return estado.enviados_at
+  if (estado.hasPartialFinal) {
+    throw new ConvexError('El envío final tiene un estado inconsistente y requiere revisión administrativa.')
+  }
+  if (!estado.completo) throw new ConvexError('Faltan datos para completar el envio final')
+
+  const now = Date.now()
+  await Promise.all(
+    estado.envios.map((envio) => ctx.db.patch(envio._id, { finalSubmittedAt: now, updatedAt: now }))
+  )
+  return new Date(now).toISOString()
+}
 
 async function requireActiveRondaPTReferences(
   ctx: MutationCtx,
@@ -138,49 +213,33 @@ export const getEnvioPT = query({
 export const getEstadoEnvioPTParticipante = query({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
-    const { identity } = await requireParticipantOrAdminForRonda(ctx, rondaId)
-    const [items, sampleGroups] = await Promise.all([
-      ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
-      ctx.db.query('rondaPtSampleGroups').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
-    ])
-    const totalEsperado = items.length * sampleGroups.length
-
-    const participante = await ctx.db
-      .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
-      .unique()
-
+    const { participante } = await requireParticipantOrAdminForRonda(ctx, rondaId)
     if (!participante) {
       return { completo: false, enviado: false, enviados_at: null, total_esperado: 0, total_guardado: 0 }
     }
-
-    const envios = await ctx.db
-      .query('enviosPt')
-      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', participante._id))
-      .collect()
-
-    const totalGuardado = envios.length
-    const completo = totalGuardado === totalEsperado && totalEsperado > 0
-
-    let enviado = false
-    let enviadosAt: string | null = null
-
-    if (completo) {
-      const finalTimes = Array.from(
-        new Set(envios.map((e) => e.finalSubmittedAt).filter((t): t is number => t !== undefined && t !== null))
-      )
-      if (finalTimes.length === 1) {
-        enviado = true
-        enviadosAt = new Date(finalTimes[0]!).toISOString()
-      }
-    }
-
+    const estado = await getEstadoEnvioPTForParticipante(ctx, participante)
     return {
-      completo,
-      enviado,
-      enviados_at: enviadosAt,
-      total_esperado: totalEsperado,
-      total_guardado: totalGuardado,
+      completo: estado.completo,
+      enviado: estado.enviado,
+      enviados_at: estado.enviados_at,
+      total_esperado: estado.total_esperado,
+      total_guardado: estado.total_guardado,
+    }
+  },
+})
+
+export const getEstadoEnvioPTByParticipante = query({
+  args: { rondaParticipanteId: v.id('rondaParticipantes') },
+  handler: async (ctx, { rondaParticipanteId }) => {
+    const { participante } = await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
+    if (!participante) throw new ConvexError('Participante no encontrado.')
+    const estado = await getEstadoEnvioPTForParticipante(ctx, participante)
+    return {
+      completo: estado.completo,
+      enviado: estado.enviado,
+      enviados_at: estado.enviados_at,
+      total_esperado: estado.total_esperado,
+      total_guardado: estado.total_guardado,
     }
   },
 })
@@ -356,6 +415,14 @@ export const upsertEnvioPT = mutation({
   handler: async (ctx, { rondaId, rondaParticipanteId, ptItemId, sampleGroupId, d1, d2, d3, meanValue, sdValue, ux, k, uxExp }) => {
     await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
     await requireActiveRondaPTReferences(ctx, rondaId, rondaParticipanteId, ptItemId, sampleGroupId)
+    if (d1 != null && !Number.isFinite(d1)) throw new ConvexError('d1 debe ser un número válido.')
+    if (d2 != null && !Number.isFinite(d2)) throw new ConvexError('d2 debe ser un número válido o quedar en NA.')
+    if (d3 != null && !Number.isFinite(d3)) throw new ConvexError('d3 debe ser un número válido o quedar en NA.')
+    if (!Number.isFinite(meanValue)) throw new ConvexError('El promedio debe ser un número válido.')
+    if (!Number.isFinite(sdValue) || sdValue < 0) throw new ConvexError('La desviación estándar debe ser mayor o igual a cero.')
+    if (ux != null && (!Number.isFinite(ux) || ux < 0)) throw new ConvexError('u(x) debe ser mayor o igual a cero.')
+    if (k != null && (!Number.isFinite(k) || k < 0)) throw new ConvexError('k debe ser mayor o igual a cero.')
+    if (uxExp != null && (!Number.isFinite(uxExp) || uxExp < 0)) throw new ConvexError('U(X) debe ser mayor o igual a cero.')
     const now = Date.now()
 
     const existing = await ctx.db
@@ -393,33 +460,45 @@ export const upsertEnvioPT = mutation({
 export const submitFinalPT = mutation({
   args: { rondaId: v.id('rondas') },
   handler: async (ctx, { rondaId }) => {
-    const { identity } = await requireParticipantOrAdminForRonda(ctx, rondaId)
-    const participante = await ctx.db
-      .query('rondaParticipantes')
-      .withIndex('by_ronda_user', (q) => q.eq('rondaId', rondaId).eq('workosUserId', identity.subject))
-      .unique()
-    if (!participante) throw new Error('Participante no encontrado')
-    const ronda = await ctx.db.get(rondaId)
+    const { participante } = await requireParticipantOrAdminForRonda(ctx, rondaId)
+    if (!participante) throw new ConvexError('Participante no encontrado.')
+    return submitFinalPTForParticipante(ctx, participante)
+  },
+})
+
+export const submitFinalPTByParticipante = mutation({
+  args: { rondaParticipanteId: v.id('rondaParticipantes') },
+  handler: async (ctx, { rondaParticipanteId }) => {
+    const { participante } = await requireParticipantOrAdminForRondaParticipante(ctx, rondaParticipanteId)
+    if (!participante) throw new ConvexError('Participante no encontrado.')
+    return submitFinalPTForParticipante(ctx, participante)
+  },
+})
+
+export const reabrirEnvioFinalPT = mutation({
+  args: { rondaParticipanteId: v.id('rondaParticipantes') },
+  handler: async (ctx, { rondaParticipanteId }) => {
+    await requireAdminIdentity(ctx)
+    const participante = await ctx.db.get(rondaParticipanteId)
+    if (!participante) throw new ConvexError('Participante no encontrado.')
+    const ronda = await ctx.db.get(participante.rondaId)
     if (!ronda || ronda.estado !== 'activa') throw new ConvexError('La ronda no está activa.')
 
-    const [items, sampleGroups] = await Promise.all([
-      ctx.db.query('rondaPtItems').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
-      ctx.db.query('rondaPtSampleGroups').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
-    ])
-    const expectedCount = items.length * sampleGroups.length
-
-    const envios = (await ctx.db
-      .query('enviosPt')
-      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', participante._id))
-      .collect()).filter((envio) => envio.rondaId === rondaId)
-
-    if (envios.length !== expectedCount) {
-      throw new Error('Faltan datos para completar el envio final')
+    const estado = await getEstadoEnvioPTForParticipante(ctx, participante)
+    if ((!estado.enviado || !estado.enviados_at) && !estado.hasPartialFinal) {
+      throw new ConvexError('El participante no tiene un envío final consistente para reabrir.')
     }
 
     const now = Date.now()
-    await Promise.all(envios.map((e) => ctx.db.patch(e._id, { finalSubmittedAt: now, updatedAt: now })))
-    return new Date(now).toISOString()
+    await Promise.all(
+      estado.envios.map((envio) =>
+        ctx.db.patch(envio._id, { finalSubmittedAt: undefined, updatedAt: now })
+      )
+    )
+    return {
+      previousSubmittedAt: estado.enviados_at,
+      updatedCells: estado.envios.length,
+    }
   },
 })
 
