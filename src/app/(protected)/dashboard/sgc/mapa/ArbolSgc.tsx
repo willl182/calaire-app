@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
-import { bloqueGeneralCarpetas, bloqueGeneralRaiz } from '@/lib/sgc/arbolBloqueGeneral'
+import { bloqueGeneralCarpetas } from '@/lib/sgc/arbolBloqueGeneral'
 
 type ArbolSgcProps = {
   /** Códigos con ficha en el inventario maestro, para enlazar el nodo del árbol. */
@@ -40,9 +40,10 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
   const [cerrados, setCerrados] = useState<Set<string>>(new Set())
 
   const carpetas = useMemo(() => {
+    const conDocumentos = bloqueGeneralCarpetas.filter((carpeta) => carpeta.items.length > 0)
     const filtro = texto.trim().toLowerCase()
-    if (!filtro) return bloqueGeneralCarpetas
-    return bloqueGeneralCarpetas
+    if (!filtro) return conDocumentos
+    return conDocumentos
       .map((carpeta) => ({
         ...carpeta,
         items: carpeta.items.filter((item) => item.nombre.toLowerCase().includes(filtro)),
@@ -60,6 +61,7 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
       return siguiente
     })
 
+  const totalCarpetas = bloqueGeneralCarpetas.filter((carpeta) => carpeta.items.length > 0).length
   const totalItems = bloqueGeneralCarpetas.reduce((suma, carpeta) => suma + carpeta.items.length, 0)
 
   return (
@@ -74,7 +76,7 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
           </span>
         </div>
         <p className="mt-1 text-xs text-[var(--foreground-muted)]">
-          {bloqueGeneralCarpetas.length} carpetas · {totalItems} documentos del bloque general.
+          {totalCarpetas} carpetas · {totalItems} documentos PSEA del bloque general.
         </p>
         <input
           className="mt-3 h-8 w-full rounded-md border border-[var(--border)] bg-white px-2 text-xs outline-none focus:border-[var(--pt-primary)]"
@@ -155,22 +157,6 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
                 )}
               </li>
             ))}
-
-            {!buscando &&
-              bloqueGeneralRaiz.map((item) => (
-                <li key={item.nombre} className="flex items-center gap-2 px-1 py-1">
-                  <span aria-hidden="true" className="opacity-0">
-                    ▸
-                  </span>
-                  <span aria-hidden="true">📄</span>
-                  <span className="truncate text-[var(--foreground-muted)]" title={item.nombre}>
-                    {item.nombre}
-                  </span>
-                  <span className="ml-auto shrink-0 text-[9px] uppercase text-[var(--foreground-muted)]">
-                    {item.formatos.join(' ')}
-                  </span>
-                </li>
-              ))}
           </ul>
         )}
       </div>

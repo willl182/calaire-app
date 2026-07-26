@@ -74,13 +74,6 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
     "nombre": "02_procedimientos",
     "items": [
       {
-        "nombre": "crear_estructura_ronda",
-        "formatos": [
-          "sh"
-        ],
-        "carpeta": false
-      },
-      {
         "nombre": "P-PSEA-01 Protocolo General EA_v2",
         "formatos": [
           "docx"
@@ -250,20 +243,6 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
         "nombre": "P-PSEA-23 Mejora continua del PEA",
         "formatos": [
           "docx",
-          "md"
-        ],
-        "carpeta": false
-      },
-      {
-        "nombre": "Planificacion_R1_PP (1)",
-        "formatos": [
-          "md"
-        ],
-        "carpeta": false
-      },
-      {
-        "nombre": "plantilla_checklist_ronda",
-        "formatos": [
           "md"
         ],
         "carpeta": false
@@ -540,59 +519,8 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
   },
   {
     "nombre": "05_matrices_inventarios",
-    "items": [
-      {
-        "nombre": "Árbol Maestro PSEA",
-        "formatos": [
-          "md"
-        ],
-        "carpeta": false
-      },
-      {
-        "nombre": "Diccionario de Documentos SGC",
-        "formatos": [
-          "md"
-        ],
-        "carpeta": false
-      },
-      {
-        "nombre": "Inventario Documental del SGC",
-        "formatos": [
-          "md"
-        ],
-        "carpeta": false
-      },
-      {
-        "nombre": "Matriz Maestra de Cumplimiento Normativo",
-        "formatos": [
-          "md"
-        ],
-        "carpeta": false
-      },
-      {
-        "nombre": "trazabilidad_normativa_sgc",
-        "formatos": [
-          "md"
-        ],
-        "carpeta": false
-      }
-    ]
+    "items": []
   }
 ]
 
-export const bloqueGeneralRaiz: ItemBloqueGeneral[] = [
-  {
-    "nombre": "EA-PP2026-R1-1-z-4-2a",
-    "formatos": [
-      "docx"
-    ],
-    "carpeta": false
-  },
-  {
-    "nombre": "EA-PP2026-R2-1-z-4-2a",
-    "formatos": [
-      "docx"
-    ],
-    "carpeta": false
-  }
-]
+export const bloqueGeneralRaiz: ItemBloqueGeneral[] = []
