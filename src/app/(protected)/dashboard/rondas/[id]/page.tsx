@@ -10,10 +10,12 @@ import {
   type EstadoOperativo,
   type RondaMetricas,
   type EstadoRonda,
+  type Ronda,
 } from '@/server/rondas'
 import { RondaContextNav } from './RondaContextNav'
 import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
+import { updateRondaReplicasAction } from '../../actions'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -250,6 +252,67 @@ function AccionesDeEstado({
   )
 }
 
+function ReplicasForm({ ronda }: { ronda: Ronda }) {
+  if (ronda.contaminantes.length === 0) return null
+
+  const canEdit = ronda.estado !== 'cerrada'
+
+  return (
+    <section className="card p-6">
+      <h2 className="text-lg font-semibold text-[var(--foreground)] mb-1">Réplicas por contaminante</h2>
+      <p className="text-sm text-[var(--foreground-muted)] mb-4">
+        Cambie el número de réplicas en cualquier momento mientras la ronda no esté cerrada. Si reduce
+        las réplicas, los envíos ya registrados se recortan y su promedio se recalcula.
+      </p>
+
+      {canEdit ? (
+        <form action={updateRondaReplicasAction} className="grid gap-4">
+          <input type="hidden" name="ronda_id" value={ronda.id} />
+          <input type="hidden" name="return_to" value={`/dashboard/rondas/${ronda.id}`} />
+
+          <div className="grid gap-3 md:grid-cols-2">
+            {ronda.contaminantes.map((config) => (
+              <label
+                key={config.id}
+                className="grid gap-1 rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm text-[var(--foreground-muted)]"
+              >
+                <span className="font-medium text-[var(--foreground)]">{config.contaminante}</span>
+                <span className="text-xs">Niveles: {config.niveles}</span>
+                <select
+                  name={`replicas_${config.contaminante}`}
+                  defaultValue={String(config.replicas)}
+                  className="mt-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[var(--foreground)] outline-none transition-colors focus:border-[var(--pt-primary)]"
+                >
+                  <option value="2">2 réplicas</option>
+                  <option value="3">3 réplicas</option>
+                </select>
+              </label>
+            ))}
+          </div>
+
+          <div className="flex justify-end">
+            <button type="submit" className="btn-primary">
+              Guardar réplicas
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="grid gap-2 md:grid-cols-2">
+          {ronda.contaminantes.map((config) => (
+            <div
+              key={config.id}
+              className="rounded-xl border border-[var(--border)] bg-[var(--surface-muted)] p-4 text-sm text-[var(--foreground-muted)]"
+            >
+              <span className="font-medium text-[var(--foreground)]">{config.contaminante}</span>
+              <span className="ml-2">{config.replicas} réplicas</span>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
+  )
+}
+
 // ---------------------------------------------------------------------------
 // Page
 // ---------------------------------------------------------------------------
@@ -360,6 +423,9 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
 
         {/* Operational Alerts */}
         <AlertasOperativas metricas={metricas} rondaId={rondaId} />
+
+        {/* Replicas */}
+        <ReplicasForm ronda={ronda} />
 
         {/* State Actions */}
         <AccionesDeEstado

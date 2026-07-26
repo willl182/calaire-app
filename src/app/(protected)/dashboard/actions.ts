@@ -17,6 +17,7 @@ import {
   transitionRondaEstado,
   updateRondaBasicInfo,
   updateRondaConfig,
+  updateRondaReplicas,
   type Contaminante,
 } from '@/server/rondas'
 
@@ -190,6 +191,53 @@ export async function updateRondaAction(formData: FormData) {
     const message =
       error instanceof Error ? error.message : 'No fue posible actualizar la ronda.'
     targetUrl = buildErrorUrl(message)
+  }
+
+  redirect(targetUrl)
+}
+
+export async function updateRondaReplicasAction(formData: FormData) {
+  await requireAdmin()
+
+  const rondaId = parseText(formData, 'ronda_id')
+  const returnTo = parseText(formData, 'return_to')
+  const buildError = (msg: string) =>
+    returnTo ? `${returnTo}?error=${encodeURIComponent(msg)}` : buildErrorUrl(msg)
+  const buildSuccess = (msg: string) =>
+    returnTo ? `${returnTo}?success=${encodeURIComponent(msg)}` : buildSuccessUrl(msg)
+
+  let targetUrl = buildError('No fue posible actualizar las réplicas.')
+
+  try {
+    if (!rondaId) {
+      throw new Error('No se recibió la ronda a editar.')
+    }
+
+    const items: { contaminante: Contaminante; replicas: 2 | 3 }[] = []
+    for (const contaminante of CONTAMINANTES) {
+      const raw = parseText(formData, `replicas_${contaminante}`)
+      if (!raw) continue
+      const value = Number.parseInt(raw, 10)
+      if (!REPLICAS_OPTIONS.includes(value as 2 | 3)) {
+        throw new Error(`Defina 2 o 3 réplicas para ${contaminante}.`)
+      }
+      items.push({ contaminante, replicas: value as 2 | 3 })
+    }
+
+    if (items.length === 0) {
+      throw new Error('No hay contaminantes configurados para editar.')
+    }
+
+    await updateRondaReplicas(rondaId, items)
+
+    revalidatePath('/dashboard')
+    revalidatePath('/dashboard/rondas')
+    revalidatePath(`/dashboard/rondas/${rondaId}`)
+    targetUrl = buildSuccess('Réplicas actualizadas.')
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : 'No fue posible actualizar las réplicas.'
+    targetUrl = buildError(message)
   }
 
   redirect(targetUrl)

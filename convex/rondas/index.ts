@@ -2,7 +2,7 @@ import { query, mutation } from '../_generated/server'
 import { getRondaDefinition, getRondaByCodigoDefinition, listRondasDefinition, listParticipantesDefinition, listParticipantesRondaResumenDefinition, getParticipanteRondaResumenDefinition, listRondasParticipanteDefinition, listAllParticipantesDefinition, isInvitadoDefinition } from './reads'
 import { listDirectorioParticipantesDefinition, getDirectorioParticipanteByLookupDefinition, upsertDirectorioParticipanteDefinition } from './directorio_definitions'
 import { listEnviosDefinition, getEstadoEnvioParticipanteDefinition, listResultadosDefinition, listResultadosRondaDefinition, claimParticipanteTokenDefinition, upsertEnvioDefinition } from './resultados'
-import { createRondaDefinition, updateRondaEstadoDefinition, addContaminanteDefinition, addParticipanteDefinition, updateParticipanteAdminDefinition, createConfiguredRondaDefinition, updateRondaConfigDefinition, updateRondaBasicInfoDefinition, transitionRondaEstadoDefinition, reabrirRondaDefinition, assignParticipanteDefinition, regenerateParticipanteSlotDefinition, updateParticipanteEmailDefinition, addReferenceSlotDefinition } from './mutations'
+import { createRondaDefinition, updateRondaEstadoDefinition, addContaminanteDefinition, addParticipanteDefinition, updateParticipanteAdminDefinition, createConfiguredRondaDefinition, updateRondaConfigDefinition, updateRondaReplicasDefinition, updateRondaBasicInfoDefinition, transitionRondaEstadoDefinition, reabrirRondaDefinition, assignParticipanteDefinition, regenerateParticipanteSlotDefinition, updateParticipanteEmailDefinition, addReferenceSlotDefinition } from './mutations'
 import { deleteRondaDefinition, removeParticipanteDefinition } from './cleanup'
 
 export const getRonda = query({ ...getRondaDefinition })
@@ -30,6 +30,7 @@ export const addParticipante = mutation({ ...addParticipanteDefinition })
 export const updateParticipanteAdmin = mutation({ ...updateParticipanteAdminDefinition })
 export const createConfiguredRonda = mutation({ ...createConfiguredRondaDefinition })
 export const updateRondaConfig = mutation({ ...updateRondaConfigDefinition })
+export const updateRondaReplicas = mutation({ ...updateRondaReplicasDefinition })
 export const updateRondaBasicInfo = mutation({ ...updateRondaBasicInfoDefinition })
 export const transitionRondaEstado = mutation({ ...transitionRondaEstadoDefinition })
 export const reabrirRonda = mutation({ ...reabrirRondaDefinition })

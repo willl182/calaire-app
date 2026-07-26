@@ -1009,6 +1009,16 @@ export async function updateRondaConfig(
   })
 }
 
+export async function updateRondaReplicas(
+  rondaId: string,
+  items: { contaminante: Contaminante; replicas: 2 | 3 }[]
+): Promise<void> {
+  await fetchMutation(api.rondas.index.updateRondaReplicas, {
+    rondaId: rondaId as Id<'rondas'>,
+    items,
+  })
+}
+
 export async function updateRondaBasicInfo(
   rondaId: string,
   nombre: string,

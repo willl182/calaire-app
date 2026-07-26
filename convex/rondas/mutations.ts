@@ -250,6 +250,55 @@ export const updateRondaConfigDefinition = defineRondaMutation({
   },
 })
 
+export const updateRondaReplicasDefinition = defineRondaMutation({
+  args: {
+    rondaId: v.id('rondas'),
+    items: v.array(v.object({
+      contaminante: contaminanteValidator,
+      replicas: replicasValidator,
+    })),
+  },
+  handler: async (ctx, { rondaId, items }) => {
+    await requireManagerIdentity(ctx)
+    const ronda = await ctx.db.get(rondaId)
+    if (!ronda) throw new Error('La ronda no existe.')
+    if (ronda.estado === 'cerrada') {
+      throw new Error('No se puede editar una ronda cerrada.')
+    }
+
+    const existing = await ctx.db
+      .query('rondaContaminantes')
+      .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
+      .collect()
+
+    for (const item of items) {
+      const row = existing.find((r) => r.contaminante === item.contaminante)
+      if (!row) throw new Error(`El contaminante ${item.contaminante} no esta configurado en la ronda.`)
+      if (row.replicas === item.replicas) continue
+
+      await ctx.db.patch(row._id, { replicas: item.replicas })
+
+      // Los envios ya registrados guardan un valor por replica. Si el nuevo
+      // numero de replicas es menor, se recortan los valores sobrantes y se
+      // recalcula el promedio; si es mayor, el participante completa el resto.
+      const envios = await ctx.db
+        .query('envios')
+        .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
+        .collect()
+      const afectados = envios.filter(
+        (e) => e.contaminante === item.contaminante && e.valores.length > item.replicas
+      )
+      for (const envio of afectados) {
+        const valores = envio.valores.slice(0, item.replicas)
+        const promedio = valores.length > 0
+          ? valores.reduce((a, b) => a + b, 0) / valores.length
+          : undefined
+        await ctx.db.patch(envio._id, { valores, promedio, updatedAt: Date.now() })
+      }
+    }
+  },
+})
+
 export const updateRondaBasicInfoDefinition = defineRondaMutation({
   args: {
     id: v.id('rondas'),
