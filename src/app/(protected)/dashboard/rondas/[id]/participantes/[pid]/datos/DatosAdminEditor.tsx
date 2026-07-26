@@ -2,7 +2,6 @@
 
 import { useActionState } from 'react'
 import type { EnvioPT, RondaPTItem, RondaPTSampleGroup } from '@/server/rondas'
-import { getRequiredPTReplicateCount } from '@/server/rondas'
 import { adminGuardarDatoPTAction } from './actions'
 
 type Props = {
@@ -23,14 +22,12 @@ function DatoRow({
   item,
   group,
   envio,
-  requiredReplicates,
 }: {
   rondaId: string
   participanteId: string
   item: RondaPTItem
   group: RondaPTSampleGroup
   envio?: EnvioPT
-  requiredReplicates: 1 | 3
 }) {
   const [state, action, pending] = useActionState(adminGuardarDatoPTAction, null)
   const inputClass =
@@ -55,11 +52,11 @@ function DatoRow({
       </label>
       <label className="grid gap-1 text-xs text-[var(--foreground-muted)]">
         d2
-        <input name="d2" type="number" step="any" disabled={requiredReplicates === 1} className={inputClass} defaultValue={envio?.d2 ?? ''} />
+        <input name="d2" type="number" step="any" placeholder="NA" className={inputClass} defaultValue={envio?.d2 ?? ''} />
       </label>
       <label className="grid gap-1 text-xs text-[var(--foreground-muted)]">
         d3
-        <input name="d3" type="number" step="any" disabled={requiredReplicates === 1} className={inputClass} defaultValue={envio?.d3 ?? ''} />
+        <input name="d3" type="number" step="any" placeholder="NA" className={inputClass} defaultValue={envio?.d3 ?? ''} />
       </label>
       <label className="grid gap-1 text-xs text-[var(--foreground-muted)]">
         Prom.
@@ -121,7 +118,6 @@ export default function DatosAdminEditor({ rondaId, participanteId, ptItems, sam
             item={item}
             group={group}
             envio={envioByCell.get(key(item.id, group.id))}
-            requiredReplicates={getRequiredPTReplicateCount(item, ptItems)}
           />
         ))
       )}

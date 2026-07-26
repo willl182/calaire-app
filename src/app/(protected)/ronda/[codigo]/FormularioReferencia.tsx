@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
 import {
   CONTAMINANTES,
-  getRequiredPTReplicateCount,
   type EnvioPT,
   type Ronda,
   type RondaPTItem,
@@ -48,10 +47,8 @@ function isValidNumberInput(value: string): boolean {
   return Number.isFinite(parsed)
 }
 
-function getCellIssue(data: CellData, requiredReplicates: 1 | 3): string | null {
-  const fields = requiredReplicates === 1
-    ? ([['Dato 1', data.d1]] as const)
-    : ([['Dato 1', data.d1], ['Dato 2', data.d2], ['Dato 3', data.d3]] as const)
+function getCellIssue(data: CellData): string | null {
+  const fields = [['Dato 1', data.d1], ['Dato 2', data.d2], ['Dato 3', data.d3]] as const
 
   for (const [label, field] of fields) {
     if (field.trim() !== '' && !isValidNumberInput(field)) {
@@ -76,13 +73,10 @@ function getCellIssue(data: CellData, requiredReplicates: 1 | 3): string | null 
   return null
 }
 
-function isCellComplete(data: CellData, requiredReplicates: 1 | 3): boolean {
-  const hasRequiredReplicates = requiredReplicates === 1
-    ? isValidNumberInput(data.d1)
-    : isValidNumberInput(data.d1) && isValidNumberInput(data.d2) && isValidNumberInput(data.d3)
-
+function isCellComplete(data: CellData): boolean {
+  // Solo d1 es obligatorio. d2 y d3 pueden quedar vacios (NA) y se guardan como null.
   return (
-    hasRequiredReplicates &&
+    isValidNumberInput(data.d1) &&
     isValidNumberInput(data.meanValue) &&
     isValidNumberInput(data.sdValue) &&
     Number(data.sdValue) >= 0 &&
@@ -198,15 +192,10 @@ export default function FormularioReferencia({
   const cellEntries = ptItems.flatMap((item) =>
     sampleGroups.map((group) => ({
       key: toCellKey(item.id, group.id),
-      requiredReplicates: getRequiredPTReplicateCount(item, ptItems),
     }))
   )
-  const completedCells = cellEntries.filter(({ key, requiredReplicates }) =>
-    isCellComplete(cells[key], requiredReplicates)
-  ).length
-  const invalidCells = cellEntries.filter(({ key, requiredReplicates }) =>
-    getCellIssue(cells[key], requiredReplicates) !== null
-  ).length
+  const completedCells = cellEntries.filter(({ key }) => isCellComplete(cells[key])).length
+  const invalidCells = cellEntries.filter(({ key }) => getCellIssue(cells[key]) !== null).length
   const progressPct = totalCells > 0 ? Math.round((completedCells / totalCells) * 100) : 0
   const allComplete = totalCells > 0 && completedCells === totalCells
   const allSaved = Object.values(saveStatus).every((status) => status === 'saved' || status === 'idle')
@@ -231,20 +220,18 @@ export default function FormularioReferencia({
 
   async function triggerSave(key: CellKey, data: CellData) {
     const { ptItemId, sampleGroupId } = fromCellKey(key)
-    const item = ptItems.find((candidate) => candidate.id === ptItemId)
-    const requiredReplicates = item ? getRequiredPTReplicateCount(item, ptItems) : 3
-    const issue = getCellIssue(data, requiredReplicates)
+    const issue = getCellIssue(data)
     if (issue) {
       setSaveStatus((prev) => ({ ...prev, [key]: 'error' }))
       setSaveErrors((prev) => ({ ...prev, [key]: issue }))
       return
     }
-    if (!isCellComplete(data, requiredReplicates)) return
+    if (!isCellComplete(data)) return
     if (soloLectura) return
 
     const d1 = Number(data.d1)
-    const d2 = requiredReplicates === 1 ? null : Number(data.d2)
-    const d3 = requiredReplicates === 1 ? null : Number(data.d3)
+    const d2 = data.d2.trim() === '' ? null : Number(data.d2)
+    const d3 = data.d3.trim() === '' ? null : Number(data.d3)
     const meanValue = Number(data.meanValue)
     const sdValue = Number(data.sdValue)
     const ux = Number(data.ux)
@@ -730,7 +717,7 @@ export default function FormularioReferencia({
             sampleGroups.length > 0 &&
             items.every((item) =>
               sampleGroups.every((group) =>
-                isCellComplete(cells[toCellKey(item.id, group.id)], getRequiredPTReplicateCount(item, ptItems))
+                isCellComplete(cells[toCellKey(item.id, group.id)])
               )
             )
 
@@ -778,10 +765,9 @@ export default function FormularioReferencia({
                       sampleGroups.map((group) => {
                         const key = toCellKey(item.id, group.id)
                         const data = cells[key]
-                        const requiredReplicates = getRequiredPTReplicateCount(item, ptItems)
-                        const issue = saveErrors[key] ?? getCellIssue(data, requiredReplicates)
+                        const issue = saveErrors[key] ?? getCellIssue(data)
                         const status = saveStatus[key] ?? 'idle'
-                        const complete = isCellComplete(data, requiredReplicates)
+                        const complete = isCellComplete(data)
 
                         const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
@@ -805,7 +791,8 @@ export default function FormularioReferencia({
                                   step="any"
                                   inputMode="decimal"
                                   value={data[field]}
-                                  disabled={soloLectura || index >= requiredReplicates}
+                                  placeholder={index === 0 ? '' : 'NA'}
+                                  disabled={soloLectura}
                                   onChange={(e) => updateCell(key, { ...data, [field]: e.target.value })}
                                   className={inputCls}
                                 />

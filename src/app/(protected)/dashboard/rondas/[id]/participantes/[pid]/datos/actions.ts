@@ -2,7 +2,6 @@
 
 import { requireAdminAuth } from '@/server/auth'
 import {
-  getRequiredPTReplicateCount,
   getRonda,
   listPTItems,
   listPTSampleGroups,
@@ -46,10 +45,10 @@ export async function adminGuardarDatoPTAction(
     return { error: 'El grupo de muestra no pertenece a esta ronda.' }
   }
 
-  const requiredReplicates = getRequiredPTReplicateCount(item, items)
   const d1 = parseNumber(formData, 'd1')
-  const d2 = requiredReplicates === 1 ? null : parseNumber(formData, 'd2')
-  const d3 = requiredReplicates === 1 ? null : parseNumber(formData, 'd3')
+  // d2 y d3 son opcionales: vacio significa NA y se guarda como null.
+  const d2 = parseNumber(formData, 'd2')
+  const d3 = parseNumber(formData, 'd3')
   const meanValue = parseNumber(formData, 'mean_value')
   const sdValue = parseNumber(formData, 'sd_value')
   const ux = parseNumber(formData, 'ux')
@@ -57,9 +56,6 @@ export async function adminGuardarDatoPTAction(
   const k = parseNumber(formData, 'k') ?? 2
 
   if (d1 == null) return { error: 'd1 es obligatorio.' }
-  if (requiredReplicates === 3 && (d2 == null || d3 == null)) {
-    return { error: 'd2 y d3 son obligatorios para este nivel.' }
-  }
   if (meanValue == null) return { error: 'El promedio es obligatorio.' }
   if (sdValue == null || sdValue < 0) return { error: 'La desviación estándar debe ser mayor o igual a cero.' }
   if (ux == null || ux < 0) return { error: 'u(x) debe ser mayor o igual a cero.' }

@@ -249,11 +249,6 @@ export function buildReferenciaImportPreview(
       continue
     }
 
-    if (requiredReplicates === 3 && (row.meanH2 == null || row.meanH3 == null)) {
-      errors.push(`Fila ${row.rowNumber}: mean_h2 y mean_h3 son requeridos para niveles con tres replicas.`)
-      continue
-    }
-
     if (row.uxExp == null) {
       errors.push(`Fila ${row.rowNumber}: u_exp es requerido.`)
       continue
@@ -262,8 +257,9 @@ export function buildReferenciaImportPreview(
     const sdValue = row.sdValue ?? 0
     const k = row.k ?? defaultK
     const d1 = row.meanH1
-    const d2 = requiredReplicates === 1 ? null : row.meanH2
-    const d3 = requiredReplicates === 1 ? null : row.meanH3
+    // mean_h2 y mean_h3 son opcionales: vacio en el CSV significa NA.
+    const d2 = requiredReplicates === 1 ? null : row.meanH2 ?? null
+    const d3 = requiredReplicates === 1 ? null : row.meanH3 ?? null
 
     for (const group of sampleGroups) {
       const cellKey = `${item.id}::${group.id}`

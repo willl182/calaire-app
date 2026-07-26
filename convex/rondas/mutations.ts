@@ -276,25 +276,10 @@ export const updateRondaReplicasDefinition = defineRondaMutation({
       if (!row) throw new Error(`El contaminante ${item.contaminante} no esta configurado en la ronda.`)
       if (row.replicas === item.replicas) continue
 
+      // Solo se ajusta la configuracion. Los datos ya capturados no se tocan:
+      // replicas aplica a todos los niveles del contaminante, asi que recortar
+      // valores aqui borraria mediciones reales de cada nivel.
       await ctx.db.patch(row._id, { replicas: item.replicas })
-
-      // Los envios ya registrados guardan un valor por replica. Si el nuevo
-      // numero de replicas es menor, se recortan los valores sobrantes y se
-      // recalcula el promedio; si es mayor, el participante completa el resto.
-      const envios = await ctx.db
-        .query('envios')
-        .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
-        .collect()
-      const afectados = envios.filter(
-        (e) => e.contaminante === item.contaminante && e.valores.length > item.replicas
-      )
-      for (const envio of afectados) {
-        const valores = envio.valores.slice(0, item.replicas)
-        const promedio = valores.length > 0
-          ? valores.reduce((a, b) => a + b, 0) / valores.length
-          : undefined
-        await ctx.db.patch(envio._id, { valores, promedio, updatedAt: Date.now() })
-      }
     }
   },
 })

@@ -261,8 +261,8 @@ function ReplicasForm({ ronda }: { ronda: Ronda }) {
     <section className="card p-6">
       <h2 className="text-lg font-semibold text-[var(--foreground)] mb-1">Réplicas por contaminante</h2>
       <p className="text-sm text-[var(--foreground-muted)] mb-4">
-        Cambie el número de réplicas en cualquier momento mientras la ronda no esté cerrada. Si reduce
-        las réplicas, los envíos ya registrados se recortan y su promedio se recalcula.
+        Cambie el número de réplicas en cualquier momento mientras la ronda no esté cerrada. Aplica a
+        todos los niveles del contaminante y no modifica los datos ya capturados.
       </p>
 
       {canEdit ? (

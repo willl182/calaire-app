@@ -4,7 +4,6 @@ import { isAdmin, requireAuth } from '@/server/auth'
 import {
   deleteParticipanteEnviosPT,
   getEstadoEnvioPTParticipante,
-  getRequiredPTReplicateCount,
   getRonda,
   getRondaParticipantePT,
   isMemberSpecialRole,
@@ -65,13 +64,15 @@ export async function guardarEnvioAction(
     return { error: 'El grupo de muestra no pertenece a esta ronda.' }
   }
 
-  const item = items.find((candidate) => candidate.id === ptItemId)
-  const requiredReplicates = item ? getRequiredPTReplicateCount(item, items) : 3
   if (!Number.isFinite(d1)) {
     return { error: 'd1 debe ser un número válido.' }
   }
-  if (requiredReplicates === 3 && (!Number.isFinite(d2) || !Number.isFinite(d3))) {
-    return { error: 'd2 y d3 deben ser números válidos para niveles distintos de la concentración inicial.' }
+  // d2 y d3 son opcionales: vienen como null cuando el participante los deja en NA.
+  if (d2 != null && !Number.isFinite(d2)) {
+    return { error: 'd2 debe ser un número válido o quedar en NA.' }
+  }
+  if (d3 != null && !Number.isFinite(d3)) {
+    return { error: 'd3 debe ser un número válido o quedar en NA.' }
   }
   if (!Number.isFinite(meanValue)) {
     return { error: 'El promedio debe ser un número válido.' }
@@ -151,11 +152,9 @@ export async function guardarReferenciaCsvAction(
     if (!item) errors.push(`${label}: la corrida PT no pertenece a esta ronda.`)
     if (!sampleGroupIds.has(row.sampleGroupId)) errors.push(`${label}: el grupo de muestra no pertenece a esta ronda.`)
 
-    const requiredReplicates = item ? getRequiredPTReplicateCount(item, items) : 3
     if (!Number.isFinite(row.d1)) errors.push(`${label}: d1 debe ser un número válido.`)
-    if (requiredReplicates === 3 && (!Number.isFinite(row.d2) || !Number.isFinite(row.d3))) {
-      errors.push(`${label}: d2 y d3 deben ser números válidos para niveles distintos de la concentración inicial.`)
-    }
+    if (row.d2 != null && !Number.isFinite(row.d2)) errors.push(`${label}: d2 debe ser un número válido o quedar en NA.`)
+    if (row.d3 != null && !Number.isFinite(row.d3)) errors.push(`${label}: d3 debe ser un número válido o quedar en NA.`)
     if (!Number.isFinite(row.meanValue)) errors.push(`${label}: el promedio debe ser un número válido.`)
     if (!Number.isFinite(row.sdValue) || row.sdValue < 0) {
       errors.push(`${label}: la desviación estándar debe ser un número válido mayor o igual a cero.`)
