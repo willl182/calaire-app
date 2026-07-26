@@ -12,9 +12,14 @@ const identity = JSON.stringify({
   roles: ['admin_sgc'],
 })
 const deploymentArgs = process.argv.includes('--prod') ? ['--prod'] : []
+// --refresh: registra una version nueva cuando el archivo del seed no coincide
+// con el nombre de la version vigente (por ejemplo, al pasar de .md a .docx).
+const refresh = process.argv.includes('--refresh')
+const dryRun = process.argv.includes('--dry-run')
 
 const contentTypes = new Map([
   ['.csv', 'text/csv'],
+  ['.doc', 'application/msword'],
   ['.docx', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'],
   ['.jpeg', 'image/jpeg'],
   ['.jpg', 'image/jpeg'],
@@ -22,6 +27,7 @@ const contentTypes = new Map([
   ['.pdf', 'application/pdf'],
   ['.png', 'image/png'],
   ['.txt', 'text/plain'],
+  ['.xls', 'application/vnd.ms-excel'],
   ['.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'],
 ])
 
@@ -77,18 +83,22 @@ async function main() {
     texto: null,
   })
   const byCode = new Map(maestro.documentos.map((doc) => [doc.codigo, doc]))
-  const vigenteByDoc = new Set(maestro.versiones.filter((item) => item.vigente).map((item) => item.documentoId))
+  const vigenteByDoc = new Map(
+    maestro.versiones.filter((item) => item.vigente).map((item) => [item.documentoId, item.vigente]),
+  )
   const nextVersionByDoc = new Map()
-  for (const version of maestro.versiones) {
-    const current = nextVersionByDoc.get(version.documentoId) ?? 1
-    nextVersionByDoc.set(version.documentoId, Math.max(current, version.version + 1))
+  for (const item of maestro.versiones) {
+    if (!item.vigente) continue
+    const current = nextVersionByDoc.get(item.documentoId) ?? 1
+    nextVersionByDoc.set(item.documentoId, Math.max(current, (item.vigente.version ?? 0) + 1))
   }
 
-  const summary = { uploaded: 0, skippedWithVersion: 0, skippedNoFile: 0, skippedUnsupported: 0 }
+  const summary = { uploaded: 0, replaced: 0, skippedWithVersion: 0, skippedSameFile: 0, skippedNoFile: 0, skippedUnsupported: 0 }
   for (const item of seed) {
     const doc = byCode.get(item.codigo)
     if (!doc) continue
-    if (vigenteByDoc.has(doc._id)) {
+    const vigente = vigenteByDoc.get(doc._id)
+    if (vigente && !refresh) {
       summary.skippedWithVersion += 1
       continue
     }
@@ -97,9 +107,19 @@ async function main() {
       summary.skippedNoFile += 1
       continue
     }
+    if (vigente && vigente.fileName === basename(filePath)) {
+      summary.skippedSameFile += 1
+      continue
+    }
     const contentType = contentTypeFor(filePath)
     if (contentType === 'application/octet-stream') {
       summary.skippedUnsupported += 1
+      continue
+    }
+    if (dryRun) {
+      console.log(`[dry-run] ${item.codigo}: ${vigente ? `${vigente.fileName} -> ` : ''}${basename(filePath)}`)
+      if (vigente) summary.replaced += 1
+      else summary.uploaded += 1
       continue
     }
     const { uploaded, bytes } = await uploadToStorage(filePath, contentType)
@@ -113,7 +133,9 @@ async function main() {
       contentType,
       size: bytes.byteLength,
       hash,
-      resumenCambios: 'Version vigente precargada desde docs/01_bloque_general.',
+      resumenCambios: vigente
+        ? `Version oficial actualizada al formato editable (${basename(filePath)}) desde docs/01_bloque_general.`
+        : 'Version vigente precargada desde docs/01_bloque_general.',
       elaboradoPor: null,
       revisadoPor: null,
       aprobadoPor: null,
@@ -121,8 +143,9 @@ async function main() {
       fechaAprobacion: null,
       fechaVigencia: null,
     })
-    summary.uploaded += 1
-    console.log(`Uploaded ${item.codigo}: ${basename(filePath)}`)
+    if (vigente) summary.replaced += 1
+    else summary.uploaded += 1
+    console.log(`${vigente ? 'Replaced' : 'Uploaded'} ${item.codigo}: ${basename(filePath)}`)
   }
   console.log(JSON.stringify(summary, null, 2))
 }

@@ -52,21 +52,39 @@ function modoControlFromRow(code, location) {
   return 'app_oficial'
 }
 
+// La version oficial es el archivo editable: primero Word, luego hoja de calculo,
+// luego CSV y por ultimo el markdown de apoyo.
+const formatPriority = ['.docx', '.doc', '.xlsx', '.xls', '.csv', '.md']
+
+function formatRank(name) {
+  const index = formatPriority.indexOf(name.slice(name.lastIndexOf('.')).toLowerCase())
+  return index === -1 ? formatPriority.length : index
+}
+
+function pickPreferred(entries) {
+  return [...entries].sort((a, b) => formatRank(a) - formatRank(b) || a.localeCompare(b))[0]
+}
+
 async function resolveInventoryLocation(code, location) {
   const clean = location.replace(/`/g, '').trim()
   if (!clean) return null
   const absolute = join(root, 'docs', clean)
   try {
     const info = await stat(absolute)
-    if (!info.isDirectory()) return clean
-    const entries = await readdir(absolute)
-    const match = entries
-      .filter((entry) => entry.toUpperCase().startsWith(code))
-      .sort((a, b) => {
-        const priority = (name) => name.endsWith('.md') ? 0 : name.endsWith('.docx') ? 1 : 2
-        return priority(a) - priority(b) || a.localeCompare(b)
-      })[0]
-    return match ? `${clean.replace(/\/+$/, '')}/${match}` : clean
+    if (info.isDirectory()) {
+      const entries = (await readdir(absolute)).filter((entry) => entry.toUpperCase().startsWith(code))
+      const match = pickPreferred(entries)
+      return match ? `${clean.replace(/\/+$/, '')}/${match}` : clean
+    }
+    // Ruta a archivo: elegir el hermano con el mismo nombre base y mejor formato.
+    const fileName = clean.slice(clean.lastIndexOf('/') + 1)
+    const dir = clean.slice(0, clean.lastIndexOf('/'))
+    const base = fileName.slice(0, fileName.lastIndexOf('.'))
+    const hermanos = (await readdir(join(root, 'docs', dir))).filter(
+      (entry) => entry.slice(0, entry.lastIndexOf('.')) === base,
+    )
+    const match = pickPreferred(hermanos)
+    return match ? `${dir}/${match}` : clean
   } catch {
     return clean
   }
