@@ -10,8 +10,14 @@ import {
   type RondaPTSampleGroup,
 } from '@/server/rondas'
 import {
+  buildReferenciaImportPreview,
+  parseReferenciaCsv,
+  type ReferenciaImportPreview,
+} from '@/server/rondas/referencia-csv'
+import {
   adminEnviarInformeFinalAction,
   adminGuardarEnvioAction,
+  adminGuardarResultadosCsvAction,
   adminReabrirInformeFinalAction,
 } from '@/app/(protected)/dashboard/rondas/[id]/participantes/[pid]/datos/actions'
 import { enviarInformeFinalAction, guardarEnvioAction } from './actions'
@@ -33,6 +39,7 @@ type CellData = {
   uxExp: string
 }
 type SaveStatus = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
+type ImportStatus = 'idle' | 'previewing' | 'ready' | 'saving' | 'saved' | 'error'
 type KMode = 'individual' | 'grupal'
 
 function toCellKey(ptItemId: string, sampleGroupId: string): CellKey {
@@ -181,9 +188,14 @@ export default function FormularioRonda({
   )
   const [saveErrors, setSaveErrors] = useState<Record<CellKey, string>>({})
   const [formMessage, setFormMessage] = useState<string | null>(null)
+  const [importFile, setImportFile] = useState<File | null>(null)
+  const [importPreview, setImportPreview] = useState<ReferenciaImportPreview | null>(null)
+  const [importStatus, setImportStatus] = useState<ImportStatus>('idle')
+  const [importMessage, setImportMessage] = useState<string | null>(null)
   const [kMode, setKMode] = useState<KMode>('individual')
   const [globalK, setGlobalK] = useState('2')
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const importFileInputRef = useRef<HTMLInputElement | null>(null)
 
   const cerrada = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
   const soloLectura = cerrada || submitDone
@@ -210,6 +222,13 @@ export default function FormularioRonda({
       }
     }
   }, [])
+
+  function cancelAllPendingSaves() {
+    for (const [key, timer] of Object.entries(timers.current)) {
+      clearTimeout(timer)
+      delete timers.current[key]
+    }
+  }
 
   async function triggerSave(key: CellKey, data: CellData) {
     const { ptItemId, sampleGroupId } = fromCellKey(key)
@@ -281,6 +300,95 @@ export default function FormularioRonda({
     for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
       updateCell(key, { ...data, k: value })
     }
+  }
+
+  async function handlePreviewImport() {
+    if (!importFile) {
+      setImportMessage('Selecciona un archivo CSV antes de previsualizar.')
+      setImportStatus('error')
+      return
+    }
+
+    setImportStatus('previewing')
+    setImportMessage(null)
+    try {
+      const text = await importFile.text()
+      const parsedRows = parseReferenciaCsv(text)
+      const existingCells = new Set(
+        Object.entries(cells)
+          .filter(([, data]) => data.meanValue.trim() !== '' || data.d1.trim() !== '')
+          .map(([key]) => key)
+      )
+      if (!isValidNumberInput(globalK) || Number(globalK) < 0) {
+        setImportPreview(null)
+        setImportStatus('error')
+        setImportMessage('El factor de cobertura grupal debe ser un número mayor o igual a cero.')
+        return
+      }
+      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells, Number(globalK))
+      setImportPreview(preview)
+      setImportStatus(preview.errors.length > 0 ? 'error' : 'ready')
+    } catch (error) {
+      setImportPreview(null)
+      setImportStatus('error')
+      setImportMessage(error instanceof Error ? error.message : 'No fue posible leer el CSV.')
+    }
+  }
+
+  async function handleImportSave() {
+    if (!adminTarget || !importPreview || importPreview.errors.length > 0 || importPreview.cells.length === 0) return
+    cancelAllPendingSaves()
+    setImportStatus('saving')
+    setImportMessage(null)
+
+    const result = await adminGuardarResultadosCsvAction(
+      ronda.id,
+      adminTarget.rondaParticipanteId,
+      importPreview.cells
+    )
+    const savedRows = importPreview.cells.slice(0, result.saved ?? (result.ok ? importPreview.cells.length : 0))
+
+    if (savedRows.length > 0) {
+      setCells((prev) => {
+        const next = { ...prev }
+        for (const row of savedRows) {
+          next[toCellKey(row.ptItemId, row.sampleGroupId)] = {
+            d1: String(row.d1),
+            d2: row.d2 != null ? String(row.d2) : '',
+            d3: row.d3 != null ? String(row.d3) : '',
+            meanValue: String(row.meanValue),
+            sdValue: String(row.sdValue),
+            ux: String(row.ux),
+            k: String(row.k),
+            uxExp: String(row.uxExp),
+          }
+        }
+        return next
+      })
+      setSaveStatus((prev) => {
+        const next = { ...prev }
+        for (const row of savedRows) {
+          next[toCellKey(row.ptItemId, row.sampleGroupId)] = 'saved'
+        }
+        return next
+      })
+      setSaveErrors((prev) => {
+        const next = { ...prev }
+        for (const row of savedRows) {
+          delete next[toCellKey(row.ptItemId, row.sampleGroupId)]
+        }
+        return next
+      })
+    }
+
+    if (result.error || (result.errors && result.errors.length > 0)) {
+      setImportStatus('error')
+      setImportMessage(result.error ?? result.errors?.join(' ') ?? 'No fue posible guardar la importación.')
+      return
+    }
+
+    setImportStatus('saved')
+    setImportMessage(`Se cargaron ${savedRows.length} celdas para ${participanteEmail}.`)
   }
 
   async function handleSubmit() {
@@ -470,6 +578,116 @@ export default function FormularioRonda({
             </div>
           )}
         </section>
+
+        {adminTarget && (
+          <section className="card p-6">
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div>
+                <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
+                  Cargar archivo de resultados
+                </h2>
+                <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+                  Importa un CSV y guarda sus resultados en nombre de {participanteEmail}.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <input
+                  ref={importFileInputRef}
+                  type="file"
+                  accept=".csv,text/csv"
+                  disabled={soloLectura}
+                  onChange={(event) => {
+                    setImportFile(event.target.files?.[0] ?? null)
+                    setImportPreview(null)
+                    setImportStatus('idle')
+                    setImportMessage(null)
+                  }}
+                  className="max-w-72 rounded border border-[var(--border)] px-3 py-2 text-sm disabled:bg-[var(--surface-muted)]"
+                />
+                <button
+                  type="button"
+                  onClick={() => void handlePreviewImport()}
+                  className="btn-outline"
+                  disabled={soloLectura || importStatus === 'previewing' || !importFile}
+                >
+                  {importStatus === 'previewing' ? 'Leyendo…' : 'Previsualizar'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void handleImportSave()}
+                  className="btn-primary"
+                  disabled={
+                    soloLectura ||
+                    importStatus === 'saving' ||
+                    !importPreview ||
+                    importPreview.errors.length > 0 ||
+                    importPreview.cells.length === 0
+                  }
+                >
+                  {importStatus === 'saving' ? 'Cargando…' : 'Cargar resultados'}
+                </button>
+              </div>
+            </div>
+
+            {importPreview && (
+              <div className="mt-4 grid gap-3 md:grid-cols-3">
+                <div className="card-accent px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                    Filas leídas
+                  </div>
+                  <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                    {importPreview.rowsRead}
+                  </div>
+                </div>
+                <div className="card-accent px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                    Resultados
+                  </div>
+                  <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                    {importPreview.cells.length}
+                  </div>
+                </div>
+                <div className="card-accent px-4 py-3">
+                  <div className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
+                    Alertas
+                  </div>
+                  <div className="numeric mt-1 text-lg font-semibold text-[var(--foreground)]">
+                    {importPreview.warnings.length + importPreview.errors.length}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {importMessage && (
+              <div
+                className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
+                  importStatus === 'saved'
+                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
+                    : 'border-rose-200 bg-rose-50 text-rose-700'
+                }`}
+              >
+                {importMessage}
+              </div>
+            )}
+
+            {importPreview && importPreview.warnings.length > 0 && (
+              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                {importPreview.warnings.slice(0, 4).map((warning) => (
+                  <div key={warning}>{warning}</div>
+                ))}
+                {importPreview.warnings.length > 4 && <div>Y {importPreview.warnings.length - 4} advertencias más.</div>}
+              </div>
+            )}
+
+            {importPreview && importPreview.errors.length > 0 && (
+              <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                {importPreview.errors.map((error) => (
+                  <div key={error}>{error}</div>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
           <div>

@@ -128,7 +128,7 @@ export async function adminReabrirInformeFinalAction(
   }
 }
 
-export async function adminGuardarReferenciaCsvAction(
+export async function adminGuardarResultadosCsvAction(
   rondaId: string,
   participanteId: string,
   rows: ReferenciaImportCell[],
@@ -139,9 +139,6 @@ export async function adminGuardarReferenciaCsvAction(
     return { error: `El archivo excede el máximo permitido de ${MAX_IMPORT_ROWS} filas (recibidas: ${rows.length}).` }
   }
   if (target.ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
-  if (!isMemberSpecialRole(target.participante.participant_profile)) {
-    return { error: 'La carga CSV solo está habilitada para el laboratorio de referencia.' }
-  }
   if (!target.participante.participant_code || target.participante.replicate_code == null) {
     return { error: 'El participante no tiene código PT o código de réplica asignado.' }
   }

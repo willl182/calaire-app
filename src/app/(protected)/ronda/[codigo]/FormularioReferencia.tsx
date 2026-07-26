@@ -17,7 +17,7 @@ import {
 import {
   adminEnviarInformeFinalAction,
   adminGuardarEnvioAction,
-  adminGuardarReferenciaCsvAction,
+  adminGuardarResultadosCsvAction,
   adminLimpiarEnviosReferenciaAction,
   adminReabrirInformeFinalAction,
 } from '@/app/(protected)/dashboard/rondas/[id]/participantes/[pid]/datos/actions'
@@ -367,7 +367,7 @@ export default function FormularioReferencia({
     setImportMessage(null)
 
     const result = adminTarget
-      ? await adminGuardarReferenciaCsvAction(ronda.id, adminTarget.rondaParticipanteId, importPreview.cells)
+      ? await adminGuardarResultadosCsvAction(ronda.id, adminTarget.rondaParticipanteId, importPreview.cells)
       : await guardarReferenciaCsvAction(ronda.id, importPreview.cells)
     const savedRows = importPreview.cells.slice(0, result.saved ?? (result.ok ? importPreview.cells.length : 0))
 
