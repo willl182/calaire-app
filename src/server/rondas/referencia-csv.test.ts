@@ -166,3 +166,33 @@ test('reporta contaminantes y niveles sin configuracion', () => {
   assert.match(preview.errors[0], /O3 no esta configurado/)
   assert.match(preview.errors[1], /no hay nivel PT/)
 })
+
+test('acepta mean_h2 y mean_h3 en NA para niveles de tres replicas', () => {
+  const rows: ParsedReferenciaRow[] = [
+    {
+      rowNumber: 8,
+      source: 'ronda',
+      pollutant: 'CO',
+      level: '6.3 ppm',
+      unit: 'ppm',
+      instrument: 'ref',
+      meanH1: 6.3,
+      meanH2: null,
+      meanH3: null,
+      meanValue: 6.3,
+      sdValue: 0.1,
+      ux: 0.1,
+      k: null,
+      uxExp: 0.2,
+      nHours: 3,
+      hourStarts: '',
+    },
+  ]
+
+  const preview = buildReferenciaImportPreview(rows, ptItems, sampleGroups)
+  assert.deepEqual(preview.errors, [])
+  assert.equal(preview.cells.length, 1)
+  assert.equal(preview.cells[0].d1, 6.3)
+  assert.equal(preview.cells[0].d2, null)
+  assert.equal(preview.cells[0].d3, null)
+})
