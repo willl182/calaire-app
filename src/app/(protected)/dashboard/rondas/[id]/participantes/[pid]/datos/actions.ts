@@ -115,7 +115,7 @@ export async function adminEnviarInformeFinalAction(
 export async function adminReabrirInformeFinalAction(
   rondaId: string,
   participanteId: string,
-): Promise<{ ok?: boolean; error?: string; previousSubmittedAt?: string }> {
+): Promise<{ ok?: boolean; error?: string; previousSubmittedAt?: string | null }> {
   const target = await getAdminTarget(rondaId, participanteId)
   if ('error' in target) return target
   if (target.ronda.estado !== 'activa') return { error: 'Solo se pueden reabrir envíos de una ronda activa.' }
@@ -133,11 +133,11 @@ export async function adminGuardarReferenciaCsvAction(
   participanteId: string,
   rows: ReferenciaImportCell[],
 ): Promise<{ ok?: boolean; saved?: number; errors?: string[]; error?: string }> {
+  const target = await getAdminTarget(rondaId, participanteId)
+  if ('error' in target) return target
   if (rows.length > MAX_IMPORT_ROWS) {
     return { error: `El archivo excede el máximo permitido de ${MAX_IMPORT_ROWS} filas (recibidas: ${rows.length}).` }
   }
-  const target = await getAdminTarget(rondaId, participanteId)
-  if ('error' in target) return target
   if (target.ronda.estado !== 'activa') return { error: 'La ronda no admite cambios en este momento.' }
   if (!isMemberSpecialRole(target.participante.participant_profile)) {
     return { error: 'La carga CSV solo está habilitada para el laboratorio de referencia.' }

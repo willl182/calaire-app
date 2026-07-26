@@ -485,7 +485,7 @@ export const reabrirEnvioFinalPT = mutation({
     if (!ronda || ronda.estado !== 'activa') throw new ConvexError('La ronda no está activa.')
 
     const estado = await getEstadoEnvioPTForParticipante(ctx, participante)
-    if (!estado.enviado || !estado.enviados_at) {
+    if ((!estado.enviado || !estado.enviados_at) && !estado.hasPartialFinal) {
       throw new ConvexError('El participante no tiene un envío final consistente para reabrir.')
     }
 

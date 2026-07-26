@@ -454,7 +454,7 @@ export default function FormularioRonda({
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
               <span>
                 {adminTarget ? 'El informe final PT fue enviado correctamente.' : 'Tu informe final PT fue enviado correctamente.'}
-                {submittedAt ? ` Fecha de envío: ${new Date(submittedAt).toLocaleString('es-CO')}.` : ''}
+                {submittedAt ? ` Fecha de envío: ${new Date(submittedAt).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.` : ''}
               </span>
               {adminTarget && ronda.estado === 'activa' && (
                 <button type="button" onClick={() => void handleReopen()} className="btn-outline">

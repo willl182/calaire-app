@@ -8,6 +8,7 @@ import {
   getEstadoEnvioPTByParticipante,
   getParticipanteRondaResumen,
   getRonda,
+  isMemberSpecialRole,
   listEnviosPTByParticipante,
   listPTItems,
   listPTSampleGroups,
@@ -36,7 +37,7 @@ export default async function DatosParticipanteAdminPage({ params }: Props) {
     listEnviosPTByParticipante(participanteId),
     getEstadoEnvioPTByParticipante(participanteId),
   ])
-  const isReferencia = participante.participant_profile === 'member_special'
+  const isReferencia = isMemberSpecialRole(participante.participant_profile)
   const backHref = `/dashboard/rondas/${rondaId}/participantes`
   const formProps = {
     ronda,

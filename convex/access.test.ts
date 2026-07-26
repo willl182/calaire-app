@@ -369,6 +369,8 @@ test('admin reabre, corrige y reenvia PT sin perder valores', async () => {
     ptItemId: ids.ptItemId,
     sampleGroupId: ids.sampleGroupId,
     d1: 1,
+    d2: 1.1,
+    d3: 0.9,
     meanValue: 1,
     sdValue: 0,
     ux: 0.1,
@@ -396,7 +398,13 @@ test('admin reabre, corrige y reenvia PT sin perder valores', async () => {
   const draft = await asAdmin.query(api.pt.index.listEnviosPTByParticipante, {
     rondaParticipanteId: ids.participanteId,
   })
+  expect(draft[0]?.d1).toBe(1)
+  expect(draft[0]?.d2).toBe(1.1)
+  expect(draft[0]?.d3).toBe(0.9)
   expect(draft[0]?.meanValue).toBe(1)
+  expect(draft[0]?.ux).toBe(0.1)
+  expect(draft[0]?.k).toBe(2)
+  expect(draft[0]?.uxExp).toBe(0.2)
   expect(draft[0]?.finalSubmittedAt).toBeUndefined()
 
   await asAdmin.mutation(api.pt.index.upsertEnvioPT, { ...args, d2: undefined, d3: undefined, meanValue: 2 })
@@ -404,10 +412,75 @@ test('admin reabre, corrige y reenvia PT sin perder valores', async () => {
     rondaParticipanteId: ids.participanteId,
   })
   expect(secondSubmittedAt).toBeTruthy()
-  const finalState = await asAdmin.query(api.pt.index.getEstadoEnvioPTByParticipante, {
+  const [finalState, finalDraft] = await Promise.all([
+    asAdmin.query(api.pt.index.getEstadoEnvioPTByParticipante, {
+      rondaParticipanteId: ids.participanteId,
+    }),
+    asAdmin.query(api.pt.index.listEnviosPTByParticipante, {
+      rondaParticipanteId: ids.participanteId,
+    }),
+  ])
+  expect(finalState).toMatchObject({ completo: true, enviado: true, total_guardado: 1, total_esperado: 1 })
+  expect(finalDraft[0]).toMatchObject({
+    d1: 1,
+    meanValue: 2,
+    ux: 0.1,
+    k: 2,
+    uxExp: 0.2,
+  })
+  expect(finalDraft[0]?.d2).toBeUndefined()
+  expect(finalDraft[0]?.d3).toBeUndefined()
+})
+
+test('admin reabre un envío PT parcialmente finalizado', async () => {
+  const t = convexTest(schema, modules)
+  const ids = await t.run(async (ctx) => {
+    const rondaId = await ctx.db.insert('rondas', { codigo: 'PT-PARTIAL', nombre: 'PT parcial', estado: 'activa', createdAt: Date.now() })
+    const participanteId = await ctx.db.insert('rondaParticipantes', {
+      rondaId,
+      workosUserId: 'pt-partial',
+      email: 'pt-partial@lab.test',
+      invitadoAt: Date.now(),
+      participantProfile: 'member',
+      participantCode: 'P-PARTIAL',
+      replicateCode: 9,
+    })
+    const ptItemId = await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'L1', sortOrder: 1, createdAt: Date.now() })
+    const firstGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'G1', sortOrder: 1, createdAt: Date.now() })
+    const secondGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'G2', sortOrder: 2, createdAt: Date.now() })
+    return { rondaId, participanteId, ptItemId, firstGroupId, secondGroupId }
+  })
+  const asAdmin = t.withIdentity({ subject: 'admin-pt-partial', role: 'admin' })
+  const baseArgs = {
+    rondaId: ids.rondaId,
+    rondaParticipanteId: ids.participanteId,
+    ptItemId: ids.ptItemId,
+    d1: 1,
+    meanValue: 1,
+    sdValue: 0,
+  }
+
+  await asAdmin.mutation(api.pt.index.upsertEnvioPT, { ...baseArgs, sampleGroupId: ids.firstGroupId })
+  await asAdmin.mutation(api.pt.index.upsertEnvioPT, { ...baseArgs, sampleGroupId: ids.secondGroupId })
+  await asAdmin.mutation(api.pt.index.submitFinalPTByParticipante, {
     rondaParticipanteId: ids.participanteId,
   })
-  expect(finalState).toMatchObject({ completo: true, enviado: true, total_guardado: 1, total_esperado: 1 })
+  await t.run(async (ctx) => {
+    const envios = await ctx.db
+      .query('enviosPt')
+      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', ids.participanteId))
+      .collect()
+    await ctx.db.patch(envios[0]!._id, { finalSubmittedAt: undefined })
+  })
+
+  const reopened = await asAdmin.mutation(api.pt.index.reabrirEnvioFinalPT, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  expect(reopened).toEqual({ previousSubmittedAt: null, updatedCells: 2 })
+  const draft = await asAdmin.query(api.pt.index.listEnviosPTByParticipante, {
+    rondaParticipanteId: ids.participanteId,
+  })
+  expect(draft.every((envio) => envio.finalSubmittedAt === undefined)).toBe(true)
 })
 
 test('fichas no se crean ni editan fuera de una ronda activa', async () => {

@@ -1390,7 +1390,7 @@ export async function submitFinalPTByParticipante(rondaParticipanteId: string): 
 }
 
 export async function reabrirEnvioFinalPT(rondaParticipanteId: string): Promise<{
-  previousSubmittedAt: string
+  previousSubmittedAt: string | null
   updatedCells: number
 }> {
   return fetchMutation(api.pt.index.reabrirEnvioFinalPT, {
