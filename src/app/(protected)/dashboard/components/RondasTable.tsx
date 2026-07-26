@@ -150,6 +150,14 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
             >
               Gestionar
             </Link>
+            {canEdit && (
+              <Link
+                href={isEditing ? '/dashboard/rondas' : `/dashboard/rondas?editando=${round.id}`}
+                className="inline-flex h-8 min-w-16 items-center justify-center rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] hover:no-underline"
+              >
+                {isEditing ? 'Cerrar' : 'Editar'}
+              </Link>
+            )}
             <StatusAction round={round} />
             <CloseRondaAction round={round} />
             <form action={deleteRondaAction}>

@@ -15,6 +15,14 @@ export function RondaConfigForm({ round }: { round: Ronda }) {
         <p className="text-sm text-[var(--foreground-muted)]">
           Actualice nombre, código, contaminantes, niveles y réplicas antes de recibir envíos.
         </p>
+        <p className="text-xs text-[var(--foreground-muted)]">
+          Una vez que la ronda tiene envíos, la lista de contaminantes y sus niveles quedan fijos. Para
+          cambiar solo las réplicas use{' '}
+          <Link href={`/dashboard/rondas/${round.id}`} className="underline">
+            el resumen de la ronda
+          </Link>
+          .
+        </p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
