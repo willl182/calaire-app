@@ -1,8 +1,8 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
 
-import { LogoUnal } from '@/components/LogoUnal'
 import { requireAdminAuth } from '@/server/auth'
+import { RondaPageHeader } from '../../../RondaPageHeader'
 import {
   getParticipanteRondaResumen,
   getRonda,
@@ -42,25 +42,16 @@ export default async function DatosParticipanteAdminPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-8 py-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-6">
-              <LogoUnal height={64} />
-              <div className="space-y-0.5">
-                <h1 className="text-xl font-bold text-[var(--foreground)]">
-                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
-                </h1>
-                <p className="text-base font-medium text-[var(--pt-primary-dark)]">Gases Contaminantes Criterio</p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  {participante.email} · {isReferencia ? 'Referencia' : 'Participante'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
+        <RondaPageHeader
+          ronda={ronda}
+          section="Resultados PT del participante"
+          description={`${participante.email} · ${isReferencia ? 'Referencia' : 'Participante'}`}
+          actions={(
+            <Link href={`/dashboard/rondas/${rondaId}/participantes`} className="btn-outline">
+              ← Volver a participantes
+            </Link>
+          )}
+        />
 
         <section className="card p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">

@@ -1,9 +1,9 @@
 import { notFound } from 'next/navigation'
 import Link from 'next/link'
-import { LogoUnal } from '@/components/LogoUnal'
 import { requireAdminAuth } from '@/server/auth'
 import { getParticipanteRondaResumen, getRonda } from '@/server/rondas'
 import { getOrCreateFicha, getFichaByRondaParticipante } from '@/server/rondas/fichas'
+import { RondaPageHeader } from '../../../RondaPageHeader'
 import FichaAdminEditor from './FichaAdminEditor'
 
 type Props = {
@@ -32,27 +32,16 @@ export default async function FichaAdminPage({ params }: Props) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-4 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-8 py-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-6">
-              <LogoUnal height={64} />
-              <div className="space-y-1">
-                <h1 className="text-xl font-bold text-[var(--foreground)]">
-                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
-                </h1>
-                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
-                  Gases Contaminantes Criterio
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  {participante.email} · {participante.participant_profile === 'member_special' ? 'Referencia' : 'Participante'}
-                </p>
-              </div>
-            </div>
-          </div>
-        </header>
+        <RondaPageHeader
+          ronda={ronda}
+          section="Ficha del participante"
+          description={`${participante.email} · ${participante.participant_profile === 'member_special' ? 'Referencia' : 'Participante'}`}
+          actions={(
+            <Link href={`/dashboard/rondas/${rondaId}/participantes`} className="btn-outline">
+              ← Volver a participantes
+            </Link>
+          )}
+        />
 
         <section className="card flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
@@ -78,15 +67,6 @@ export default async function FichaAdminPage({ params }: Props) {
           ficha={fichaCompleta}
           participanteEmail={participante.email}
         />
-
-        <div>
-          <Link
-            href={`/dashboard/rondas/${rondaId}/participantes`}
-            className="btn-outline"
-          >
-            ← Volver a participantes
-          </Link>
-        </div>
       </div>
     </div>
   )

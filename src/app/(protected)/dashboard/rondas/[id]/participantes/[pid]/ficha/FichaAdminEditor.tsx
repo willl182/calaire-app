@@ -197,7 +197,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
       </section>
 
       {/* Datos del participante */}
-      <section className="card grid gap-5 p-6">
+      <section id="datos-participante" className="card grid scroll-mt-28 gap-5 p-6">
         <SectionHeader
           title="Datos del participante"
           description="Información del laboratorio responsable de los ensayos."

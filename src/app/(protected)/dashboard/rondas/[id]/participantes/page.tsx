@@ -211,16 +211,19 @@ function ParticipanteRow({
   return (
     <tr className="border-b border-[var(--border-soft)] last:border-0">
       {/* Col 1: Participante */}
-      <td className="py-3 pr-4">
-        <div className="text-sm font-medium text-[var(--foreground)]">{p.email}</div>
-        <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
-          <span className="rounded-full bg-[var(--surface-muted)] px-2 py-0.5 text-[10px] font-medium text-[var(--foreground-muted)]">
-            Código{' '}
-            <span className="numeric font-semibold text-[var(--foreground)]">
-              {p.participant_code ?? 'pendiente'}
-            </span>
-          </span>
+      <td className="px-5 py-4 align-top">
+        <div className="numeric text-sm font-semibold text-[var(--foreground)]">
+          {p.participant_code ?? 'Código pendiente'}
+        </div>
+        <div className="mt-2 flex flex-wrap items-center gap-1.5">
           {perfilBadge(p)}
+          <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
+            p.estado === 'reclamado'
+              ? 'bg-emerald-100 text-emerald-800'
+              : 'bg-amber-100 text-amber-800'
+          }`}>
+            {p.estado === 'reclamado' ? 'Reclamado' : 'Pendiente'}
+          </span>
         </div>
       </td>
 
@@ -289,39 +292,45 @@ function ParticipanteRow({
       </td>
 
       {/* Col 6: Acciones */}
-      <td className="py-3 text-right">
-        <div className="flex flex-wrap items-center justify-end gap-2">
+      <td className="px-5 py-4 align-top">
+        <div className="grid min-w-40 gap-2">
+          <Link
+            href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha#datos-participante`}
+            className="rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-3 py-1.5 text-center text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
+          >
+            Editar datos del participante
+          </Link>
           <Link
             href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`}
-            className="rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2 py-1 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
+            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-center text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--pt-primary)]"
           >
-            Editar ficha
+            Editar ficha completa
           </Link>
           <Link
             href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/datos`}
-            className="rounded-lg border border-blue-200 bg-blue-50 px-2 py-1 text-xs font-semibold text-blue-700 transition hover:border-blue-400 hover:bg-blue-100"
+            className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-center text-xs font-semibold text-blue-700 transition hover:border-blue-400 hover:bg-blue-100"
           >
-            Editar datos
+            Editar resultados PT
           </Link>
           {canEdit && (
             <>
-              <form action={regenerateSlotAction} className="inline">
+              <form action={regenerateSlotAction}>
                 <input type="hidden" name="ronda_id" value={rondaId} />
                 <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
                 <button
                   type="submit"
-                  className="rounded-lg border border-[var(--border)] px-2 py-1 text-xs text-[var(--foreground-muted)] transition hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
+                  className="w-full rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--foreground-muted)] transition hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
                 >
                   Regenerar
                 </button>
               </form>
-              <form action={removeParticipanteAction} className="inline">
+              <form action={removeParticipanteAction}>
                 <input type="hidden" name="ronda_id" value={rondaId} />
                 <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
                 <ConfirmSubmitButton
                   type="submit"
                   message={`¿Eliminar a ${p.email} de esta ronda?`}
-                  className="rounded-lg border border-rose-200 bg-rose-50/50 px-2 py-1 text-xs text-rose-600 transition hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800"
+                  className="w-full rounded-lg border border-rose-200 bg-rose-50/50 px-3 py-1.5 text-xs text-rose-600 transition hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800"
                 >
                   Eliminar
                 </ConfirmSubmitButton>
@@ -512,14 +521,14 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[70rem] table-fixed">
+              <table className="w-full min-w-[64rem] table-fixed">
                 <colgroup>
-                  <col className="w-[18rem]" />
-                  <col className="w-[18rem]" />
-                  <col className="w-[13rem]" />
+                  <col className="w-[12rem]" />
+                  <col className="w-[17rem]" />
                   <col className="w-[11rem]" />
-                  <col className="w-[11rem]" />
-                  <col className="w-auto" />
+                  <col className="w-[9rem]" />
+                  <col className="w-[9rem]" />
+                  <col className="w-[15rem]" />
                 </colgroup>
                 <thead>
                   <tr className="border-b-2 border-[var(--pt-primary)]">
