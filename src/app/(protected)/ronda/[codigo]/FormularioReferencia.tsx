@@ -619,14 +619,14 @@ export default function FormularioReferencia({
           )}
         </section>
 
-        <section className="card p-6">
+        <section className={`card p-6 ${adminTarget ? 'order-3' : ''}`}>
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
                 Carga CSV de referencia
               </h2>
               <p className="mt-1 text-sm text-[var(--foreground-muted)]">
-                Importa valores de referencia y revisa la tabla antes del envío final.
+                Método opcional para importar valores en bloque. También puedes cargarlos manualmente en las tablas.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
@@ -764,6 +764,17 @@ export default function FormularioReferencia({
           )}
         </section>
 
+        {adminTarget && (
+          <section className="card order-1 p-6">
+            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
+              Carga manual de resultados
+            </h2>
+            <p className="mt-1 text-sm text-[var(--foreground-muted)]">
+              Ingresa réplicas, promedio, desviación e incertidumbre directamente para este participante.
+            </p>
+          </section>
+        )}
+
         {itemsByContaminante.map(({ contaminante, items }) => {
           const contaminanteComplete =
             items.length > 0 &&
@@ -775,7 +786,7 @@ export default function FormularioReferencia({
             )
 
           return (
-            <section key={contaminante} className="card overflow-hidden">
+            <section key={contaminante} className={`card overflow-hidden ${adminTarget ? 'order-1' : ''}`}>
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
@@ -931,7 +942,7 @@ export default function FormularioReferencia({
         })}
 
         {!soloLectura && (
-          <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
+          <section className={`card flex flex-wrap items-center justify-between gap-4 p-6 ${adminTarget ? 'order-2' : ''}`}>
             <p className="text-sm text-[var(--foreground-muted)]">
               {canSubmit
                 ? 'Todas las combinaciones PT están completas y guardadas. Puedes enviar el informe final.'
