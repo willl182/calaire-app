@@ -1,42 +1,38 @@
 # Session State: calaire-app2
 
-**Last Updated**: 2026-07-25 08:21
+**Last Updated**: 2026-07-26 19:07
 
 ## Session Objective
 
-Definir plan y workflow técnico para incorporar nuevos documentos de ronda al SGC, incluyendo integración Convex/Next.js, mapa documental, endpoints y pruebas.
+Permitir que administración cargue, revise, corrija y envíe resultados PT en nombre de cualquier participante usando la misma experiencia del participante.
 
 ## Current State
 
-- [x] Alcance funcional acordado mediante entrevista `grill-me`.
-- [x] Plan principal creado en `plan_documentos_sgc.md`.
-- [x] Workflow técnico creado en `workflow_documentos_sgc.md`.
-- [x] Definidos F-PSEA-19 Acta de inicio, F-PSEA-20 Rotulado anónimo y F-PSEA-21 Relación de instrumentos Calaire.
-- [x] Definidos anexos A/B de I-PSEA-02.
-- [x] Definidos anclajes a P-PSEA-01, 03, 04, 05, 06, 08, 19 y 20.
-- [x] Definidas relaciones para mapa documental, seeds, endpoints y matriz de pruebas.
-- [x] Implementación documental y funcional de F-PSEA-19, F-PSEA-20 y F-PSEA-21 completada.
-- [x] Cierre no bloqueante, paginación F-PSEA-21 y registro atómico PDF/XLSX implementados.
-- [ ] Modelo visual definitivo F-PSEA-20 pendiente de entrega por usuario; placeholder controlado vigente.
+- [x] Ruta admin reutiliza `FormularioRonda` o `FormularioReferencia` según perfil del participante seleccionado.
+- [x] Guardado, envío final y reapertura usan `rondaParticipanteId` explícito.
+- [x] Admin puede editar manualmente réplicas, promedio, desviación e incertidumbre.
+- [x] Admin puede cargar CSV para participantes normales y de referencia.
+- [x] CSV permite previsualizar, validar y sobrescribir celdas del participante seleccionado.
+- [x] Flujo de referencia conserva carga manual y CSV.
+- [x] Cambios enviados directamente a `main` sin nueva PR.
+- [x] Producción desplegada en `https://calaire-app.vercel.app`.
+- [ ] Verificación manual autenticada del selector de archivo y guardado real pendiente.
 
 ## Critical Technical Context
 
-- F-PSEA-04 conserva equipos reportados por participantes. F-PSEA-21 es formato separado para instrumentos Calaire usados.
-- F-PSEA-19: DOCX precargado desde calendario/F-PSEA-03, firmas manuales, PDF escaneado visible a participantes.
-- F-PSEA-20: carga manual, solo etiquetas, interno; primera versión será placeholder válido.
-- F-PSEA-21: nativo, siete mínimos, dos fotos nuevas por instrumento, técnico registra, coordinador valida, exporta PDF/XLSX.
-- I-PSEA-02 incorpora Anexo A de operación normal y Anexo B de procesamiento, promedio horario con 75 % mínimo, incertidumbre propia documentada y archivo original obligatorio.
-- Instrucciones, calendario, cronograma y acta visibles a participantes. F20/F21 internos.
-- F19/F20/F21 son críticos para checklist, pero no bloquean técnicamente cierre.
-- Catálogo SGC está duplicado en `src/server/sgc/catalog.ts` y `convex/_lib/sgc/catalog.ts`; mantener paridad.
-- Cambios Convex requieren leer `convex/_generated/ai/guidelines.md` y ejecutar codegen.
-- Mapa documental usa `dev/import/relaciones_mapa_sgc.seed.json` y `mapaSgcRelaciones`.
-- Repositorio ya tiene cambios del usuario. No descartarlos ni sobrescribirlos.
+- `src/app/(protected)/dashboard/rondas/[id]/participantes/[pid]/datos/page.tsx` carga participante seleccionado y renderiza formularios compartidos.
+- `FormularioRonda.tsx` ahora muestra `Cargar archivo de resultados` cuando existe `adminTarget`.
+- `FormularioReferencia.tsx` conserva misma importación y usa acción genérica de administración.
+- `adminGuardarResultadosCsvAction` valida admin, ronda, participante objetivo, códigos PT, ítems, grupos y valores; ya no restringe CSV a `member_special`.
+- Parser compartido: `src/server/rondas/referencia-csv.ts`. Formato exige columnas `source`, `pollutant`, `level`, `unit`, `instrument`, `mean_value`, `sd_value`, `u_value`, `u_exp`, `n_hours`, `hour_starts`; acepta `mean_h1`, `mean_h2`, `mean_h3` y `k` opcionales.
+- Commit funcional: `1853ff7 feat(pt): let admins upload participant results`.
+- Deploy producción: `dpl_4hNVrV8w5KiydFMWbHdLqBhMJRKd`, estado READY.
+- Validación completada: TypeScript, lint, 69 tests y build.
+- No tocar archivos del usuario sin instrucción: `data/3-pt.csv`, `data/3-ref.csv`, `propd.md`.
 
 ## Next Steps
 
-1. Completar `pnpm lint`, `pnpm test`, `pnpm build` y `pnpm test:e2e:start`.
-2. Revisar diff final y corregir cualquier regresión detectada.
-3. Preparar release y desplegar cambios Convex/Next.js.
-4. Verificar F19/F20/F21 en entorno desplegado.
-5. Aprobar o sustituir el placeholder visual definitivo de F-PSEA-20.
+1. Iniciar sesión como admin y abrir un participante normal en `.../participantes/[pid]/datos`.
+2. Confirmar selector `Cargar archivo de resultados`, previsualización y persistencia del CSV.
+3. Repetir con laboratorio de referencia y verificar que carga manual y CSV siguen disponibles.
+4. Si formato real de `data/3-pt.csv` difiere del parser actual, adaptar parser y agregar prueba de regresión.
