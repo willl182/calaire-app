@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Diagnóstico documental · SGC PEA</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap');
+    :root {
+      --ink: #15231d;
+      --muted: #617169;
+      --paper: #f4f1e8;
+      --card: #fffdf7;
+      --line: #d9d4c8;
+      --green: #1e5c45;
+      --lime: #c8df72;
+      --amber: #dc9b35;
+      --red: #bd5448;
+      --blue: #477e8f;
+      --shadow: 0 18px 50px rgba(34, 47, 39, .11);
+    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(rgba(30, 92, 69, .035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(30, 92, 69, .035) 1px, transparent 1px),
+        var(--paper);
+      background-size: 28px 28px;
+      font-family: Manrope, sans-serif;
+    }
+    button, input, select, textarea { font: inherit; }
+    button { cursor: pointer; }
+    .shell { width: min(1500px, calc(100% - 32px)); margin: 24px auto 80px; }
+    .masthead {
+      position: relative; overflow: hidden; padding: 34px;
+      color: #f9f5e9; background: var(--green); border-radius: 24px;
+      box-shadow: var(--shadow);
+    }
+    .masthead::after {
+      content: "SGC"; position: absolute; right: -18px; bottom: -58px;
+      color: rgba(255,255,255,.06); font-size: 190px; font-weight: 800; letter-spacing: -.08em;
+    }
+    .eyebrow { margin: 0 0 12px; color: var(--lime); font: 500 12px DM Mono, monospace; letter-spacing: .15em; text-transform: uppercase; }
+    h1 { max-width: 800px; margin: 0; font-size: clamp(32px, 5vw, 66px); line-height: .96; letter-spacing: -.055em; }
+    .lead { max-width: 780px; margin: 20px 0 0; color: #dce8df; font-size: 16px; line-height: 1.65; }
+    .save-state { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px; padding: 8px 12px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; font: 500 11px DM Mono, monospace; }
+    .save-state::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--lime); box-shadow: 0 0 0 4px rgba(200,223,114,.13); }
+    .stats { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px; margin: 16px 0; }
+    .stat { min-height: 112px; padding: 18px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,253,247,.88); }
+    .stat b { display: block; font-size: 32px; line-height: 1; letter-spacing: -.04em; }
+    .stat span { display: block; margin-top: 10px; color: var(--muted); font: 500 11px DM Mono, monospace; text-transform: uppercase; }
+    .toolbar { position: sticky; top: 10px; z-index: 20; display: grid; grid-template-columns: 1fr 180px 180px auto; gap: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 18px; background: rgba(244,241,232,.94); backdrop-filter: blur(16px); box-shadow: 0 8px 30px rgba(34,47,39,.08); }
+    .field, .btn { min-height: 42px; border: 1px solid var(--line); border-radius: 11px; background: var(--card); color: var(--ink); }
+    .field { width: 100%; padding: 9px 12px; outline: none; }
+    .field:focus { border-color: var(--green); box-shadow: 0 0 0 3px rgba(30,92,69,.1); }
+    .btn { padding: 9px 14px; font-weight: 700; }
+    .btn:hover { transform: translateY(-1px); border-color: var(--green); }
+    .btn.primary { color: white; background: var(--green); border-color: var(--green); }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .meta-card { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin: 16px 0; padding: 18px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; }
+    .meta-card label { color: var(--muted); font: 500 10px DM Mono, monospace; text-transform: uppercase; }
+    .meta-card input { margin-top: 7px; }
+    .document-list { display: grid; gap: 12px; }
+    .doc { overflow: hidden; border: 1px solid var(--line); border-left: 5px solid #aaa; border-radius: 18px; background: var(--card); box-shadow: 0 3px 12px rgba(34,47,39,.04); }
+    .doc[data-level="incompleto"] { border-left-color: var(--red); }
+    .doc[data-level="aceptable"] { border-left-color: var(--amber); }
+    .doc[data-level="bueno"] { border-left-color: var(--green); }
+    .doc-head { display: grid; grid-template-columns: 112px 1fr auto; gap: 16px; align-items: center; width: 100%; padding: 18px; border: 0; text-align: left; background: transparent; color: inherit; }
+    .code { color: var(--green); font: 500 12px DM Mono, monospace; }
+    .doc-title { font-weight: 800; letter-spacing: -.015em; }
+    .family { color: var(--muted); font-size: 12px; }
+    .level-pill { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); font: 500 10px DM Mono, monospace; text-transform: uppercase; }
+    .doc-body { display: none; padding: 0 18px 20px; border-top: 1px solid var(--line); }
+    .doc.open .doc-body { display: block; animation: reveal .18s ease-out; }
+    @keyframes reveal { from { opacity: 0; transform: translateY(-5px); } }
+    .assessment { display: grid; grid-template-columns: 220px 1fr; gap: 20px; padding-top: 18px; }
+    .level-box label, .comment-box label { display: block; margin-bottom: 8px; color: var(--muted); font: 500 10px DM Mono, monospace; text-transform: uppercase; }
+    .level-select { width: 100%; }
+    textarea.field { min-height: 94px; resize: vertical; line-height: 1.5; }
+    .check-title { margin: 20px 0 10px; font-size: 13px; }
+    .checks { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .check { display: flex; align-items: flex-start; gap: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 11px; background: #faf8f1; font-size: 12px; line-height: 1.4; }
+    .check input { width: 17px; height: 17px; margin: 0; accent-color: var(--green); flex: 0 0 auto; }
+    .progress { height: 7px; margin-top: 12px; overflow: hidden; border-radius: 99px; background: #e7e2d6; }
+    .progress i { display: block; height: 100%; width: 0; background: var(--green); transition: width .2s ease; }
+    .empty { padding: 50px; text-align: center; color: var(--muted); }
+    .footer-note { margin-top: 18px; color: var(--muted); font-size: 12px; line-height: 1.6; }
+    .toast { position: fixed; right: 22px; bottom: 22px; z-index: 50; padding: 12px 16px; border-radius: 12px; color: white; background: var(--ink); opacity: 0; transform: translateY(12px); pointer-events: none; transition: .2s; }
+    .toast.show { opacity: 1; transform: none; }
+    @media (max-width: 900px) {
+      .stats { grid-template-columns: repeat(2, 1fr); }
+      .toolbar { position: static; grid-template-columns: 1fr 1fr; }
+      .toolbar .search { grid-column: 1 / -1; }
+      .meta-card { grid-template-columns: 1fr 1fr; }
+      .assessment { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 580px) {
+      .shell { width: min(100% - 18px, 1500px); margin-top: 9px; }
+      .masthead { padding: 24px 20px; border-radius: 18px; }
+      .stats, .toolbar, .meta-card, .checks { grid-template-columns: 1fr; }
+      .doc-head { grid-template-columns: 1fr auto; gap: 7px; }
+      .code { grid-column: 1 / -1; }
+    }
+    @media print {
+      body { background: white; }
+      .shell { width: 100%; margin: 0; }
+      .masthead { color: var(--ink); background: white; box-shadow: none; border: 1px solid #bbb; }
+      .masthead .lead, .eyebrow { color: var(--ink); }
+      .toolbar, .actions, .save-state { display: none !important; }
+      .doc { break-inside: avoid; }
+      .doc-body { display: block !important; }
+      .stats { grid-template-columns: repeat(5, 1fr); }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <p class="eyebrow">Instrumento de revisión · PEA / ISO 17043</p>
+      <h1>Diagnóstico documental del SGC</h1>
+      <p class="lead">Revise cada documento, marque criterios cumplidos, clasifique calidad y deje comentario orientador. Cambios quedan guardados automáticamente en este navegador.</p>
+      <div id="saveState" class="save-state">Listo para registrar</div>
+    </header>
+
+    <section class="stats" aria-label="Resumen del diagnóstico">
+      <div class="stat"><b id="totalStat">0</b><span>Documentos</span></div>
+      <div class="stat"><b id="pendingStat">0</b><span>Sin revisar</span></div>
+      <div class="stat"><b id="incompleteStat">0</b><span>Incompletos</span></div>
+      <div class="stat"><b id="acceptableStat">0</b><span>Aceptables</span></div>
+      <div class="stat"><b id="goodStat">0</b><span>Buenos</span></div>
+    </section>
+
+    <section class="meta-card" aria-label="Datos del diagnóstico">
+      <div><label for="reviewer">Responsable</label><input id="reviewer" class="field meta" placeholder="Nombre de quien revisa"></div>
+      <div><label for="reviewDate">Fecha</label><input id="reviewDate" class="field meta" type="date"></div>
+      <div><label for="reviewScope">Alcance</label><input id="reviewScope" class="field meta" value="Sistema de Gestión PEA"></div>
+      <div><label for="reviewVersion">Corte / versión</label><input id="reviewVersion" class="field meta" placeholder="Ej. diagnóstico inicial 2026"></div>
+    </section>
+
+    <nav class="toolbar" aria-label="Filtros y acciones">
+      <input id="search" class="field search" type="search" placeholder="Buscar código, nombre o comentario…">
+      <select id="familyFilter" class="field"><option value="">Todas las familias</option></select>
+      <select id="levelFilter" class="field">
+        <option value="">Todos los estados</option>
+        <option value="pendiente">Sin revisar</option>
+        <option value="incompleto">Incompleto</option>
+        <option value="aceptable">Aceptable</option>
+        <option value="bueno">Bueno</option>
+      </select>
+      <div class="actions">
+        <button id="expandAll" class="btn" type="button">Abrir todos</button>
+        <button id="exportJson" class="btn primary" type="button">Guardar copia</button>
+        <button id="importJson" class="btn" type="button">Cargar copia</button>
+        <button id="exportCsv" class="btn" type="button">CSV</button>
+        <button class="btn" type="button" onclick="window.print()">Imprimir</button>
+        <input id="fileInput" type="file" accept="application/json,.json" hidden>
+      </div>
+    </nav>
+
+    <section id="documentList" class="document-list" aria-live="polite"></section>
+    <p class="footer-note"><strong>Guardado:</strong> localStorage conserva datos en este navegador y equipo. Botón “Guardar copia” descarga respaldo JSON transportable. Use respaldo para mover diagnóstico a otro equipo o evitar pérdida al limpiar navegador.</p>
+  </main>
+  <div id="toast" class="toast" role="status"></div>
+
+  <script>
+    const STORAGE_KEY = 'sgc-diagnostico-documental-v1';
+    const criteria = [
+      'Código, título y tipo documental claramente identificados',
+      'Objetivo y alcance completos y coherentes',
+      'Responsables, roles y autoridades definidos',
+      'Actividades descritas en secuencia suficiente',
+      'Entradas, salidas y criterios de aceptación definidos',
+      'Riesgos, controles y puntos críticos contemplados',
+      'Registros y evidencias resultantes identificados',
+      'Referencias normativas y documentos relacionados vigentes',
+      'Versión, aprobación, fecha y control de cambios completos',
+      'Redacción clara, aplicable y sin vacíos operativos'
+    ];
+    const rawDocuments = `
+00_plantillas_base|DG-PSEA|Plantilla Documento General
+00_plantillas_base|F-PSEA-01|Plantilla Formato Excel
+00_plantillas_base|I-PSEA-01|Plantilla Instructivo
+00_plantillas_base|P-PSEA-01-PL|Plantilla Procedimiento
+01_documentos_marco|DG-PSEA-01|Protocolo Participación EA Gases Contaminantes Criterio
+01_documentos_marco|DG-PSEA-02|Aplicativo calaire-app
+01_documentos_marco|DG-PSEA-03|Aplicativo pt_app
+02_procedimientos|P-PSEA-01|Protocolo General EA v2
+02_procedimientos|P-PSEA-02|Matriz documental básica del PEA
+02_procedimientos|P-PSEA-03|Control de registros y evidencias del PEA
+02_procedimientos|P-PSEA-04|Planificación de ronda EA
+02_procedimientos|P-PSEA-05|Comunicaciones del PEA
+02_procedimientos|P-PSEA-06|Preparación y control del ítem de ensayo gaseoso
+02_procedimientos|P-PSEA-07|Diseño estadístico
+02_procedimientos|P-PSEA-08|Flujo técnico de datos digitales del PEA
+02_procedimientos|P-PSEA-09|Generación y emisión del informe de resultados
+02_procedimientos|P-PSEA-10|Procedimiento técnico NO-NO2
+02_procedimientos|P-PSEA-11|Procedimiento técnico CO
+02_procedimientos|P-PSEA-12|Procedimiento técnico O3
+02_procedimientos|P-PSEA-13|Procedimiento técnico SO2
+02_procedimientos|P-PSEA-14|Colusión y falsificación
+02_procedimientos|P-PSEA-15|Trabajo no conforme, no conformidades y acciones correctivas
+02_procedimientos|P-PSEA-16|Divulgación y control de valores sensibles
+02_procedimientos|P-PSEA-17|Quejas del PEA
+02_procedimientos|P-PSEA-18|Apelaciones del PEA
+02_procedimientos|P-PSEA-19|Confidencialidad operativa interna del PEA
+02_procedimientos|P-PSEA-20|Competencia y autorización operativa del PEA
+02_procedimientos|P-PSEA-21|Proveedores críticos del PEA
+02_procedimientos|P-PSEA-23|Mejora continua del PEA
+03_instructivos|I-PSEA-01|Instructivo de Embalaje v1
+03_instructivos|I-PSEA-02|Instructivo participante calaire-app
+03_instructivos|I-PSEA-03|Instructivo administración rondas calaire-app
+03_instructivos|I-PSEA-04|Instructivo preprocesador pt_app
+03_instructivos|I-PSEA-05|Instructivo módulo análisis pt_app
+04_formatos_maestros|F-PSEA-01|Calendario Tipo v0
+04_formatos_maestros|F-PSEA-02|Cronograma Detallado v0
+04_formatos_maestros|F-PSEA-03|Registro de participación
+04_formatos_maestros|F-PSEA-04|Anexo técnico de equipos e instrumentos
+04_formatos_maestros|F-PSEA-05|Ficha básica de ronda EA
+04_formatos_maestros|F-PSEA-06|Planificación de ronda EA
+04_formatos_maestros|F-PSEA-07|Preparación y control del ítem
+04_formatos_maestros|F-PSEA-08|Datos reportados por participante
+04_formatos_maestros|F-PSEA-09|Datos de participantes exportados para análisis PT
+04_formatos_maestros|F-PSEA-10|Registro de preprocesamiento de datos
+04_formatos_maestros|F-PSEA-11|Homogeneidad y estabilidad del ítem
+04_formatos_maestros|F-PSEA-11A|Datos preprocesados de homogeneidad
+04_formatos_maestros|F-PSEA-11B|Datos preprocesados de estabilidad
+04_formatos_maestros|F-PSEA-11C|Resultados de homogeneidad
+04_formatos_maestros|F-PSEA-11D|Resultados de estabilidad
+04_formatos_maestros|F-PSEA-12|Datos oficiales consolidados para evaluación de aptitud
+04_formatos_maestros|F-PSEA-13|Informe final de resultados
+04_formatos_maestros|F-PSEA-14|Registro caso de queja o NC según aplique
+04_formatos_maestros|F-PSEA-15|Registro de apelaciones
+04_formatos_maestros|F-PSEA-16|Matriz de competencia y autorización
+04_formatos_maestros|F-PSEA-17|Evaluación de proveedores críticos
+04_formatos_maestros|F-PSEA-18|Comunicación participantes
+04_formatos_maestros|F-PSEA-19|Acta de inicio de ronda
+04_formatos_maestros|F-PSEA-20|Rotulado anónimo
+04_formatos_maestros|F-PSEA-21|Relación de instrumentos Calaire usados
+05_matrices_inventarios|M-SGC-01|Árbol Maestro PSEA
+05_matrices_inventarios|M-SGC-02|Diccionario de Documentos SGC
+05_matrices_inventarios|M-SGC-03|Inventario Documental del SGC
+05_matrices_inventarios|M-SGC-04|Matriz Maestra de Cumplimiento Normativo
+05_matrices_inventarios|M-SGC-05|Trazabilidad normativa SGC`.trim();
+
+    const documents = rawDocuments.split('\n').map((line) => {
+      const [family, code, name] = line.split('|');
+      return { id: `${family}:${code}`, family, code, name };
+    });
+    const state = loadState();
+
+    function defaultState() {
+      return {
+        meta: { reviewer: '', reviewDate: new Date().toISOString().slice(0, 10), reviewScope: 'Sistema de Gestión PEA', reviewVersion: '' },
+        docs: {}, updatedAt: null
+      };
+    }
+    function loadState() {
+      try { return { ...defaultState(), ...JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}') }; }
+      catch { return defaultState(); }
+    }
+    function docState(id) {
+      if (!state.docs[id]) state.docs[id] = { level: 'pendiente', comment: '', checks: Array(criteria.length).fill(false) };
+      return state.docs[id];
+    }
+    let saveTimer;
+    function save() {
+      clearTimeout(saveTimer);
+      document.getElementById('saveState').textContent = 'Guardando…';
+      saveTimer = setTimeout(() => {
+        state.updatedAt = new Date().toISOString();
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        document.getElementById('saveState').textContent = `Guardado ${new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' })}`;
+      }, 180);
+    }
+    function escapeHtml(value = '') {
+      return value.replace(/[&<>'"]/g, (char) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', "'":'&#39;', '"':'&quot;' })[char]);
+    }
+    function labelLevel(level) {
+      return ({ pendiente: 'Sin revisar', incompleto: 'Incompleto', aceptable: 'Aceptable', bueno: 'Bueno' })[level] || 'Sin revisar';
+    }
+    function render() {
+      const query = document.getElementById('search').value.trim().toLowerCase();
+      const family = document.getElementById('familyFilter').value;
+      const level = document.getElementById('levelFilter').value;
+      const filtered = documents.filter((doc) => {
+        const current = docState(doc.id);
+        const haystack = `${doc.code} ${doc.name} ${doc.family} ${current.comment}`.toLowerCase();
+        return (!query || haystack.includes(query)) && (!family || doc.family === family) && (!level || current.level === level);
+      });
+      const list = document.getElementById('documentList');
+      list.innerHTML = filtered.length ? filtered.map(renderDocument).join('') : '<div class="empty">No hay documentos para filtros aplicados.</div>';
+      bindDocumentEvents();
+      updateStats();
+    }
+    function renderDocument(doc) {
+      const current = docState(doc.id);
+      const completed = current.checks.filter(Boolean).length;
+      const percent = Math.round(completed / criteria.length * 100);
+      return `<article class="doc" data-id="${escapeHtml(doc.id)}" data-level="${current.level}">
+        <button class="doc-head" type="button" aria-expanded="false">
+          <span class="code">${escapeHtml(doc.code)}</span>
+          <span><span class="doc-title">${escapeHtml(doc.name)}</span><br><span class="family">${escapeHtml(doc.family)} · ${completed}/${criteria.length} criterios</span></span>
+          <span class="level-pill">${labelLevel(current.level)}</span>
+        </button>
+        <div class="doc-body">
+          <div class="assessment">
+            <div class="level-box">
+              <label>Valoración general</label>
+              <select class="field level-select">
+                <option value="pendiente" ${current.level === 'pendiente' ? 'selected' : ''}>Sin revisar</option>
+                <option value="incompleto" ${current.level === 'incompleto' ? 'selected' : ''}>Incompleto · requiere intervención</option>
+                <option value="aceptable" ${current.level === 'aceptable' ? 'selected' : ''}>Aceptable · ajustes puntuales</option>
+                <option value="bueno" ${current.level === 'bueno' ? 'selected' : ''}>Bueno · sólido y aplicable</option>
+              </select>
+            </div>
+            <div class="comment-box">
+              <label>Comentario orientador / trabajo requerido</label>
+              <textarea class="field comment" placeholder="Ej. Completar responsabilidades, definir registros de salida y agregar control de cambios…">${escapeHtml(current.comment)}</textarea>
+            </div>
+          </div>
+          <h3 class="check-title">Lista de verificación documental</h3>
+          <div class="checks">${criteria.map((criterion, index) => `<label class="check"><input type="checkbox" data-check="${index}" ${current.checks[index] ? 'checked' : ''}><span>${escapeHtml(criterion)}</span></label>`).join('')}</div>
+          <div class="progress" title="${percent}% de criterios marcados"><i style="width:${percent}%"></i></div>
+        </div>
+      </article>`;
+    }
+    function bindDocumentEvents() {
+      document.querySelectorAll('.doc').forEach((card) => {
+        const id = card.dataset.id;
+        card.querySelector('.doc-head').addEventListener('click', () => {
+          card.classList.toggle('open');
+          card.querySelector('.doc-head').setAttribute('aria-expanded', card.classList.contains('open'));
+        });
+        card.querySelector('.level-select').addEventListener('change', (event) => {
+          docState(id).level = event.target.value;
+          save(); render();
+          requestAnimationFrame(() => document.querySelector(`.doc[data-id="${CSS.escape(id)}"]`)?.classList.add('open'));
+        });
+        card.querySelector('.comment').addEventListener('input', (event) => { docState(id).comment = event.target.value; save(); });
+        card.querySelectorAll('[data-check]').forEach((checkbox) => checkbox.addEventListener('change', (event) => {
+          docState(id).checks[Number(event.target.dataset.check)] = event.target.checked;
+          save();
+          const completed = docState(id).checks.filter(Boolean).length;
+          card.querySelector('.progress i').style.width = `${Math.round(completed / criteria.length * 100)}%`;
+          card.querySelector('.family').textContent = `${documents.find((doc) => doc.id === id).family} · ${completed}/${criteria.length} criterios`;
+        }));
+      });
+    }
+    function updateStats() {
+      const counts = { pendiente: 0, incompleto: 0, aceptable: 0, bueno: 0 };
+      documents.forEach((doc) => counts[docState(doc.id).level]++);
+      document.getElementById('totalStat').textContent = documents.length;
+      document.getElementById('pendingStat').textContent = counts.pendiente;
+      document.getElementById('incompleteStat').textContent = counts.incompleto;
+      document.getElementById('acceptableStat').textContent = counts.aceptable;
+      document.getElementById('goodStat').textContent = counts.bueno;
+    }
+    function toast(message) {
+      const element = document.getElementById('toast');
+      element.textContent = message; element.classList.add('show');
+      setTimeout(() => element.classList.remove('show'), 2200);
+    }
+    function download(filename, content, type) {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([content], { type }));
+      link.download = filename; link.click(); URL.revokeObjectURL(link.href);
+    }
+    function exportJson() {
+      save();
+      const payload = { schema: 'sgc-diagnostico-documental-v1', exportedAt: new Date().toISOString(), criteria, documents, state };
+      download(`diagnostico-sgc-${new Date().toISOString().slice(0,10)}.json`, JSON.stringify(payload, null, 2), 'application/json');
+      toast('Copia JSON descargada');
+    }
+    function exportCsv() {
+      const quote = (value) => `"${String(value ?? '').replaceAll('"', '""')}"`;
+      const rows = [['Código','Documento','Familia','Valoración','Criterios cumplidos','Comentario']];
+      documents.forEach((doc) => { const current = docState(doc.id); rows.push([doc.code, doc.name, doc.family, labelLevel(current.level), `${current.checks.filter(Boolean).length}/${criteria.length}`, current.comment]); });
+      download(`diagnostico-sgc-${new Date().toISOString().slice(0,10)}.csv`, '﻿' + rows.map((row) => row.map(quote).join(';')).join('\n'), 'text/csv;charset=utf-8');
+      toast('CSV descargado');
+    }
+    function importJson(file) {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const payload = JSON.parse(reader.result);
+          const imported = payload.state || payload;
+          if (!imported.docs || !imported.meta) throw new Error('Formato inválido');
+          state.docs = imported.docs; state.meta = imported.meta; state.updatedAt = imported.updatedAt || null;
+          hydrateMeta(); save(); render(); toast('Diagnóstico cargado');
+        } catch (error) { alert(`No se pudo cargar archivo: ${error.message}`); }
+      };
+      reader.readAsText(file);
+    }
+    function hydrateMeta() {
+      Object.entries(state.meta).forEach(([key, value]) => { const element = document.getElementById(key); if (element) element.value = value || ''; });
+    }
+
+    [...new Set(documents.map((doc) => doc.family))].forEach((family) => {
+      const option = document.createElement('option'); option.value = family; option.textContent = family; document.getElementById('familyFilter').appendChild(option);
+    });
+    document.querySelectorAll('.meta').forEach((input) => input.addEventListener('input', (event) => { state.meta[event.target.id] = event.target.value; save(); }));
+    ['search','familyFilter','levelFilter'].forEach((id) => document.getElementById(id).addEventListener('input', render));
+    document.getElementById('expandAll').addEventListener('click', () => {
+      const cards = [...document.querySelectorAll('.doc')];
+      const shouldOpen = cards.some((card) => !card.classList.contains('open'));
+      cards.forEach((card) => { card.classList.toggle('open', shouldOpen); card.querySelector('.doc-head').setAttribute('aria-expanded', shouldOpen); });
+      document.getElementById('expandAll').textContent = shouldOpen ? 'Cerrar todos' : 'Abrir todos';
+    });
+    document.getElementById('exportJson').addEventListener('click', exportJson);
+    document.getElementById('exportCsv').addEventListener('click', exportCsv);
+    document.getElementById('importJson').addEventListener('click', () => document.getElementById('fileInput').click());
+    document.getElementById('fileInput').addEventListener('change', (event) => event.target.files[0] && importJson(event.target.files[0]));
+
+    hydrateMeta(); render();
+    if (state.updatedAt) document.getElementById('saveState').textContent = `Datos recuperados · ${new Date(state.updatedAt).toLocaleString('es-CO')}`;
+  </script>
+</body>
+</html>

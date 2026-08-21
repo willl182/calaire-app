@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ronda EA: proceso, aplicativos y diagnóstico</title>
+<style>
+:root{--ink:#17212b;--muted:#5e6b76;--blue:#15577c;--blue2:#eaf4f9;--green:#26734d;--green2:#eaf7f0;--amber:#966a13;--amber2:#fff8e5;--red:#a52b2b;--red2:#fff0f0;--line:#d7e0e5;--paper:#fff;--bg:#f4f7f8}
+*{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Arial,sans-serif} main{max-width:1100px;margin:auto;padding:30px 20px 70px} h1{font-size:32px;line-height:1.15;margin:0;color:var(--blue)} h2{margin:38px 0 12px;color:var(--blue);border-bottom:2px solid var(--line);padding-bottom:7px} h3{margin:0 0 7px}.sub{color:var(--muted);margin:7px 0 0}.note{padding:12px 15px;border-left:4px solid var(--blue);background:var(--blue2);margin:18px 0}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.app,.stage,.box{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:16px}.app h3{color:var(--blue)}.app ul,.stage ul{padding-left:19px;margin:7px 0}.app li,.stage li{margin:4px 0}.flow{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:17px 0}.flow div{background:var(--blue);color:white;border-radius:8px;padding:12px;text-align:center;font-weight:bold}.flow small{display:block;font-weight:normal;opacity:.85;margin-top:4px}.stage{margin:14px 0;padding:0;overflow:hidden}.stage-head{display:grid;grid-template-columns:52px 1fr auto;align-items:center;gap:12px;padding:15px 17px;background:var(--paper)}.num{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--blue);color:white;font-weight:bold;font-size:18px}.stage-head h3{margin:0}.stage-head p{margin:2px 0 0;color:var(--muted)}.owner{font-size:12px;color:var(--muted);text-align:right}.stage-body{display:grid;grid-template-columns:1.2fr 1fr 1fr;border-top:1px solid var(--line)}.stage-body>div{padding:14px 16px;border-right:1px solid var(--line)}.stage-body>div:last-child{border-right:0}.label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;font-weight:bold;color:var(--muted);margin-bottom:6px}.tag{display:inline-block;border-radius:999px;padding:3px 8px;margin:2px;font-size:11px;font-weight:bold;background:var(--blue2);color:var(--blue)}.risk{background:var(--red2)!important}.risk .label{color:var(--red)}.check{background:var(--green2)!important}.check .label{color:var(--green)}code{font:12px Consolas,monospace;background:#edf1f3;padding:2px 5px;border-radius:4px}.diag{width:100%;border-collapse:collapse;background:white;border:1px solid var(--line)}.diag th,.diag td{padding:10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}.diag th{background:#eaf1f5;color:var(--blue);font-size:12px;text-transform:uppercase}.state{white-space:nowrap}.state span{display:inline-block;width:14px;height:14px;border-radius:50%;margin-right:5px;vertical-align:-2px}.s-red{background:#d64242}.s-amber{background:#e5a82c}.s-green{background:#3aa76d}.critical{border:2px solid var(--red);background:var(--red2);border-radius:10px;padding:18px}.critical h3{color:var(--red)}.questions{columns:2;column-gap:35px}.questions li{break-inside:avoid;margin:0 0 12px}.source{color:var(--muted);font-size:12px}.legend{display:flex;gap:14px;flex-wrap:wrap;margin:10px 0}.legend span{font-size:13px}.decision{background:var(--amber2);border-left:4px solid var(--amber);padding:11px 14px;margin:12px 0}.summary{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.summary div{background:white;border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center}.summary b{display:block;font-size:22px;color:var(--blue)}
+@media(max-width:800px){.grid,.flow,.summary{grid-template-columns:1fr}.stage-body{grid-template-columns:1fr}.stage-body>div{border-right:0;border-bottom:1px solid var(--line)}.questions{columns:1}.owner{display:none}}
+@media print{body{background:white}main{max-width:none;padding:10px}.stage,.app,.box{break-inside:avoid}h2{break-after:avoid}.questions{columns:2}}
+</style>
+</head>
+<body><main>
+<header>
+<h1>Cómo funciona una ronda de ensayo de aptitud</h1>
+<p class="sub">Mapa operativo + aplicativos + evidencia ISO/IEC 17043 + guía de diagnóstico</p>
+</header>
+
+<div class="note"><b>Objetivo de reunión:</b> recorrer una ronda completa con asesor, confirmar controles suficientes, detectar vacíos entre procedimiento, aplicativo y evidencia, y acordar mejoras antes de siguiente ronda.</div>
+
+<h2>1. Ecosistema de aplicativos</h2>
+<div class="grid">
+<section class="app"><h3>1. Calaire-app · Coordinación</h3><ul>
+<li>Crea ronda en <b>borrador</b>, configura contaminantes, niveles, réplicas y participantes.</li>
+<li>Controla estados: <code>borrador</code> → <code>activa</code> → <code>documentación pendiente</code> → <code>cerrada</code>.</li>
+<li>Gestiona directorio, enlaces de acceso, fichas, avance de envíos y resultados.</li>
+<li>Permite carga o corrección administrativa de datos del participante.</li>
+</ul><p class="source">Pantallas: Resumen · Configuración PT · Participantes · Resultados · Casos · SGC</p></section>
+
+<section class="app"><h3>2. Portal del participante</h3><ul>
+<li>Participante reclama enlace y completa ficha técnica.</li>
+<li>Carga resultados solo cuando ronda está activa y ficha fue enviada.</li>
+<li>Envía resultados finales, consulta evaluación publicada y descarga certificado.</li>
+<li>Puede abrir consulta, queja o apelación y responder expediente.</li>
+</ul><p class="source">Control: participante solo accede a sus rondas, resultados y casos.</p></section>
+
+<section class="app"><h3>3. pt_app · Análisis estadístico</h3><ul>
+<li>Procesa datos exportados por cala​​​​ire-app.</li>
+<li>Calcula valor asignado, incertidumbre, σpt, z, z′, En y gráficos.</li>
+<li>Devuelve CSV de evaluación e informe general PDF.</li>
+<li>Calaire-app valida importación completa antes de publicar.</li>
+</ul><p class="source">Integración existente: CSV/HTTP por lotes, borrador validado, informe PDF.</p></section>
+
+<section class="app"><h3>4. Módulo SGC + Drive documental</h3><ul>
+<li>Checklist por ronda, hitos, evidencias, versiones, revisiones y snapshots.</li>
+<li>Gestiona acta de inicio, tabla confidencial de códigos anónimos y relación de instrumentos usados en la ronda.</li>
+<li>Bitácora de auditoría: actor, evento, objeto y fecha.</li>
+<li>Publica al participante solo recursos autorizados; nunca expone Drive interno.</li>
+</ul><p class="source">Repositorio maestro adicional: documentos, matriz normativa y mapa SGC.</p></section>
+</div>
+
+<h2>2. Flujo entre sistemas</h2>
+<div class="flow">
+<div>Calaire-app<small>Configura ronda y recibe datos</small></div>
+<div>Participante<small>Ficha, mediciones, incertidumbre y envío</small></div>
+<div>pt_app<small>Análisis, scores, gráficos e informe</small></div>
+<div>SGC<small>Evidencia, revisión, publicación y cierre</small></div>
+</div>
+<div class="decision"><b>Punto de control:</b> transferencia entre sistemas debe ser reproducible. Debe poder demostrarse qué archivo salió de cala​​​​ire-app, quién lo analizó, qué versión entró a pt_app, qué resultados regresaron y quién los aprobó.</div>
+
+<h2>3. Ronda completa y diagnóstico por etapa</h2>
+
+<section class="stage"><div class="stage-head"><span class="num">1</span><div><h3>Diseño y planificación</h3><p>Definir qué se evaluará y cómo se decidirá desempeño.</p></div><div class="owner">Coordinador técnico + calidad</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Crear ronda en borrador.</li><li>Configurar gases, niveles, réplicas y participantes planeados.</li><li>Completar ficha básica, plan de ronda y matriz de requisitos a–u.</li><li>Congelar diseño estadístico antes de ver resultados.</li></ul><span class="tag">calaire-app</span><span class="tag">SGC</span></div>
+<div class="check"><div class="label">Evidencia esperada</div><ul><li>Objetivo y alcance.</li><li>Responsables autorizados.</li><li>Criterios z/z′/En.</li><li>Número mínimo de participantes.</li><li>Snapshot final del plan.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿Planificación de la ronda coincide con configuración real?</li><li>¿Plan define enfoque alterno si faltan participantes?</li><li>¿Quién revisa y aprueba?</li><li>¿Cambio posterior exige motivo y nueva versión?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">2</span><div><h3>Convocatoria y participantes</h3><p>Vincular laboratorios sin romper confidencialidad.</p></div><div class="owner">Coordinación administrativa</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Crear o reutilizar registro del directorio.</li><li>Asignar cupo, correo y código de participante.</li><li>Participante reclama enlace y diligencia ficha.</li><li>Emitir instrucciones y cronograma.</li></ul><span class="tag">calaire-app</span><span class="tag">Portal participante</span></div>
+<div class="check"><div class="label">Evidencia esperada</div><ul><li>Lista confirmada de participantes.</li><li>Comunicaciones e instrucciones enviadas.</li><li>Ficha técnica del participante.</li><li>Tabla interna que relaciona identidad con código anónimo.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿Hay enlaces sin reclamar?</li><li>¿Códigos permiten identificar indirectamente?</li><li>¿Alta por administrador queda auditada?</li><li>¿Participante confirmó condiciones y método?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">3</span><div><h3>Preparación del ítem y equipos</h3><p>Asegurar trazabilidad, homogeneidad y condiciones válidas.</p></div><div class="owner">Responsable técnico</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Verificar patrón, calibrador, manifold y analizadores.</li><li>Registrar instrumentos CALAIRE y equipos participantes.</li><li>Registrar condiciones ambientales y verificaciones previas.</li><li>Preparar niveles y respuesta ante desviaciones.</li></ul><span class="tag">SGC</span><span class="tag">Instrumentos usados</span></div>
+<div class="check"><div class="label">Evidencia esperada</div><ul><li>Certificados vigentes.</li><li>Registro de preparación y control del ítem.</li><li>Relación de instrumentos con fotos, revisión y validación.</li><li>Verificación de al menos 3 puertos.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿Certificados fueron revisados, no solo cargados?</li><li>¿Equipo fuera de tolerancia activa impacto/TNC?</li><li>¿Relación de instrumentos coincide con datos?</li><li>¿Qué evidencia prueba estabilidad del gas in situ?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">4</span><div><h3>Apertura y ejecución</h3><p>Dejar constancia del inicio y preservar datos crudos.</p></div><div class="owner">Organizadores + participantes</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Crear hito INICIO_RONDA.</li><li>Generar DOCX Acta de inicio de ronda, firmar y cargar PDF escaneado.</li><li>Ejecutar cero, niveles y estabilizaciones.</li><li>Conservar series crudas y eventos técnicos.</li></ul><span class="tag">SGC</span><span class="tag">Portal participante</span></div>
+<div class="check"><div class="label">Evidencia esperada</div><ul><li>Acta con 2 organizadores y participantes.</li><li>PDF firmado como versión publicable.</li><li>Cronograma real.</li><li>Registro de desviaciones.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿Reemplazar PDF despublica versión anterior?</li><li>¿Ausencias quedan registradas?</li><li>¿Cambios de secuencia o nivel quedan explicados?</li><li>¿Datos tienen sello temporal común?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">5</span><div><h3>Carga y cierre de resultados</h3><p>Recibir datos completos sin alteración silenciosa.</p></div><div class="owner">Participante + coordinador</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Ficha enviada habilita carga.</li><li>Participante registra datos, promedio, desviación e incertidumbre.</li><li>Envío final bloquea edición ordinaria.</li><li>Administrador puede reabrir envío o ingresar datos cuando aplica.</li></ul><span class="tag">Portal participante</span><span class="tag">calaire-app</span></div>
+<div class="check"><div class="label">Evidencia esperada</div><ul><li>Datos originales y envío final.</li><li>Fecha, usuario y versión.</li><li>Motivo de reapertura/corrección.</li><li>Confirmación del participante si admin interviene.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿45/60 datos válidos se verifica en sistema o solo instrucción?</li><li>¿Admin puede cambiar resultado sin doble control?</li><li>¿Se conserva valor anterior?</li><li>¿Corrección de blunder está separada de cambio técnico?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">6</span><div><h3>Preprocesamiento y análisis PT</h3><p>Convertir datos recibidos en evaluación reproducible.</p></div><div class="owner">Analista PT + revisor</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Exportar resultados desde cala​​​​ire-app.</li><li>Documentar exclusiones y transformaciones.</li><li>Procesar en pt_app.</li><li>Importar CSV en lotes, validar filas y cargar informe PDF.</li></ul><span class="tag">calaire-app</span><span class="tag">pt_app</span></div>
+<div class="check"><div class="label">Controles existentes</div><ul><li>Duplicados participante × ítem × método rechazados.</li><li>Importación incompleta no puede validarse.</li><li>Borrador validado antes de publicar.</li><li>Publicación genera auditoría.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿CSV exportado tiene hash o versión?</li><li>¿Código/versión de pt_app queda asociado?</li><li>¿Revisor independiente reproduce muestra de cálculos?</li><li>¿Parámetros σpt tienen fuente aprobada por gas?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">7</span><div><h3>Revisión, publicación e informe</h3><p>Liberar solo resultados revisados y autorizados.</p></div><div class="owner">Revisor técnico + autorizador</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Finalizar revisión de homogeneidad, estabilidad y resultados.</li><li>Crear versiones congeladas de registros revisados.</li><li>Pasar ronda a documentación pendiente.</li><li>Publicar evaluación solo con análisis validado e informe PDF.</li><li>Generar certificados y casos automáticos por resultados no satisfactorios.</li></ul><span class="tag">SGC</span><span class="tag">Resultados PT</span></div>
+<div class="check"><div class="label">Controles existentes</div><ul><li>Evaluación publicada es inmutable.</li><li>Solo publica en cierre documental o ronda cerrada.</li><li>Histograma oculto si n &lt; 3.</li><li>Participante ve solo resultados propios.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>¿Quien importa puede también publicar?</li><li>¿Existe autorización formal, no solo rol admin?</li><li>¿Informe y CSV corresponden a mismo lote?</li><li>¿Enmienda parcial evalúa impacto sobre otros?</li></ul></div>
+</div></section>
+
+<section class="stage"><div class="stage-head"><span class="num">8</span><div><h3>Casos, apelaciones y mejora</h3><p>Resolver desacuerdos con imparcialidad y evidencia.</p></div><div class="owner">Calidad + panel independiente</div></div><div class="stage-body">
+<div><div class="label">Proceso y aplicativos</div><ul><li>Participante abre consulta, queja o apelación.</li><li>Resultados no satisfactorios crean caso NC/CAPA automático.</li><li>Expediente versiona documentos, mensajes y verificaciones.</li><li>Ronda cerrada puede reabrirse solo con motivo.</li></ul><span class="tag">Casos</span><span class="tag">SGC</span><span class="tag">Auditoría</span></div>
+<div class="check"><div class="label">Evidencia esperada</div><ul><li>Expediente de queja, apelación o no conformidad.</li><li>Declaración de conflicto de interés.</li><li>Acta de análisis y decisión.</li><li>Comunicación al participante.</li><li>Acción y eficacia en ronda posterior.</li></ul></div>
+<div class="risk"><div class="label">Diagnóstico</div><ul><li>Aplicativo hoy registra decisión documental; ¿registra panel e imparcialidad?</li><li>¿Participante puede ser oído?</li><li>¿Resolución distingue procedente/parcial/no procedente?</li><li>¿Expediente cerrado se exporta completo?</li></ul></div>
+</div></section>
+
+<h2>4. Punto crítico: conflicto de interés y actas</h2>
+<div class="critical"><h3>Control que debe quedar explícito en ronda 3</h3>
+<ul>
+<li>Antes de revisar queja o apelación, registrar integrantes propuestos y relación previa con participante, ronda y decisión apelada.</li>
+<li>Cada integrante declara ausencia de conflicto. Si existe conflicto, queda registrado y se designa reemplazo.</li>
+<li>Persona que preparó datos, calculó evaluación o autorizó informe no debería decidir sola sobre su propia actuación.</li>
+<li>Si participante no está presente, acta debe indicar convocatoria, oportunidad de presentar argumentos, evidencia aportada y razón de revisión sin audiencia.</li>
+<li>Acta debe incluir: fecha, asistentes, roles, declaración de imparcialidad, asunto, evidencia revisada, análisis técnico, decisión, fundamento, acciones, responsables y firmas.</li>
+<li>Aplicativo debería vincular acta al caso, impedir cierre sin acta y conservar versiones. Bitácora sola no reemplaza acta deliberativa.</li>
+</ul></div>
+
+<h2>5. Diagnóstico rápido de aplicativos</h2>
+<div class="legend"><span><i class="s-green" style="display:inline-block;width:12px;height:12px;border-radius:50%"></i> Control visible</span><span><i class="s-amber" style="display:inline-block;width:12px;height:12px;border-radius:50%"></i> Parcial / confirmar</span><span><i class="s-red" style="display:inline-block;width:12px;height:12px;border-radius:50%"></i> Vacío probable</span></div>
+<table class="diag">
+<tr><th>Control</th><th>Estado inicial</th><th>Evidencia observada</th><th>Pregunta de diagnóstico</th></tr>
+<tr><td>Acceso por rol y ronda</td><td class="state"><span class="s-green"></span>Visible</td><td>Admin gestiona; participante limitado a sus rondas.</td><td>¿Roles técnicos distinguen preparador, revisor y autorizador?</td></tr>
+<tr><td>Estados controlados de ronda</td><td class="state"><span class="s-green"></span>Visible</td><td>Secuencia obligatoria y reapertura con motivo.</td><td>¿Criterios de paso están vinculados a checklist completo?</td></tr>
+<tr><td>Ficha antes de carga</td><td class="state"><span class="s-green"></span>Visible</td><td>Carga habilitada solo con ronda activa y ficha enviada.</td><td>¿Cambio posterior de ficha afecta resultados ya enviados?</td></tr>
+<tr><td>Trazabilidad de cambios de datos</td><td class="state"><span class="s-amber"></span>Parcial</td><td>Hay bitácora SGC; admin puede intervenir datos.</td><td>¿Se guarda antes/después, motivo y confirmación participante?</td></tr>
+<tr><td>Integridad transferencia cala​​​​ire-app ↔ pt_app</td><td class="state"><span class="s-amber"></span>Parcial</td><td>CSV/HTTP, token de importación, conteo y validación.</td><td>¿Archivo origen, hash y versión del algoritmo quedan unidos?</td></tr>
+<tr><td>Revisión independiente</td><td class="state"><span class="s-red"></span>Vacío probable</td><td>Existe rol admin y estado borrador validado.</td><td>¿Una segunda persona debe aprobar antes de publicación?</td></tr>
+<tr><td>Inmutabilidad publicada</td><td class="state"><span class="s-green"></span>Visible</td><td>Evaluación publicada no se reimporta ni modifica.</td><td>¿Cómo se emite enmienda sin borrar historia?</td></tr>
+<tr><td>Confidencialidad</td><td class="state"><span class="s-green"></span>Visible</td><td>Acceso propio; Relación confidencial entre participante y código anónimo interno; umbral n≥3.</td><td>¿Tablas, exportaciones y PDF evitan identificación indirecta?</td></tr>
+<tr><td>Conflicto de interés</td><td class="state"><span class="s-red"></span>Vacío probable</td><td>Procedimiento exige control; caso no muestra declaración/panel.</td><td>¿Dónde se registra impedimento, recusación y reemplazo?</td></tr>
+<tr><td>Acta de apelación</td><td class="state"><span class="s-red"></span>Vacío probable</td><td>Hay mensajes, documentos y decisión documental.</td><td>¿Existe acta firmada de deliberación y decisión fundada?</td></tr>
+<tr><td>Expediente y retención</td><td class="state"><span class="s-green"></span>Visible</td><td>Versiones, mensajes, verificaciones y ZIP al cerrar.</td><td>¿Política fija plazo, custodia y disposición?</td></tr>
+<tr><td>Eficacia de acciones</td><td class="state"><span class="s-green"></span>Visible</td><td>Caso puede vincular resultado posterior satisfactorio.</td><td>¿Vínculo manual exige justificación y aprobación?</td></tr>
+</table>
+
+<h2>6. Aprendizajes de rondas 1, 2 y 3</h2>
+<div class="grid">
+<div class="box"><h3>Ronda 1 · Arquitectura documental</h3><ul><li>Planificación mezclada con estadística.</li><li>Procedimientos duplicados y taxonomías A–U divergentes.</li><li>Varias copias del mismo formato y códigos inconsistentes.</li><li>Aprendizaje: un requisito, un dueño, una fuente controlada.</li></ul></div>
+<div class="box"><h3>Ronda 2 · Operación y evidencia</h3><ul><li>Formalizar acta de inicio y rotulado anónimo.</li><li>Separar datos crudos de resultados de H/E.</li><li>Registrar correcciones de errores antes del informe.</li><li>Aprendizaje: aplicativo no reemplaza evidencia revisable.</li></ul></div>
+<div class="box"><h3>Ronda 3 · Datos e imparcialidad</h3><ul><li>Instrucciones precisas: periodos, 45/60, nivel cero, no interpolar.</li><li>Controlar intervención administrativa en datos.</li><li>Panel sin conflicto y acta aun sin participante presente.</li><li>Aprendizaje: decisión válida necesita cálculo y proceso imparcial.</li></ul></div>
+<div class="box"><h3>Aprendizaje transversal</h3><ul><li>Datos, algoritmo, informe y decisión deben formar una cadena única.</li><li>Cada cambio necesita actor, motivo, fecha y versión.</li><li>Cierre documental no debe depender solo de “archivo cargado”.</li><li>Controles críticos deben bloquear, no solo advertir.</li></ul></div>
+</div>
+
+<h2>7. Preguntas para asesor: ¿está bien mapeada la ronda?</h2>
+<p class="sub">Validar correspondencia entre actividad real, requisito 17043, procedimiento, formato, responsable y aplicativo.</p>
+<ol class="questions">
+<li><b>Inicio del mapa:</b> ¿las ocho etapas descritas representan una ronda completa o falta una etapa independiente —por ejemplo contratación, revisión de solicitud, aprobación del diseño o seguimiento posterior?</li>
+<li><b>Orden:</b> ¿secuencia planificación → convocatoria → preparación → ejecución → datos → análisis → informe → cierre es correcta para un EA gaseoso realizado in situ?</li>
+<li><b>Planificación:</b> ¿el procedimiento y el formato del plan de ronda deben cubrir únicamente diseño y coordinación, dejando preparación del ítem y diseño estadístico en sus documentos técnicos propios?</li>
+<li><b>Matriz a–u:</b> ¿cada requisito de planificación de ISO/IEC 17043:2023 está asignado a documento dueño correcto, sin duplicación ni vacío?</li>
+<li><b>Participante:</b> ¿ficha técnica, instrucciones, datos reportados y comunicaciones cubren todas las entradas que norma exige del participante?</li>
+<li><b>Ítem gaseoso:</b> ¿estamos interpretando bien “producción, distribución, homogeneidad y estabilidad” cuando gas se genera y consume en sitio, no se empaca ni transporta?</li>
+<li><b>Aplicativos:</b> ¿división actual es correcta: cala​​​​ire-app administra ronda y recibe datos; pt_app analiza; SGC conserva evidencia y controla cierre?</li>
+<li><b>Transferencia:</b> ¿hace falta una actividad formal entre cala​​​​ire-app y pt_app, o bastan el archivo de datos exportados y el registro de preprocesamiento?</li>
+<li><b>Valor asignado:</b> ¿determinación, trazabilidad e incertidumbre están ubicadas correctamente en diseño estadístico, o parte corresponde al control técnico del ítem?</li>
+<li><b>Homogeneidad y estabilidad:</b> ¿deben evaluarse antes de medición, durante ronda, después, o en más de un momento? ¿Nuestro mapa muestra esos momentos?</li>
+<li><b>Correcciones:</b> ¿el contacto para corregir errores de transcripción pertenece a preprocesamiento, comunicación con participante o trabajo no conforme?</li>
+<li><b>Informe:</b> ¿el informe final reúne evidencia suficiente de análisis, revisión, autorización y publicación, o conviene separar informe técnico y aprobación de emisión?</li>
+<li><b>Resultados no satisfactorios:</b> ¿apertura automática de caso NC/CAPA al participante está bien interpretada? ¿Norma exige acción del proveedor o solo recomendación/seguimiento?</li>
+<li><b>Queja vs. apelación:</b> ¿mapa separa correctamente insatisfacción con servicio, desacuerdo con decisión y solicitud técnica de aclaración?</li>
+<li><b>Conflicto de interés:</b> ¿control debe aparecer solo en etapa de apelaciones o también en diseño, análisis, autorización del informe y selección de proveedores?</li>
+<li><b>Actas sin participante presente:</b> ¿acta de revisión y decisión es evidencia suficiente si participante pudo aportar información pero no estuvo en deliberación?</li>
+<li><b>Cierre:</b> ¿cierre de ronda ocurre al emitir informe, al vencer periodo de apelación o al cerrar casos derivados?</li>
+<li><b>Rondas posteriores:</b> ¿comparación de desempeño entre rondas y verificación de eficacia pertenece al cierre de ronda original, a siguiente ronda o a mejora continua?</li>
+<li><b>Formatos:</b> ¿hay actividades reales sin formato, formatos sin actividad real, o varios formatos intentando probar mismo requisito?</li>
+<li><b>Responsables:</b> ¿cada etapa distingue quién ejecuta, quién revisa y quién autoriza, especialmente en planificación, análisis, publicación y apelaciones?</li>
+<li><b>Alcance 17025:</b> ¿qué actividades de la ronda deben mapear además a ISO/IEC 17025 por afectar trazabilidad, equipos, incertidumbre o validez del valor asignado?</li>
+<li><b>Evidencia digital:</b> ¿registros generados por aplicativo pueden ser evidencia primaria, o necesitan siempre exportación firmada/PDF controlado?</li>
+<li><b>Exclusiones:</b> ¿qué requisitos de 17043 no aplican al esquema gaseoso de CALAIRE y dónde debe quedar justificación?</li>
+<li><b>Mapa final:</b> para cada requisito, ¿podemos mostrar una cadena única: requisito → actividad → responsable → aplicativo → registro → revisión → evidencia final?</li>
+</ol>
+
+<h2>8. Resultado esperado de reunión</h2>
+<div class="summary"><div><b>1</b>Flujo validado</div><div><b>2</b>Roles definidos</div><div><b>3</b>Vacíos priorizados</div><div><b>4</b>Actas acordadas</div><div><b>5</b>Mejoras del aplicativo</div></div>
+<p class="source" style="margin-top:25px">Base revisada: requisitos 17043/17025, procedimientos y formatos PEA, cala​​​​ire-app, portal participante, integración pt_app, módulo SGC, auditoría, casos, publicaciones y cierre. Estados del diagnóstico son hipótesis de trabajo para confirmar con asesor y responsables.</p>
+</main></body></html>

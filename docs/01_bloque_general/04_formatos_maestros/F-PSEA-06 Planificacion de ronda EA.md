@@ -148,29 +148,29 @@ Formato completo para planificar, aprobar y controlar la ejecucion de una ronda 
 
 ## 11. Matriz A-U ISO/IEC 17043:2023 7.2.1.3
 
-| Literal | Requisito de diseno | Definicion / referencia en la ronda |
+| Literal | Punto para analizar | Respuesta |
 |---|---|---|
-| A | Objetivo de la ronda | |
-| B | Items de ensayo de aptitud | |
-| C | Participantes previstos | |
-| D | Metodos o procedimientos aplicables | |
-| E | Preparacion, manipulacion y distribucion | |
-| F | Homogeneidad y estabilidad | |
-| G | Informacion requerida a participantes | |
-| H | Forma de reporte de resultados | |
-| I | Evaluacion estadistica | |
-| J | Valor asignado y su incertidumbre | |
-| K | Criterios de desempeno | |
-| L | Confidencialidad y colusion | |
-| M | Cronograma | |
-| N | Comunicaciones | |
-| O | Subcontratacion o proveedores | |
-| P | Instrucciones a participantes | |
-| Q | Seguridad y ambiente | |
-| R | Registros y trazabilidad | |
-| S | Tratamiento de quejas/apelaciones | |
-| T | Informe | |
-| U | Revision y aprobacion del diseno | |
+| a) | Personal involucrado en el diseno y la operacion del programa de EA. | |
+| b) | Actividades de los proveedores externos de productos y servicios y sus datos de contacto. | |
+| c) | Criterios que deben cumplirse para participar en el programa de EA. | |
+| d) | Numero y tipo de participantes esperados. | |
+| e) | Descripcion de las actividades a realizar y los resultados que deben informar los participantes. | |
+| f) | Descripcion del rango de valores o caracteristicas esperadas de los items de EA. | |
+| g) | Principales fuentes potenciales de errores relacionadas con el area tecnica del EA. | |
+| h) | Requisitos para la produccion, control de calidad, almacenamiento y distribucion de los items de EA. | |
+| i) | Disposiciones para evitar colusion o falsificacion de resultados entre participantes. | |
+| j) | Descripcion de la informacion a suministrar a los participantes y cronograma de actividades. | |
+| k) | Para EA continuos: frecuencia de distribucion de items, fechas limite para reporte de resultados y fechas para la ejecucion de las mediciones. | |
+| l) | Informacion sobre metodos o procedimientos que los participantes deben utilizar para almacenar, manipular, preparar, enviar o desechar los items, asi como para realizar mediciones. | |
+| m) | Procedimientos de medicion o metodos de ensayo para las pruebas de homogeneidad y estabilidad de los items. | |
+| n) | Preparacion de formatos normalizados de informe que deben utilizar los participantes. | |
+| o) | Descripcion detallada del analisis estadistico a utilizar. | |
+| p) | Origen, trazabilidad metrologica e incertidumbre de los valores asignados. | |
+| q) | Tratamiento de resultados obtenidos por diferentes metodos de medicion que permitan evaluacion comparable. | |
+| r) | Criterios para la evaluacion del desempeno de los participantes. | |
+| s) | Descripcion de los datos, informes provisionales o informacion a devolver a los participantes. | |
+| t) | Descripcion del grado en que los resultados seran publicos y las conclusiones basadas en ellos. | |
+| u) | Procedimientos en caso de perdida, deterioro o dano de los items de EA. | |
 
 ---
 
