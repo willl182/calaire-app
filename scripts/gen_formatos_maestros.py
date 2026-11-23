@@ -389,38 +389,44 @@ def f13():
 
 def f19():
     md = "F-PSEA-19 Acta de inicio de ronda.md"
-    datos = fields(md, "4. Datos del acta")
-    wb, ws = new_book("F-PSEA-19", "Acta de inicio de ronda", 4)
-    r = write_band(ws, 6, "1. Datos del acta", 4)
+    datos = fields(md, "1. Datos de la ronda")
+    wb, ws = new_book("F-PSEA-19", "Acta de inicio de ronda", 6)
+    r = write_band(ws, 6, "1. Datos de la ronda", 6)
     r = write_form(ws, r, datos) + 1
-    r = write_band(ws, r, "2. Declaraciones y compromisos", 4)
-    for j, h in enumerate(["N.º", "Declaracion", "Verificado", "Observaciones"], start=1):
-        c = ws.cell(row=r, column=j, value=h)
-        c.font = Font(name="Arial", sz=10, b=True); c.fill = HDR_FILL; c.border = BOX; c.alignment = A(horizontal="center")
-    r += 1
-    for i in range(1, 9):
-        ws.cell(row=r, column=1, value=i)
-        for j in range(1, 5):
-            ws.cell(row=r, column=j).border = BOX
-            ws.cell(row=r, column=j).alignment = A()
-            ws.cell(row=r, column=j).font = Font(name="Arial", sz=10)
+    r = write_band(ws, r, "2. Declaracion de inicio", 6)
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=6)
+    c = ws.cell(row=r, column=1, value="En la fecha y lugar indicados se declara formalmente iniciada la ronda identificada en esta acta. Los asistentes conocen el calendario, cronograma e instructivo aplicables. El valor asignado se determina por el metodo de referencia descrito a continuacion, con los instrumentos relacionados en esta acta.")
+    c.font = Font(name="Arial", sz=10); c.alignment = A()
+    ws.row_dimensions[r].height = 42
+    r += 2
+    r = write_band(ws, r, "3. Metodo de determinacion del valor asignado", 6)
+    ws.merge_cells(start_row=r, start_column=1, end_row=r, end_column=6)
+    c = ws.cell(row=r, column=1, value="El valor asignado (xpt) de cada nivel de concentracion es la media de las mediciones del analizador de referencia de Calaire durante el periodo de medicion establecido, calculada a partir de 3 promedios de una hora. Su incertidumbre expandida (k = 2) combina la incertidumbre del instrumento de referencia y la debida a la falta de homogeneidad del item.")
+    c.font = Font(name="Arial", sz=10); c.alignment = A()
+    ws.row_dimensions[r].height = 56
+    r += 2
+    for title, headers, nrows, height in [
+        ("4. Instrumentos para metodo de referencia", ["No.", "Instrumento", "Codigo interno", "Marca", "Modelo", "Serial"], 8, None),
+        ("5. Firmas", ["No.", "Nombre", "Entidad", "Rol", "Firma", ""], 8, 26),
+    ]:
+        r = write_band(ws, r, title, 6)
+        for j, h in enumerate(headers, start=1):
+            c = ws.cell(row=r, column=j, value=h)
+            c.font = Font(name="Arial", sz=10, b=True); c.fill = HDR_FILL; c.border = BOX; c.alignment = A(horizontal="center")
         r += 1
-    r += 1
-    r = write_band(ws, r, "3. Firmantes", 4)
-    for j, h in enumerate(["Nombre", "Entidad", "Rol", "Firma"], start=1):
-        c = ws.cell(row=r, column=j, value=h)
-        c.font = Font(name="Arial", sz=10, b=True); c.fill = HDR_FILL; c.border = BOX; c.alignment = A(horizontal="center")
-    r += 1
-    for _ in range(8):
-        for j in range(1, 5):
-            ws.cell(row=r, column=j).border = BOX
-            ws.cell(row=r, column=j).alignment = A()
-        ws.row_dimensions[r].height = 26
+        for i in range(1, nrows + 1):
+            ws.cell(row=r, column=1, value=i)
+            for j in range(1, 7):
+                ws.cell(row=r, column=j).border = BOX
+                ws.cell(row=r, column=j).alignment = A()
+                ws.cell(row=r, column=j).font = Font(name="Arial", sz=10)
+            if height:
+                ws.row_dimensions[r].height = height
+            r += 1
         r += 1
-    for j, w in enumerate([38, 30, 28, 30], start=1):
+    for j, w in enumerate([8, 34, 28, 24, 24, 24], start=1):
         ws.column_dimensions[get_column_letter(j)].width = w
-    instructivo(wb, [("Datos del acta", datos)])
-    finish(wb, ws, "F-PSEA-19 Acta de inicio de ronda.xlsx", 4)
+    finish(wb, ws, "F-PSEA-19 Acta de inicio de ronda.xlsx", 6)
 
 
 def f20():

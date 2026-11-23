@@ -17,6 +17,7 @@
     "test:e2e:start": "PLAYWRIGHT_START_SERVER=1 playwright test",
     "test:e2e:ui": "playwright test --ui",
     "sgc:validate-documents": "node scripts/validate-sgc-new-documents.mjs",
+    "sgc:gen-arbol": "node scripts/gen-arbol-bloque-general.mjs",
     "sgc:extract-seeds": "node scripts/extract-sgc-seeds.mjs",
     "sgc:import-seeds": "node scripts/import-sgc-seeds.mjs",
     "sgc:upload-document-versions": "node scripts/upload-sgc-document-versions.mjs",

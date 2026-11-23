@@ -40,6 +40,7 @@ export async function generarDocxF19Action(rondaId: string) {
     lugar: acta.lugar,
     textoInicio: acta.textoInicio,
     firmantes: acta.firmantes,
+    equipos: acta.equipos,
   })
   const contentType = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
   const fileName = `F-PSEA-19_${panel.ronda.codigo}.docx`

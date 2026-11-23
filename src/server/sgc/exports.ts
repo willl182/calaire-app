@@ -16,7 +16,21 @@ export type ActaInicioExport = {
   lugar: string
   textoInicio: string
   firmantes: Array<{ tipo: string; nombre: string; entidad: string }>
+  equipos: Array<{ tipo: string; codigoInterno: string; marca: string; modelo: string; serialIdentificacion: string }>
 }
+
+const TIPO_EQUIPO: Record<string, string> = {
+  analizador: 'Analizador',
+  aire_cero: 'Generador de aire cero',
+  calibrador_dinamico: 'Calibrador dinamico',
+  cilindro: 'Cilindro',
+  otro: 'Otro',
+}
+
+const METODO_VALOR_ASIGNADO = 'El valor asignado (xpt) de cada nivel de concentracion es la media de las mediciones del analizador de referencia de Calaire durante el periodo de medicion establecido, calculada a partir de 3 promedios de una hora. Su incertidumbre expandida (k = 2) combina la incertidumbre del instrumento de referencia y la debida a la falta de homogeneidad del item.'
+
+const cell = (value: unknown, bold = false) => `<w:tc><w:p><w:r>${bold ? '<w:rPr><w:b/></w:rPr>' : ''}<w:t>${xml(value)}</w:t></w:r></w:p></w:tc>`
+const TBL_PR = '<w:tblPr><w:tblBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/><w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/><w:insideH w:val="single" w:sz="4"/><w:insideV w:val="single" w:sz="4"/></w:tblBorders></w:tblPr>'
 
 export async function crearActaInicioDocx(data: ActaInicioExport) {
   const rows = data.firmantes.map((item, index) => `
@@ -27,6 +41,9 @@ export async function crearActaInicioDocx(data: ActaInicioExport) {
       <w:tc><w:p><w:r><w:t>${xml(item.tipo)}</w:t></w:r></w:p></w:tc>
       <w:tc><w:p><w:r><w:t>Firma: ____________________</w:t></w:r></w:p></w:tc>
     </w:tr>`).join('')
+  const equipos = data.equipos.length
+    ? `<w:tbl>${TBL_PR}<w:tr>${['No.', 'Instrumento', 'Codigo interno', 'Marca', 'Modelo', 'Serial'].map((h) => cell(h, true)).join('')}</w:tr>${data.equipos.map((item, index) => `<w:tr>${[index + 1, TIPO_EQUIPO[item.tipo] ?? item.tipo, item.codigoInterno, item.marca, item.modelo, item.serialIdentificacion].map((value) => cell(value)).join('')}</w:tr>`).join('')}</w:tbl>`
+    : '<w:p><w:r><w:t>No hay instrumentos registrados para la ronda.</w:t></w:r></w:p>'
   const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>
 <w:p><w:pPr><w:jc w:val="center"/></w:pPr><w:r><w:rPr><w:b/><w:sz w:val="32"/></w:rPr><w:t>F-PSEA-19 ACTA DE INICIO DE RONDA</w:t></w:r></w:p>
@@ -34,8 +51,12 @@ export async function crearActaInicioDocx(data: ActaInicioExport) {
 <w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Fecha: </w:t></w:r><w:r><w:t>${xml(data.fecha)}</w:t></w:r></w:p>
 <w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Lugar: </w:t></w:r><w:r><w:t>${xml(data.lugar)}</w:t></w:r></w:p>
 <w:p><w:r><w:t>${xml(data.textoInicio)}</w:t></w:r></w:p>
-<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Firmantes</w:t></w:r></w:p>
-<w:tbl><w:tblPr><w:tblBorders><w:top w:val="single" w:sz="4"/><w:left w:val="single" w:sz="4"/><w:bottom w:val="single" w:sz="4"/><w:right w:val="single" w:sz="4"/><w:insideH w:val="single" w:sz="4"/><w:insideV w:val="single" w:sz="4"/></w:tblBorders></w:tblPr>
+<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Metodo de determinacion del valor asignado</w:t></w:r></w:p>
+<w:p><w:r><w:t>${xml(METODO_VALOR_ASIGNADO)}</w:t></w:r></w:p>
+<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Instrumentos para metodo de referencia</w:t></w:r></w:p>
+${equipos}
+<w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Firmas</w:t></w:r></w:p>
+<w:tbl>${TBL_PR}
 <w:tr><w:tc><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>No.</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Nombre</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Entidad</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Rol</w:t></w:r></w:p></w:tc><w:tc><w:p><w:r><w:rPr><w:b/></w:rPr><w:t>Firma</w:t></w:r></w:p></w:tc></w:tr>${rows}</w:tbl>
 <w:sectPr><w:pgSz w:w="12240" w:h="15840"/><w:pgMar w:top="1080" w:right="1080" w:bottom="1080" w:left="1080"/></w:sectPr></w:body></w:document>`
   const zip = new JSZip()

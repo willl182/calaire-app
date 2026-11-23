@@ -21,6 +21,15 @@ async function getFirmantes(ctx: QueryCtx | MutationCtx, actaId: Id<'sgcActasIni
   return ctx.db.query('sgcActaInicioFirmantes').withIndex('by_actaId', (q) => q.eq('actaId', actaId)).collect()
 }
 
+async function getEquipos(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
+  const relacion = await ctx.db.query('sgcInstrumentosRonda').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first()
+  if (!relacion) return []
+  const items = await ctx.db.query('sgcInstrumentosRondaItems').withIndex('by_relacionId', (q) => q.eq('relacionId', relacion._id)).collect()
+  return items
+    .sort((a, b) => a.sortOrder - b.sortOrder)
+    .map((item) => ({ tipo: item.tipo, codigoInterno: item.codigoInterno, marca: item.marca, modelo: item.modelo, serialIdentificacion: item.serialIdentificacion }))
+}
+
 async function getRecurso(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
   return ctx.db
     .query('sgcDriveRecursos')
@@ -36,8 +45,8 @@ export const getActaInicioConfig = {
     await requireSgcManage(ctx)
     const acta = await getActa(ctx, rondaId)
     if (!acta) return null
-    const firmantes = await getFirmantes(ctx, acta._id)
-    return { ...acta, firmantes: firmantes.sort((a, b) => a.sortOrder - b.sortOrder) }
+    const [firmantes, equipos] = await Promise.all([getFirmantes(ctx, acta._id), getEquipos(ctx, rondaId)])
+    return { ...acta, firmantes: firmantes.sort((a, b) => a.sortOrder - b.sortOrder), equipos }
   },
 } satisfies SgcQueryConfig<typeof getActaInicioArgs>
 
@@ -64,7 +73,7 @@ export const inicializarActaInicioConfig = {
       rondaId,
       fecha: hitoInicio.fechaObjetivo,
       lugar: LUGAR_INSTITUCIONAL,
-      textoInicio: 'Se declara formalmente iniciada la ronda y se referencia la relacion F-PSEA-21 de instrumentos Calaire usados.',
+      textoInicio: 'Se declara formalmente iniciada la ronda. El valor asignado se determina por el metodo de referencia descrito en esta acta, con los instrumentos relacionados.',
       estado: 'borrador',
       versionBaseId: recurso?.documentoSgcVersionId ?? null,
       docxStorageId: null,

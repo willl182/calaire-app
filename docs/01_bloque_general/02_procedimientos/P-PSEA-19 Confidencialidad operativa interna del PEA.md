@@ -17,7 +17,7 @@ Procedimiento exclusivo del PEA para el monitoreo continuo de la imparcialidad e
 
 `F-PSEA-20` se conserva siempre como documento interno. Solo personal autorizado puede cargarlo, reemplazarlo o confirmar su uso en ronda. La sustitucion del archivo reinicia `usadoEnRonda`. El codigo anonimo no debe exponerse junto con la identidad real del participante en documentos publicados, comunicaciones generales o exportaciones de resultados.
 
-`F-PSEA-19` puede publicarse solo como PDF firmado y por decision explicita de coordinacion. `F-PSEA-21` permanece interno porque contiene identificacion y fotografias de instrumentos Calaire.
+`F-PSEA-19` puede publicarse solo como PDF firmado y por decision explicita de coordinacion. El acta identifica de forma inequivoca los instrumentos para metodo de referencia usados en la ronda (tipo, codigo interno, marca, modelo y serial); esa identificacion se publica con el acta. `F-PSEA-21` permanece interno porque contiene ademas fotografias, observaciones y el registro de validacion de esos instrumentos.
 
 ## Contenido esperado
 

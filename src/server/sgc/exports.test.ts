@@ -23,11 +23,14 @@ const items = [{
 
 describe('exportaciones SGC', () => {
   test('genera DOCX F-PSEA-19 legible como OpenXML', async () => {
-    const bytes = await crearActaInicioDocx({ rondaCodigo: 'R-01', rondaNombre: 'Ronda', fecha: '2026-07-25', lugar: 'Calaire', textoInicio: 'Inicio formal.', firmantes: [{ tipo: 'organizador', nombre: 'Responsable', entidad: 'Calaire' }] })
+    const bytes = await crearActaInicioDocx({ rondaCodigo: 'R-01', rondaNombre: 'Ronda', fecha: '2026-07-25', lugar: 'Calaire', textoInicio: 'Inicio formal.', firmantes: [{ tipo: 'organizador', nombre: 'Responsable', entidad: 'Calaire' }], equipos: [{ tipo: 'analizador', codigoInterno: 'AN-01', marca: 'Teledyne', modelo: 'T300', serialIdentificacion: 'SN-123' }] })
     const zip = await JSZip.loadAsync(bytes)
     const document = await zip.file('word/document.xml')?.async('string')
     expect(document).toContain('F-PSEA-19')
     expect(document).toContain('Responsable')
+    expect(document).toContain('Metodo de determinacion del valor asignado')
+    expect(document).toContain('Instrumentos para metodo de referencia')
+    expect(document).toContain('SN-123')
   })
 
   test('genera PDF F-PSEA-21 válido con ambas fotos', async () => {

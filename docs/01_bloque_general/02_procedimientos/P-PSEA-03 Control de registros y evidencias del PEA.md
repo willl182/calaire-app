@@ -103,7 +103,7 @@ El script `crear_estructura_ronda.sh` y la plantilla `plantilla_checklist_ronda.
 | `F-PSEA-15` | Registro de apelaciones | Coordinacion / SGC | Cuando se presenta apelacion | Responsable SGC | Registro de gestion | `P-PSEA-18` |
 | `F-PSEA-16` | Matriz de competencia y autorizacion | Responsable SGC | Antes y durante ejecucion | Responsable SGC | Matriz de soporte | `P-PSEA-20` |
 | `F-PSEA-17` | Evaluacion de proveedores criticos | Responsable SGC | Seleccion/evaluacion de proveedor | Responsable SGC | Registro de gestion | `P-PSEA-21` |
-| `F-PSEA-19` | Acta de inicio de ronda | `calaire-app` / coordinacion | Inicio presencial | Coordinacion del PEA | Registro oficial firmado | `P-PSEA-04`, `F-PSEA-03` |
+| `F-PSEA-19` | Acta de inicio de ronda | `calaire-app` / coordinacion | Inicio presencial | Coordinacion del PEA | Registro oficial firmado | `P-PSEA-24`, `F-PSEA-03`, `F-PSEA-21` |
 | `F-PSEA-20` | Rotulado anonimo | Responsable tecnico | Preparacion e inicio | Responsable tecnico | Archivo interno | `P-PSEA-06`, `P-PSEA-19` |
 | `F-PSEA-21` | Relacion de instrumentos Calaire usados | Responsable tecnico / `calaire-app` | Preparacion e inicio | Tecnico y coordinador | Registro nativo validado | `P-PSEA-06`, `P-PSEA-20` |
 | CSV exportado desde `calaire-app` | Exportacion operativa de datos | `calaire-app` | Transferencia a analisis | Responsable de datos | Anexo digital trazable si se conserva | `P-PSEA-08`, `F-PSEA-09` |

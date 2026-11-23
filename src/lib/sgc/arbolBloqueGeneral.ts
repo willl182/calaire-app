@@ -1,4 +1,4 @@
-// Generado desde docs/01_bloque_general. No editar a mano.
+// Generado desde docs/01_bloque_general con scripts/gen-arbol-bloque-general.mjs. No editar a mano.
 export type ItemBloqueGeneral = {
   nombre: string
   formatos: string[]
@@ -243,6 +243,13 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
         "nombre": "P-PSEA-23 Mejora continua del PEA",
         "formatos": [
           "docx",
+          "md"
+        ],
+        "carpeta": false
+      },
+      {
+        "nombre": "P-PSEA-24 Apertura de ronda EA",
+        "formatos": [
           "md"
         ],
         "carpeta": false
@@ -494,7 +501,6 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
       {
         "nombre": "F-PSEA-19 Acta de inicio de ronda",
         "formatos": [
-          "docx",
           "md"
         ],
         "carpeta": false
@@ -502,7 +508,6 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
       {
         "nombre": "F-PSEA-20 Rotulado anonimo",
         "formatos": [
-          "docx",
           "md"
         ],
         "carpeta": false
@@ -510,7 +515,6 @@ export const bloqueGeneralCarpetas: CarpetaBloqueGeneral[] = [
       {
         "nombre": "F-PSEA-21 Relacion de instrumentos Calaire usados",
         "formatos": [
-          "docx",
           "md"
         ],
         "carpeta": false

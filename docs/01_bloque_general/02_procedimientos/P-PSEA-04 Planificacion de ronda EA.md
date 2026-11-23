@@ -4,7 +4,7 @@
 
 ## Control documental de inicio de ronda
 
-La planificacion debe crear el hito `INICIO_RONDA`, con fecha, lugar y responsable. Antes del evento se confirma la lista de participantes en `F-PSEA-03`. En el inicio presencial se genera `F-PSEA-19` con dos organizadores y todos los participantes; se firma manualmente, se escanea y solo el PDF firmado puede publicarse. `F-PSEA-20` y `F-PSEA-21` son internos, criticos y no bloquean el cierre documental.
+La planificacion debe crear el hito `INICIO_RONDA`, con fecha, lugar y responsable. Antes del evento se confirma la lista de participantes en `F-PSEA-03`. La apertura presencial de la ronda y su acta `F-PSEA-19` se rigen por `P-PSEA-24 Apertura de ronda EA`. `F-PSEA-20` y `F-PSEA-21` son internos, criticos y no bloquean el cierre documental.
 
 | INFORMACIÓN GENERAL DEL PROCEDIMIENTO |
 | ----- |
