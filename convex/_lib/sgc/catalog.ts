@@ -30,8 +30,22 @@ export type SgcFormato = {
 
 export type SgcRondaDocumentoEstado = 'disponible' | 'pendiente' | 'no_aplica'
 
+export type SgcResponsable = 'coordinador' | 'participante' | 'automatico'
+export type SgcObligatoriedad = 'obligatorio' | 'si_aplica'
+
 export type SgcRondaDocumento = {
   codigo: string
+  /** Orden de diligenciamiento dentro de la etapa (1..n). */
+  orden: number
+  /**
+   * Orden logico global por dependencias (barra "Siguiente paso"). No sigue el numero de
+   * carpeta: F-PSEA-21 (03) va antes que F-PSEA-19 (02A), F-PSEA-07 se completa antes de
+   * F-PSEA-19 y la etapa 05 se intercala antes de F-PSEA-12. Decisiones del usuario 2026-11-24.
+   */
+  ordenLogico: number
+  responsable: SgcResponsable
+  /** `si_aplica` no cuenta en el avance hasta que se marque que aplica. */
+  obligatoriedad: SgcObligatoriedad
   nombre: string
   estado: SgcRondaDocumentoEstado
   archivoBase?: string
@@ -221,7 +235,7 @@ export function getSgcFormato(codigo: SgcFormatoCodigo) {
   return SGC_FORMATOS_FASE_1.find((formato) => formato.codigo === codigo) ?? null
 }
 
-export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
+const SGC_RONDA_ETAPAS_BASE: SgcRondaEtapa[] = [
   {
     key: 'planificacion',
     numero: '01',
@@ -230,14 +244,14 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'planificacion',
     descripcion: 'Define alcance, calendario, participantes previstos, recursos, responsabilidades y criterios de evaluacion.',
     documentos: [
-      { codigo: 'F-PSEA-01', nombre: 'Calendario global de ronda', estado: 'pendiente', nota: 'Formato maestro XLSX pendiente de integrar como evidencia de ronda.' },
-      { codigo: 'F-PSEA-02', nombre: 'Cronograma detallado de ronda', estado: 'pendiente', nota: 'Formato maestro XLSX pendiente de integrar como evidencia de ronda.' },
-      { codigo: 'F-PSEA-03', nombre: 'Registro de participacion y carga de datos del participante', estado: 'disponible', formatoOperativo: 'F-PSEA-03', nota: 'Se gestiona desde fichas y datos nativos de participantes.' },
-      { codigo: 'F-PSEA-04', nombre: 'Equipos e instrumentos exportados desde F-PSEA-03', estado: 'pendiente', nota: 'Exportacion operativa pendiente de exponerse en el expediente.' },
-      { codigo: 'F-PSEA-05', nombre: 'Ficha basica de ronda EA', estado: 'disponible', archivoBase: 'F-PSEA-05 Ficha basica de ronda EA', formatoOperativo: 'F-PSEA-05', nota: 'Existe en docs/EA-PP-2026-R1 y se cubre con datos nativos de ronda.' },
-      { codigo: 'F-PSEA-06', nombre: 'Planificacion de ronda EA', estado: 'disponible', archivoBase: 'F-PSEA-06 Planificacion de ronda EA', formatoOperativo: 'F-PSEA-06', nota: 'Existe en docs/EA-PP-2026-R1 y se diligencia en el plan nativo.' },
-      { codigo: 'F-PSEA-16', nombre: 'Matriz de competencia y autorizacion', estado: 'pendiente', nota: 'Aplica cuando se documente competencia especifica de la ronda.' },
-      { codigo: 'F-PSEA-17', nombre: 'Evaluacion de proveedores criticos, si aplica', estado: 'pendiente', nota: 'Aplica si la ronda usa proveedores criticos.' },
+      { codigo: 'F-PSEA-01', orden: 2, ordenLogico: 20, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Calendario global de ronda', estado: 'pendiente', nota: 'Formato maestro XLSX pendiente de integrar como evidencia de ronda.' },
+      { codigo: 'F-PSEA-02', orden: 3, ordenLogico: 30, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Cronograma detallado de ronda', estado: 'pendiente', nota: 'Formato maestro XLSX pendiente de integrar como evidencia de ronda.' },
+      { codigo: 'F-PSEA-03', orden: 5, ordenLogico: 50, responsable: 'participante', obligatoriedad: 'obligatorio', nombre: 'Registro de participacion y carga de datos del participante', estado: 'disponible', formatoOperativo: 'F-PSEA-03', nota: 'Se gestiona desde fichas y datos nativos de participantes.' },
+      { codigo: 'F-PSEA-04', orden: 6, ordenLogico: 60, responsable: 'automatico', obligatoriedad: 'obligatorio', nombre: 'Equipos e instrumentos exportados desde F-PSEA-03', estado: 'pendiente', nota: 'Exportacion operativa pendiente de exponerse en el expediente.' },
+      { codigo: 'F-PSEA-05', orden: 4, ordenLogico: 40, responsable: 'automatico', obligatoriedad: 'obligatorio', nombre: 'Ficha basica de ronda EA', estado: 'disponible', archivoBase: 'F-PSEA-05 Ficha basica de ronda EA', formatoOperativo: 'F-PSEA-05', nota: 'Existe en docs/EA-PP-2026-R1 y se cubre con datos nativos de ronda.' },
+      { codigo: 'F-PSEA-06', orden: 1, ordenLogico: 10, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Planificacion de ronda EA', estado: 'disponible', archivoBase: 'F-PSEA-06 Planificacion de ronda EA', formatoOperativo: 'F-PSEA-06', nota: 'Existe en docs/EA-PP-2026-R1 y se diligencia en el plan nativo.' },
+      { codigo: 'F-PSEA-16', orden: 7, ordenLogico: 70, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Matriz de competencia y autorizacion', estado: 'pendiente', nota: 'Obligatorio en cada ronda (decision 2026-11-24). Procedimiento fuente P-PSEA-20 pendiente de redactar.' },
+      { codigo: 'F-PSEA-17', orden: 8, ordenLogico: 80, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Evaluacion de proveedores criticos, si aplica', estado: 'pendiente', nota: 'Aplica si la ronda usa proveedores criticos.' },
     ],
   },
   {
@@ -248,10 +262,10 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'comunicaciones',
     descripcion: 'Conserva convocatorias, aclaraciones, respuestas, acuses y comunicaciones formales emitidas durante la ronda.',
     documentos: [
-      { codigo: 'I-PSEA-02', nombre: 'Instructivo participante calaire-app con anexos A y B', estado: 'disponible', archivoBase: 'I-PSEA-02 Instructivo participante calaire-app', nota: 'Version congelada y publicada para la ronda.' },
-      { codigo: 'F-PSEA-18', nombre: 'Formato de comunicacion oficial al participante', estado: 'pendiente', nota: 'Pendiente de enlazar con publicaciones, plantillas y notificaciones.' },
-      { codigo: 'EVID-COM', nombre: 'Respuestas o acuses de recibo del participante', estado: 'pendiente', nota: 'Evidencia operativa pendiente de carga o sincronizacion.' },
-      { codigo: 'EVID-ACL', nombre: 'Comunicaciones de aclaracion o cambios, si aplica', estado: 'pendiente', nota: 'Se conserva cuando existan aclaraciones o cambios.' },
+      { codigo: 'I-PSEA-02', orden: 1, ordenLogico: 90, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Instructivo participante calaire-app con anexos A y B', estado: 'disponible', archivoBase: 'I-PSEA-02 Instructivo participante calaire-app', nota: 'Version congelada y publicada para la ronda.' },
+      { codigo: 'F-PSEA-18', orden: 2, ordenLogico: 100, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Formato de comunicacion oficial al participante', estado: 'pendiente', nota: 'Pendiente de enlazar con publicaciones, plantillas y notificaciones.' },
+      { codigo: 'EVID-COM', orden: 3, ordenLogico: 110, responsable: 'automatico', obligatoriedad: 'obligatorio', nombre: 'Respuestas o acuses de recibo del participante', estado: 'pendiente', nota: 'No se exige acuse separado: se da por cumplido cuando los participantes ingresan a la app (decision 2026-11-24).' },
+      { codigo: 'EVID-ACL', orden: 4, ordenLogico: 120, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Comunicaciones de aclaracion o cambios, si aplica', estado: 'pendiente', nota: 'Se conserva cuando existan aclaraciones o cambios.' },
     ],
   },
   {
@@ -262,7 +276,7 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'inicio',
     descripcion: 'Documenta el inicio presencial de la ronda y el acta firmada por participantes y organizadores.',
     documentos: [
-      { codigo: 'F-PSEA-19', nombre: 'Acta de inicio de ronda', estado: 'disponible', archivoBase: 'F-PSEA-19 Acta de inicio de ronda', formatoOperativo: 'F-PSEA-19', nota: 'Se genera desde datos de ronda, se firma a mano y se publica solo como PDF firmado.' },
+      { codigo: 'F-PSEA-19', orden: 1, ordenLogico: 180, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Acta de inicio de ronda', estado: 'disponible', archivoBase: 'F-PSEA-19 Acta de inicio de ronda', formatoOperativo: 'F-PSEA-19', nota: 'Se genera desde datos de ronda, se firma a mano y se publica solo como PDF firmado.' },
     ],
   },
   {
@@ -273,11 +287,11 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'item',
     descripcion: 'Agrupa la preparacion, control y verificaciones tecnicas del item de ensayo de aptitud.',
     documentos: [
-      { codigo: 'F-PSEA-07', nombre: 'Preparacion y control del item', estado: 'disponible', archivoBase: 'F-PSEA-07 Preparacion y control del item', formatoOperativo: 'F-PSEA-07', nota: 'Existe en docs/EA-PP-2026-R1; la vista valida codigos y trazabilidad operativa.' },
-      { codigo: 'F-PSEA-20', nombre: 'Rotulado anonimo', estado: 'disponible', archivoBase: 'F-PSEA-20 Rotulado anonimo', formatoOperativo: 'F-PSEA-20', nota: 'Placeholder maestro y archivo manual interno usado en la ronda.' },
-      { codigo: 'F-PSEA-21', nombre: 'Relacion de instrumentos Calaire usados', estado: 'disponible', archivoBase: 'F-PSEA-21 Relacion de instrumentos Calaire usados', formatoOperativo: 'F-PSEA-21', nota: 'Registro nativo interno con identificacion, dos fotos por instrumento y validacion.' },
-      { codigo: 'EVID-CERT', nombre: 'Certificados de gases, equipos o patrones usados', estado: 'pendiente', nota: 'Evidencia tecnica pendiente de carga cuando aplique.' },
-      { codigo: 'EVID-MONT', nombre: 'Evidencia de montaje, configuracion o verificacion tecnica', estado: 'pendiente', nota: 'Evidencia tecnica pendiente de carga cuando aplique.' },
+      { codigo: 'F-PSEA-07', orden: 4, ordenLogico: 160, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Preparacion y control del item', estado: 'disponible', archivoBase: 'F-PSEA-07 Preparacion y control del item', formatoOperativo: 'F-PSEA-07', nota: 'Existe en docs/EA-PP-2026-R1; la vista valida codigos y trazabilidad operativa.' },
+      { codigo: 'F-PSEA-20', orden: 2, ordenLogico: 140, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Rotulado anonimo', estado: 'disponible', archivoBase: 'F-PSEA-20 Rotulado anonimo', formatoOperativo: 'F-PSEA-20', nota: 'Placeholder maestro y archivo manual interno usado en la ronda.' },
+      { codigo: 'F-PSEA-21', orden: 1, ordenLogico: 130, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Relacion de instrumentos Calaire usados', estado: 'disponible', archivoBase: 'F-PSEA-21 Relacion de instrumentos Calaire usados', formatoOperativo: 'F-PSEA-21', nota: 'Registro nativo interno con identificacion, dos fotos por instrumento y validacion.' },
+      { codigo: 'EVID-CERT', orden: 3, ordenLogico: 150, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Certificados de gases, equipos o patrones usados', estado: 'pendiente', nota: 'Evidencia tecnica pendiente de carga cuando aplique.' },
+      { codigo: 'EVID-MONT', orden: 5, ordenLogico: 170, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Evidencia de montaje, configuracion o verificacion tecnica', estado: 'pendiente', nota: 'Evidencia tecnica pendiente de carga cuando aplique.' },
     ],
   },
   {
@@ -288,11 +302,11 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'datos',
     descripcion: 'Controla el flujo oficial de datos desde lo reportado por participantes hasta el dataset consolidado.',
     documentos: [
-      { codigo: 'F-PSEA-08', nombre: 'Datos reportados por participante', estado: 'disponible', archivoBase: 'F-PSEA-08 Datos reportados por participante', formatoOperativo: 'F-PSEA-08', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada.' },
-      { codigo: 'F-PSEA-09', nombre: 'Datos de participantes exportados para analisis PT', estado: 'disponible', archivoBase: 'F-PSEA-09 Datos de participantes exportados para analisis PT', formatoOperativo: 'F-PSEA-09', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada.' },
-      { codigo: 'F-PSEA-10', nombre: 'Registro de preprocesamiento de datos', estado: 'disponible', archivoBase: 'F-PSEA-10 Registro de preprocesamiento de datos', formatoOperativo: 'F-PSEA-10', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada.' },
-      { codigo: 'F-PSEA-12', nombre: 'Datos oficiales consolidados para evaluacion de aptitud', estado: 'disponible', archivoBase: 'F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud', formatoOperativo: 'F-PSEA-12', nota: 'Existe en docs/EA-PP-2026-R1; se cubre con envios finales y dataset consolidado.' },
-      { codigo: 'EVID-CSV', nombre: 'Archivos CSV o exportaciones conservadas para trazabilidad', estado: 'pendiente', nota: 'Pendiente de exponer descargas conservadas como evidencia.' },
+      { codigo: 'F-PSEA-08', orden: 1, ordenLogico: 190, responsable: 'participante', obligatoriedad: 'obligatorio', nombre: 'Datos reportados por participante', estado: 'disponible', archivoBase: 'F-PSEA-08 Datos reportados por participante', formatoOperativo: 'F-PSEA-08', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada.' },
+      { codigo: 'F-PSEA-09', orden: 2, ordenLogico: 200, responsable: 'automatico', obligatoriedad: 'obligatorio', nombre: 'Datos de participantes exportados para analisis PT', estado: 'disponible', archivoBase: 'F-PSEA-09 Datos de participantes exportados para analisis PT', formatoOperativo: 'F-PSEA-09', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada.' },
+      { codigo: 'F-PSEA-10', orden: 4, ordenLogico: 220, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Registro de preprocesamiento de datos', estado: 'disponible', archivoBase: 'F-PSEA-10 Registro de preprocesamiento de datos', formatoOperativo: 'F-PSEA-10', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada.' },
+      { codigo: 'F-PSEA-12', orden: 5, ordenLogico: 280, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Datos oficiales consolidados para evaluacion de aptitud', estado: 'disponible', archivoBase: 'F-PSEA-12 Datos oficiales consolidados para evaluacion de aptitud', formatoOperativo: 'F-PSEA-12', nota: 'Existe en docs/EA-PP-2026-R1; se cubre con envios finales y dataset consolidado.' },
+      { codigo: 'EVID-CSV', orden: 3, ordenLogico: 210, responsable: 'automatico', obligatoriedad: 'si_aplica', nombre: 'Archivos CSV o exportaciones conservadas para trazabilidad', estado: 'pendiente', nota: 'Pendiente de exponer descargas conservadas como evidencia.' },
     ],
   },
   {
@@ -303,11 +317,11 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'homogeneidad',
     descripcion: 'Documenta muestreo, analisis, resultados y conclusiones sobre homogeneidad y estabilidad del item.',
     documentos: [
-      { codigo: 'F-PSEA-11', nombre: 'Homogeneidad y estabilidad del item', estado: 'disponible', archivoBase: 'F-PSEA-11 Homogeneidad y estabilidad del item', formatoOperativo: 'F-PSEA-11', nota: 'Existe en docs/EA-PP-2026-R1; se revisa con el registro nativo de H/E.' },
-      { codigo: 'F-PSEA-11A', nombre: 'Datos preprocesados de homogeneidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
-      { codigo: 'F-PSEA-11B', nombre: 'Datos preprocesados de estabilidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
-      { codigo: 'F-PSEA-11C', nombre: 'Resultados de homogeneidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
-      { codigo: 'F-PSEA-11D', nombre: 'Resultados de estabilidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
+      { codigo: 'F-PSEA-11', orden: 5, ordenLogico: 270, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Homogeneidad y estabilidad del item', estado: 'disponible', archivoBase: 'F-PSEA-11 Homogeneidad y estabilidad del item', formatoOperativo: 'F-PSEA-11', nota: 'Existe en docs/EA-PP-2026-R1; se revisa con el registro nativo de H/E.' },
+      { codigo: 'F-PSEA-11A', orden: 1, ordenLogico: 230, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Datos preprocesados de homogeneidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
+      { codigo: 'F-PSEA-11B', orden: 2, ordenLogico: 240, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Datos preprocesados de estabilidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
+      { codigo: 'F-PSEA-11C', orden: 3, ordenLogico: 250, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Resultados de homogeneidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
+      { codigo: 'F-PSEA-11D', orden: 4, ordenLogico: 260, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Resultados de estabilidad', estado: 'pendiente', nota: 'Subformato/anexo pendiente.' },
     ],
   },
   {
@@ -318,9 +332,9 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'informe',
     descripcion: 'Conserva el informe final, evidencia de envio y salidas generadas para comunicar resultados.',
     documentos: [
-      { codigo: 'F-PSEA-13', nombre: 'Informe final de resultados', estado: 'disponible', archivoBase: 'F-PSEA-13 Informe final de resultados', formatoOperativo: 'F-PSEA-13', nota: 'Existe en docs/EA-PP-2026-R1; la vista permite revision final y snapshot.' },
-      { codigo: 'EVID-ENVIO', nombre: 'Evidencia de envio del informe final al participante', estado: 'pendiente', nota: 'Pendiente de enlazar con publicaciones/notificaciones.' },
-      { codigo: 'EVID-SALIDAS', nombre: 'Salidas, graficas o tablas generadas para el informe', estado: 'pendiente', nota: 'Pendiente de carga o sincronizacion desde pt_app.' },
+      { codigo: 'F-PSEA-13', orden: 2, ordenLogico: 300, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Informe final de resultados', estado: 'disponible', archivoBase: 'F-PSEA-13 Informe final de resultados', formatoOperativo: 'F-PSEA-13', nota: 'Existe en docs/EA-PP-2026-R1; la vista permite revision final y snapshot.' },
+      { codigo: 'EVID-ENVIO', orden: 3, ordenLogico: 310, responsable: 'automatico', obligatoriedad: 'obligatorio', nombre: 'Evidencia de envio del informe final al participante', estado: 'pendiente', nota: 'Pendiente de enlazar con publicaciones/notificaciones.' },
+      { codigo: 'EVID-SALIDAS', orden: 1, ordenLogico: 290, responsable: 'coordinador', obligatoriedad: 'obligatorio', nombre: 'Salidas, graficas o tablas generadas para el informe', estado: 'pendiente', nota: 'Pendiente de carga o sincronizacion desde pt_app.' },
     ],
   },
   {
@@ -331,9 +345,52 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
     foco: 'cierre',
     descripcion: 'Reune evidencia de cierre, casos, quejas, no conformidades, acciones correctivas y apelaciones.',
     documentos: [
-      { codigo: 'EVID-CIERRE', nombre: 'Evidencia de cierre de ronda', estado: 'pendiente', nota: 'Se completa al cerrar documentalmente la ronda.' },
-      { codigo: 'F-PSEA-14', nombre: 'Registro caso de queja o no conformidad, si aplica', estado: 'disponible', archivoBase: 'F-PSEA-14 Registro caso de queja o NC segun aplique', formatoOperativo: 'F-PSEA-14', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada cuando aplique.' },
-      { codigo: 'F-PSEA-15', nombre: 'Registro de apelacion, si aplica', estado: 'pendiente', nota: 'Aplica si existe apelacion.' },
+      { codigo: 'EVID-CIERRE', orden: 3, ordenLogico: 340, responsable: 'automatico', obligatoriedad: 'obligatorio', nombre: 'Evidencia de cierre de ronda', estado: 'pendiente', nota: 'Se completa al cerrar documentalmente la ronda.' },
+      { codigo: 'F-PSEA-14', orden: 1, ordenLogico: 320, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Registro caso de queja o no conformidad, si aplica', estado: 'disponible', archivoBase: 'F-PSEA-14 Registro caso de queja o NC segun aplique', formatoOperativo: 'F-PSEA-14', nota: 'Existe en docs/EA-PP-2026-R1; admite evidencia cargada cuando aplique.' },
+      { codigo: 'F-PSEA-15', orden: 2, ordenLogico: 330, responsable: 'coordinador', obligatoriedad: 'si_aplica', nombre: 'Registro de apelacion, si aplica', estado: 'pendiente', nota: 'Aplica si existe apelacion.' },
     ],
   },
 ]
+
+/** Expediente por etapa con los documentos ordenados por `orden` (orden de diligenciamiento). */
+export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = SGC_RONDA_ETAPAS_BASE.map((etapa) => ({
+  ...etapa,
+  documentos: [...etapa.documentos].sort((a, b) => a.orden - b.orden),
+}))
+
+export type SgcRondaDocumentoCatalogo = SgcRondaDocumento & {
+  etapaKey: string
+  etapaNumero: string
+  etapaNombre: string
+  carpeta: string
+  critico: boolean
+  bloqueaCierre: boolean
+}
+
+function normalizarCodigo(codigo: string) {
+  return codigo.trim().toUpperCase()
+}
+
+/** Todos los documentos del expediente en orden logico global (dependencias, no carpeta). */
+export const SGC_DOCUMENTOS_ORDEN_LOGICO: SgcRondaDocumentoCatalogo[] = SGC_RONDA_ETAPAS.flatMap((etapa) =>
+  etapa.documentos.map((documento) => {
+    const formato = documento.formatoOperativo ? getSgcFormato(documento.formatoOperativo) : null
+    return {
+      ...documento,
+      etapaKey: etapa.key,
+      etapaNumero: etapa.numero,
+      etapaNombre: etapa.nombre,
+      carpeta: etapa.carpeta,
+      critico: formato?.critico ?? false,
+      // Un "si aplica" nunca bloquea el cierre (F-PSEA-14/15 abiertos no bloquean, decision 16).
+      bloqueaCierre: documento.obligatoriedad === 'obligatorio' && (formato?.bloqueaCierre ?? true),
+    }
+  })
+).sort((a, b) => a.ordenLogico - b.ordenLogico)
+
+const DOCUMENTO_POR_CODIGO = new Map(SGC_DOCUMENTOS_ORDEN_LOGICO.map((doc) => [normalizarCodigo(doc.codigo), doc]))
+
+/** Politica vigente (orden, responsable, obligatoriedad) de un documento, siempre desde el catalogo. */
+export function getSgcRondaDocumento(codigo: string): SgcRondaDocumentoCatalogo | null {
+  return DOCUMENTO_POR_CODIGO.get(normalizarCodigo(codigo)) ?? null
+}
