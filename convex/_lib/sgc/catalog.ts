@@ -225,7 +225,7 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
   {
     key: 'planificacion',
     numero: '01',
-    nombre: 'Planificacion de ronda',
+    nombre: 'Planificación de ronda',
     carpeta: '01_planificacion_ronda',
     foco: 'planificacion',
     descripcion: 'Define alcance, calendario, participantes previstos, recursos, responsabilidades y criterios de evaluacion.',
@@ -268,7 +268,7 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
   {
     key: 'preparacion_item',
     numero: '03',
-    nombre: 'Preparacion del item',
+    nombre: 'Preparación del ítem',
     carpeta: '03_preparacion_item',
     foco: 'item',
     descripcion: 'Agrupa la preparacion, control y verificaciones tecnicas del item de ensayo de aptitud.',
@@ -313,7 +313,7 @@ export const SGC_RONDA_ETAPAS: SgcRondaEtapa[] = [
   {
     key: 'analisis_informe',
     numero: '06',
-    nombre: 'Analisis e informe',
+    nombre: 'Análisis e informe',
     carpeta: '06_analisis_e_informe',
     foco: 'informe',
     descripcion: 'Conserva el informe final, evidencia de envio y salidas generadas para comunicar resultados.',
