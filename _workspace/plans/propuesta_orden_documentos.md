@@ -207,3 +207,9 @@ Revisado en `calaire-app/docs` y en `calaire-ea_sgc`:
 - Los procedimientos **P-PSEA-20** (Competencia y autorización) y **P-PSEA-21** (Proveedores críticos) **no están redactados**. Los archivos con ese nombre traen otro contenido: P-PSEA-20 es un borrador de "Comunicación PT" y P-PSEA-21 un placeholder de "Divulgación de valores". Esto pasa en ambos repos, también en los .docx.
 - Lo que sí existe: `calaire-ea_sgc/fichas_resumen/ficha_P-PSEA-20.md` y `ficha_P-PSEA-21.md` (propósito y alcance del procedimiento correcto), y los placeholders antiguos `para_quitar/.../P-PSEA-27 Competencia…` y `P-PSEA-28 Proveedores externos…`.
 - **Pendiente nuevo:** redactar P-PSEA-20 y P-PSEA-21 a partir de sus fichas resumen. Además, reubicar los contenidos actuales ("Comunicación PT" y "Divulgación de valores") con su código correcto.
+
+### Decisiones posteriores (2026-11-24, tras B2)
+
+| # | Tema | Decisión |
+|---|---|---|
+| 19 | F-03 y cupos sin reclamar | Un cupo que nadie reclamó cuenta como "no participó": no bloquea F-03. F-03 se cumple cuando todos los cupos reclamados enviaron su ficha (comportamiento de B2). |
