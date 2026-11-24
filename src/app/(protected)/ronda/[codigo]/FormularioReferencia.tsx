@@ -1,7 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
+import { DecimalInput } from '@/components/DecimalInput'
+import { isValidDecimal, statsWarnings, toDecimal } from '@/lib/decimal'
 import {
   CONTAMINANTES,
   type EnvioPT,
@@ -49,10 +51,12 @@ function fromCellKey(key: CellKey) {
 }
 
 function isValidNumberInput(value: string): boolean {
-  const trimmed = value.trim()
-  if (trimmed === '') return false
-  const parsed = Number(trimmed)
-  return Number.isFinite(parsed)
+  return isValidDecimal(value)
+}
+
+/** Valor normalizado (coma o punto); NaN si vacío o inválido. */
+function num(value: string): number {
+  return toDecimal(value) ?? NaN
 }
 
 function getCellIssue(data: CellData): string | null {
@@ -66,19 +70,35 @@ function getCellIssue(data: CellData): string | null {
   if (data.meanValue.trim() !== '' && !isValidNumberInput(data.meanValue)) {
     return 'El promedio debe ser un número válido.'
   }
-  if (data.sdValue.trim() !== '' && (!isValidNumberInput(data.sdValue) || Number(data.sdValue) < 0)) {
+  if (data.sdValue.trim() !== '' && (!isValidNumberInput(data.sdValue) || num(data.sdValue) < 0)) {
     return 'La desviación estándar debe ser ≥ 0.'
   }
-  if (data.ux.trim() !== '' && (!isValidNumberInput(data.ux) || Number(data.ux) < 0)) {
+  if (data.ux.trim() !== '' && (!isValidNumberInput(data.ux) || num(data.ux) < 0)) {
     return 'La incertidumbre estándar u(x) debe ser ≥ 0.'
   }
-  if (data.k.trim() !== '' && (!isValidNumberInput(data.k) || Number(data.k) < 0)) {
+  if (data.k.trim() !== '' && (!isValidNumberInput(data.k) || num(data.k) < 0)) {
     return 'El factor de cobertura k debe ser ≥ 0.'
   }
-  if (data.uxExp.trim() !== '' && (!isValidNumberInput(data.uxExp) || Number(data.uxExp) < 0)) {
+  if (data.uxExp.trim() !== '' && (!isValidNumberInput(data.uxExp) || num(data.uxExp) < 0)) {
     return 'La incertidumbre expandida U(X) debe ser ≥ 0.'
   }
   return null
+}
+
+const FIELD_ORDER = ['d1', 'd2', 'd3', 'meanValue', 'sdValue', 'ux', 'k', 'uxExp'] as const
+const REQUIRED_FIELDS = new Set<string>(['d1', 'meanValue', 'sdValue', 'ux', 'k', 'uxExp'])
+
+/** Primer campo vacío obligatorio o inválido, para llevar el foco desde "Faltan N celdas". */
+function firstPendingField(data: CellData): (typeof FIELD_ORDER)[number] {
+  for (const field of FIELD_ORDER) {
+    const value = data[field]
+    if (value.trim() === '') {
+      if (REQUIRED_FIELDS.has(field)) return field
+      continue
+    }
+    if (!isValidNumberInput(value)) return field
+  }
+  return 'd1'
 }
 
 function isCellComplete(data: CellData): boolean {
@@ -87,13 +107,13 @@ function isCellComplete(data: CellData): boolean {
     isValidNumberInput(data.d1) &&
     isValidNumberInput(data.meanValue) &&
     isValidNumberInput(data.sdValue) &&
-    Number(data.sdValue) >= 0 &&
+    num(data.sdValue) >= 0 &&
     isValidNumberInput(data.ux) &&
-    Number(data.ux) >= 0 &&
+    num(data.ux) >= 0 &&
     isValidNumberInput(data.k) &&
-    Number(data.k) >= 0 &&
+    num(data.k) >= 0 &&
     isValidNumberInput(data.uxExp) &&
-    Number(data.uxExp) >= 0
+    num(data.uxExp) >= 0
   )
 }
 
@@ -239,14 +259,14 @@ export default function FormularioReferencia({
     if (!isCellComplete(data)) return
     if (soloLectura) return
 
-    const d1 = Number(data.d1)
-    const d2 = data.d2.trim() === '' ? null : Number(data.d2)
-    const d3 = data.d3.trim() === '' ? null : Number(data.d3)
-    const meanValue = Number(data.meanValue)
-    const sdValue = Number(data.sdValue)
-    const ux = Number(data.ux)
-    const k = Number(data.k)
-    const uxExp = Number(data.uxExp)
+    const d1 = num(data.d1)
+    const d2 = data.d2.trim() === '' ? null : num(data.d2)
+    const d3 = data.d3.trim() === '' ? null : num(data.d3)
+    const meanValue = num(data.meanValue)
+    const sdValue = num(data.sdValue)
+    const ux = num(data.ux)
+    const k = num(data.k)
+    const uxExp = num(data.uxExp)
     setSaveStatus((prev) => ({ ...prev, [key]: 'saving' }))
 
     const result = adminTarget
@@ -343,13 +363,13 @@ export default function FormularioReferencia({
           .filter(([, data]) => data.meanValue.trim() !== '' || data.d1.trim() !== '')
           .map(([key]) => key)
       )
-      if (!isValidNumberInput(globalK) || Number(globalK) < 0) {
+      if (!isValidNumberInput(globalK) || num(globalK) < 0) {
         setImportPreview(null)
         setImportStatus('error')
         setImportMessage('El factor de cobertura grupal debe ser un número mayor o igual a cero.')
         return
       }
-      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells, Number(globalK))
+      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells, num(globalK))
       setImportPreview(preview)
       setImportStatus(preview.errors.length > 0 ? 'error' : 'ready')
       setImportMessage(null)
@@ -456,7 +476,7 @@ export default function FormularioReferencia({
 
   function handleKModeChange(nextMode: KMode) {
     setKMode(nextMode)
-    if (nextMode !== 'grupal' || !isValidNumberInput(globalK) || Number(globalK) < 0) return
+    if (nextMode !== 'grupal' || !isValidNumberInput(globalK) || num(globalK) < 0) return
     for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
       updateCell(key, { ...data, k: globalK })
     }
@@ -464,7 +484,7 @@ export default function FormularioReferencia({
 
   function handleGlobalKChange(value: string) {
     setGlobalK(value)
-    if (kMode !== 'grupal' || !isValidNumberInput(value) || Number(value) < 0) return
+    if (kMode !== 'grupal' || !isValidNumberInput(value) || num(value) < 0) return
     for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
       updateCell(key, { ...data, k: value })
     }
@@ -474,6 +494,19 @@ export default function FormularioReferencia({
     contaminante,
     items: ptItems.filter((item) => item.contaminante === contaminante),
   })).filter((entry) => entry.items.length > 0)
+
+  const pendingCells = ptItems.flatMap((item) =>
+    sampleGroups.map((group) => ({ item, group, key: toCellKey(item.id, group.id) }))
+  ).filter(({ key }) => {
+    const status = saveStatus[key] ?? 'idle'
+    return !isCellComplete(cells[key]) || getCellIssue(cells[key]) !== null || saveErrors[key] != null || status === 'dirty' || status === 'saving'
+  })
+
+  function focusPendingCell(itemId: string, groupId: string, data: CellData) {
+    const el = document.getElementById(`msg-${itemId}-${groupId}-${firstPendingField(data)}`)
+    el?.scrollIntoView({ block: 'center' })
+    el?.focus()
+  }
 
   return (
     <div className={adminTarget ? '' : 'min-h-screen bg-[var(--background)] px-6 py-8'}>
@@ -502,10 +535,12 @@ export default function FormularioReferencia({
 
         {adminTarget && (
           <section className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
-            <span className="font-semibold">Modo administrativo.</span> Guardando resultados en nombre de {participanteEmail}.
+            <span className="font-semibold">Modo administrativo.</span> Guardando resultados del laboratorio de referencia en nombre de {participanteEmail}.
           </section>
         )}
 
+        {/* En modo admin, RondaPageHeader ya muestra nombre y estado de la ronda. */}
+        {!adminTarget && (
         <section className="card p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
@@ -532,6 +567,7 @@ export default function FormularioReferencia({
             </span>
           </div>
         </section>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="card-accent px-5 py-4">
@@ -619,7 +655,7 @@ export default function FormularioReferencia({
           )}
         </section>
 
-        <section className={`card p-6 ${adminTarget ? 'order-3' : ''}`}>
+        <section className="card p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
@@ -648,14 +684,10 @@ export default function FormularioReferencia({
                   Factor grupal
                 </button>
               </div>
-              <input
-                type="number"
-                step="any"
-                min="0"
-                inputMode="decimal"
+              <DecimalInput
                 value={globalK}
                 disabled={soloLectura}
-                onChange={(event) => handleGlobalKChange(event.target.value)}
+                onValueChange={handleGlobalKChange}
                 className="w-24 rounded border border-[var(--border)] px-3 py-2 text-sm numeric disabled:bg-[var(--surface-muted)]"
                 aria-label="Valor grupal del factor de cobertura k"
               />
@@ -765,7 +797,7 @@ export default function FormularioReferencia({
         </section>
 
         {adminTarget && (
-          <section className="card order-1 p-6">
+          <section className="card p-6">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
               Carga manual de resultados
             </h2>
@@ -786,7 +818,7 @@ export default function FormularioReferencia({
             )
 
           return (
-            <section key={contaminante} className={`card overflow-hidden ${adminTarget ? 'order-1' : ''}`}>
+            <section key={contaminante} className="card overflow-hidden">
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
@@ -820,7 +852,7 @@ export default function FormularioReferencia({
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
                       <th className="min-w-36 px-4 py-2 font-semibold">Incertidumbre estándar u(x)</th>
                       <th className="min-w-32 px-4 py-2 font-semibold">Factor de cobertura k</th>
-                      <th className="min-w-36 px-4 py-2 font-semibold">Incertidumbre expandida U(X)</th>
+                      <th className="min-w-28 px-4 py-2 font-semibold">Incertidumbre expandida U(X)</th>
                       <th className="px-4 py-2 font-semibold text-center">OK</th>
                     </tr>
                   </thead>
@@ -832,14 +864,21 @@ export default function FormularioReferencia({
                         const issue = saveErrors[key] ?? getCellIssue(data)
                         const status = saveStatus[key] ?? 'idle'
                         const complete = isCellComplete(data)
+                        // Solo advertencia: nunca se autocalcula el promedio ni la desviación.
+                        const warnings = issue ? [] : statsWarnings(data)
+                        const msgId = `msg-${item.id}-${group.id}`
+                        const colCount = sampleGroups.length > 1 ? 11 : 10
+                        const cellLabel = `${contaminante} nivel ${item.level_label || item.run_code}${sampleGroups.length > 1 ? ` grupo ${group.sample_group}` : ''}`
 
                         const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
                         }`
 
+                        const wideCls = inputCls.replace('w-20', 'w-28')
+
                         return (
+                          <Fragment key={key}>
                           <tr
-                            key={key}
                             className={`transition-colors hover:bg-[var(--surface-muted)]/40 ${
                               complete ? 'bg-emerald-50/20' : ''
                             } ${issue ? 'bg-rose-50/20' : ''}`}
@@ -850,74 +889,76 @@ export default function FormularioReferencia({
                             )}
                             {(['d1', 'd2', 'd3'] as const).map((field, index) => (
                               <td key={field} className="px-2 py-2">
-                                <input
-                                  type="number"
-                                  step="any"
-                                  inputMode="decimal"
+                                <DecimalInput
+                                  id={`${msgId}-${field}`}
+                                  aria-label={`${cellLabel} dato ${index + 1}`}
+                                  aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                  aria-invalid={issue ? true : undefined}
                                   value={data[field]}
                                   placeholder={index === 0 ? '' : 'NA'}
                                   disabled={soloLectura}
-                                  onChange={(e) => updateCell(key, { ...data, [field]: e.target.value })}
-                                  className={inputCls}
+                                  onValueChange={(v) => updateCell(key, { ...data, [field]: v })}
+                                  className={wideCls}
                                 />
                               </td>
                             ))}
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                inputMode="decimal"
+                              <DecimalInput
+                                id={`${msgId}-meanValue`}
+                                aria-label={`${cellLabel} promedio`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.meanValue}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, meanValue: e.target.value })}
-                                className={inputCls}
+                                onValueChange={(v) => updateCell(key, { ...data, meanValue: v })}
+                                className={wideCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
+                                id={`${msgId}-sdValue`}
+                                aria-label={`${cellLabel} desviación estándar`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.sdValue}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, sdValue: e.target.value })}
-                                className={inputCls}
+                                onValueChange={(v) => updateCell(key, { ...data, sdValue: v })}
+                                className={wideCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
+                                id={`${msgId}-ux`}
+                                aria-label={`${cellLabel} incertidumbre estándar`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.ux}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, ux: e.target.value })}
+                                onValueChange={(v) => updateCell(key, { ...data, ux: v })}
                                 className={inputCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
+                                id={`${msgId}-k`}
+                                aria-label={`${cellLabel} factor de cobertura k`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.k}
                                 disabled={soloLectura || kMode === 'grupal'}
-                                onChange={(e) => updateCell(key, { ...data, k: e.target.value })}
+                                onValueChange={(v) => updateCell(key, { ...data, k: v })}
                                 className={inputCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
+                                id={`${msgId}-uxExp`}
+                                aria-label={`${cellLabel} incertidumbre expandida`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.uxExp}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, uxExp: e.target.value })}
+                                onValueChange={(v) => updateCell(key, { ...data, uxExp: v })}
                                 className={inputCls}
                               />
                             </td>
@@ -925,12 +966,25 @@ export default function FormularioReferencia({
                               {complete ? (
                                 <span className="text-base font-semibold text-emerald-600">✓</span>
                               ) : issue ? (
-                                <span className="text-xs text-rose-500" title={issue}>✗</span>
+                                <span className="text-xs text-rose-500" aria-hidden="true">✗</span>
                               ) : (
                                 <StatusIcon status={status} />
                               )}
                             </td>
                           </tr>
+                          {(issue || warnings.length > 0) && (
+                            <tr>
+                              <td colSpan={colCount} className="px-4 pb-2 pt-0">
+                                <div id={msgId} role="status" className="text-xs">
+                                  {issue && <p className="text-rose-700">✗ {issue}</p>}
+                                  {warnings.map((w) => (
+                                    <p key={w} className="text-amber-700">⚠ {w} Revise el valor escrito; no se corrige automáticamente.</p>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          </Fragment>
                         )
                       })
                     )}
@@ -942,12 +996,32 @@ export default function FormularioReferencia({
         })}
 
         {!soloLectura && (
-          <section className={`card flex flex-wrap items-center justify-between gap-4 p-6 ${adminTarget ? 'order-2' : ''}`}>
-            <p className="text-sm text-[var(--foreground-muted)]">
-              {canSubmit
-                ? 'Todas las combinaciones PT están completas y guardadas. Puedes enviar el informe final.'
-                : `Faltan ${Math.max(totalCells - completedCells, 0)} celdas por completar o guardar.`}
-            </p>
+          <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
+            <div className="min-w-0 flex-1 text-sm text-[var(--foreground-muted)]">
+              {canSubmit ? (
+                <p>Todas las combinaciones PT están completas y guardadas. Puedes enviar el informe final.</p>
+              ) : (
+                <>
+                  <p>Faltan {pendingCells.length} celdas por completar o guardar{pendingCells.length > 0 ? ':' : '.'}</p>
+                  {pendingCells.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-2" aria-label="Celdas pendientes">
+                      {pendingCells.map(({ item, group, key }) => (
+                        <li key={key}>
+                          <button
+                            type="button"
+                            onClick={() => focusPendingCell(item.id, group.id, cells[key])}
+                            className="rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs text-amber-800 hover:bg-amber-100"
+                          >
+                            {item.contaminante} nivel {item.level_label || item.run_code}
+                            {sampleGroups.length > 1 ? ` · ${group.sample_group}` : ''}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </div>
             <button type="button" onClick={() => void handleSubmit()} className="btn-primary" disabled={!canSubmit}>
               Enviar informe final PT
             </button>
