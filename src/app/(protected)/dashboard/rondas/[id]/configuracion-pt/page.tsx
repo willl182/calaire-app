@@ -119,7 +119,8 @@ function ParticipantePTRow({ participante, canEdit }: { participante: RondaParti
                 type="number"
                 name="replicate_code"
                 defaultValue={participante.replicate_code ?? ''}
-                placeholder="1"
+                placeholder="Sin asignar"
+                title="Asignado automáticamente al crear el cupo (referencia = 1, participantes 2, 3, …). Puede editarse."
                 min="1"
                 className="w-20 rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--foreground)]"
               />
