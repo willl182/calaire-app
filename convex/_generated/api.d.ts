@@ -10,6 +10,7 @@
 
 import type * as _lib_sgc_catalog from "../_lib/sgc/catalog.js";
 import type * as _lib_sgc_checklist from "../_lib/sgc/checklist.js";
+import type * as _lib_sgc_expediente from "../_lib/sgc/expediente.js";
 import type * as access from "../access.js";
 import type * as agent_auth from "../agent/auth.js";
 import type * as agent_definitions from "../agent/definitions.js";
@@ -55,6 +56,7 @@ import type * as sgc_comunicaciones from "../sgc/comunicaciones.js";
 import type * as sgc_documentos from "../sgc/documentos.js";
 import type * as sgc_drive from "../sgc/drive.js";
 import type * as sgc_evidencias from "../sgc/evidencias.js";
+import type * as sgc_expediente from "../sgc/expediente.js";
 import type * as sgc_hitos from "../sgc/hitos.js";
 import type * as sgc_index from "../sgc/index.js";
 import type * as sgc_instrumentosRonda from "../sgc/instrumentosRonda.js";
@@ -76,6 +78,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   "_lib/sgc/catalog": typeof _lib_sgc_catalog;
   "_lib/sgc/checklist": typeof _lib_sgc_checklist;
+  "_lib/sgc/expediente": typeof _lib_sgc_expediente;
   access: typeof access;
   "agent/auth": typeof agent_auth;
   "agent/definitions": typeof agent_definitions;
@@ -121,6 +124,7 @@ declare const fullApi: ApiFromModules<{
   "sgc/documentos": typeof sgc_documentos;
   "sgc/drive": typeof sgc_drive;
   "sgc/evidencias": typeof sgc_evidencias;
+  "sgc/expediente": typeof sgc_expediente;
   "sgc/hitos": typeof sgc_hitos;
   "sgc/index": typeof sgc_index;
   "sgc/instrumentosRonda": typeof sgc_instrumentosRonda;
