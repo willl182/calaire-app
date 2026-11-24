@@ -80,6 +80,14 @@ export function AccionPrincipal({ item, recurso, rondaId, rondaCodigo, rondaNomb
     return <Link className={item.estado === 'completo' ? clsSec : cls} href={item.destino}>{propia}</Link>
   }
 
+  if (item.codigo === 'F-PSEA-06') {
+    return (
+      <Link className={item.estado === 'completo' ? clsSec : cls} href={`/dashboard/rondas/${rondaId}/sgc/f-psea-06`}>
+        {item.estado === 'completo' ? 'Ver registro' : 'Diligenciar en la app'}
+      </Link>
+    )
+  }
+
   if (REGISTROS_NATIVOS.has(item.codigo)) {
     if (!detalleHref) return null
     return <Link className={item.estado === 'completo' ? clsSec : cls} href={detalleHref}>{item.estado === 'completo' ? 'Ver registro' : 'Diligenciar en la app'}</Link>

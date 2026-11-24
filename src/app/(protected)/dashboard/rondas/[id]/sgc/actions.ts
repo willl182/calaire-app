@@ -4,6 +4,7 @@ import { revalidatePath } from 'next/cache'
 import { redirect, unstable_rethrow } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { SGC_PLAN_BLOQUES, type SgcPlanBloques } from '@/server/sgc/catalog'
+import { ddMmAaaaAIso } from './fechas'
 import { automatizarDriveRondaSgc } from '@/server/sgc/drive-google'
 import {
   actualizarEstadoDriveRecurso,
@@ -49,10 +50,15 @@ function pageUrl(rondaId: string) {
   return `/dashboard/rondas/${rondaId}/sgc`
 }
 
-function redirectWith(rondaId: string, key: 'success' | 'error', message: string, formatoFocus?: string): never {
+function redirectWith(rondaId: string, key: 'success' | 'error', message: string, formatoFocus?: string, subpagina?: string): never {
   const params = new URLSearchParams({ [key]: message })
   if (formatoFocus) params.set('formato', formatoFocus)
-  redirect(`${pageUrl(rondaId)}?${params.toString()}`)
+  redirect(`${pageUrl(rondaId)}${subpagina ? `/${subpagina}` : ''}?${params.toString()}`)
+}
+
+/** Subpágina de retorno permitida (p. ej. el registro F-PSEA-06 a pantalla completa). */
+function parseVolver(formData: FormData) {
+  return parseText(formData, 'volver') === 'f-psea-06' ? 'f-psea-06' : undefined
 }
 
 function parseText(formData: FormData, key: string) {
@@ -358,7 +364,10 @@ export async function retirarDriveRecursoAction(formData: FormData) {
 export async function guardarPlanRondaAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
+  const volver = parseVolver(formData)
   try {
+    const fechaPlan = ddMmAaaaAIso(parseText(formData, 'fecha_plan'))
+    if (fechaPlan === null) throw new Error('Fecha del plan inválida: use dd/mm/aaaa.')
     const bloques: SgcPlanBloques = {}
     for (const { key } of SGC_PLAN_BLOQUES) {
       bloques[key] = parseText(formData, `bloque_${key}`)
@@ -368,26 +377,29 @@ export async function guardarPlanRondaAction(formData: FormData) {
       bloques,
       {
         responsable: parseText(formData, 'responsable'),
-        fecha_plan: parseText(formData, 'fecha_plan'),
+        fecha_plan: fechaPlan,
       },
       parseText(formData, 'motivo_revision') || undefined
     )
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Plan de ronda guardado.')
+    redirectWith(rondaId, 'success', 'Plan de ronda guardado.', undefined, volver)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible guardar el plan.')
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible guardar el plan.', undefined, volver)
   }
 }
 
 export async function finalizarPlanRondaAction(formData: FormData) {
   await requireAdmin()
   const rondaId = parseText(formData, 'ronda_id')
+  const volver = parseVolver(formData)
   try {
     await finalizarPlanRonda(rondaId)
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', 'Plan de ronda finalizado.')
+    redirectWith(rondaId, 'success', 'Registro F-PSEA-06 finalizado.', undefined, volver)
   } catch (error) {
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible finalizar el plan.')
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible finalizar el plan.', undefined, volver)
   }
 }
 
