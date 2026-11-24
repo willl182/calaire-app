@@ -4,6 +4,29 @@ import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import { safeConvexCall, safeConvexCallWithStatus } from '@/lib/convex-fallback'
 import { requireAuth } from '@/server/auth'
+import { MEMBER_SPECIAL_ROLES, PENDING_PARTICIPANTE_PREFIX } from './constants'
+import { derivarEstadoOperativo } from './estados'
+import type {
+  Contaminante,
+  Envio,
+  EnvioPT,
+  EnvioPTConMetadatos,
+  EnvioPTWithRelations,
+  EstadoRonda,
+  ParticipantePerfil,
+  ParticipanteRondaResumen,
+  PtScoreImportRow,
+  ResultadoParticipante,
+  ResultadoParticipantePT,
+  Ronda,
+  RondaContaminante,
+  RondaMetricas,
+  RondaParticipante,
+  RondaParticipantePT,
+  RondaPTItem,
+  RondaPTItemInput,
+  RondaPTSampleGroup,
+} from './types'
 
 // F19: las funciones Convex de rondas/pt ahora exigen identidad
 // (requireIdentity/requireAdminIdentity/requireParticipantOrAdmin...). El cliente
@@ -33,355 +56,10 @@ async function fetchMutation<Mutation extends FunctionReference<'mutation'>>(
   return rawFetchMutation(mutation, args, { token: await rondasToken() })
 }
 
-export const CONTAMINANTES = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
-export const REPLICAS_OPTIONS = [2, 3] as const
-export const PENDING_PARTICIPANTE_PREFIX = 'pendiente:'
-export const MEMBER_SPECIAL_ROLES = ['member_special', 'member-special', 'member special'] as const
-
-export type ParticipantePerfil = 'member' | 'member_special'
-
-export type RondaPTItem = {
-  id: string
-  ronda_id: string
-  contaminante: Contaminante
-  run_code: string
-  level_label: string
-  sort_order: number
-  created_at: string
-}
-
-export function isInitialConcentrationLevel(item: RondaPTItem, ptItems: RondaPTItem[]): boolean {
-  const sameContaminante = ptItems.filter((candidate) => candidate.contaminante === item.contaminante)
-  if (sameContaminante.length === 0) return false
-  const lowestSortOrder = Math.min(...sameContaminante.map((candidate) => candidate.sort_order))
-  const normalizedLevel = item.level_label.trim().toLowerCase().replace(/,/g, '.')
-  const numericMatch = normalizedLevel.match(/^[+-]?(\d+\.?\d*|\.\d+)/)
-  const numericLevel = numericMatch ? parseFloat(numericMatch[0]) : NaN
-
-  return item.sort_order === lowestSortOrder || normalizedLevel === 'cero' || numericLevel === 0
-}
-
-export function getRequiredPTReplicateCount(item: RondaPTItem, ptItems: RondaPTItem[]): 1 | 3 {
-  return isInitialConcentrationLevel(item, ptItems) ? 1 : 3
-}
-
-export type RondaPTItemInput = {
-  runCode: string
-  levelLabel: string
-  sortOrder: number
-}
-
-export type RondaPTSampleGroup = {
-  id: string
-  ronda_id: string
-  sample_group: string
-  sort_order: number
-  created_at: string
-}
-
-export type RondaParticipantePT = {
-  id: string
-  ronda_id: string
-  workos_user_id: string
-  email: string
-  invitado_at: string
-  participant_profile: ParticipantePerfil
-  participant_code: string | null
-  replicate_code: number | null
-  claimed_at: string | null
-}
-
-export type EnvioPT = {
-  id: string
-  ronda_id: string
-  ronda_participante_id: string
-  pt_item_id: string
-  sample_group_id: string
-  d1: number | null
-  d2: number | null
-  d3: number | null
-  mean_value: number
-  sd_value: number
-  ux: number | null
-  k: number | null
-  ux_exp: number | null
-  draft_saved_at: string
-  final_submitted_at: string | null
-  updated_at: string
-}
-
-export type EnvioPTConMetadatos = {
-  pollutant: string
-  run: string
-  level: string
-  participant_id: string
-  replicate: number
-  sample_group: string
-  d1: number | null
-  d2: number | null
-  d3: number | null
-  mean_value: number
-  sd_value: number
-  ux: number | null
-  k: number | null
-  ux_exp: number | null
-}
-
-export type Envio = {
-  id: string
-  ronda_id: string
-  workos_user_id: string
-  contaminante: Contaminante
-  nivel: number
-  valores: number[]
-  promedio: number | null
-  incertidumbre: number | null
-  submitted_at: string
-  updated_at: string
-}
-
-export type RondaParticipante = {
-  id: string
-  ronda_id: string
-  workos_user_id: string
-  email: string
-  invitado_at: string
-  participant_profile: ParticipantePerfil
-  envios_count: number
-  estado: 'pendiente' | 'asignado'
-  slot_token: string | null
-}
-
-export type ParticipanteRondaResumen = {
-  ronda_participante_id: string
-  ronda_id: string
-  email: string
-  workos_user_id: string | null
-  participant_profile: ParticipantePerfil
-  participant_code: string | null
-  replicate_code: number | null
-  estado: 'pendiente' | 'reclamado'
-  slot_token: string | null
-  claimed_at: string | null
-  invitado_at: string
-  ficha_estado: 'no_iniciada' | 'borrador' | 'enviado'
-  envios_pt_count: number
-  tiene_envio_final: boolean
-}
-
-export type FiltroParticipante =
-  | 'todos'
-  | 'enlace_pendiente'   // estado === 'pendiente'
-  | 'ficha_pendiente'    // estado === 'reclamado' && ficha_estado !== 'enviado'
-  | 'ficha_enviada'      // ficha_estado === 'enviado'
-  | 'con_envios'         // envios_pt_count > 0
-  | 'sin_envios'         // estado === 'reclamado' && envios_pt_count === 0
-
-export function filtrarParticipantes(
-  participantes: ParticipanteRondaResumen[],
-  filtro: FiltroParticipante
-): ParticipanteRondaResumen[] {
-  switch (filtro) {
-    case 'enlace_pendiente':
-      return participantes.filter((p) => p.estado === 'pendiente')
-    case 'ficha_pendiente':
-      return participantes.filter(
-        (p) => p.estado === 'reclamado' && p.ficha_estado !== 'enviado'
-      )
-    case 'ficha_enviada':
-      return participantes.filter((p) => p.ficha_estado === 'enviado')
-    case 'con_envios':
-      return participantes.filter((p) => p.envios_pt_count > 0)
-    case 'sin_envios':
-      return participantes.filter(
-        (p) => p.estado === 'reclamado' && p.envios_pt_count === 0
-      )
-    default:
-      return participantes
-  }
-}
-
-export type ResultadoParticipante = {
-  workos_user_id: string
-  email: string
-  completados: number
-  total_esperado: number
-  porcentaje_completitud: number
-  enviados_at: string | null
-  envios: Envio[]
-}
-
-export type ResultadoPTCelda = {
-  pt_item_id: string
-  sample_group_id: string
-  mean_value: number
-  sd_value: number
-  draft_saved_at: string
-  final_submitted_at: string | null
-  updated_at: string
-}
-
-export type ResultadoParticipantePT = {
-  participante_id: string
-  workos_user_id: string
-  email: string
-  participant_code: string | null
-  replicate_code: number | null
-  completados: number
-  total_esperado: number
-  porcentaje_completitud: number
-  enviados_at: string | null
-  celdas: ResultadoPTCelda[]
-}
-
-export type Contaminante = (typeof CONTAMINANTES)[number]
-export type EstadoRonda = 'borrador' | 'activa' | 'documentacion_pendiente' | 'cerrada'
-
-export type PtScoreImportRow = {
-  participantCode: string; contaminante: string; runCode: string; levelLabel: string; unidad: string; metodo: string
-  valorAsignado: number; incertidumbreAsignada: number | null; sigmaPt: number | null; valorParticipante: number
-  uParticipante: number | null; UParticipante: number | null; z: number | null; zPrima: number | null; zeta: number | null; en: number | null
-  clasificacion: 'satisfactorio' | 'no_satisfactorio'
-}
-
-export type RondaContaminante = {
-  id: string
-  ronda_id: string
-  contaminante: Contaminante
-  niveles: number
-  replicas: 2 | 3
-}
-
-export type Ronda = {
-  id: string
-  codigo: string
-  nombre: string
-  estado: EstadoRonda
-  created_at: string
-  contaminantes: RondaContaminante[]
-  participantes_planeados?: number
-  participantes_asignados?: number
-}
-
-export type EnvioPTWithRelations = EnvioPT & {
-  pt_item: RondaPTItem
-  sample_group: RondaPTSampleGroup
-  participante: RondaParticipantePT
-}
-
-// ---------------------------------------------------------------------------
-// Pure helpers — unchanged
-// ---------------------------------------------------------------------------
-
 export function isMemberSpecialRole(role: string | null | undefined): boolean {
   if (!role) return false
   return MEMBER_SPECIAL_ROLES.includes(role.toLowerCase() as (typeof MEMBER_SPECIAL_ROLES)[number])
 }
-
-export function buildResultadosCsv(resultados: ResultadoParticipante[]): string {
-  const header = [
-    'participant_id',
-    'participant_email',
-    'pollutant',
-    'level',
-    'mean_value',
-    'uncertainty',
-    'submitted_at',
-  ]
-
-  const rows = resultados.flatMap((resultado) =>
-    resultado.envios.map((envio) => [
-      resultado.workos_user_id,
-      resultado.email,
-      envio.contaminante.toLowerCase(),
-      String(envio.nivel),
-      ...envio.valores.map((value) => String(value)),
-      envio.promedio != null ? String(envio.promedio) : '',
-      envio.incertidumbre != null ? String(envio.incertidumbre) : '',
-      envio.submitted_at,
-    ])
-  )
-
-  const maxReplicas = Math.max(0, ...resultados.flatMap((r) => r.envios.map((e) => e.valores.length)))
-  const replicaHeaders = Array.from({ length: maxReplicas }, (_, index) => `replicate_${index + 1}`)
-  const csvRows = [[...header.slice(0, 4), ...replicaHeaders, ...header.slice(4)]]
-
-  for (const row of rows) {
-    const base = row.slice(0, 4)
-    const replicas = row.slice(4, row.length - 3)
-    const tail = row.slice(row.length - 3)
-    const paddedReplicas = [...replicas, ...Array(Math.max(0, maxReplicas - replicas.length)).fill('')]
-    csvRows.push([...base, ...paddedReplicas, ...tail])
-  }
-
-  return csvRows
-    .map((row) =>
-      row
-        .map((value) => {
-          const normalized = String(value ?? '')
-          return /[",\n]/.test(normalized)
-            ? `"${normalized.replace(/"/g, '""')}"`
-            : normalized
-        })
-        .join(',')
-    )
-    .join('\n')
-}
-
-export function buildPTCsv(envios: EnvioPTConMetadatos[]): string {
-  const header = [
-    'pollutant',
-    'run',
-    'level',
-    'participant_id',
-    'replicate',
-    'sample_group',
-    'd1',
-    'd2',
-    'd3',
-    'mean_value',
-    'sd_value',
-    'ux',
-    'k',
-    'ux_exp',
-  ]
-
-  const rows = envios.map((envio) => [
-    envio.pollutant,
-    envio.run,
-    envio.level,
-    envio.participant_id,
-    String(envio.replicate),
-    envio.sample_group,
-    envio.d1 != null ? String(envio.d1) : '',
-    envio.d2 != null ? String(envio.d2) : '',
-    envio.d3 != null ? String(envio.d3) : '',
-    String(envio.mean_value),
-    String(envio.sd_value),
-    envio.ux != null ? String(envio.ux) : '',
-    envio.k != null ? String(envio.k) : '',
-    envio.ux_exp != null ? String(envio.ux_exp) : '',
-  ])
-
-  const csvRows = [header, ...rows]
-
-  return csvRows
-    .map((row) =>
-      row
-        .map((value) => {
-          const normalized = String(value ?? '')
-          return /[",\n]/.test(normalized)
-            ? `"${normalized.replace(/"/g, '""')}"`
-            : normalized
-        })
-        .join(',')
-    )
-    .join('\n')
-}
-
-// ---------------------------------------------------------------------------
-// Internal field-mapping helpers
-// ---------------------------------------------------------------------------
 
 function msToISO(ms: number): string {
   return new Date(ms).toISOString()
@@ -1554,67 +1232,9 @@ export async function listAllEnviosPT(rondaId: string): Promise<EnvioPTWithRelat
 }
 
 // ---------------------------------------------------------------------------
-// Estado operativo — types + pure derivation + async loader
+// Estado operativo — async loader (derivación pura en ./estados)
 // ---------------------------------------------------------------------------
 
-export type EstadoOperativo =
-  | 'preparar_ronda'
-  | 'invitar_participantes'
-  | 'esperando_fichas'
-  | 'recibiendo_resultados'
-  | 'revisar_incompletos'
-  | 'lista_para_exportar'
-  | 'cerrada'
-
-export type RondaMetricas = {
-  cupos_totales: number
-  cupos_reclamados: number
-  fichas_enviadas: number
-  fichas_pendientes: number       // reclamados sin ficha enviada
-  envios_finales: number          // participantes con enviados_at !== null
-  envios_esperados: number        // = cupos_reclamados
-  pt_configurado: boolean         // ptItems.length > 0; sample group defaults to A
-  estado_operativo: EstadoOperativo
-  accion_recomendada: string
-}
-
-/**
- * Pure derivation of operative status from ronda data.
- * Priority is descending — first matching condition wins.
- * Reusable in the global dashboard (Fase 1) and ronda summary (Fase 2).
- */
-export function derivarEstadoOperativo(
-  ronda: Pick<Ronda, 'estado'>,
-  datos: Omit<RondaMetricas, 'estado_operativo' | 'accion_recomendada'>
-): Pick<RondaMetricas, 'estado_operativo' | 'accion_recomendada'> {
-  if (ronda.estado === 'cerrada') {
-    return { estado_operativo: 'cerrada', accion_recomendada: 'La ronda está cerrada.' }
-  }
-  if (!datos.pt_configurado) {
-    return { estado_operativo: 'preparar_ronda', accion_recomendada: 'Configure los niveles PT.' }
-  }
-  if (datos.cupos_totales === 0) {
-    return { estado_operativo: 'preparar_ronda', accion_recomendada: 'Agregue participantes antes de activar la ronda.' }
-  }
-  if (datos.cupos_reclamados === 0) {
-    return { estado_operativo: 'invitar_participantes', accion_recomendada: 'Comparta los enlaces de invitación. Ningún cupo ha sido reclamado.' }
-  }
-  if (datos.fichas_pendientes > 0) {
-    return { estado_operativo: 'esperando_fichas', accion_recomendada: 'Hay fichas pendientes antes de recibir resultados.' }
-  }
-  if (datos.envios_finales === 0) {
-    return { estado_operativo: 'recibiendo_resultados', accion_recomendada: 'Esperando envíos finales de los participantes.' }
-  }
-  if (datos.envios_finales > 0 && datos.envios_finales < datos.envios_esperados) {
-    return { estado_operativo: 'revisar_incompletos', accion_recomendada: 'Hay participantes que no han enviado resultados.' }
-  }
-  return { estado_operativo: 'lista_para_exportar', accion_recomendada: 'Todos los envíos están completos. Puede exportar el CSV PT.' }
-}
-
-/**
- * Loads all data required for metrics and derives the operative state.
- * Uses 4 existing queries in parallel — no new Convex queries needed.
- */
 export async function getRondaMetricasCompletas(
   rondaId: string,
   ronda: Pick<Ronda, 'estado'>
