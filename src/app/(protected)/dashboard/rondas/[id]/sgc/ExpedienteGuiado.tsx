@@ -42,6 +42,8 @@ type Props = {
   avance: SgcAvanceExpediente
   recursos: SgcDriveRecurso[]
   rondaId: string
+  rondaCodigo: string
+  rondaNombre: string
   driveGoogleReady: boolean
   carpetaRondaCreada: boolean
 }
@@ -82,6 +84,8 @@ function DocumentoFila({
   recurso,
   carpetaCodigo,
   rondaId,
+  rondaCodigo,
+  rondaNombre,
   driveGoogleReady,
   carpetaRondaCreada,
 }: {
@@ -90,6 +94,8 @@ function DocumentoFila({
   recurso: SgcDriveRecurso | undefined
   carpetaCodigo: string | null
   rondaId: string
+  rondaCodigo: string
+  rondaNombre: string
   driveGoogleReady: boolean
   carpetaRondaCreada: boolean
 }) {
@@ -131,6 +137,9 @@ function DocumentoFila({
             item={item}
             recurso={recurso}
             rondaId={rondaId}
+            rondaCodigo={rondaCodigo}
+            rondaNombre={rondaNombre}
+            detalleHref={detalleHref}
             driveGoogleReady={driveGoogleReady}
             carpetaRondaCreada={carpetaRondaCreada}
           />
@@ -146,7 +155,7 @@ function DocumentoFila({
 }
 
 /** Vista principal del expediente: etapas en orden de proceso, documentos numerados por flujo. */
-export function ExpedienteGuiado({ avance, recursos, rondaId, driveGoogleReady, carpetaRondaCreada }: Props) {
+export function ExpedienteGuiado({ avance, recursos, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, carpetaRondaCreada }: Props) {
   const recursoPorId = new Map(recursos.map((r) => [r._id, r]))
   const recursoPorCodigo = new Map(recursos.filter((r) => r.tipo !== 'carpeta').map((r) => [r.codigo.toUpperCase(), r]))
   const etapas = SGC_RONDA_ETAPAS.map((etapa) => {
@@ -173,6 +182,8 @@ export function ExpedienteGuiado({ avance, recursos, rondaId, driveGoogleReady, 
       recurso={recurso}
       carpetaCodigo={carpeta?.codigo ?? null}
       rondaId={rondaId}
+      rondaCodigo={rondaCodigo}
+      rondaNombre={rondaNombre}
       driveGoogleReady={driveGoogleReady}
       carpetaRondaCreada={carpetaRondaCreada}
     />

@@ -159,6 +159,8 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           avance={avance}
           recursos={drive.recursos}
           rondaId={id}
+          rondaCodigo={ronda.codigo}
+          rondaNombre={ronda.nombre}
           driveGoogleReady={driveGoogleStatus.ready}
           carpetaRondaCreada={Boolean(drive.root?.driveFolderId)}
         />
