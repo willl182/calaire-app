@@ -104,7 +104,36 @@ function AreaLink({
   )
 }
 
-function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
+function UserMenu({ userEmail }: { userEmail: string }) {
+  return (
+    <details className="group relative">
+      <summary
+        className="flex h-9 cursor-pointer list-none items-center gap-2 rounded-md px-2 text-sm font-medium text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)] [&::-webkit-details-marker]:hidden"
+        aria-label="Menú de usuario"
+      >
+        <span
+          className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[var(--pt-primary)] text-xs font-bold uppercase text-[var(--foreground)]"
+          aria-hidden="true"
+        >
+          {userEmail.charAt(0) || '?'}
+        </span>
+        <span className="hidden max-w-[14rem] truncate lg:inline">{userEmail}</span>
+        <span className="text-[10px] opacity-60" aria-hidden="true">▾</span>
+      </summary>
+      <div className="absolute right-0 z-50 mt-2 w-64 rounded-md border border-[var(--border-soft)] bg-[var(--surface-panel)] p-3 shadow-lg">
+        <p className="truncate text-sm font-medium text-[var(--foreground)]">{userEmail}</p>
+        <p className="text-xs text-[var(--foreground-muted)]">Coordinador · Laboratorio CALAIRE</p>
+        <form action={signOutAction} className="mt-3">
+          <button type="submit" className="btn-outline w-full">
+            Cerrar sesión
+          </button>
+        </form>
+      </div>
+    </details>
+  )
+}
+
+function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: boolean; userEmail: string }) {
   const pathname   = usePathname()
   const isSgcDashboard = pathname.startsWith('/dashboard/sgc')
   const navItems = !canViewSgcMaestro ? [] : isSgcDashboard ? SGC_NAV_ITEMS : GESTION_NAV_ITEMS
@@ -159,44 +188,21 @@ function TopNavInner({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
             <NavLink key={item.label} item={item} isActive={isActive(item)} />
           ))}
         </nav>
+
+        <div className="flex shrink-0 items-center">
+          <UserMenu userEmail={userEmail} />
+        </div>
       </div>
     </header>
   )
 
-  return (
-    <>
-      {header}
-      <div className="border-b border-[var(--border-soft)] bg-[var(--surface-panel)]">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-6 py-4">
-          <div className="flex min-w-0 items-center gap-5">
-            <LogoUnal height={56} />
-            <div className="min-w-0 space-y-0.5">
-              <h1 className="text-xl font-bold text-[var(--foreground)]">
-                CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
-              </h1>
-              <p className="text-base font-medium text-[var(--pt-primary-dark)]">
-                Gases Contaminantes Criterio
-              </p>
-              <p className="text-sm text-[var(--foreground-muted)]">
-                Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
-              </p>
-            </div>
-          </div>
-          <form action={signOutAction} className="shrink-0">
-            <button type="submit" className="btn-outline">
-              Cerrar sesión
-            </button>
-          </form>
-        </div>
-      </div>
-    </>
-  )
+  return header
 }
 
-export function Sidebar({ canViewSgcMaestro }: { canViewSgcMaestro: boolean }) {
+export function Sidebar({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: boolean; userEmail: string }) {
   return (
     <Suspense>
-      <TopNavInner canViewSgcMaestro={canViewSgcMaestro} />
+      <TopNavInner canViewSgcMaestro={canViewSgcMaestro} userEmail={userEmail} />
     </Suspense>
   )
 }

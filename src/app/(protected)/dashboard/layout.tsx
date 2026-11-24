@@ -14,7 +14,7 @@ export default async function DashboardLayout({ children }: { children: ReactNod
 
   return (
     <div className="flex flex-col min-h-[100%] bg-[var(--background)]">
-      <Sidebar canViewSgcMaestro={canViewSgcMaestro(auth)} />
+      <Sidebar canViewSgcMaestro={canViewSgcMaestro(auth)} userEmail={auth.user?.email ?? ''} />
       <div className="flex-1 min-w-0">
         {children}
       </div>
