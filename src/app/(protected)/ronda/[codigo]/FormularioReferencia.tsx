@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { Fragment, useEffect, useRef, useState } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
 import { DecimalInput } from '@/components/DecimalInput'
-import { isValidDecimal, toDecimal } from '@/lib/decimal'
+import { isValidDecimal, statsWarnings, toDecimal } from '@/lib/decimal'
 import {
   CONTAMINANTES,
   type EnvioPT,
@@ -832,6 +832,10 @@ export default function FormularioReferencia({
                         const issue = saveErrors[key] ?? getCellIssue(data)
                         const status = saveStatus[key] ?? 'idle'
                         const complete = isCellComplete(data)
+                        // Solo advertencia: nunca se autocalcula el promedio ni la desviación.
+                        const warnings = issue ? [] : statsWarnings(data)
+                        const msgId = `msg-${item.id}-${group.id}`
+                        const colCount = sampleGroups.length > 1 ? 11 : 10
 
                         const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
@@ -840,8 +844,8 @@ export default function FormularioReferencia({
                         const wideCls = inputCls.replace('w-20', 'w-28')
 
                         return (
+                          <Fragment key={key}>
                           <tr
-                            key={key}
                             className={`transition-colors hover:bg-[var(--surface-muted)]/40 ${
                               complete ? 'bg-emerald-50/20' : ''
                             } ${issue ? 'bg-rose-50/20' : ''}`}
@@ -911,6 +915,19 @@ export default function FormularioReferencia({
                               )}
                             </td>
                           </tr>
+                          {(issue || warnings.length > 0) && (
+                            <tr>
+                              <td colSpan={colCount} className="px-4 pb-2 pt-0">
+                                <div id={msgId} role="status" className="text-xs">
+                                  {issue && <p className="text-rose-700">✗ {issue}</p>}
+                                  {warnings.map((w) => (
+                                    <p key={w} className="text-amber-700">⚠ {w} Revise el valor escrito; no se corrige automáticamente.</p>
+                                  ))}
+                                </div>
+                              </td>
+                            </tr>
+                          )}
+                          </Fragment>
                         )
                       })
                     )}
