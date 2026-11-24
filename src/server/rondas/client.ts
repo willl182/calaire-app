@@ -1,9 +1,7 @@
-import { fetchMutation as rawFetchMutation, fetchQuery as rawFetchQuery } from 'convex/nextjs'
-import type { FunctionArgs, FunctionReference, FunctionReturnType } from 'convex/server'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import { safeConvexCall, safeConvexCallWithStatus } from '@/lib/convex-fallback'
-import { requireAuth } from '@/server/auth'
+import { authedMutation as fetchMutation, authedQuery as fetchQuery, dataOf } from '@/server/convex'
 import { MEMBER_SPECIAL_ROLES, PENDING_PARTICIPANTE_PREFIX } from './constants'
 import { derivarEstadoOperativo } from './estados'
 import type {
@@ -17,10 +15,8 @@ import type {
   ParticipanteRondaResumen,
   PtScoreImportRow,
   ResultadoParticipante,
-  ResultadoParticipantePT,
   Ronda,
   RondaContaminante,
-  RondaMetricas,
   RondaParticipante,
   RondaParticipantePT,
   RondaPTItem,
@@ -28,33 +24,6 @@ import type {
   RondaPTSampleGroup,
 } from './types'
 
-// F19: las funciones Convex de rondas/pt ahora exigen identidad
-// (requireIdentity/requireAdminIdentity/requireParticipantOrAdmin...). El cliente
-// de servidor debe reenviar el accessToken de la sesion como tercer argumento de
-// fetchQuery/fetchMutation, igual que src/server/sgc/index.ts (sgcToken). Sin el
-// token, el backend rechaza al usuario autenticado ("Autenticacion requerida").
-async function rondasToken(): Promise<string> {
-  const auth = await requireAuth()
-  const token = auth.accessToken
-  if (!token) {
-    throw new Error('No hay sesion activa para operar rondas.')
-  }
-  return token
-}
-
-async function fetchQuery<Query extends FunctionReference<'query'>>(
-  query: Query,
-  args: FunctionArgs<Query>,
-): Promise<FunctionReturnType<Query>> {
-  return rawFetchQuery(query, args, { token: await rondasToken() })
-}
-
-async function fetchMutation<Mutation extends FunctionReference<'mutation'>>(
-  mutation: Mutation,
-  args: FunctionArgs<Mutation>,
-): Promise<FunctionReturnType<Mutation>> {
-  return rawFetchMutation(mutation, args, { token: await rondasToken() })
-}
 
 export function isMemberSpecialRole(role: string | null | undefined): boolean {
   if (!role) return false
@@ -211,9 +180,7 @@ function mapEnvioPTDoc(e: any): EnvioPT {
 // Rondas — read
 // ---------------------------------------------------------------------------
 
-export async function getRonda(id: string): Promise<Ronda | null> {
-  return (await getRondaWithStatus(id)).data
-}
+export const getRonda = dataOf(getRondaWithStatus)
 
 export async function previewPtScoreImport(rondaId: string, rows: PtScoreImportRow[]) {
   return fetchQuery(api.pt.scores.previewImport, { rondaId: rondaId as Id<'rondas'>, rows })
@@ -335,9 +302,7 @@ export async function getRondaWithStatus(id: string) {
   }
 }
 
-export async function getRondaByCodigo(codigo: string): Promise<Ronda | null> {
-  return (await getRondaByCodigoWithStatus(codigo)).data
-}
+export const getRondaByCodigo = dataOf(getRondaByCodigoWithStatus)
 
 export async function getRondaByCodigoWithStatus(codigo: string) {
   const result = await safeConvexCallWithStatus(
@@ -351,9 +316,7 @@ export async function getRondaByCodigoWithStatus(codigo: string) {
   }
 }
 
-export async function listRondas(): Promise<Ronda[]> {
-  return (await listRondasWithStatus()).data
-}
+export const listRondas = dataOf(listRondasWithStatus)
 
 export async function listRondasWithStatus() {
   const result = await safeConvexCallWithStatus(
@@ -377,11 +340,7 @@ export async function listParticipantes(rondaId: string): Promise<RondaParticipa
   return rows.map(mapParticipanteDoc)
 }
 
-export async function listParticipantesRondaResumen(
-  rondaId: string
-): Promise<ParticipanteRondaResumen[]> {
-  return (await listParticipantesRondaResumenWithStatus(rondaId)).data
-}
+export const listParticipantesRondaResumen = dataOf(listParticipantesRondaResumenWithStatus)
 
 export async function listParticipantesRondaResumenWithStatus(
   rondaId: string
@@ -396,9 +355,7 @@ export async function listParticipantesRondaResumenWithStatus(
   return { data: result.data.map(mapParticipanteRondaResumenDoc), offline: result.offline }
 }
 
-export async function listRondasParticipante(userId: string): Promise<RondaParticipanteAsignada[]> {
-  return (await listRondasParticipanteWithStatus(userId)).data
-}
+export const listRondasParticipante = dataOf(listRondasParticipanteWithStatus)
 
 export async function listRondasParticipanteWithStatus(userId: string) {
   const result = await safeConvexCallWithStatus(
@@ -421,9 +378,7 @@ export async function listRondasParticipanteWithStatus(userId: string) {
   }
 }
 
-export async function listAllParticipantes(): Promise<ParticipanteGlobal[]> {
-  return (await listAllParticipantesWithStatus()).data
-}
+export const listAllParticipantes = dataOf(listAllParticipantesWithStatus)
 
 export async function listAllParticipantesWithStatus() {
   const result = await safeConvexCallWithStatus(
@@ -539,9 +494,7 @@ function normalizeOptionalId(value: unknown): string | null {
   return typeof value === 'string' && value !== '' && value !== 'undefined' ? value : null
 }
 
-export async function isInvitado(rondaId: string): Promise<boolean> {
-  return (await isInvitadoWithStatus(rondaId)).data
-}
+export const isInvitado = dataOf(isInvitadoWithStatus)
 
 export async function isInvitadoWithStatus(rondaId: string) {
   return safeConvexCallWithStatus(
@@ -822,9 +775,7 @@ export type ParticipanteGlobal = {
 // PT Items & Sample Groups — read
 // ---------------------------------------------------------------------------
 
-export async function listPTItems(rondaId: string): Promise<RondaPTItem[]> {
-  return (await listPTItemsWithStatus(rondaId)).data
-}
+export const listPTItems = dataOf(listPTItemsWithStatus)
 
 export async function listPTItemsWithStatus(rondaId: string) {
   const result = await safeConvexCallWithStatus(
@@ -835,9 +786,7 @@ export async function listPTItemsWithStatus(rondaId: string) {
   return { data: result.data.map(mapPTItemDoc), offline: result.offline }
 }
 
-export async function listPTSampleGroups(rondaId: string): Promise<RondaPTSampleGroup[]> {
-  return (await listPTSampleGroupsWithStatus(rondaId)).data
-}
+export const listPTSampleGroups = dataOf(listPTSampleGroupsWithStatus)
 
 export async function listPTSampleGroupsWithStatus(rondaId: string) {
   const result = await safeConvexCallWithStatus(
@@ -852,11 +801,7 @@ export async function listPTSampleGroupsWithStatus(rondaId: string) {
 // Participantes PT — read
 // ---------------------------------------------------------------------------
 
-export async function getRondaParticipantePT(
-  rondaId: string
-): Promise<RondaParticipantePT | null> {
-  return (await getRondaParticipantePTWithStatus(rondaId)).data
-}
+export const getRondaParticipantePT = dataOf(getRondaParticipantePTWithStatus)
 
 export async function getRondaParticipantePTWithStatus(
   rondaId: string
@@ -887,9 +832,7 @@ export async function listParticipantesPT(rondaId: string): Promise<RondaPartici
 // Envios PT — read
 // ---------------------------------------------------------------------------
 
-export async function listEnviosPT(rondaId: string): Promise<EnvioPT[]> {
-  return (await listEnviosPTWithStatus(rondaId)).data
-}
+export const listEnviosPT = dataOf(listEnviosPTWithStatus)
 
 export async function listEnviosPTWithStatus(rondaId: string) {
   const result = await safeConvexCallWithStatus(
@@ -931,11 +874,7 @@ export async function getEnvioPT(
   return mapEnvioPTDoc(row)
 }
 
-export async function getEstadoEnvioPTParticipante(
-  rondaId: string
-): Promise<EstadoEnvioParticipante> {
-  return (await getEstadoEnvioPTParticipanteWithStatus(rondaId)).data
-}
+export const getEstadoEnvioPTParticipante = dataOf(getEstadoEnvioPTParticipanteWithStatus)
 
 export async function getEstadoEnvioPTParticipanteWithStatus(
   rondaId: string
@@ -987,9 +926,7 @@ export async function getParticipanteRondaResumen(
   return mapParticipanteRondaResumenDoc(row)
 }
 
-export async function listResultadosPTRonda(rondaId: string): Promise<ResultadoParticipantePT[]> {
-  return (await listResultadosPTRondaWithStatus(rondaId)).data
-}
+export const listResultadosPTRonda = dataOf(listResultadosPTRondaWithStatus)
 
 export async function listResultadosPTRondaWithStatus(rondaId: string) {
   return safeConvexCallWithStatus(
@@ -1235,12 +1172,7 @@ export async function listAllEnviosPT(rondaId: string): Promise<EnvioPTWithRelat
 // Estado operativo — async loader (derivación pura en ./estados)
 // ---------------------------------------------------------------------------
 
-export async function getRondaMetricasCompletas(
-  rondaId: string,
-  ronda: Pick<Ronda, 'estado'>
-): Promise<RondaMetricas> {
-  return (await getRondaMetricasCompletasWithStatus(rondaId, ronda)).data
-}
+export const getRondaMetricasCompletas = dataOf(getRondaMetricasCompletasWithStatus)
 
 export async function getRondaMetricasCompletasWithStatus(
   rondaId: string,
