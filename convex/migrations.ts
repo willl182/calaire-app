@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import { internalMutation, internalQuery } from './_generated/server'
 import type { Id } from './_generated/dataModel'
+import { planReplicateCodes } from './rondas/codes'
 
 const PARTICIPANT_CODE_LENGTH = 6
 const PARTICIPANT_CODE_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'
@@ -151,6 +152,45 @@ export const backfillParticipantCodes = internalMutation({
       missing,
       updated,
       duplicateCodes,
+      planned: dryRun ? planned : [],
+    }
+  },
+})
+
+/**
+ * Asigna replicateCode (referencia = 1, participantes 2, 3, ...) a los
+ * participantes que no lo tengan. Idempotente: no toca valores existentes.
+ * Por defecto dryRun = true.
+ */
+export const backfillReplicateCodes = internalMutation({
+  args: {
+    dryRun: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { dryRun = true }) => {
+    const rows = await ctx.db.query('rondaParticipantes').collect()
+    const byRonda = new Map<Id<'rondas'>, typeof rows>()
+    for (const row of rows) {
+      const rondaRows = byRonda.get(row.rondaId) ?? []
+      rondaRows.push(row)
+      byRonda.set(row.rondaId, rondaRows)
+    }
+
+    const planned: Array<{ participanteId: Id<'rondaParticipantes'>; replicateCode: number }> = []
+    for (const rondaRows of byRonda.values()) {
+      planned.push(...planReplicateCodes(rondaRows))
+    }
+
+    if (!dryRun) {
+      for (const item of planned) {
+        await ctx.db.patch(item.participanteId, { replicateCode: item.replicateCode })
+      }
+    }
+
+    return {
+      dryRun,
+      total: rows.length,
+      missing: planned.length,
+      updated: dryRun ? 0 : planned.length,
       planned: dryRun ? planned : [],
     }
   },
