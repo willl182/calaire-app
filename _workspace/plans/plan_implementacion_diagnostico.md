@@ -65,7 +65,7 @@ Cada frente tiene una zona propia para evitar conflictos entre ramas en la misma
 
 1. `DecimalInput`: `type="text" inputMode="decimal"`, acepta coma y punto, normaliza a número, sin cambio por rueda. Test unitario de la normalización (`12,5`, `12.5`, `1.234,5` → rechazo explícito, vacío).
 2. Reemplazar los `type="number"` de `FormularioRonda` y `FormularioReferencia`; ensanchar Dato 1–3, Promedio y Desv. Est. (redistribuir el ancho de "Incertidumbre expandida").
-3. Promedio y desviación: calcular desde Dato 1–3 y mostrar advertencia si el valor escrito difiere (no sobrescribir sin decisión del usuario; dejar el autocálculo detrás de una opción y reportarlo).
+3. Promedio y desviación: calcular desde Dato 1–3 y **solo advertir** si el valor escrito difiere (decisión del usuario 2026-11-24: no autocalcular).
 4. Errores visibles: mensaje en línea bajo la celda con `aria-describedby`, y "Faltan N celdas" con la lista de celdas (enlace/foco a cada una).
 5. `aria-label` en cada celda (`<contaminante> nivel <n> dato <k>`).
 6. Mover la carga CSV arriba de la tabla y quitar los encabezados duplicados.
@@ -150,7 +150,7 @@ Cada frente tiene una zona propia para evitar conflictos entre ramas en la misma
 5. Renombrar/reubicar "pt_app" como enlace externo secundario.
 6. Verificación con Playwright a 390 px y 1440 px (capturas en `docs/screenshots/diagnostico/despues/`).
 
-> C2 no depende de B: puede lanzarse en la Ola A si se quieren 5 frentes en paralelo.
+> Decisión 2026-11-24: C2 se lanza en la Ola A (5 frentes en paralelo).
 
 ---
 
