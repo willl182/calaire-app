@@ -21,6 +21,8 @@ import { AvisoSincronizacion } from './AvisoSincronizacion'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
 import { ExpedienteGuiado } from './ExpedienteGuiado'
 import { HitosRonda } from './HitosRonda'
+import { nombrarUsuarios } from './notas'
+import { getNombresUsuarios } from './textos'
 import { SiguientePasoBar } from './SiguientePasoBar'
 import { transicionSgcAction } from './actions'
 
@@ -139,15 +141,25 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   if (!ronda) notFound()
 
   await inicializarPanelSgc(id)
-  const [panel, drive, sync, avance, siguientePaso, estadoDrive] = await Promise.all([
+  const [panel, drive, sync, avanceCrudo, siguientePaso, estadoDrive, nombresUsuarios] = await Promise.all([
     getPanelSgc(id),
     getDriveTreeSgc(id),
     getSincronizacionExpedienteSgc(id),
     getAvanceExpedienteSgc(id),
     getSiguientePasoExpedienteSgc(id),
     getEstadoDriveRondaSgc(id),
+    getNombresUsuarios(),
   ])
   if (!panel) notFound()
+  // Los motivos pueden traer el id de WorkOS (p. ej. "Revisado por user_…"): se muestra el nombre.
+  const conNombre = (item: SgcAvanceItem) => ({ ...item, motivo: nombrarUsuarios(item.motivo, nombresUsuarios) })
+  const avance: SgcAvanceExpediente = {
+    ...avanceCrudo,
+    items: avanceCrudo.items.map(conNombre),
+    bloqueantes: avanceCrudo.bloqueantes.map(conNombre),
+    criticos: avanceCrudo.criticos.map(conNombre),
+    advertencias: avanceCrudo.advertencias.map(conNombre),
+  }
   const driveGoogleStatus = getDriveGoogleAutomationStatus()
 
   const success = getParam(query.success)
@@ -160,7 +172,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
         <RondaPageHeader
           ronda={ronda}
           section="SGC"
-          description="Expediente documental de la ronda: mapa documental, checklist real y registros diligenciables."
+          description="Expediente documental de la ronda: qué sigue, documentos por etapa y cierre."
         />
 
         {success && <Alert tone="success" message={success} />}
@@ -209,6 +221,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           panel={panel}
           avanceItems={avance.items}
           estadoDrive={estadoDrive}
+          nombresUsuarios={nombresUsuarios}
           rondaId={id}
           rondaCodigo={ronda.codigo}
           rondaNombre={ronda.nombre}

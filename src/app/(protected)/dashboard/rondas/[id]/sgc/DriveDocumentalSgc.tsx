@@ -10,6 +10,7 @@ import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
 import type { EstadoDriveRonda, SgcAvanceItem, SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/server/sgc'
 import F20Control from './F20Control'
+import { nombrarUsuarios, notaVisible } from './notas'
 import { SgcRegistroDiligenciable } from './SgcRegistroDiligenciable'
 import {
   cambiarEstadoDriveAction,
@@ -28,6 +29,7 @@ type Props = {
   panel: SgcPanel
   avanceItems: SgcAvanceItem[]
   estadoDrive: EstadoDriveRonda & { integracionConectada: boolean }
+  nombresUsuarios: Record<string, string>
   rondaId: string
   rondaCodigo: string
   rondaNombre: string
@@ -160,7 +162,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
       </FormSection>
 
       {recurso.tipo !== 'carpeta' && recurso.codigo !== 'F-PSEA-20' && (
-        <FormSection title="Version definitiva">
+        <FormSection title="Versión definitiva">
           <div className="grid gap-3">
             <form action={guardarDriveDefinitivoAction} className="grid gap-2">
               <HiddenRecursoFields recurso={recurso} rondaId={rondaId} />
@@ -218,7 +220,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="estado" value="no_aplica" />
-            <input className="input" name="notas" placeholder="Justificacion no aplica" required />
+            <input className="input" name="notas" placeholder="Justificación de no aplica" required />
             <button className="btn-outline px-3 text-xs" type="submit">No aplica</button>
           </form>
           <form action={retirarDriveRecursoAction} className="grid gap-2">
@@ -239,7 +241,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <div>
               <div className="text-xs font-semibold text-[var(--foreground)]">Visible para participantes</div>
               <div className="text-xs text-[var(--foreground-muted)]">
-                {recurso.publicaParticipante ? 'Publicado explicitamente' : 'Interno por defecto'}
+                {recurso.publicaParticipante ? 'Publicado explícitamente' : 'Interno por defecto'}
               </div>
               {recurso.publicaParticipante && (
                 <div className="mt-1 text-xs text-[var(--foreground-muted)]">
@@ -249,7 +251,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
               )}
               {recurso.evidenciaSerieId && (
                 <div className="mt-1 text-xs text-amber-700">
-                  Esta accion aplica a todos los documentos Drive de la misma serie.
+                  Esta acción aplica a todos los documentos Drive de la misma serie.
                 </div>
               )}
             </div>
@@ -263,8 +265,54 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
   )
 }
 
+const LEYENDA_PUNTOS = [
+  { color: 'bg-amber-400', texto: 'Punto grande amarillo: pendiente' },
+  { color: 'bg-sky-500', texto: 'Punto grande azul: creado, falta diligenciar' },
+  { color: 'bg-emerald-500', texto: 'Punto grande verde: diligenciado' },
+  { color: 'bg-rose-500', texto: 'Punto grande rojo: retirado' },
+  { color: 'bg-sky-500', texto: 'Tiene enlace editable en Drive' },
+  { color: 'bg-emerald-500', texto: 'Tiene versión definitiva cargada' },
+  { color: 'bg-violet-500', texto: 'Publicado para participantes' },
+  { color: 'bg-rose-500', texto: 'Documento crítico' },
+]
 
-export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
+const GLOSARIO = [
+  { termino: 'Diligenciado', definicion: 'El contenido del documento está completo (en Drive o en la app).' },
+  { termino: 'Enlace editable', definicion: 'Dirección del documento de trabajo en Google Drive; solo la ve el equipo Calaire.' },
+  { termino: 'Versión definitiva', definicion: 'Copia final (PDF o archivo) que queda como evidencia del expediente.' },
+  { termino: 'Publicar', definicion: 'Hace visible la versión definitiva a los participantes en la app. No cambia el avance.' },
+]
+
+function LeyendaYGlosario() {
+  return (
+    <div className="mt-4 grid gap-3 text-xs text-[var(--foreground-muted)] md:grid-cols-2">
+      <div>
+        <h4 className="font-semibold text-[var(--foreground)]">Leyenda de puntos (el grande indica el estado; los pequeños, lo que tiene)</h4>
+        <ul className="mt-1 grid gap-1">
+          {LEYENDA_PUNTOS.map((punto) => (
+            <li key={punto.texto} className="flex items-center gap-2">
+              <span aria-hidden="true" className={`inline-block h-2 w-2 rounded-full ${punto.color}`} />
+              {punto.texto}
+            </li>
+          ))}
+        </ul>
+      </div>
+      <details>
+        <summary className="cursor-pointer font-semibold text-[var(--foreground)]">Glosario</summary>
+        <dl className="mt-1 grid gap-1">
+          {GLOSARIO.map((item) => (
+            <div key={item.termino}>
+              <dt className="inline font-semibold text-[var(--foreground)]">{item.termino}: </dt>
+              <dd className="inline">{item.definicion}</dd>
+            </div>
+          ))}
+        </dl>
+      </details>
+    </div>
+  )
+}
+
+export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nombresUsuarios, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
   const root = drive.root
   const recursos = drive.recursos
   const folders = root ? childrenOf(recursos, root._id).filter((recurso) => recurso.tipo === 'carpeta') : []
@@ -318,7 +366,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
 
         {root && (
           <details className="m-5 rounded-lg border border-[var(--border)] bg-slate-50">
-            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[var(--foreground)]">Administrar carpeta raiz</summary>
+            <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[var(--foreground)]">Administrar carpeta raíz</summary>
             <div className="border-t border-[var(--border)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
                 <div className="text-xs text-[var(--foreground-muted)]">{root.driveFolderId ?? 'Sin folderId registrado'}</div>
@@ -331,7 +379,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
 
         {!root && (
           <div className="px-6 py-8 text-sm text-[var(--foreground-muted)]">
-            Inicializa el expediente para crear el arbol virtual de carpetas y documentos esperados de esta ronda.
+            Inicializa el expediente para crear el árbol virtual de carpetas y documentos esperados de esta ronda.
           </div>
         )}
 
@@ -354,7 +402,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                   return (
                     <FolderCard
                       key={folder._id}
-                      href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}`}
+                      href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}#explorador`}
                       nombre={folder.nombre}
                       sublabel={`Carpeta · ${folderChildren.length} documento${folderChildren.length === 1 ? '' : 's'}`}
                       badge={`${folderDone}/${cuentan.length}`}
@@ -362,7 +410,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                   )
                 })}
                 {folders.length === 0 && (
-                  <p className="text-sm text-[var(--foreground-muted)]">Este expediente aun no tiene carpetas. Usa &quot;Reparar expediente&quot;.</p>
+                  <p className="text-sm text-[var(--foreground-muted)]">Este expediente aún no tiene carpetas. Usa &quot;Reparar expediente&quot;.</p>
                 )}
               </div>
             ) : (
@@ -372,7 +420,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
                       <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
-                      <p className="text-sm text-[var(--foreground-muted)]">{activeFolder.notas ?? activeFolder.codigo}</p>
+                      <p className="text-sm text-[var(--foreground-muted)]">{notaVisible(activeFolder.notas) ?? activeFolder.codigo}</p>
                     </div>
                     <LinkActions recurso={activeFolder} />
                   </div>
@@ -380,7 +428,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                     {folderDocs.map((recurso) => (
                       <DocRow
                         key={recurso._id}
-                        href={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}&doc=${recurso._id}`}
+                        href={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}&doc=${recurso._id}#explorador`}
                         active={recurso._id === selectedDocId}
                         iconTone={tipoTone(recurso.tipo)}
                         estado={recurso.estado}
@@ -391,9 +439,9 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                           <>
                             <span>{tipoLabel(recurso.tipo)}</span>
                             {recurso.webUrl && <DocMetaDot label="Enlace editable disponible" tone="sky" />}
-                            {recurso.definitivo && <DocMetaDot label="Version definitiva disponible" tone="emerald" />}
-                            {recurso.publicaParticipante && <DocMetaDot label="Publico para participantes" tone="violet" />}
-                            {recurso.critico && <DocMetaDot label="Critico" tone="rose" />}
+                            {recurso.definitivo && <DocMetaDot label="Versión definitiva disponible" tone="emerald" />}
+                            {recurso.publicaParticipante && <DocMetaDot label="Público para participantes" tone="violet" />}
+                            {recurso.critico && <DocMetaDot label="Crítico" tone="rose" />}
                           </>
                         }
                         trailing={
@@ -407,6 +455,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                       <p className="text-sm text-[var(--foreground-muted)]">Esta carpeta no tiene documentos.</p>
                     )}
                   </DocGrid>
+                  <LeyendaYGlosario />
                 </div>
 
                 {selectedDoc && (
@@ -422,11 +471,11 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, ron
                     nombre={selectedDoc.nombre}
                     subtitle={
                       <>
-                        {selectedDoc.notas && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.notas}</p>}
-                        <div className="mt-2 text-xs text-[var(--foreground-muted)]">Actualizado: {fmtDate(selectedDoc.updatedAt)} por {selectedDoc.updatedBy}</div>
+                        {notaVisible(selectedDoc.notas) && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{notaVisible(selectedDoc.notas)}</p>}
+                        <div className="mt-2 text-xs text-[var(--foreground-muted)]">Actualizado: {fmtDate(selectedDoc.updatedAt)} por {nombrarUsuarios(selectedDoc.updatedBy, nombresUsuarios)}</div>
                       </>
                     }
-                    closeHref={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}`}
+                    closeHref={`${basePath}?carpeta=${encodeURIComponent(activeFolder.codigo)}#explorador`}
                   >
                     <div className="mb-3 flex flex-wrap gap-2">
                       <LinkActions recurso={selectedDoc} />
