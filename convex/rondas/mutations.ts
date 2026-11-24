@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { contaminanteValidator, participantProfileValidator, replicasValidator, rondaEstadoValidator } from './validators'
 import { defineRondaMutation } from './definitions'
-import { generateUniqueParticipantCode } from './codes'
+import { generateNextReplicateCode, generateUniqueParticipantCode } from './codes'
 import { getDirectorioByLookup, normalizeEmail } from './directorio'
 import { assertAllowedEstadoTransition } from './state'
 import { assertNivelesPTCuadran } from './ptLevels'
@@ -88,7 +88,7 @@ export const addParticipanteDefinition = defineRondaMutation({
       directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode: assignedParticipantCode,
-      replicateCode,
+      replicateCode: replicateCode ?? await generateNextReplicateCode(ctx, rondaId, participantProfile),
       invitadoAt: Date.now(),
     })
   },
@@ -178,6 +178,7 @@ export const createConfiguredRondaDefinition = defineRondaMutation({
 
     for (const slot of slots) {
       const participantCode = await generateUniqueParticipantCode(ctx, rondaId)
+      const replicateCode = await generateNextReplicateCode(ctx, rondaId, slot.participantProfile)
       const directorio = await getDirectorioByLookup(ctx, slot.email)
       await ctx.db.insert('rondaParticipantes', {
         rondaId,
@@ -186,6 +187,7 @@ export const createConfiguredRondaDefinition = defineRondaMutation({
         directorioParticipanteId: directorio?._id ?? null,
         participantProfile: slot.participantProfile,
         participantCode,
+        replicateCode,
         invitadoAt: now,
       })
     }
@@ -369,6 +371,7 @@ export const assignParticipanteDefinition = defineRondaMutation({
       directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode,
+      replicateCode: await generateNextReplicateCode(ctx, rondaId, participantProfile),
       invitadoAt: Date.now(),
     })
   },
@@ -460,6 +463,7 @@ export const addReferenceSlotDefinition = defineRondaMutation({
       email,
       participantProfile: 'member_special',
       participantCode,
+      replicateCode: await generateNextReplicateCode(ctx, rondaId, 'member_special'),
       invitadoAt: Date.now(),
     })
   },
