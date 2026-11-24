@@ -164,7 +164,7 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
 
   const header = (
     <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)] bg-[var(--surface-panel)] shadow-sm">
-      <div className="mx-auto flex max-w-screen-2xl items-stretch gap-3 px-4 sm:px-6 lg:gap-5">
+      <div className="mx-auto flex max-w-7xl items-stretch gap-3 px-4 sm:px-6 lg:gap-5">
         <Link href="/dashboard" className="flex shrink-0 items-center gap-3 py-3 lg:border-r lg:border-[var(--border-soft)] lg:pr-6">
           <LogoUnal height={32} />
           <span className="hidden text-xs font-bold uppercase tracking-[0.18em] text-[var(--foreground)] sm:inline">
