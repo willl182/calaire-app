@@ -7,6 +7,7 @@ import {
   getDriveTreeSgc,
   getPanelSgc,
   getSincronizacionExpedienteSgc,
+  getSiguientePasoExpedienteSgc,
   inicializarPanelSgc,
   type SgcPanel,
 } from '@/server/sgc'
@@ -16,6 +17,8 @@ import { RondaPageHeader } from '../RondaPageHeader'
 import { AvisoSincronizacion } from './AvisoSincronizacion'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
 import { ExpedienteGuiado } from './ExpedienteGuiado'
+import { HitosRonda } from './HitosRonda'
+import { SiguientePasoBar } from './SiguientePasoBar'
 import { transicionSgcAction } from './actions'
 
 type PageProps = {
@@ -106,11 +109,12 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   if (!ronda) notFound()
 
   await inicializarPanelSgc(id)
-  const [panel, drive, sync, avance] = await Promise.all([
+  const [panel, drive, sync, avance, siguientePaso] = await Promise.all([
     getPanelSgc(id),
     getDriveTreeSgc(id),
     getSincronizacionExpedienteSgc(id),
     getAvanceExpedienteSgc(id),
+    getSiguientePasoExpedienteSgc(id),
   ])
   if (!panel) notFound()
   const driveGoogleStatus = getDriveGoogleAutomationStatus()
@@ -130,6 +134,8 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
+
+        {siguientePaso && <SiguientePasoBar pasosPrevios={siguientePaso.pasosPrevios} siguiente={siguientePaso.siguiente} />}
 
         <AvisoSincronizacion sync={sync} rondaId={id} />
 
@@ -164,6 +170,8 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           driveGoogleReady={driveGoogleStatus.ready}
           carpetaRondaCreada={Boolean(drive.root?.driveFolderId)}
         />
+
+        <HitosRonda hitos={panel.hitos} rondaId={id} />
 
         <DriveDocumentalSgc
           drive={drive}
