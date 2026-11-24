@@ -118,12 +118,22 @@ function UserMenu({ userEmail }: { userEmail: string }) {
         >
           {userEmail.charAt(0) || '?'}
         </span>
-        <span className="hidden max-w-[14rem] truncate lg:inline">{userEmail}</span>
+        <span className="hidden max-w-[14rem] truncate 2xl:inline">{userEmail}</span>
         <span className="text-[10px] opacity-60" aria-hidden="true">▾</span>
       </summary>
       <div className="absolute right-0 z-50 mt-2 w-64 rounded-md border border-[var(--border-soft)] bg-[var(--surface-panel)] p-3 shadow-lg">
         <p className="truncate text-sm font-medium text-[var(--foreground)]">{userEmail}</p>
         <p className="text-xs text-[var(--foreground-muted)]">Coordinador · Laboratorio CALAIRE</p>
+        <a
+          href={PT_APP_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-3 flex items-center gap-1 text-xs text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:underline 2xl:hidden"
+        >
+          Cálculo PT (Shiny)
+          <span className="text-[9px] opacity-60" aria-hidden="true">↗</span>
+          <span className="sr-only">(aplicativo externo, abre en nueva pestaña)</span>
+        </a>
         <form action={signOutAction} className="mt-3">
           <button type="submit" className="btn-outline w-full">
             Cerrar sesión
@@ -166,8 +176,8 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
 
   const header = (
     <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)] bg-[var(--surface-panel)] shadow-sm">
-      <div className="mx-auto flex max-w-7xl items-stretch gap-3 px-4 sm:px-6 lg:gap-5">
-        <Link href="/dashboard" className="flex shrink-0 items-center gap-3 py-3 lg:border-r lg:border-[var(--border-soft)] lg:pr-6">
+      <div className="mx-auto flex max-w-7xl items-stretch gap-3 px-4 sm:px-6 xl:gap-5">
+        <Link href="/dashboard" className="flex shrink-0 items-center gap-3 py-3 xl:border-r xl:border-[var(--border-soft)] xl:pr-6">
           <LogoUnal height={32} />
           <span className="hidden text-xs font-bold uppercase tracking-[0.18em] text-[var(--foreground)] sm:inline">
             CALAIRE-APP{' '}
@@ -177,13 +187,13 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 border-r border-[var(--border-soft)] pr-5 lg:flex" aria-label="Áreas principales">
+        <nav className="hidden items-center gap-1 border-r border-[var(--border-soft)] pr-5 xl:flex" aria-label="Áreas principales">
           {areaItems.map((item) => (
             <AreaLink key={item.label} item={item} isActive={isAreaActive(item)} />
           ))}
         </nav>
 
-        <nav className="hidden min-w-0 flex-1 items-stretch gap-5 overflow-x-auto lg:flex" aria-label={sectionsLabel}>
+        <nav className="hidden min-w-0 flex-1 items-stretch gap-5 overflow-x-auto xl:flex" aria-label={sectionsLabel}>
           {navItems.map((item) => (
             <NavLink key={item.label} item={item} isActive={isActive(item)} />
           ))}
@@ -194,7 +204,7 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
             href={PT_APP_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:underline lg:inline-flex"
+            className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:underline 2xl:inline-flex"
             title="Aplicativo externo de cálculo de ensayos de aptitud (pt_app, Shiny)"
           >
             Cálculo PT (Shiny)
@@ -265,7 +275,7 @@ export function MobileNav({
     )
 
   return (
-    <div className="lg:hidden">
+    <div className="xl:hidden">
       <button
         type="button"
         className="inline-flex h-9 w-9 items-center justify-center rounded-md text-[var(--foreground)] hover:bg-[var(--surface-muted)]"

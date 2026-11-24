@@ -42,6 +42,7 @@ import type * as rondas_fichas from "../rondas/fichas.js";
 import type * as rondas_index from "../rondas/index.js";
 import type * as rondas_mapping from "../rondas/mapping.js";
 import type * as rondas_mutations from "../rondas/mutations.js";
+import type * as rondas_ptLevels from "../rondas/ptLevels.js";
 import type * as rondas_reads from "../rondas/reads.js";
 import type * as rondas_resultados from "../rondas/resultados.js";
 import type * as rondas_state from "../rondas/state.js";
@@ -107,6 +108,7 @@ declare const fullApi: ApiFromModules<{
   "rondas/index": typeof rondas_index;
   "rondas/mapping": typeof rondas_mapping;
   "rondas/mutations": typeof rondas_mutations;
+  "rondas/ptLevels": typeof rondas_ptLevels;
   "rondas/reads": typeof rondas_reads;
   "rondas/resultados": typeof rondas_resultados;
   "rondas/state": typeof rondas_state;
