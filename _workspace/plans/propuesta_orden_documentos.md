@@ -213,3 +213,4 @@ Revisado en `calaire-app/docs` y en `calaire-ea_sgc`:
 | # | Tema | Decisión |
 |---|---|---|
 | 19 | F-03 y cupos sin reclamar | Un cupo que nadie reclamó cuenta como "no participó": no bloquea F-03. F-03 se cumple cuando todos los cupos reclamados enviaron su ficha (comportamiento de B2). |
+| 20 | Formato de exportaciones F-01/F-02/F-04 | CSV por ahora; XLSX con formato de plantilla queda para más adelante. |
