@@ -1,11 +1,8 @@
-import { signOut } from '@workos-inc/authkit-nextjs'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
 
-import { LogoUnal } from '@/components/LogoUnal'
 import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
-import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { getMyPtPerformance, getRondaParticipanteLandingPath, listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
 import {
@@ -368,41 +365,11 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
   const backendOffline = rondasResult.offline || sgcOfflineResults.some(Boolean)
   const performance = backendOffline ? { fechaConsulta: 0, series: [], rondas: [] } : await getMyPtPerformance()
   return (
-    <div className="min-h-screen px-6 py-8">
+    <div className="min-h-screen px-4 py-8 sm:px-6">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
-        <header className="header-bar px-8 py-6">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="flex items-center gap-6">
-              <LogoUnal height={64} />
-              <div className="space-y-0.5">
-                <h1 className="text-xl font-bold text-[var(--foreground)]">
-                  CALAIRE-APP <span className="font-medium text-[var(--foreground-muted)]">Ensayos de Aptitud</span>
-                </h1>
-                <p className="text-base font-medium text-[var(--pt-primary-dark)]">
-                  Gases Contaminantes Criterio
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  Laboratorio CALAIRE · Universidad Nacional de Colombia — Sede Medellín
-                </p>
-                <p className="text-sm text-[var(--foreground-muted)]">
-                  {auth.user.email} · Participante
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <form
-                action={async () => {
-                  'use server'
-                  await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
-                }}
-              >
-                <button type="submit" className="btn-outline">
-                  Cerrar sesión
-                </button>
-              </form>
-            </div>
-          </div>
+        <header className="space-y-1">
+          <h1 className="text-xl font-bold text-[var(--foreground)]">Mi panel de participante</h1>
+          <p className="text-sm text-[var(--foreground-muted)]">{auth.user.email} · Participante</p>
         </header>
 
         <Alert tone="success" message={success} />
@@ -412,7 +379,6 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
         )}
 
         <section className="grid gap-6">
-          <PerformanceDashboard data={performance} />
           {backendOffline && rondas.length === 0 ? (
             <OfflineParticipantState />
           ) : rondas.length === 0 ? (
@@ -445,6 +411,8 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
               })}
             </>
           )}
+          {/* El desempeño va después de las tareas pendientes y rondas asignadas. */}
+          <PerformanceDashboard data={performance} />
         </section>
       </div>
     </div>
