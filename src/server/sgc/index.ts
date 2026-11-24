@@ -1,8 +1,7 @@
 import { fetchMutation, fetchQuery } from 'convex/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
-import { safeConvexCallWithStatus } from '@/lib/convex-fallback'
-import { requireAuth } from '@/server/auth'
+import { getConvexToken, withStatus } from '@/server/convex'
 import {
   agruparChecklistPorFase,
   calcularChecklistSgc,
@@ -10,15 +9,6 @@ import {
   type SgcChecklistItem,
 } from './checklist'
 import type { SgcFase, SgcFormatoCodigo } from './catalog'
-
-async function sgcToken() {
-  const auth = await requireAuth()
-  const token = auth.accessToken
-  if (!token) {
-    throw new Error('No hay sesion activa para operar SGC.')
-  }
-  return token
-}
 
 export type SgcPanel = {
   ronda: {
@@ -446,7 +436,7 @@ export type SgcDriveRecursoParticipante = Pick<
 }
 
 export async function getPanelSgc(rondaId: string): Promise<SgcPanel | null> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   const raw = await fetchQuery(api.sgc.index.getPanelSgc, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -491,7 +481,7 @@ export async function guardarJustificacionSgc(
   alcance: string,
   razon: string
 ) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.upsertJustificacion, {
     rondaId: rondaId as Id<'rondas'>,
     formato,
@@ -501,7 +491,7 @@ export async function guardarJustificacionSgc(
 }
 
 export async function retirarJustificacionSgc(justificacionId: string, motivo: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.retirarJustificacion, {
     justificacionId: justificacionId as Id<'sgcJustificaciones'>,
     motivo
@@ -509,32 +499,30 @@ export async function retirarJustificacionSgc(justificacionId: string, motivo: s
 }
 
 export async function inicializarPanelSgc(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.inicializarPanelSgc, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
 export async function getDriveTreeSgc(rondaId: string): Promise<SgcDriveTree> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getDriveTree, {
     rondaId: rondaId as Id<'rondas'>
   }, { token }) as Promise<SgcDriveTree>
 }
 
 export async function listDriveRecursosParticipante(rondaId: string): Promise<SgcDriveRecursoParticipante[]> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listDriveRecursosParticipante, {
     rondaId: rondaId as Id<'rondas'>
   }, { token }) as Promise<SgcDriveRecursoParticipante[]>
 }
 
-export async function listDriveRecursosParticipanteWithStatus(rondaId: string) {
-  return safeConvexCallWithStatus('listDriveRecursosParticipante', () => listDriveRecursosParticipante(rondaId), [])
-}
+export const listDriveRecursosParticipanteWithStatus = withStatus('listDriveRecursosParticipante', listDriveRecursosParticipante, [])
 
 export async function inicializarDriveRonda(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.inicializarDriveRonda, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -554,7 +542,7 @@ export async function upsertDriveRecurso(args: {
   notas?: string | null
   definitivo?: SgcDriveRecurso['definitivo']
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.upsertDriveRecurso, {
     ...args,
     recursoId: args.recursoId as Id<'sgcDriveRecursos'> | null | undefined,
@@ -574,7 +562,7 @@ export async function reemplazarDriveRecurso(args: {
   motivo: string
   tipo?: SgcDriveTipo
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.reemplazarDriveRecurso, {
     ...args,
     recursoId: args.recursoId as Id<'sgcDriveRecursos'>,
@@ -586,7 +574,7 @@ export async function actualizarEstadoDriveRecurso(
   estado: SgcDriveEstado,
   notas: string | null
 ) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.actualizarEstadoDriveRecurso, {
     recursoId: recursoId as Id<'sgcDriveRecursos'>,
     estado,
@@ -595,7 +583,7 @@ export async function actualizarEstadoDriveRecurso(
 }
 
 export async function actualizarVisibilidadDriveRecurso(recursoId: string, publicaParticipante: boolean) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.actualizarVisibilidadDriveRecurso, {
     recursoId: recursoId as Id<'sgcDriveRecursos'>,
     publicaParticipante
@@ -608,7 +596,7 @@ export async function registrarAutomatizacionDrive(args: {
   detalle: string
   targetId?: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.registrarAutomatizacionDrive, {
     rondaId: args.rondaId as Id<'rondas'>,
     evento: args.evento,
@@ -618,7 +606,7 @@ export async function registrarAutomatizacionDrive(args: {
 }
 
 export async function retirarDriveRecurso(recursoId: string, motivo: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.retirarDriveRecurso, {
     recursoId: recursoId as Id<'sgcDriveRecursos'>,
     motivo
@@ -626,7 +614,7 @@ export async function retirarDriveRecurso(recursoId: string, motivo: string) {
 }
 
 export async function listMatrizDocumentalSgc(): Promise<MatrizDocumentalSgc> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listMatrizDocumentalSgc, {}, { token }) as Promise<MatrizDocumentalSgc>
 }
 
@@ -637,26 +625,14 @@ export async function listSgcMaestro(filters: {
   modoDiligenciamiento?: DocumentoSgc['modoDiligenciamiento'] | null
   texto?: string | null
 } = {}): Promise<SgcMaestroList> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listSgcMaestro, filters, { token }) as Promise<SgcMaestroList>
 }
 
-export async function listSgcMaestroWithStatus(filters: {
-  ambito?: string | null
-  familia?: DocumentoSgc['familia'] | null
-  estado?: DocumentoSgc['estado'] | null
-  modoDiligenciamiento?: DocumentoSgc['modoDiligenciamiento'] | null
-  texto?: string | null
-} = {}) {
-  return safeConvexCallWithStatus(
-    'listSgcMaestro',
-    () => listSgcMaestro(filters),
-    { documentos: [], versiones: [], ambitos: [], familias: [], resumen: { total: 0, vigentes: 0, enRevision: 0, sinVersion: 0 } } satisfies SgcMaestroList,
-  )
-}
+export const listSgcMaestroWithStatus = withStatus('listSgcMaestro', listSgcMaestro, { documentos: [], versiones: [], ambitos: [], familias: [], resumen: { total: 0, vigentes: 0, enRevision: 0, sinVersion: 0 } } satisfies SgcMaestroList)
 
 export async function getDocumentoMaestro(documentoId: string): Promise<DocumentoMaestroDetalle> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getDocumentoMaestro, {
     documentoId: documentoId as Id<'documentosSgc'>,
   }, { token }) as Promise<DocumentoMaestroDetalle>
@@ -668,43 +644,26 @@ export async function listNormativaSgc(filters: {
   page?: number
   pageSize?: number
 } = {}): Promise<NormativaSgc> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listNormativaSgc, filters, { token }) as Promise<NormativaSgc>
 }
 
-export async function listNormativaSgcWithStatus(filters: {
-  norma?: string | null
-  estadoCobertura?: DocumentoRequisito['estadoCobertura'] | null
-  page?: number
-  pageSize?: number
-} = {}) {
-  return safeConvexCallWithStatus(
-    'listNormativaSgc',
-    () => listNormativaSgc(filters),
-    {
-      normas: [],
-      rows: [],
-      pagination: { page: 1, pageSize: 0, totalRows: 0, totalPages: 0, hasPreviousPage: false, hasNextPage: false },
-      resumen: { requisitos: 0, cubiertos: 0, parciales: 0, pendientes: 0 },
-    } satisfies NormativaSgc,
-  )
-}
+export const listNormativaSgcWithStatus = withStatus('listNormativaSgc', listNormativaSgc, {
+  normas: [],
+  rows: [],
+  pagination: { page: 1, pageSize: 0, totalRows: 0, totalPages: 0, hasPreviousPage: false, hasNextPage: false },
+  resumen: { requisitos: 0, cubiertos: 0, parciales: 0, pendientes: 0 },
+} satisfies NormativaSgc)
 
 export async function listMapaSgc(filters: { ambito?: string | null } = {}): Promise<MapaSgc> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listMapaSgc, filters, { token }) as Promise<MapaSgc>
 }
 
-export async function listMapaSgcWithStatus(filters: { ambito?: string | null } = {}) {
-  return safeConvexCallWithStatus(
-    'listMapaSgc',
-    () => listMapaSgc(filters),
-    { relaciones: [], documentos: [], bloques: [], ambitos: [], pendientes: 0 } satisfies MapaSgc,
-  )
-}
+export const listMapaSgcWithStatus = withStatus('listMapaSgc', listMapaSgc, { relaciones: [], documentos: [], bloques: [], ambitos: [], pendientes: 0 } satisfies MapaSgc)
 
 export async function listExpedientesSgc(): Promise<ExpedienteSgcResumen[]> {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listExpedientesSgc, {}, { token }) as Promise<ExpedienteSgcResumen[]>
 }
 
@@ -726,7 +685,7 @@ export async function upsertDocumentoMaestro(args: {
   ubicacionFuente: string | null
   notas: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.upsertDocumentoMaestro, {
     ...args,
     documentoId: args.documentoId as Id<'documentosSgc'> | null,
@@ -750,7 +709,7 @@ export async function registrarVersionOficial(args: {
   fechaAprobacion: string | null
   fechaVigencia: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.registrarVersionOficial, {
     ...args,
     documentoId: args.documentoId as Id<'documentosSgc'>,
@@ -771,7 +730,7 @@ export async function crearRegistroSgc(args: {
   externalUrl?: string | null
   externalLabel?: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.crearRegistroSgc, {
     ...args,
     documentoId: args.documentoId as Id<'documentosSgc'>,
@@ -789,7 +748,7 @@ export async function upsertDocumentoRequisito(args: {
   observacion: string | null
   fechaRevision: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.upsertDocumentoRequisito, {
     ...args,
     documentoId: args.documentoId as Id<'documentosSgc'>,
@@ -810,7 +769,7 @@ export async function upsertDocumentoSgc(args: {
   ubicacionFuente: string | null
   notas: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.upsertDocumentoSgc, {
     ...args,
     documentoId: args.documentoId as Id<'documentosSgc'> | null
@@ -827,7 +786,7 @@ export async function registrarDocumentoSgcVersion(args: {
   size: number | null
   hash: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.registrarDocumentoSgcVersion, {
     ...args,
     documentoId: args.documentoId as Id<'documentosSgc'>,
@@ -841,7 +800,7 @@ export async function guardarPlanRonda(
   camposEstructurados: Record<string, string>,
   motivoRevision?: string
 ) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.createOrUpdatePlanRonda, {
     rondaId: rondaId as Id<'rondas'>,
     bloques,
@@ -851,7 +810,7 @@ export async function guardarPlanRonda(
 }
 
 export async function finalizarPlanRonda(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.finalizarPlanRonda, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -862,7 +821,7 @@ export async function guardarRevisionDatos(
   checks: Record<string, { cumple: boolean; observacion: string | null }>,
   metricas: Record<string, string | number | boolean | null>
 ) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.createOrUpdateRevisionDatos, {
     rondaId: rondaId as Id<'rondas'>,
     checks,
@@ -871,7 +830,7 @@ export async function guardarRevisionDatos(
 }
 
 export async function finalizarRevisionDatos(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.finalizarRevisionDatos, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -883,7 +842,7 @@ export async function guardarRevisionHomogeneidad(
   metricas: Record<string, string | number | boolean | null>,
   conclusiones: string | null
 ) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.createOrUpdateRevisionHomogeneidad, {
     rondaId: rondaId as Id<'rondas'>,
     checks,
@@ -893,7 +852,7 @@ export async function guardarRevisionHomogeneidad(
 }
 
 export async function finalizarRevisionHomogeneidad(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.finalizarRevisionHomogeneidad, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -913,7 +872,7 @@ export async function crearHitoRonda(args: {
   formatoRelacionado: string | null
   notas: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.createHitoRonda, {
     ...args,
     rondaId: args.rondaId as Id<'rondas'>
@@ -934,7 +893,7 @@ export async function actualizarHitoRonda(args: {
   formatoRelacionado: string | null
   notas: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.updateHitoRonda, {
     ...args,
     hitoId: args.hitoId as Id<'sgcHitosRonda'>
@@ -946,7 +905,7 @@ export async function crearSerieEvidencia(
   formato: SgcFormatoCodigo,
   nombre: string
 ) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.createEvidenciaSeries, {
     rondaId: rondaId as Id<'rondas'>,
     formato,
@@ -958,7 +917,7 @@ export async function crearSerieEvidencia(
 }
 
 export async function generateSgcUploadUrl() {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.generateUploadUrl, {}, { token })
 }
 
@@ -970,7 +929,7 @@ export async function registrarEvidenciaVersion(args: {
   size: number
   hash: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.registrarEvidenciaVersion, {
     ...args,
     serieId: args.serieId as Id<'sgcEvidenciaSeries'>,
@@ -979,7 +938,7 @@ export async function registrarEvidenciaVersion(args: {
 }
 
 export async function retirarEvidenciaVersion(evidenciaVersionId: string, motivo: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.retirarEvidenciaVersion, {
     evidenciaVersionId: evidenciaVersionId as Id<'sgcEvidenciaVersiones'>,
     motivo
@@ -987,14 +946,14 @@ export async function retirarEvidenciaVersion(evidenciaVersionId: string, motivo
 }
 
 export async function getSgcDownloadUrl(evidenciaVersionId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getDownloadUrl, {
     evidenciaVersionId: evidenciaVersionId as Id<'sgcEvidenciaVersiones'>
   }, { token })
 }
 
 export async function getDocumentoSgcDownloadUrl(documentoId: string, versionId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getDocumentoSgcDownloadUrl, {
     documentoId: documentoId as Id<'documentosSgc'>,
     versionId: versionId as Id<'documentoSgcVersiones'>
@@ -1003,28 +962,28 @@ export async function getDocumentoSgcDownloadUrl(documentoId: string, versionId:
 
 
 export async function getEvidenciaVersionContext(evidenciaVersionId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getEvidenciaVersionContext, {
     evidenciaVersionId: evidenciaVersionId as Id<'sgcEvidenciaVersiones'>
   }, { token })
 }
 
 export async function pasarADocumentacionPendiente(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.transitionRondaToDocumentacionPendiente, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
 export async function cerrarDocumentalmente(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.transitionRondaToCerrada, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
 export async function reabrirRondaSgc(rondaId: string, motivo: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.reabrirRondaSgc, {
     rondaId: rondaId as Id<'rondas'>,
     motivo
@@ -1032,12 +991,12 @@ export async function reabrirRondaSgc(rondaId: string, motivo: string) {
 }
 
 export async function listRondasSgcResumen() {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listRondasSgcResumen, {}, { token })
 }
 
 export async function listComunicaciones(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listComunicaciones, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -1052,7 +1011,7 @@ export async function createComunicacion(args: {
   fecha: string
   responsable: string
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.createComunicacion, {
     ...args,
     rondaId: args.rondaId as Id<'rondas'>
@@ -1068,7 +1027,7 @@ export async function updateComunicacion(args: {
   fecha: string
   responsable: string
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.updateComunicacion, {
     ...args,
     comunicacionId: args.comunicacionId as Id<'sgcComunicaciones'>
@@ -1076,14 +1035,14 @@ export async function updateComunicacion(args: {
 }
 
 export async function deleteComunicacion(comunicacionId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.deleteComunicacion, {
     comunicacionId: comunicacionId as Id<'sgcComunicaciones'>
   }, { token })
 }
 
 export async function listPublicaciones(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listPublicaciones, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
@@ -1097,7 +1056,7 @@ export async function createPublicacion(args: {
   visibleDesde: number
   visibleHasta: number | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.createPublicacion, {
     ...args,
     rondaId: args.rondaId as Id<'rondas'>
@@ -1105,47 +1064,41 @@ export async function createPublicacion(args: {
 }
 
 export async function deletePublicacion(publicacionId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.deletePublicacion, {
     publicacionId: publicacionId as Id<'sgcPublicaciones'>
   }, { token })
 }
 
 export async function getHitosVisibleParticipante(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getHitosVisibleParticipante, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function getHitosVisibleParticipanteWithStatus(rondaId: string) {
-  return safeConvexCallWithStatus('getHitosVisibleParticipante', () => getHitosVisibleParticipante(rondaId), [])
-}
+export const getHitosVisibleParticipanteWithStatus = withStatus('getHitosVisibleParticipante', getHitosVisibleParticipante, [])
 
 export async function getEvidenciasPublicas(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getEvidenciasPublicas, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function getEvidenciasPublicasWithStatus(rondaId: string) {
-  return safeConvexCallWithStatus('getEvidenciasPublicas', () => getEvidenciasPublicas(rondaId), [])
-}
+export const getEvidenciasPublicasWithStatus = withStatus('getEvidenciasPublicas', getEvidenciasPublicas, [])
 
 export async function listPublicacionesParticipante(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listPublicaciones, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function listPublicacionesParticipanteWithStatus(rondaId: string) {
-  return safeConvexCallWithStatus('listPublicacionesParticipante', () => listPublicacionesParticipante(rondaId), [])
-}
+export const listPublicacionesParticipanteWithStatus = withStatus('listPublicacionesParticipante', listPublicacionesParticipante, [])
 
 export async function createComentarioRonda(rondaId: string, mensaje: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.createComentarioRonda, {
     rondaId: rondaId as Id<'rondas'>,
     mensaje
@@ -1153,18 +1106,16 @@ export async function createComentarioRonda(rondaId: string, mensaje: string) {
 }
 
 export async function listMisComentariosRonda(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listMisComentariosRonda, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function listMisComentariosRondaWithStatus(rondaId: string) {
-  return safeConvexCallWithStatus('listMisComentariosRonda', () => listMisComentariosRonda(rondaId), [])
-}
+export const listMisComentariosRondaWithStatus = withStatus('listMisComentariosRonda', listMisComentariosRonda, [])
 
 export async function responderComentarioRonda(comentarioId: string, respuesta: string, cerrar: boolean) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.responderComentarioRonda, {
     comentarioId: comentarioId as Id<'sgcComentariosRonda'>,
     respuesta,
@@ -1180,7 +1131,7 @@ export async function crearNotificacion(args: {
   mensaje: string
   tipo: 'recordatorio' | 'cronograma' | 'resultado' | 'sgc' | 'otro'
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.crearNotificacion, {
     ...args,
     rondaId: args.rondaId as Id<'rondas'>,
@@ -1189,18 +1140,16 @@ export async function crearNotificacion(args: {
 }
 
 export async function listMisNotificaciones(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.listMisNotificaciones, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }
 
-export async function listMisNotificacionesWithStatus(rondaId: string) {
-  return safeConvexCallWithStatus('listMisNotificaciones', () => listMisNotificaciones(rondaId), [])
-}
+export const listMisNotificacionesWithStatus = withStatus('listMisNotificaciones', listMisNotificaciones, [])
 
 export async function marcarNotificacionLeida(notificacionId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.marcarNotificacionLeida, {
     notificacionId: notificacionId as Id<'sgcNotificaciones'>
   }, { token })
@@ -1215,7 +1164,7 @@ export async function upsertResultadoPtApp(args: {
   observaciones: string | null
   fechaCalculo: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.upsertResultadoPtApp, {
     ...args,
     rondaId: args.rondaId as Id<'rondas'>,
@@ -1236,7 +1185,7 @@ export async function crearCasoSgc(args: {
   evidenciaSerieId: string | null
   fechaObjetivo: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.crearCasoSgc, {
     ...args,
     rondaId: args.rondaId as Id<'rondas'>,
@@ -1253,7 +1202,7 @@ export async function actualizarCasoSgc(args: {
   fechaObjetivo: string | null
   resolucion: string | null
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   await fetchMutation(api.sgc.index.actualizarCasoSgc, {
     ...args,
     casoId: args.casoId as Id<'sgcCasos'>
@@ -1261,39 +1210,39 @@ export async function actualizarCasoSgc(args: {
 }
 
 export async function getActaInicio(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getActaInicio, { rondaId: rondaId as Id<'rondas'> }, { token })
 }
 
 export async function inicializarActaInicio(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.inicializarActaInicio, { rondaId: rondaId as Id<'rondas'> }, { token })
 }
 
 export async function actualizarActaInicio(args: { actaId: string; fecha: string; lugar: string; textoInicio: string; organizadores: Array<{ nombre: string; entidad: string }> }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.actualizarActaInicio, { ...args, actaId: args.actaId as Id<'sgcActasInicio'> }, { token })
 }
 
 export async function registrarArchivoActaInicio(args: { actaId: string; storageId: string; fileName: string; contentType: string; size: number; tipo: 'docx' | 'pdf' }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   const payload = { actaId: args.actaId as Id<'sgcActasInicio'>, storageId: args.storageId as Id<'_storage'>, fileName: args.fileName, contentType: args.contentType, size: args.size }
   if (args.tipo === 'docx') return fetchMutation(api.sgc.index.registrarDocxActaInicio, payload, { token })
   return fetchMutation(api.sgc.index.registrarPdfFirmadoActaInicio, payload, { token })
 }
 
 export async function cambiarPublicacionActaInicio(actaId: string, publicaParticipante: boolean) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.cambiarPublicacionActaInicio, { actaId: actaId as Id<'sgcActasInicio'>, publicaParticipante }, { token })
 }
 
 export async function getRelacionInstrumentosRonda(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getRelacionInstrumentosRonda, { rondaId: rondaId as Id<'rondas'> }, { token })
 }
 
 export async function inicializarRelacionInstrumentos(rondaId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.inicializarRelacionInstrumentos, { rondaId: rondaId as Id<'rondas'> }, { token })
 }
 
@@ -1301,42 +1250,42 @@ type InstrumentoTipo = 'analizador' | 'aire_cero' | 'calibrador_dinamico' | 'cil
 type InstrumentoCampos = { tipo: InstrumentoTipo; codigoInterno: string; marca: string; modelo: string; serialIdentificacion: string; observaciones: string }
 
 export async function crearInstrumentoRonda(relacionId: string, campos: InstrumentoCampos) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.crearInstrumentoRonda, { ...campos, relacionId: relacionId as Id<'sgcInstrumentosRonda'> }, { token })
 }
 
 export async function actualizarInstrumentoRonda(itemId: string, campos: InstrumentoCampos) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.actualizarInstrumentoRonda, { ...campos, itemId: itemId as Id<'sgcInstrumentosRondaItems'> }, { token })
 }
 
 export async function eliminarInstrumentoRonda(itemId: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.eliminarInstrumentoRonda, { itemId: itemId as Id<'sgcInstrumentosRondaItems'> }, { token })
 }
 
 export async function registrarFotoInstrumentoRonda(args: { itemId: string; tipoFoto: 'general' | 'placa_serial'; storageId: string; fileName: string; contentType: string; size: number }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.registrarFotoInstrumentoRonda, { ...args, itemId: args.itemId as Id<'sgcInstrumentosRondaItems'>, storageId: args.storageId as Id<'_storage'> }, { token })
 }
 
 export async function retirarFotoInstrumentoRonda(itemId: string, tipoFoto: 'general' | 'placa_serial') {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.retirarFotoInstrumentoRonda, { itemId: itemId as Id<'sgcInstrumentosRondaItems'>, tipoFoto }, { token })
 }
 
 export async function enviarRelacionInstrumentosAValidacion(relacionId: string, tecnicoNombre: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.enviarRelacionInstrumentosAValidacion, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, tecnicoNombre }, { token })
 }
 
 export async function validarRelacionInstrumentos(relacionId: string, coordinadorNombre: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.validarRelacionInstrumentos, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, coordinadorNombre }, { token })
 }
 
 export async function devolverRelacionInstrumentos(relacionId: string, observacion: string) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.devolverRelacionInstrumentos, { relacionId: relacionId as Id<'sgcInstrumentosRonda'>, observacion }, { token })
 }
 
@@ -1353,7 +1302,7 @@ export async function registrarExportacionesInstrumentos(args: {
   pdf: ExportacionInstrumentosArchivo
   xlsx: ExportacionInstrumentosArchivo
 }) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.registrarExportacionesInstrumentos, {
     relacionId: args.relacionId as Id<'sgcInstrumentosRonda'>,
     revision: args.revision,
@@ -1363,16 +1312,16 @@ export async function registrarExportacionesInstrumentos(args: {
 }
 
 export async function getExportacionInstrumentosUrl(rondaId: string, tipo: 'pdf' | 'xlsx') {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getExportacionInstrumentosUrl, { rondaId: rondaId as Id<'rondas'>, tipo }, { token })
 }
 
 export async function getActaInicioDownloadUrl(rondaId: string, tipo: 'docx' | 'pdf_firmado' | 'pdf_firmado_interno') {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getActaInicioDownloadUrl, { rondaId: rondaId as Id<'rondas'>, tipo }, { token })
 }
 
 export async function marcarDriveRecursoUsado(recursoId: string, usado: boolean) {
-  const token = await sgcToken()
+  const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.marcarDriveRecursoUsado, { recursoId: recursoId as Id<'sgcDriveRecursos'>, usado }, { token })
 }

@@ -1,4 +1,4 @@
-import type { Contaminante, RondaPTItem, RondaPTSampleGroup } from './client'
+import type { Contaminante, RondaPTItem, RondaPTSampleGroup } from './types'
 
 const CONTAMINANTES = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 

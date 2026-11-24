@@ -6,7 +6,7 @@ import {
   parseReferenciaCsv,
   type ParsedReferenciaRow,
 } from './referencia-csv.ts'
-import type { RondaPTItem, RondaPTSampleGroup } from './client'
+import type { RondaPTItem, RondaPTSampleGroup } from './types'
 
 const ptItems: RondaPTItem[] = [
   makeItem('co-0', 'CO', '0 ppm', 1),
