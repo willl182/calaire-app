@@ -5,6 +5,7 @@ import { redirect, unstable_rethrow } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { SGC_PLAN_BLOQUES, type SgcPlanBloques } from '@/server/sgc/catalog'
 import { ddMmAaaaAIso } from './fechas'
+import { limpiarMensajeError } from './mensajes'
 import { automatizarDriveRondaSgc } from '@/server/sgc/drive-google'
 import {
   actualizarEstadoDriveRecurso,
@@ -51,7 +52,7 @@ function pageUrl(rondaId: string) {
 }
 
 function redirectWith(rondaId: string, key: 'success' | 'error', message: string, formatoFocus?: string, subpagina?: string): never {
-  const params = new URLSearchParams({ [key]: message })
+  const params = new URLSearchParams({ [key]: key === 'error' ? limpiarMensajeError(message) : message })
   if (formatoFocus) params.set('formato', formatoFocus)
   redirect(`${pageUrl(rondaId)}${subpagina ? `/${subpagina}` : ''}?${params.toString()}`)
 }
@@ -126,10 +127,10 @@ export async function inicializarDriveRondaAction(formData: FormData) {
   try {
     const result = await inicializarDriveRonda(rondaId)
     revalidatePath(pageUrl(rondaId))
-    redirectWith(rondaId, 'success', `Expediente Drive inicializado: ${result.creados} creados, ${result.reutilizados} reutilizados, ${result.reparados} reparados.`)
+    redirectWith(rondaId, 'success', `Expediente inicializado: ${result.creados} documentos y carpetas creados, ${result.reutilizados} reutilizados, ${result.reparados} reparados.`)
   } catch (error) {
     unstable_rethrow(error)
-    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible inicializar el expediente Drive.')
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible inicializar el expediente.')
   }
 }
 

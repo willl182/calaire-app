@@ -1,9 +1,32 @@
 import type { SincronizacionExpediente } from '@/server/sgc'
-import { actualizarExpedienteAction } from './actions'
+import { actualizarExpedienteAction, inicializarDriveRondaAction } from './actions'
 
 /** Aviso cuando el expediente guardado no coincide con el catálogo vigente (DIAG 2.3). */
 export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExpediente; rondaId: string }) {
-  if (!sync.inicializado || sync.sincronizado) return null
+  if (!sync.inicializado) {
+    return (
+      <section
+        role="status"
+        aria-labelledby="aviso-sync-title"
+        className="flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 md:flex-row md:items-center md:justify-between"
+      >
+        <div>
+          <h2 id="aviso-sync-title" className="font-semibold">El expediente de esta ronda aún no está inicializado</h2>
+          <p className="mt-1">
+            Inicializarlo crea en la app las carpetas y documentos del catálogo para esta ronda. No crea nada en Google
+            Drive; eso se hace después con «Crear en Google Drive».
+          </p>
+        </div>
+        <form action={inicializarDriveRondaAction}>
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <button className="btn-primary whitespace-nowrap" type="submit">
+            Inicializar expediente
+          </button>
+        </form>
+      </section>
+    )
+  }
+  if (sync.sincronizado) return null
   const nuevos = sync.documentosFaltantes.length
   const carpetas = sync.carpetasFaltantes.length
   const movidos = sync.documentosEnOtraCarpeta.length
