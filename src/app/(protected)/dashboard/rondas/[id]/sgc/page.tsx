@@ -11,7 +11,7 @@ import {
   inicializarPanelSgc,
   type SgcPanel,
 } from '@/server/sgc'
-import { getDriveGoogleAutomationStatus } from '@/server/sgc/drive-google'
+import { getDriveGoogleAutomationStatus, getEstadoDriveRondaSgc } from '@/server/sgc/drive-google'
 import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
 import { AvisoSincronizacion } from './AvisoSincronizacion'
@@ -109,12 +109,13 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   if (!ronda) notFound()
 
   await inicializarPanelSgc(id)
-  const [panel, drive, sync, avance, siguientePaso] = await Promise.all([
+  const [panel, drive, sync, avance, siguientePaso, estadoDrive] = await Promise.all([
     getPanelSgc(id),
     getDriveTreeSgc(id),
     getSincronizacionExpedienteSgc(id),
     getAvanceExpedienteSgc(id),
     getSiguientePasoExpedienteSgc(id),
+    getEstadoDriveRondaSgc(id),
   ])
   if (!panel) notFound()
   const driveGoogleStatus = getDriveGoogleAutomationStatus()
@@ -168,7 +169,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           rondaCodigo={ronda.codigo}
           rondaNombre={ronda.nombre}
           driveGoogleReady={driveGoogleStatus.ready}
-          carpetaRondaCreada={Boolean(drive.root?.driveFolderId)}
+          carpetaRondaCreada={estadoDrive.carpetaRondaCreada}
         />
 
         <HitosRonda hitos={panel.hitos} rondaId={id} />
@@ -177,6 +178,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           drive={drive}
           panel={panel}
           avanceItems={avance.items}
+          estadoDrive={estadoDrive}
           rondaId={id}
           rondaCodigo={ronda.codigo}
           rondaNombre={ronda.nombre}

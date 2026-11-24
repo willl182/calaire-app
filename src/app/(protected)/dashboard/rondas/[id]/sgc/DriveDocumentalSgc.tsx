@@ -8,7 +8,7 @@ import { DriveDetailAside } from '@/components/ui/drive/DriveDetailAside'
 import { FolderCard } from '@/components/ui/drive/FolderCard'
 import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
-import type { SgcAvanceItem, SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/server/sgc'
+import type { EstadoDriveRonda, SgcAvanceItem, SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/server/sgc'
 import F20Control from './F20Control'
 import { SgcRegistroDiligenciable } from './SgcRegistroDiligenciable'
 import {
@@ -27,6 +27,7 @@ type Props = {
   drive: SgcDriveTree
   panel: SgcPanel
   avanceItems: SgcAvanceItem[]
+  estadoDrive: EstadoDriveRonda & { integracionConectada: boolean }
   rondaId: string
   rondaCodigo: string
   rondaNombre: string
@@ -263,7 +264,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
 }
 
 
-export function DriveDocumentalSgc({ drive, panel, avanceItems, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
+export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
   const root = drive.root
   const recursos = drive.recursos
   const folders = root ? childrenOf(recursos, root._id).filter((recurso) => recurso.tipo === 'carpeta') : []
@@ -282,9 +283,13 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, rondaId, rondaCo
             <h2 id="drive-documental-title">Explorador de carpetas</h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            {driveGoogleReady && (
-              <span className="sgc-badge">Drive conectado</span>
-            )}
+            <span className={`sgc-badge ${estadoDrive.integracionConectada ? '' : 'opacity-70'}`} title="Credenciales de Google Drive configuradas en el servidor">
+              Integración Drive: {estadoDrive.integracionConectada ? 'conectada' : 'sin configurar'}
+            </span>
+            <span className="sgc-badge" title="Carpeta de esta ronda creada en Google Drive">
+              Carpeta de la ronda: {estadoDrive.carpetaRondaCreada ? 'creada' : 'no creada'}
+              {estadoDrive.carpetaRondaCreada && ` · ${estadoDrive.documentos.conEnlace}/${estadoDrive.documentos.total} con enlace`}
+            </span>
             <form action={inicializarDriveRondaAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <button className="btn-outline" type="submit">{root ? 'Reparar expediente' : 'Inicializar expediente documental'}</button>
@@ -293,16 +298,20 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, rondaId, rondaCo
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="ronda_codigo" value={rondaCodigo} />
               <input type="hidden" name="ronda_nombre" value={rondaNombre} />
-              <button className="btn-primary" type="submit" disabled={!driveGoogleReady}>Crear en Google Drive</button>
+              <button className="btn-primary" type="submit" disabled={!driveGoogleReady} aria-describedby="crear-drive-ayuda">Crear en Google Drive</button>
             </form>
           </div>
         </div>
+        <p id="crear-drive-ayuda" className="mx-5 mt-3 text-xs text-[var(--foreground-muted)]">
+          &quot;Inicializar&quot; crea el índice del expediente en la app. &quot;Crear en Google Drive&quot; crea (o reutiliza) la carpeta de la ronda
+          y sus subcarpetas por etapa, y copia las plantillas de los documentos que aún no tienen enlace. No modifica documentos ya diligenciados.
+        </p>
 
         {!driveGoogleReady && (
           <div className="m-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
-            <div className="font-semibold">Automatizacion Google Drive pendiente de configuracion</div>
+            <div className="font-semibold">Integración con Google Drive sin configurar</div>
             <div className="mt-1">
-              Cuenta: {driveGoogleConfig.clientEmail ? 'configurada' : 'faltante'} · Llave: {driveGoogleConfig.privateKey ? 'configurada' : 'faltante'} · Raiz: {driveGoogleConfig.rootFolderId ? 'configurada' : 'faltante'} · Plantillas: {driveGoogleConfig.templateMap ? 'mapeadas' : 'sin mapa'}
+              Cuenta: {driveGoogleConfig.clientEmail ? 'configurada' : 'faltante'} · Llave: {driveGoogleConfig.privateKey ? 'configurada' : 'faltante'} · Raíz: {driveGoogleConfig.rootFolderId ? 'configurada' : 'faltante'} · Plantillas: {driveGoogleConfig.templateMap ? 'mapeadas' : 'sin mapa'}
             </div>
           </div>
         )}
