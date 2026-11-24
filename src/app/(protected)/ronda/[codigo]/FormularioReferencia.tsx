@@ -2,6 +2,8 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
+import { DecimalInput } from '@/components/DecimalInput'
+import { isValidDecimal, toDecimal } from '@/lib/decimal'
 import {
   CONTAMINANTES,
   type EnvioPT,
@@ -49,10 +51,12 @@ function fromCellKey(key: CellKey) {
 }
 
 function isValidNumberInput(value: string): boolean {
-  const trimmed = value.trim()
-  if (trimmed === '') return false
-  const parsed = Number(trimmed)
-  return Number.isFinite(parsed)
+  return isValidDecimal(value)
+}
+
+/** Valor normalizado (coma o punto); NaN si vacío o inválido. */
+function num(value: string): number {
+  return toDecimal(value) ?? NaN
 }
 
 function getCellIssue(data: CellData): string | null {
@@ -66,16 +70,16 @@ function getCellIssue(data: CellData): string | null {
   if (data.meanValue.trim() !== '' && !isValidNumberInput(data.meanValue)) {
     return 'El promedio debe ser un número válido.'
   }
-  if (data.sdValue.trim() !== '' && (!isValidNumberInput(data.sdValue) || Number(data.sdValue) < 0)) {
+  if (data.sdValue.trim() !== '' && (!isValidNumberInput(data.sdValue) || num(data.sdValue) < 0)) {
     return 'La desviación estándar debe ser ≥ 0.'
   }
-  if (data.ux.trim() !== '' && (!isValidNumberInput(data.ux) || Number(data.ux) < 0)) {
+  if (data.ux.trim() !== '' && (!isValidNumberInput(data.ux) || num(data.ux) < 0)) {
     return 'La incertidumbre estándar u(x) debe ser ≥ 0.'
   }
-  if (data.k.trim() !== '' && (!isValidNumberInput(data.k) || Number(data.k) < 0)) {
+  if (data.k.trim() !== '' && (!isValidNumberInput(data.k) || num(data.k) < 0)) {
     return 'El factor de cobertura k debe ser ≥ 0.'
   }
-  if (data.uxExp.trim() !== '' && (!isValidNumberInput(data.uxExp) || Number(data.uxExp) < 0)) {
+  if (data.uxExp.trim() !== '' && (!isValidNumberInput(data.uxExp) || num(data.uxExp) < 0)) {
     return 'La incertidumbre expandida U(X) debe ser ≥ 0.'
   }
   return null
@@ -87,13 +91,13 @@ function isCellComplete(data: CellData): boolean {
     isValidNumberInput(data.d1) &&
     isValidNumberInput(data.meanValue) &&
     isValidNumberInput(data.sdValue) &&
-    Number(data.sdValue) >= 0 &&
+    num(data.sdValue) >= 0 &&
     isValidNumberInput(data.ux) &&
-    Number(data.ux) >= 0 &&
+    num(data.ux) >= 0 &&
     isValidNumberInput(data.k) &&
-    Number(data.k) >= 0 &&
+    num(data.k) >= 0 &&
     isValidNumberInput(data.uxExp) &&
-    Number(data.uxExp) >= 0
+    num(data.uxExp) >= 0
   )
 }
 
@@ -239,14 +243,14 @@ export default function FormularioReferencia({
     if (!isCellComplete(data)) return
     if (soloLectura) return
 
-    const d1 = Number(data.d1)
-    const d2 = data.d2.trim() === '' ? null : Number(data.d2)
-    const d3 = data.d3.trim() === '' ? null : Number(data.d3)
-    const meanValue = Number(data.meanValue)
-    const sdValue = Number(data.sdValue)
-    const ux = Number(data.ux)
-    const k = Number(data.k)
-    const uxExp = Number(data.uxExp)
+    const d1 = num(data.d1)
+    const d2 = data.d2.trim() === '' ? null : num(data.d2)
+    const d3 = data.d3.trim() === '' ? null : num(data.d3)
+    const meanValue = num(data.meanValue)
+    const sdValue = num(data.sdValue)
+    const ux = num(data.ux)
+    const k = num(data.k)
+    const uxExp = num(data.uxExp)
     setSaveStatus((prev) => ({ ...prev, [key]: 'saving' }))
 
     const result = adminTarget
@@ -343,13 +347,13 @@ export default function FormularioReferencia({
           .filter(([, data]) => data.meanValue.trim() !== '' || data.d1.trim() !== '')
           .map(([key]) => key)
       )
-      if (!isValidNumberInput(globalK) || Number(globalK) < 0) {
+      if (!isValidNumberInput(globalK) || num(globalK) < 0) {
         setImportPreview(null)
         setImportStatus('error')
         setImportMessage('El factor de cobertura grupal debe ser un número mayor o igual a cero.')
         return
       }
-      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells, Number(globalK))
+      const preview = buildReferenciaImportPreview(parsedRows, ptItems, sampleGroups, existingCells, num(globalK))
       setImportPreview(preview)
       setImportStatus(preview.errors.length > 0 ? 'error' : 'ready')
       setImportMessage(null)
@@ -456,7 +460,7 @@ export default function FormularioReferencia({
 
   function handleKModeChange(nextMode: KMode) {
     setKMode(nextMode)
-    if (nextMode !== 'grupal' || !isValidNumberInput(globalK) || Number(globalK) < 0) return
+    if (nextMode !== 'grupal' || !isValidNumberInput(globalK) || num(globalK) < 0) return
     for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
       updateCell(key, { ...data, k: globalK })
     }
@@ -464,7 +468,7 @@ export default function FormularioReferencia({
 
   function handleGlobalKChange(value: string) {
     setGlobalK(value)
-    if (kMode !== 'grupal' || !isValidNumberInput(value) || Number(value) < 0) return
+    if (kMode !== 'grupal' || !isValidNumberInput(value) || num(value) < 0) return
     for (const [key, data] of Object.entries(cells) as [CellKey, CellData][]) {
       updateCell(key, { ...data, k: value })
     }
@@ -648,14 +652,10 @@ export default function FormularioReferencia({
                   Factor grupal
                 </button>
               </div>
-              <input
-                type="number"
-                step="any"
-                min="0"
-                inputMode="decimal"
+              <DecimalInput
                 value={globalK}
                 disabled={soloLectura}
-                onChange={(event) => handleGlobalKChange(event.target.value)}
+                onValueChange={handleGlobalKChange}
                 className="w-24 rounded border border-[var(--border)] px-3 py-2 text-sm numeric disabled:bg-[var(--surface-muted)]"
                 aria-label="Valor grupal del factor de cobertura k"
               />
@@ -820,7 +820,7 @@ export default function FormularioReferencia({
                       <th className="px-4 py-2 font-semibold">Desv. Est.</th>
                       <th className="min-w-36 px-4 py-2 font-semibold">Incertidumbre estándar u(x)</th>
                       <th className="min-w-32 px-4 py-2 font-semibold">Factor de cobertura k</th>
-                      <th className="min-w-36 px-4 py-2 font-semibold">Incertidumbre expandida U(X)</th>
+                      <th className="min-w-28 px-4 py-2 font-semibold">Incertidumbre expandida U(X)</th>
                       <th className="px-4 py-2 font-semibold text-center">OK</th>
                     </tr>
                   </thead>
@@ -837,6 +837,8 @@ export default function FormularioReferencia({
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
                         }`
 
+                        const wideCls = inputCls.replace('w-20', 'w-28')
+
                         return (
                           <tr
                             key={key}
@@ -850,74 +852,52 @@ export default function FormularioReferencia({
                             )}
                             {(['d1', 'd2', 'd3'] as const).map((field, index) => (
                               <td key={field} className="px-2 py-2">
-                                <input
-                                  type="number"
-                                  step="any"
-                                  inputMode="decimal"
+                                <DecimalInput
                                   value={data[field]}
                                   placeholder={index === 0 ? '' : 'NA'}
                                   disabled={soloLectura}
-                                  onChange={(e) => updateCell(key, { ...data, [field]: e.target.value })}
-                                  className={inputCls}
+                                  onValueChange={(v) => updateCell(key, { ...data, [field]: v })}
+                                  className={wideCls}
                                 />
                               </td>
                             ))}
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={data.meanValue}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, meanValue: e.target.value })}
-                                className={inputCls}
+                                onValueChange={(v) => updateCell(key, { ...data, meanValue: v })}
+                                className={wideCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={data.sdValue}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, sdValue: e.target.value })}
-                                className={inputCls}
+                                onValueChange={(v) => updateCell(key, { ...data, sdValue: v })}
+                                className={wideCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={data.ux}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, ux: e.target.value })}
+                                onValueChange={(v) => updateCell(key, { ...data, ux: v })}
                                 className={inputCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={data.k}
                                 disabled={soloLectura || kMode === 'grupal'}
-                                onChange={(e) => updateCell(key, { ...data, k: e.target.value })}
+                                onValueChange={(v) => updateCell(key, { ...data, k: v })}
                                 className={inputCls}
                               />
                             </td>
                             <td className="px-2 py-2">
-                              <input
-                                type="number"
-                                step="any"
-                                min="0"
-                                inputMode="decimal"
+                              <DecimalInput
                                 value={data.uxExp}
                                 disabled={soloLectura}
-                                onChange={(e) => updateCell(key, { ...data, uxExp: e.target.value })}
+                                onValueChange={(v) => updateCell(key, { ...data, uxExp: v })}
                                 className={inputCls}
                               />
                             </td>
