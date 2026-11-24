@@ -401,3 +401,119 @@ export function calcularAvanceExpediente(
     advertencias: items.filter((item) => item.nivel === 'advertencia'),
   }
 }
+
+// ---------------------------------------------------------------------------
+// Siguiente paso (B1.6)
+// ---------------------------------------------------------------------------
+
+export type PasoPrevioKey = 'crear_ronda' | 'configuracion_pt' | 'codigos_replica' | 'hitos' | 'expediente' | 'invitaciones'
+
+export type PasoPrevio = {
+  key: PasoPrevioKey
+  nombre: string
+  completo: boolean
+  motivo: string
+  destino: string
+  responsable: SgcResponsable
+}
+
+export type PasosPreviosInput = {
+  /** Contaminantes definidos al crear la ronda. */
+  contaminantes: number
+  /** Resultado de `getNivelesPTDescuadres` (vacio = cuadra). */
+  descuadresPT: Array<{ contaminante: string; niveles: number; nivelesPT: number }>
+  participantes: number
+  participantesSinCodigoReplica: number
+  participantesSinCodigo: number
+  hitoInicioConFecha: boolean
+  expedienteInicializado: boolean
+  invitacionesEnviadas: number
+}
+
+export type SiguientePaso =
+  | { tipo: 'previo'; paso: PasoPrevio }
+  | { tipo: 'documento'; documento: SgcAvanceItem }
+  | { tipo: 'ninguno' }
+
+/**
+ * Pasos previos no SGC, en orden: crear ronda, Configuracion PT, codigos de participante y de
+ * replica, hitos, expediente e invitaciones (antes de F-PSEA-03). Los hitos van en paralelo
+ * al expediente y no bloquean inicializarlo (decision 2).
+ */
+export function calcularPasosPrevios(rondaId: string, input: PasosPreviosInput): PasoPrevio[] {
+  const base = `/dashboard/rondas/${rondaId}`
+  const ptOk = input.contaminantes > 0 && input.descuadresPT.length === 0
+  const codigosOk =
+    input.participantes > 0 && input.participantesSinCodigoReplica === 0 && input.participantesSinCodigo === 0
+  return [
+    {
+      key: 'crear_ronda',
+      nombre: 'Crear ronda',
+      completo: true,
+      motivo: 'Ronda creada.',
+      destino: base,
+      responsable: 'coordinador',
+    },
+    {
+      key: 'configuracion_pt',
+      nombre: 'Configuracion PT (niveles por gas)',
+      completo: ptOk,
+      motivo: ptOk
+        ? 'Niveles PT cuadran con la ronda.'
+        : input.contaminantes === 0
+        ? 'La ronda no tiene contaminantes definidos.'
+        : `Niveles PT sin cuadrar: ${input.descuadresPT.map((d) => `${d.contaminante} ${d.nivelesPT}/${d.niveles}`).join(', ')}.`,
+      destino: `${base}/configuracion-pt`,
+      responsable: 'coordinador',
+    },
+    {
+      key: 'codigos_replica',
+      nombre: 'Codigos de participante y de replica',
+      completo: codigosOk,
+      motivo: codigosOk
+        ? 'Todos los cupos tienen codigo y replica.'
+        : input.participantes === 0
+        ? 'Registre los cupos (participantes y referencia).'
+        : `Cupos sin codigo: ${input.participantesSinCodigo}; sin replica: ${input.participantesSinCodigoReplica}.`,
+      destino: `${base}/participantes`,
+      responsable: 'automatico',
+    },
+    {
+      key: 'hitos',
+      nombre: 'Hitos del calendario (INICIO_RONDA con fecha)',
+      completo: input.hitoInicioConFecha,
+      motivo: input.hitoInicioConFecha ? 'Hito de inicio con fecha.' : 'Registre el hito INICIO_RONDA con fecha.',
+      destino: `${base}/sgc#hitos`,
+      responsable: 'coordinador',
+    },
+    {
+      key: 'expediente',
+      nombre: 'Inicializar expediente SGC',
+      completo: input.expedienteInicializado,
+      motivo: input.expedienteInicializado ? 'Expediente inicializado.' : 'Inicialice el expediente documental.',
+      destino: `${base}/sgc#expediente`,
+      responsable: 'coordinador',
+    },
+    {
+      key: 'invitaciones',
+      nombre: 'Invitaciones a participantes',
+      completo: input.participantes > 0 && input.invitacionesEnviadas >= input.participantes,
+      motivo:
+        input.participantes === 0
+          ? 'No hay cupos registrados.'
+          : `Invitaciones enviadas ${input.invitacionesEnviadas}/${input.participantes}.`,
+      destino: `${base}/participantes`,
+      responsable: 'coordinador',
+    },
+  ]
+}
+
+/** Primer pendiente: pasos previos y luego el primer documento obligatorio en orden logico. */
+export function calcularSiguientePaso(pasosPrevios: readonly PasoPrevio[], avance: SgcAvanceExpediente): SiguientePaso {
+  const previo = pasosPrevios.find((paso) => !paso.completo)
+  if (previo) return { tipo: 'previo', paso: previo }
+  const documento = avance.items.find(
+    (item) => item.obligatoriedad === 'obligatorio' && item.cuentaEnAvance && item.estado !== 'completo'
+  )
+  return documento ? { tipo: 'documento', documento } : { tipo: 'ninguno' }
+}

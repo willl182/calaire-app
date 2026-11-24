@@ -559,6 +559,16 @@ export async function getEstadoDriveRondaGuardado(rondaId: string): Promise<Esta
   }, { token })
 }
 
+export type { PasoPrevio, PasoPrevioKey, SiguientePaso } from '../../../convex/_lib/sgc/expediente'
+
+/** Barra "Siguiente paso": pasos previos no SGC + primer documento obligatorio pendiente. */
+export async function getSiguientePasoExpedienteSgc(rondaId: string) {
+  const token = await getConvexToken('operar SGC')
+  return fetchQuery(api.sgc.index.getSiguientePasoExpediente, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
 export async function marcarAplicaDocumentoSgc(rondaId: string, codigo: string, aplica: boolean) {
   const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.marcarAplicaDocumento, {

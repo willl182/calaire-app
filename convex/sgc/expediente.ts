@@ -6,9 +6,14 @@ import { getSgcRondaDocumento } from '../_lib/sgc/catalog'
 import {
   calcularAvanceExpediente,
   calcularEstadoDriveRonda,
+  calcularPasosPrevios,
+  calcularSiguientePaso,
   compararExpedienteConCatalogo,
+  DRIVE_ROOT_CODIGO,
   type EstadosNativosExpediente,
 } from '../_lib/sgc/expediente'
+import { detectarCodigosProvisionales } from '../_lib/sgc/checklist'
+import { getNivelesPTDescuadres } from '../rondas/ptLevels'
 import { inicializarDriveRondaConfig } from './drive'
 import {
   collectChecklistFaltantes,
@@ -81,6 +86,48 @@ export const getAvanceExpedienteConfig = {
   handler: async (ctx, { rondaId }) => {
     await requireSgcViewer(ctx)
     return getAvance(ctx, rondaId)
+  },
+} satisfies SgcQueryConfig<typeof rondaArgs>
+
+/**
+ * B1.6: barra "Siguiente paso". Pasos previos no SGC con estado calculado y, despues, el primer
+ * documento obligatorio pendiente en orden logico (dependencias, no numero de carpeta).
+ */
+export const getSiguientePasoConfig = {
+  args: rondaArgs,
+  handler: async (ctx, { rondaId }) => {
+    await requireSgcViewer(ctx)
+    const ronda = await ctx.db.get(rondaId)
+    if (!ronda) return null
+    const [contaminantes, descuadresPT, participantes, hitos, recursos, nativos] = await Promise.all([
+      ctx.db.query('rondaContaminantes').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
+      getNivelesPTDescuadres(ctx, rondaId),
+      ctx.db.query('rondaParticipantes').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
+      ctx.db.query('sgcHitosRonda').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect(),
+      ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect(),
+      collectEstadosNativosExpediente(ctx, rondaId),
+    ])
+    const pasosPrevios = calcularPasosPrevios(String(rondaId), {
+      contaminantes: contaminantes.length,
+      descuadresPT,
+      participantes: participantes.length,
+      participantesSinCodigoReplica: participantes.filter((p) => p.replicateCode == null).length,
+      participantesSinCodigo: participantes.filter(
+        (p) => !p.participantCode?.trim() || detectarCodigosProvisionales([p.participantCode]).length > 0
+      ).length,
+      hitoInicioConFecha: hitos.some(
+        (hito) => hito.codigo === 'INICIO_RONDA' && hito.estado !== 'cancelado' && Boolean(hito.fechaObjetivo?.trim())
+      ),
+      expedienteInicializado: recursos.some((recurso) => recurso.codigo === DRIVE_ROOT_CODIGO),
+      // Cada cupo registrado en rondaParticipantes nace con `invitadoAt` (invitacion emitida).
+      invitacionesEnviadas: participantes.filter((p) => p.invitadoAt > 0).length,
+    })
+    const avance = calcularAvanceExpediente(String(rondaId), recursos, nativos)
+    return {
+      pasosPrevios,
+      siguiente: calcularSiguientePaso(pasosPrevios, avance),
+      avance: { completos: avance.completos, total: avance.total, porcentaje: avance.porcentaje },
+    }
   },
 } satisfies SgcQueryConfig<typeof rondaArgs>
 

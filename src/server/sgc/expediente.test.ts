@@ -2,11 +2,14 @@ import { describe, expect, it } from 'vitest'
 import {
   calcularAvanceExpediente,
   calcularEstadoDriveRonda,
+  calcularPasosPrevios,
+  calcularSiguientePaso,
   compararExpedienteConCatalogo,
   enriquecerRecursoConCatalogo,
   type EstadosNativosExpediente,
+  type PasosPreviosInput,
 } from '../../../convex/_lib/sgc/expediente'
-import { SGC_RONDA_ETAPAS } from './catalog'
+import { SGC_DOCUMENTOS_ORDEN_LOGICO, SGC_RONDA_ETAPAS } from './catalog'
 
 describe('enriquecerRecursoConCatalogo', () => {
   it('toma orden, responsable y obligatoriedad del catalogo aunque la copia guardada sea antigua', () => {
@@ -74,6 +77,52 @@ describe('calcularEstadoDriveRonda', () => {
     )
     expect(conDrive).toMatchObject({ carpetaRondaCreada: true, carpetaRondaId: 'abc', carpetaRondaUrl: 'https://drive.google.com/open?id=abc' })
     expect(calcularEstadoDriveRonda([]).expedienteInicializado).toBe(false)
+  })
+})
+
+const PREVIOS_OK: PasosPreviosInput = {
+  contaminantes: 2,
+  descuadresPT: [],
+  participantes: 3,
+  participantesSinCodigoReplica: 0,
+  participantesSinCodigo: 0,
+  hitoInicioConFecha: true,
+  expedienteInicializado: true,
+  invitacionesEnviadas: 3,
+}
+
+describe('siguiente paso', () => {
+  it('pasos previos en orden y con estado calculado', () => {
+    const pasos = calcularPasosPrevios('r1', { ...PREVIOS_OK, descuadresPT: [{ contaminante: 'CO', niveles: 3, nivelesPT: 2 }] })
+    expect(pasos.map((p) => p.key)).toEqual(['crear_ronda', 'configuracion_pt', 'codigos_replica', 'hitos', 'expediente', 'invitaciones'])
+    const pt = pasos.find((p) => p.key === 'configuracion_pt')!
+    expect(pt).toMatchObject({ completo: false, destino: '/dashboard/rondas/r1/configuracion-pt' })
+    expect(pt.motivo).toContain('CO 2/3')
+  })
+
+  it('primero los previos, luego el primer obligatorio en orden logico', () => {
+    const avance = calcularAvanceExpediente('r1', recursosPendientes(), NATIVOS_VACIOS)
+    const conPrevio = calcularSiguientePaso(calcularPasosPrevios('r1', { ...PREVIOS_OK, participantesSinCodigoReplica: 1 }), avance)
+    expect(conPrevio).toMatchObject({ tipo: 'previo', paso: { key: 'codigos_replica' } })
+
+    const previos = calcularPasosPrevios('r1', PREVIOS_OK)
+    expect(calcularSiguientePaso(previos, avance)).toMatchObject({ tipo: 'documento', documento: { codigo: 'F-PSEA-06' } })
+  })
+
+  it('F-PSEA-21 y F-PSEA-07 se piden antes que F-PSEA-19', () => {
+    const completos: Record<string, { estado: string; aprobadoAt?: number }> = Object.fromEntries(
+      SGC_DOCUMENTOS_ORDEN_LOGICO.filter((d) => d.ordenLogico < 130).map((d) => [d.codigo, { estado: 'diligenciado', aprobadoAt: 1 }])
+    )
+    const nativos = { ...NATIVOS_VACIOS, planFinalizado: true, fichasEnviadas: 2, participantesReclamados: 2 }
+    const previos = calcularPasosPrevios('r1', PREVIOS_OK)
+    const paso = (extra: typeof completos, n = nativos) =>
+      calcularSiguientePaso(previos, calcularAvanceExpediente('r1', recursosPendientes(extra), n))
+    expect(paso(completos)).toMatchObject({ documento: { codigo: 'F-PSEA-21' } })
+    const conF21 = { ...nativos, relacionInstrumentosEstado: 'validado' as const }
+    expect(paso({ ...completos, 'F-PSEA-20': { estado: 'diligenciado' } }, conF21)).toMatchObject({ documento: { codigo: 'F-PSEA-07' } })
+    expect(
+      paso({ ...completos, 'F-PSEA-20': { estado: 'diligenciado' }, 'F-PSEA-07': { estado: 'diligenciado' } }, conF21)
+    ).toMatchObject({ documento: { codigo: 'F-PSEA-19' } })
   })
 })
 

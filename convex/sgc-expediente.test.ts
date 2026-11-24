@@ -91,6 +91,37 @@ describe('sincronizacion del expediente (B1.3)', () => {
     expect(estado).toMatchObject({ expedienteInicializado: true, carpetaRondaCreada: false })
   })
 
+  test('siguiente paso con pasos previos calculados (B1.6)', async () => {
+    const t = convexTest(schema, modules)
+    const rondaId = await seedRonda(t)
+    const admin = t.withIdentity(adminIdentity)
+    await t.run(async (ctx) => {
+      await ctx.db.insert('rondaContaminantes', { rondaId, contaminante: 'CO', niveles: 1, replicas: 2 })
+    })
+    const sinPT = await admin.query(api.sgc.index.getSiguientePasoExpediente, { rondaId })
+    expect(sinPT?.siguiente).toMatchObject({ tipo: 'previo', paso: { key: 'configuracion_pt' } })
+
+    await t.run(async (ctx) => {
+      await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'N1', sortOrder: 1, createdAt: Date.now() })
+      await ctx.db.insert('rondaParticipantes', {
+        rondaId, workosUserId: 'pendiente:lab', email: 'lab@test', invitadoAt: Date.now(),
+        participantProfile: 'member', participantCode: 'LAB-01', replicateCode: 2,
+      })
+      await ctx.db.insert('sgcHitosRonda', {
+        rondaId, codigo: 'INICIO_RONDA', nombre: 'Inicio', fase: 'Inicio', fechaObjetivo: '2026-12-01', fechaReal: null,
+        estado: 'pendiente', responsable: 'Calaire', visibleParticipante: true, bloqueaCierre: false,
+        formatoRelacionado: 'F-PSEA-19', notas: null, createdAt: Date.now(), createdBy: 'seed', updatedAt: Date.now(), updatedBy: 'seed',
+      })
+    })
+    const sinExpediente = await admin.query(api.sgc.index.getSiguientePasoExpediente, { rondaId })
+    expect(sinExpediente?.siguiente).toMatchObject({ tipo: 'previo', paso: { key: 'expediente' } })
+
+    await admin.mutation(api.sgc.index.actualizarExpediente, { rondaId })
+    const documento = await admin.query(api.sgc.index.getSiguientePasoExpediente, { rondaId })
+    expect(documento?.siguiente).toMatchObject({ tipo: 'documento', documento: { codigo: 'F-PSEA-06' } })
+    expect(documento?.pasosPrevios.every((p) => p.completo)).toBe(true)
+  })
+
   test('sin rol SGC no consulta la sincronizacion', async () => {
     const t = convexTest(schema, modules)
     const rondaId = await seedRonda(t)
