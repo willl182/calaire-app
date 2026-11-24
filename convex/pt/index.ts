@@ -1,6 +1,7 @@
 import { ConvexError, v } from 'convex/values'
 import { query, mutation, MutationCtx, QueryCtx } from '../_generated/server'
 import { Doc, Id } from '../_generated/dataModel'
+import { assertCapacidadNivelesPT } from '../rondas/ptLevels'
 import {
   requireAdminIdentity,
   requireManagerIdentity,
@@ -518,6 +519,7 @@ export const createPTItem = mutation({
   },
   handler: async (ctx, { rondaId, contaminante, runCode, levelLabel, sortOrder }) => {
     await requireManagerIdentity(ctx)
+    await assertCapacidadNivelesPT(ctx, rondaId, contaminante, 1)
     const id = await ctx.db.insert('rondaPtItems', { rondaId, contaminante, runCode, levelLabel, sortOrder, createdAt: Date.now() })
     return ctx.db.get(id)
   },
@@ -537,6 +539,7 @@ export const createPTItemsBulk = mutation({
   },
   handler: async (ctx, { rondaId, contaminante, items }) => {
     await requireManagerIdentity(ctx)
+    await assertCapacidadNivelesPT(ctx, rondaId, contaminante, items.length)
     const now = Date.now()
     const ids = []
     for (const item of items) {

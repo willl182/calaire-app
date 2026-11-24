@@ -66,9 +66,50 @@ El personal autorizado usa calaire-app bajo lo definido en DG-PSEA-02, P-PSEA-04
 | F-PSEA-09 | Exportacion de datos de participantes hacia pt_app. |
 | F-PSEA-14 | Caso SGC de queja o NC, si aplica. |
 
-## 6. Procedimiento resumido
+## 6. Creacion y configuracion de la ronda
 
-1. Crear la ronda en calaire-app con su codigo, periodo, analito(s) y niveles.
+La ronda queda creada solo cuando se completan los dos pasos siguientes. Los datos de entrada deben estar definidos previamente en la planificacion de ronda (`P-PSEA-04`, `F-PSEA-06`).
+
+### 6.1 Crear la ronda
+
+Ruta: **Dashboard → Rondas → Nueva ronda**. Requiere rol administrador.
+
+| Campo | Que registrar | Observaciones |
+|---|---|---|
+| Nombre | Nombre descriptivo de la ronda. | Ej.: `Comparacion interlaboratorio de gases contaminantes criterio 2026`. |
+| Codigo | Codigo unico de la ronda. | Formato `EA-<tipo>-<año>[-R<n>]`, en mayusculas. Ej.: `EA-PP-2026-R1`, `EA-CIL-2026` para ronda unica. No se puede repetir. |
+| Numero de participantes | Cantidad de laboratorios participantes planeados. | Crea un cupo pendiente por participante, cada uno con su enlace de acceso. No incluye la referencia. |
+| Incluir referencia | Marcar si Calaire participa como referencia. | Crea un cupo adicional de perfil `member_special` con enlace individual. |
+| Contaminantes | Marcar cada gas incluido (CO, SO2, O3, NO, NO2). | Solo los gases marcados se configuran y reportan. |
+| Niveles (por gas) | Numero de niveles de concentracion del gas. | Define las casillas que diligencia el participante. Debe coincidir con los niveles PT de 6.2. |
+| Replicas (por gas) | Numero de replicas por nivel: 2 o 3. | Aplica a todos los niveles del gas. |
+
+Al guardar, la ronda queda en estado `borrador` y el aplicativo asigna a cada cupo un **codigo de participante aleatorio** de 6 caracteres, unico en la ronda.
+
+### 6.2 Configurar PT
+
+Ruta: **Ronda → Configuracion PT**. Se realiza inmediatamente despues de crear la ronda y antes de invitar participantes.
+
+1. **Niveles PT por gas.** Seleccionar el contaminante y registrar una fila por nivel con:
+   - **Run:** identificador de la corrida (ej. `1`, `2`, `3`).
+   - **Nivel:** etiqueta del nivel de concentracion (ej. `1`, `2`, `3`).
+
+   Repetir para cada gas. El numero de filas de cada gas debe ser igual al numero de niveles definido en 6.1. El aplicativo no permite cargar mas niveles PT de los definidos ni niveles de un gas no incluido, muestra un aviso mientras falten niveles y no permite activar la ronda hasta que coincidan. Los pares run/nivel son los que se exportan a pt_app (`F-PSEA-09`).
+2. **Codigos de participantes PT.** Verificar que cada participante y la referencia tengan codigo asignado. El codigo se genera automaticamente; editarlo solo como respaldo administrativo y conservando la unicidad. El campo **Replica** completa la exportacion CSV.
+
+Los codigos de participante son el identificador anonimo de la ronda: no deben publicarse junto con la identidad del laboratorio (`P-PSEA-19`, `F-PSEA-20`).
+
+### 6.3 Verificacion antes de continuar
+
+- [ ] Codigo y nombre de la ronda correctos.
+- [ ] Cupos = participantes planeados (+ referencia, si aplica).
+- [ ] Gases, niveles y replicas iguales a `F-PSEA-06`.
+- [ ] Niveles PT cargados para cada gas, en igual numero que los niveles.
+- [ ] Todos los participantes y la referencia con codigo PT.
+
+## 7. Procedimiento resumido
+
+1. Crear y configurar la ronda en calaire-app segun la seccion 6.
 2. Configurar el calendario global (F-PSEA-01) y el cronograma detallado (F-PSEA-02).
 3. Registrar o importar los laboratorios participantes y enviar invitaciones.
 4. Generar y controlar la ficha basica de ronda (F-PSEA-05) y la planificacion completa de ronda (F-PSEA-06).
@@ -77,7 +118,7 @@ El personal autorizado usa calaire-app bajo lo definido en DG-PSEA-02, P-PSEA-04
 7. Ejecutar la exportacion oficial de datos (F-PSEA-09) hacia pt_app.
 8. Registrar casos SGC de queja o NC cuando aplique.
 
-## 7. Campos minimos
+## 8. Campos minimos
 
 La administracion de una ronda debe controlar como minimo:
 
@@ -90,7 +131,7 @@ La administracion de una ronda debe controlar como minimo:
 - Identificador de la exportacion oficial hacia pt_app (F-PSEA-09).
 - Registro de casos SGC, si aplica.
 
-## 8. Controles
+## 9. Controles
 
 - Los cambios en calendario o cronograma deben estar justificados y comunicados.
 - La planificacion de ronda (F-PSEA-06) debe reflejar lo definido en P-PSEA-04; la ficha basica (F-PSEA-05) resume esa planificacion.
@@ -98,7 +139,7 @@ La administracion de una ronda debe controlar como minimo:
 - Los casos SGC de queja deben alinearse con P-PSEA-17 y escalar a P-PSEA-15 cuando deriven en trabajo no conforme, NC o accion correctiva. P-PSEA-16 solo aplica a divulgacion y control de valores sensibles.
 - El acceso administrativo debe estar restringido a roles autorizados.
 
-## 9. Relaciones documentales
+## 10. Relaciones documentales
 
 | Codigo | Relacion |
 |---|---|
@@ -112,7 +153,7 @@ La administracion de una ronda debe controlar como minimo:
 | F-PSEA-06 | Planificacion completa de ronda generada o consolidada desde calaire-app. |
 | I-PSEA-02 | Instructivo de uso del participante. |
 
-## 10. Limites
+## 11. Limites
 
 - No reemplaza P-PSEA-04; solo explica como ejecutar en el aplicativo lo definido por el procedimiento.
 - No define criterios estadisticos ni analisis de resultados.

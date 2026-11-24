@@ -1,10 +1,10 @@
-# Diagnóstico UI/UX y funcionalidad documental — CALAIRE APP
+# Diagnóstico de calaire-app: UI/UX, gestión documental y arquitectura
 
 - **Fecha:** 2026-11-18
-- **Alcance:** perfil administrador/coordinador. La vista de participante no se pudo revisar en vivo.
+- **Alcance:** perfil administrador/coordinador (la vista de participante no se pudo revisar en vivo) y arquitectura del código (`src/server`, `convex/`, almacenamiento de archivos).
 - **Capturas:** `docs/screenshots/diagnostico/`, tomadas el 2026-11-18 en producción.
 - **Método:**
-  - Auditoría estática del código (`src/`, `convex/`).
+  - Auditoría estática del código (`src/`, `convex/`), incluida la organización por capas y el almacenamiento.
   - Recorrido en producción (`https://calaire-app.vercel.app`) en escritorio (1440 px) y móvil (390 px). Solo navegación: no se envió ningún formulario ni se ejecutaron acciones que cambien datos.
   - Rondas revisadas: EA-PP2026-R3 (`kd763crwy2e9948jdvknmmhnzn88hsxv`) y EA-PP-R3 (`kd7fd3pawt3wpnvy6xe6yzwrm58any1z`).
 
@@ -20,6 +20,7 @@
 | Captura de datos PT | 🔴 Riesgo de datos | Inputs que truncan valores, `type="number"` sin coma decimal ni protección contra la rueda del mouse. |
 | Accesibilidad | 🟠 Irregular | Contrastes por debajo de AA, celdas sin etiqueta, errores solo en tooltip. |
 | Consistencia de información | 🟠 Contradicciones | Estados e indicadores distintos para la misma ronda según la pantalla. |
+| Arquitectura del código | 🟠 Sobrecargada | `src/server` replica a Convex en fachadas monolíticas con código duplicado; los archivos se reparten entre Convex Storage y Drive. |
 | **Gestión documental de ronda (SGC)** | 🔴 **No funcional de punta a punta** | El expediente no está sincronizado con el catálogo, F-PSEA-19/20/21 no son accesibles, el Drive de la ronda no está creado y los datos de la app no alimentan los documentos. |
 
 **Calificación UI/UX general: 6/10.** La base es sólida, pero la experiencia en móvil, la captura de datos y el flujo documental requieren trabajo prioritario.
@@ -123,6 +124,32 @@ En la ronda EA-PP2026-R3, que operativamente está terminada (envíos PT complet
 4. **Un único indicador de avance por etapa**, con un cierre que explique qué falta, quién lo hace y un enlace directo a cada pendiente.
 5. **F-PSEA-19 con indicador de pasos** y validación previa del hito `INICIO_RONDA`, antes de presionar el botón.
 6. **Limpiar textos:** tildes, nombre del usuario en vez del identificador de WorkOS, formato de fecha `dd/mm/aaaa` y sin rutas internas.
+
+### 2.7 Flujo de creación y expediente de cualquier ronda (2026-11-24)
+
+**Alcance: todas las rondas.** Los hallazgos y el cambio propuesto son del funcionamiento general de la app, no de una ronda en particular. Se detectaron al crear `EA-CIL-2026` desde cero: después de inicializar el expediente aparecen las 8 carpetas, pero el coordinador no sabe por dónde seguir y tiene que dar vueltas entre pantallas. Esto confirma los puntos 7, 9 y 11 y agrega lo siguiente:
+
+13. **Dentro de cada carpeta los documentos se ordenan por código, no por el orden en que se diligencian.** En Planificación se abre F-01/F-02 antes de tener F-06.
+14. **No se indica quién llena cada documento** (coordinador, participante o la app), así que no se distingue lo que hay que hacer de lo que solo hay que esperar.
+15. **F-PSEA-16/F-PSEA-17 ("si aplica") se ven y se cuentan como pendientes**, igual que los obligatorios.
+16. **Lo previo al expediente queda fuera de la pantalla.** Configuración PT (niveles run/nivel y códigos), hitos e invitaciones están en otras rutas, sin nada que guíe hacia ellos.
+17. **El código de réplica no se asigna al crear la ronda**, aunque `submitFinalPTForParticipante` lo exige (`convex/pt/index.ts:64`). Hay que llenarlo a mano en Configuración PT.
+
+**Propuesta.** Esto cambia parte de cómo funciona la app, no solo la vista, y aplica a todas las rondas, nuevas y existentes:
+
+- **Orden por flujo y pasos numerados en cada etapa.** Planificación: F-06 → F-01 → F-02 → F-05 → F-03/F-04 → F-16/F-17.
+- **Etiqueta de responsable** en cada documento: **Tú**, **Participante** o **Automático**.
+- **"Si aplica" separado** de los obligatorios, en gris, y fuera del cálculo de avance hasta que se marque que aplica.
+- **Barra "Siguiente paso"** arriba del expediente, con el primer pendiente obligatorio y un enlace directo. Incluye los pasos que no son formatos SGC (Configuración PT, hitos, invitaciones), con estado calculado; por ejemplo, niveles PT cuadrados con `getNivelesPTDescuadres` (`convex/rondas/ptLevels.ts`).
+- **Leyenda del punto crítico** y limpieza de textos (punto 9).
+- **Código de réplica automático** al crear la ronda: referencia = 1 y participantes 2, 3, …, la convención de pt_app.
+
+**Implica:**
+
+- Agregar al catálogo `SGC_RONDA_ETAPAS`, por documento, el orden de flujo, el responsable y si es obligatorio o "si aplica". El catálogo está duplicado (ver 4.4), así que conviene unificarlo antes.
+- Recalcular el avance y el checklist sin los "si aplica" inactivos.
+- Que las rondas ya creadas tomen el nuevo orden y las etiquetas sin reinicializar el expediente, leyéndolos del catálogo y no de la copia guardada por ronda (relacionado con el punto 1, expediente desincronizado).
+- Actualizar `I-PSEA-03` con el mapa de carpetas, etapas y pasos.
 
 ---
 
@@ -238,20 +265,111 @@ Referencia: `src/app/(protected)/ronda/[codigo]/FormularioRonda.tsx`.
 
 ---
 
-## 4. Plan sugerido
+## 4. Diagnóstico de arquitectura
+
+`convex/` está razonablemente bien organizado por dominio (`rondas/`, `pt/`, `sgc/*`, `agent/*`, `fichas/`). La sobrecarga se concentra en la capa `src/server`, que replica a Convex como fachadas monolíticas con código duplicado, envoltorios repetitivos y barriles vacíos. Además, el almacenamiento de archivos está dividido entre Convex Storage y Google Drive.
+
+### 4.1 `src/server/rondas/client.ts` (1660 líneas) — el más problemático
+
+- **Más de 130 exports en un solo archivo**: rondas, participantes, directorio, envíos, PT, resultados, casos PT, certificados, calendario y métricas.
+- **Duplicación interna**: el archivo vuelve a definir `CONTAMINANTES`, `isInitialConcentrationLevel`, `getRequiredPTReplicateCount`, `filtrarParticipantes`, `buildResultadosCsv`, `buildPTCsv` y los tipos `Ronda`, `RondaPTItem` y `Contaminante`, que ya existen en `constants.ts`, `pt.ts`, `filtros.ts`, `csv.ts` y `types.ts`. Hay dos fuentes de verdad, y los archivos pequeños quedan como código muerto o divergente.
+- **45 pares `X` / `XWithStatus`** (por ejemplo `listRondas` / `listRondasWithStatus`): casi la mitad del archivo es el mismo envoltorio `safeConvexCallWithStatus` repetido.
+
+### 4.2 `src/server/sgc/index.ts` (1378 líneas) — mismo patrón
+
+- Son 111 funciones que en general solo reenvían a Convex, con el par `X` / `XWithStatus` y el token.
+- Mezcla temas sin relación: panel, Drive, maestro documental, hitos, comunicaciones, publicaciones, comentarios, notificaciones, acta de inicio e instrumentos.
+- En `convex/sgc/` esos temas ya están separados en archivos; el cliente de Next los vuelve a juntar.
+
+### 4.3 Capas que no hacen nada
+
+- `rondas/repositorio.ts`, `rondas/operaciones.ts`, `rondas/tipos.ts`, `sgc/repositorio.ts`, `sgc/operaciones.ts`, `sgc/service.ts` y `sgc/tipos.ts` tienen de 1 a 7 líneas que solo hacen `export *`. Parecen una arquitectura en capas, pero no aportan nada.
+- Hay nombres en inglés y en español para lo mismo: `types.ts` / `tipos.ts` e `index.ts` / `operaciones.ts`.
+- 63 imports apuntan a `@/server/rondas`, el barril que incluye todo `client.ts`.
+
+### 4.4 Lógica repetida entre archivos
+
+- `rondasToken()` (`rondas/client.ts`), `sgcToken()` (`sgc/index.ts`) y `fichasToken()` (`rondas/fichas.ts`) son la misma función copiada, y cada archivo vuelve a envolver `fetchQuery` / `fetchMutation`.
+- `src/server/sgc/catalog.ts` y `convex/_lib/sgc/catalog.ts` son idénticos (339 líneas cada uno). Existe `catalog-parity.test.ts` solo para comprobar que sigan iguales, lo que indica que deberían ser un solo archivo compartido.
+
+### 4.5 Componentes y server actions grandes
+
+- `ronda/[codigo]/FormularioReferencia.tsx` (959 líneas) y `ronda/[codigo]/FormularioRonda.tsx` (912 líneas) tienen 13 `useState` cada uno. Es muy probable que compartan lógica de réplicas, validación y guardado (pendiente de comparar en detalle).
+- `dashboard/rondas/[id]/sgc/actions.ts` (758 líneas) agrupa 33 server actions de todos los subtemas SGC.
+- `convex/schema.ts` (982 líneas) es aceptable en Convex, aunque se podría separar por dominio.
+
+### 4.6 Almacenamiento de archivos: Convex Storage y Drive conviven
+
+#### Situación actual
+
+- Ya existe integración con Google Drive en `src/server/google-drive.ts`: autenticación por service account u OAuth, carpeta raíz y shared drive, creación y copia de archivos. También existen `src/server/sgc/drive-google.ts` y la tabla `sgcDriveRecursos`, con los campos `driveFileId` y `driveFolderId`.
+- Al mismo tiempo, **17 campos `_storage` en 13 tablas** guardan archivos en Convex:
+
+| Dominio | Tablas y campos |
+|---|---|
+| PT | `ptEvaluaciones` (CSV, informe), `ptInformes`, `ptCertificados` |
+| Fichas | `fichasAcompanantes` (ARL) |
+| SGC | `sgcEvidenciaVersiones`, `sgcDriveRecursos`, `sgcActasInicio` (docx/pdf), `sgcInstrumentosRonda` (pdf/xlsx), `sgcInstrumentosRondaItems` (fotos), `documentoSgcVersiones`, `documentoSgcAnexos`, `registrosSgc` |
+| Casos | `casoDocumentoVersiones` |
+
+- El patrón de subida (`generateUploadUrl`, luego `fetch POST` desde el navegador y después registrar el `storageId`) está repetido en `F20Control.tsx`, `ActaArchivos.tsx`, `InstrumentosEditor.tsx`, `FormularioRegistro.tsx`, `FichaAdminEditor.tsx` y en los casos PT. Del lado del servidor, `getXDownloadUrl` aparece en `sgc/index.ts`, `rondas/client.ts` y `fichas.ts`.
+- Hay recursos que tienen a la vez un archivo en Convex y una referencia en Drive (`sgcDriveRecursos`), así que nunca está claro cuál es la copia oficial.
+
+#### Propuesta: Drive como único almacén y Convex solo con metadatos
+
+1. **Un solo módulo de archivos** (`src/server/files.ts`) con `iniciarSubida`, `confirmarSubida`, `urlDescarga` y `retirar`, apoyado en `google-drive.ts`. Reemplaza los flujos repetidos.
+2. **Subida directa a Drive con una sesión resumable.** El servidor crea la sesión en la carpeta de la ronda y le devuelve la URL al navegador, que sube el archivo directamente a Drive. Así no pasan archivos grandes por server actions, que tienen límite de tamaño. Para el navegador el flujo es igual al de hoy (pedir URL y hacer POST/PUT), así que los componentes cambian poco.
+3. **Esquema:** cambiar `storageId: v.id('_storage')` por un objeto común `archivo: { driveFileId, nombre, mimeType, tamano, webViewLink }`, definido una sola vez en el esquema y reutilizado en las 13 tablas.
+4. **Descargas:** un route handler `/api/archivos/[id]` que verifica permisos con Convex y sirve el archivo como proxy desde Drive, sin exponer su enlace. Mantiene privados los archivos de participantes (ARL, resultados y certificados) sin tener que compartirlos públicamente en Drive.
+5. **Archivos que genera Convex** (`pt/certificate_generation.ts`, informes, exportaciones F21): moverlos a una action `'use node'` con las credenciales de Drive, o generarlos en Next. Es el punto más delicado.
+6. **Migración:** copiar a Drive los archivos existentes, guardar el `driveFileId` y eliminarlos de `_storage`. `convex/migrations.ts` sirve como base.
+
+#### Costos y riesgos
+
+- Las descargas son más lentas que con la URL directa de Convex, y dependes de las cuotas de la API de Drive.
+- Los permisos pasan a estar en el código de la app y no en Drive. Hay que asegurarse de que el service account sea dueño de todo y de que nadie comparta carpetas a mano con participantes.
+- Los tests de `convex/*.test.ts` que usan storage tendrán que simular Drive.
+
+#### Decisión (2026-11-24)
+
+**El participante no accede a Drive.** Solo ve, dentro de la app, el enlace de descarga de los pocos archivos que puede o debe ver: documentos publicados de la ronda (I-PSEA-02, calendario, cronograma, F-PSEA-19) y sus propios archivos (informe, certificado, ARL). Por lo tanto:
+
+- Los permisos se controlan en la app, en el route handler de descargas, y no en Drive.
+- Ninguna carpeta ni archivo de Drive se comparte con participantes. El service account es dueño de todo.
+- La descarga se sirve como proxy desde la app; no se redirige al enlace de Drive.
+
+---
+
+## 5. Plan sugerido
+
+Dos líneas de trabajo. La de producto ordena lo que ve el usuario; la técnica reduce la deuda del código. Se cruzan en un punto: el catálogo SGC único (técnica, paso 5) es requisito de la fase 2 de producto.
+
+### 5.1 Producto (UI/UX y flujo documental)
 
 | Fase | Contenido | Puntos |
 |---|---|---|
 | **1. Datos y documentación** | Ensanchar los inputs PT, aceptar la coma, sacar los inputs de `type=number`, errores visibles. Sincronizar el expediente con el catálogo, dar acceso a F-PSEA-19 y F-PSEA-21, aclarar el estado de Drive. | 3.1 (1–5), 2.3 (1–3) |
-| **2. Flujo documental guiado** | Vista por etapas con una acción principal por documento, autollenado desde los datos de la app, un indicador único de avance y cierre explicado. | 2.6 |
+| **2. Flujo documental guiado** (requiere 5.2, paso 5) | Vista por etapas con una acción principal por documento, autollenado desde los datos de la app, un indicador único de avance y cierre explicado. Orden por flujo, responsable por documento, "si aplica" separado, barra "Siguiente paso" que incluye Configuración PT e hitos, y código de réplica automático. | 2.6, 2.7 |
 | **3. Navegación** | Una sola cabecera con menú de usuario, navegación móvil, anchos alineados, cerrar sesión para el participante, `aria-current` correcto. | 3.2 |
 | **4. Coherencia** | Unificar los estados de ronda y los conteos del directorio; convertir avisos y tarjetas en enlaces. | 3.3 |
 | **5. Sistema de diseño** | Botón con estado de carga, diálogo de confirmación propio, avisos emergentes, tokens en lugar de colores Tailwind fijos, contraste AA. | 3.4 |
 | **6. Pulido** | Tildes, textos técnicos, `metadata` por página, áreas táctiles. | 3.5 |
 
+### 5.2 Técnica (arquitectura), de menor a mayor riesgo
+
+1. **Quitar los duplicados de `client.ts`** y que importe desde `pt.ts`, `csv.ts`, `filtros.ts`, `types.ts` y `constants.ts`. Es un cambio mecánico y seguro.
+2. **Eliminar los barriles vacíos** (`repositorio`, `operaciones`, `tipos`, `service` de sgc) y unificar `types` / `tipos`.
+3. **Crear un solo `src/server/convex.ts`** con `authedQuery` / `authedMutation` y un helper genérico para la variante con status. Así cada `XWithStatus` queda en una línea, o desaparece si se devuelve siempre `{ data, offline }`.
+4. **Partir `client.ts` y `sgc/index.ts` por dominio**, siguiendo la estructura de `convex/`: `rondas/participantes.ts`, `rondas/pt.ts`, `rondas/casos.ts`, `sgc/drive.ts`, `sgc/maestro.ts`, etc. El barril `index.ts` se mantiene para no romper los imports.
+5. **Compartir el catálogo SGC** desde un solo archivo y borrar el test de paridad.
+6. **Extraer lógica común** de los dos formularios de ronda y dividir `sgc/actions.ts` por subtema.
+7. **Migrar el almacenamiento a Drive** (4.6). Empezar por SGC, donde ya existe la estructura de carpetas de Drive, y dejar al final PT, certificados y fichas, que tienen archivos privados de participantes.
+
+Cada paso se valida con `pnpm test` y `pnpm lint`.
+
 ---
 
-## 5. Pendiente de verificar
+## 6. Pendiente de verificar o decidir
 
 - Crear el expediente en Drive, ejecutar "Reparar expediente" e inicializar F-PSEA-19 y F-PSEA-21. Implican cambiar datos, por lo que deben probarse en una ronda de prueba o en un entorno de desarrollo.
 - La vista del participante: documentos publicados, calendario y captura PT, con una cuenta de participante de prueba.

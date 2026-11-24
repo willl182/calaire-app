@@ -4,6 +4,7 @@ import { defineRondaMutation } from './definitions'
 import { generateUniqueParticipantCode } from './codes'
 import { getDirectorioByLookup, normalizeEmail } from './directorio'
 import { assertAllowedEstadoTransition } from './state'
+import { assertNivelesPTCuadran } from './ptLevels'
 import { requireManagerIdentity } from '../access'
 
 export const createRondaDefinition = defineRondaMutation({
@@ -34,6 +35,7 @@ export const updateRondaEstadoDefinition = defineRondaMutation({
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     assertAllowedEstadoTransition(ronda.estado, estado)
+    if (estado === 'activa' && ronda.estado !== 'activa') await assertNivelesPTCuadran(ctx, id)
     await ctx.db.patch(id, { estado })
   },
 })
@@ -322,6 +324,7 @@ export const transitionRondaEstadoDefinition = defineRondaMutation({
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     assertAllowedEstadoTransition(ronda.estado, nextState)
+    if (nextState === 'activa' && ronda.estado !== 'activa') await assertNivelesPTCuadran(ctx, id)
     await ctx.db.patch(id, { estado: nextState })
   },
 })

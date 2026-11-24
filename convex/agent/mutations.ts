@@ -1,6 +1,7 @@
 import { v } from 'convex/values'
 import type { Id } from '../_generated/dataModel'
 import { defineAgentMutation } from './definitions'
+import { assertCapacidadNivelesPT, assertNivelesPTCuadran } from '../rondas/ptLevels'
 import { assertAllowedEstadoTransition, generateUniqueParticipantCode, getDirectorioByLookup, requireAgentAdmin } from './shared'
 
 export const createRondaDefinition = defineAgentMutation({
@@ -83,6 +84,7 @@ export const updateRondaEstadoDefinition = defineAgentMutation({
     const ronda = await ctx.db.get(id)
     if (!ronda) throw new Error('La ronda no existe.')
     assertAllowedEstadoTransition(ronda.estado, estado)
+    if (estado === 'activa' && ronda.estado !== 'activa') await assertNivelesPTCuadran(ctx, id)
     await ctx.db.patch(id, { estado })
   },
 })
@@ -347,6 +349,7 @@ export const createPTItemDefinition = defineAgentMutation({
   },
   handler: async (ctx, { apiKey, rondaId, contaminante, runCode, levelLabel, sortOrder }) => {
     await requireAgentAdmin(ctx, apiKey)
+    await assertCapacidadNivelesPT(ctx, rondaId, contaminante, 1)
     const id = await ctx.db.insert('rondaPtItems', { rondaId, contaminante, runCode, levelLabel, sortOrder, createdAt: Date.now() })
     return ctx.db.get(id)
   },
@@ -361,6 +364,7 @@ export const createPTItemsBulkDefinition = defineAgentMutation({
   },
   handler: async (ctx, { apiKey, rondaId, contaminante, items }) => {
     await requireAgentAdmin(ctx, apiKey)
+    await assertCapacidadNivelesPT(ctx, rondaId, contaminante, items.length)
     const now = Date.now()
     const ids: Id<'rondaPtItems'>[] = []
     for (const item of items) {

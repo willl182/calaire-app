@@ -160,6 +160,14 @@ export default async function ConfiguracionPTPage({ params, searchParams }: Page
   const canEdit = ronda.estado !== 'cerrada'
   const contaminantesConfigurados = new Set(ptItems.map((item) => item.contaminante)).size
   const participantesConfigurados = participantesPT.filter((participante) => participante.participant_code || participante.replicate_code).length
+  const nivelesPTPorContaminante = new Map<string, number>()
+  for (const item of ptItems) nivelesPTPorContaminante.set(item.contaminante, (nivelesPTPorContaminante.get(item.contaminante) ?? 0) + 1)
+  const descuadresNiveles = (ronda.contaminantes ?? [])
+    .map((c) => ({ contaminante: c.contaminante, niveles: c.niveles, nivelesPT: nivelesPTPorContaminante.get(c.contaminante) ?? 0 }))
+    .filter((c) => c.nivelesPT !== c.niveles)
+  const avisoNiveles = descuadresNiveles.length > 0
+    ? `Niveles PT incompletos: ${descuadresNiveles.map((c) => `${c.contaminante} ${c.nivelesPT} de ${c.niveles}`).join(', ')}. La ronda no podrá activarse hasta que coincidan.`
+    : undefined
 
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
@@ -175,6 +183,7 @@ export default async function ConfiguracionPTPage({ params, searchParams }: Page
 
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
+        {ronda.estado === 'borrador' && <Alert tone="error" message={avisoNiveles} />}
 
         <section className="sgc-kpis">
           <div className="sgc-kpi">

@@ -4,6 +4,19 @@
 
 ## Control documental de inicio de ronda
 
+Antes de crear la ronda en calaire-app, la planificacion (`F-PSEA-06`) debe dejar definidos:
+
+| Dato | Definicion |
+|---|---|
+| Codigo y nombre de la ronda | Codigo unico con formato `EA-<tipo>-<año>[-R<n>]` (ej. `EA-CIL-2026` para ronda unica). |
+| Numero de participantes | Laboratorios participantes planeados. |
+| Participacion de referencia | Si Calaire participa como referencia con cupo propio. |
+| Gases | Contaminantes incluidos en la ronda. |
+| Niveles y replicas por gas | Numero de niveles de concentracion y replicas por nivel (2 o 3). |
+| Niveles PT por gas | Identificador de corrida (run) y etiqueta de cada nivel. |
+
+Con estos datos se crea la ronda y se configura PT siguiendo `I-PSEA-03`, seccion 6. Al crear la ronda el aplicativo asigna a cada participante y a la referencia un codigo aleatorio unico, que es su identificador anonimo durante la ronda (`P-PSEA-19`).
+
 La planificacion debe crear el hito `INICIO_RONDA`, con fecha, lugar y responsable. Antes del evento se confirma la lista de participantes en `F-PSEA-03`. La apertura presencial de la ronda y su acta `F-PSEA-19` se rigen por `P-PSEA-24 Apertura de ronda EA`. `F-PSEA-20` y `F-PSEA-21` son internos, criticos y no bloquean el cierre documental.
 
 | INFORMACIÓN GENERAL DEL PROCEDIMIENTO |
