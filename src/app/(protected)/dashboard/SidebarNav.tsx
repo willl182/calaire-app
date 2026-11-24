@@ -141,7 +141,6 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
   const areaItems: NavItem[] = [
     { label: 'Gestión de rondas', href: '/dashboard', tabKey: '__gestion__' },
     ...(canViewSgcMaestro ? [{ label: 'Sistema de Gestión', href: '/dashboard/sgc', tabKey: '__sgc__' }] : []),
-    { label: 'pt_app', href: PT_APP_URL, tabKey: '__external__', external: true },
   ]
 
   function isActive(item: NavItem): boolean {
@@ -158,6 +157,9 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
     return false
   }
 
+  const externalItems: NavItem[] = [
+    { label: 'Aplicativo de cálculo PT (Shiny)', href: PT_APP_URL, tabKey: '__external__', external: true },
+  ]
   const sectionsLabel = isSgcDashboard ? 'Secciones Sistema de Gestión' : 'Secciones gestión de ronda'
   const isAreaActive = (item: NavItem) =>
     !item.external && (item.tabKey === '__sgc__' ? isSgcDashboard : !isSgcDashboard)
@@ -188,10 +190,22 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
         </nav>
 
         <div className="ml-auto flex shrink-0 items-center gap-1">
+          <a
+            href={PT_APP_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hidden items-center gap-1 rounded-md px-2 py-1 text-xs text-[var(--foreground-muted)] hover:text-[var(--foreground)] hover:underline lg:inline-flex"
+            title="Aplicativo externo de cálculo de ensayos de aptitud (pt_app, Shiny)"
+          >
+            Cálculo PT (Shiny)
+            <span className="text-[9px] opacity-60" aria-hidden="true">↗</span>
+            <span className="sr-only">(aplicativo externo, abre en nueva pestaña)</span>
+          </a>
           <UserMenu userEmail={userEmail} />
           <MobileNav
             areaItems={areaItems}
             navItems={navItems}
+            externalItems={externalItems}
             sectionsLabel={sectionsLabel}
             isAreaActive={isAreaActive}
             isActive={isActive}
@@ -215,12 +229,14 @@ export function Sidebar({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: b
 export function MobileNav({
   areaItems,
   navItems,
+  externalItems,
   sectionsLabel,
   isAreaActive,
   isActive,
 }: {
   areaItems: NavItem[]
   navItems: NavItem[]
+  externalItems: NavItem[]
   sectionsLabel: string
   isAreaActive: (item: NavItem) => boolean
   isActive: (item: NavItem) => boolean
@@ -279,6 +295,9 @@ export function MobileNav({
               {navItems.map((item) => renderItem(item, isActive(item)))}
             </nav>
           )}
+          <nav aria-label="Enlaces externos (móvil)" className="mt-3 flex flex-col gap-1 border-t border-[var(--border-soft)] pt-3">
+            {externalItems.map((item) => renderItem(item, false))}
+          </nav>
         </div>
       )}
     </div>
