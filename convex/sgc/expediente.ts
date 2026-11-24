@@ -14,6 +14,7 @@ import {
 } from '../_lib/sgc/expediente'
 import { detectarCodigosProvisionales } from '../_lib/sgc/checklist'
 import { getNivelesPTDescuadres } from '../rondas/ptLevels'
+import { collectAutomaticos } from './autollenado'
 import { inicializarDriveRondaConfig } from './drive'
 import {
   collectChecklistFaltantes,
@@ -36,12 +37,13 @@ export async function collectEstadosNativosExpediente(
   ctx: QueryCtx | MutationCtx,
   rondaId: Id<'rondas'>
 ): Promise<EstadosNativosExpediente> {
-  const [coverage, driveCierre, acta, relaciones, evaluacion] = await Promise.all([
+  const [coverage, driveCierre, acta, relaciones, evaluacion, automaticos] = await Promise.all([
     collectCoverage(ctx, rondaId),
     collectDriveCierreCalidad(ctx, rondaId),
     ctx.db.query('sgcActasInicio').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
     ctx.db.query('sgcInstrumentosRonda').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect(),
     ctx.db.query('ptEvaluaciones').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
+    collectAutomaticos(ctx, rondaId),
   ])
   const relacion = relaciones.sort((a, b) => b.updatedAt - a.updatedAt)[0] ?? null
   const bloqueantesDrive = driveCierre.bloqueantes.filter((mensaje) => !mensaje.startsWith('EVID-CIERRE'))
@@ -55,6 +57,8 @@ export async function collectEstadosNativosExpediente(
     relacionInstrumentosEstado: relacion?.estado ?? null,
     informePublicado: evaluacion?.estado === 'publicada' && Boolean(evaluacion.informeStorageId),
     bloqueantesCierre: collectChecklistFaltantes(coverage).length + bloqueantesDrive.length,
+    // B2: cumplidos automaticos (F-PSEA-03, F-PSEA-04).
+    automaticos,
   }
 }
 

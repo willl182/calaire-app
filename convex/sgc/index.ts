@@ -16,6 +16,7 @@ import { upsertResultadoPtAppConfig, crearCasoSgcConfig, actualizarCasoSgcConfig
 import { crearRegistroSgcConfig, getDocumentoMaestroConfig, importarDocumentosSeedSgcConfig, importarMapaSeedSgcConfig, importarRequisitosSeedSgcConfig, importarSeedSgcConfig, listExpedientesSgcConfig, listMapaSgcConfig, listNormativaSgcConfig, listSgcMaestroConfig, registrarVersionOficialConfig, upsertDocumentoMaestroConfig, upsertDocumentoRequisitoConfig } from './maestro'
 import { actualizarEstadoDriveRecursoConfig, actualizarVisibilidadDriveRecursoConfig, getDriveTreeConfig, inicializarDriveRondaConfig, listDriveRecursosConfig, listDriveRecursosParticipanteConfig, marcarDriveRecursoUsadoConfig, registrarAutomatizacionDriveConfig, reemplazarDriveRecursoConfig, retirarDriveRecursoConfig, upsertDriveRecursoConfig } from './drive'
 import { actualizarExpedienteConfig, aprobarDocumentoExpedienteConfig, getAvanceExpedienteConfig, getEstadoDriveRondaConfig, getSiguientePasoConfig, getSincronizacionExpedienteConfig, marcarAplicaDocumentoConfig } from './expediente'
+import { getEstadoAutomaticoConfig, getEquiposExportConfig, getHitosExportConfig } from './autollenado'
 import { actualizarActaInicioConfig, cambiarPublicacionActaInicioConfig, getActaInicioConfig, getActaInicioDownloadUrlConfig, inicializarActaInicioConfig, registrarDocxActaInicioConfig, registrarPdfFirmadoActaInicioConfig } from './actaInicio'
 import { actualizarInstrumentoRondaConfig, crearInstrumentoRondaConfig, devolverRelacionInstrumentosConfig, eliminarInstrumentoRondaConfig, enviarRelacionInstrumentosAValidacionConfig, getExportacionInstrumentosUrlConfig, getRelacionInstrumentosRondaConfig, inicializarRelacionInstrumentosConfig, registrarExportacionesInstrumentosConfig, registrarFotoInstrumentoRondaConfig, retirarFotoInstrumentoRondaConfig, validarRelacionInstrumentosConfig } from './instrumentosRonda'
 
@@ -107,6 +108,9 @@ export const getEstadoDriveRonda = query(getEstadoDriveRondaConfig)
 export const getSiguientePasoExpediente = query(getSiguientePasoConfig)
 export const marcarAplicaDocumento = mutation(marcarAplicaDocumentoConfig)
 export const aprobarDocumentoExpediente = mutation(aprobarDocumentoExpedienteConfig)
+export const getHitosExport = query(getHitosExportConfig)
+export const getEquiposExport = query(getEquiposExportConfig)
+export const getEstadoAutomatico = query(getEstadoAutomaticoConfig)
 
 export const getActaInicio = query(getActaInicioConfig)
 export const getActaInicioDownloadUrl = query(getActaInicioDownloadUrlConfig)
