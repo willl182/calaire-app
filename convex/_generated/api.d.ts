@@ -50,6 +50,7 @@ import type * as rondas_state from "../rondas/state.js";
 import type * as rondas_validators from "../rondas/validators.js";
 import type * as sgc_actaInicio from "../sgc/actaInicio.js";
 import type * as sgc_audit from "../sgc/audit.js";
+import type * as sgc_autollenado from "../sgc/autollenado.js";
 import type * as sgc_casos from "../sgc/casos.js";
 import type * as sgc_comentarios from "../sgc/comentarios.js";
 import type * as sgc_comunicaciones from "../sgc/comunicaciones.js";
@@ -118,6 +119,7 @@ declare const fullApi: ApiFromModules<{
   "rondas/validators": typeof rondas_validators;
   "sgc/actaInicio": typeof sgc_actaInicio;
   "sgc/audit": typeof sgc_audit;
+  "sgc/autollenado": typeof sgc_autollenado;
   "sgc/casos": typeof sgc_casos;
   "sgc/comentarios": typeof sgc_comentarios;
   "sgc/comunicaciones": typeof sgc_comunicaciones;
