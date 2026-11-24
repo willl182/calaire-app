@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 import { Alert } from '@/components/ui/Alert'
 import { isAdmin, requireAuth } from '@/server/auth'
@@ -9,6 +10,8 @@ import {
   getSincronizacionExpedienteSgc,
   getSiguientePasoExpedienteSgc,
   inicializarPanelSgc,
+  type SgcAvanceExpediente,
+  type SgcAvanceItem,
   type SgcPanel,
 } from '@/server/sgc'
 import { getDriveGoogleAutomationStatus, getEstadoDriveRondaSgc } from '@/server/sgc/drive-google'
@@ -30,70 +33,97 @@ function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
-function CierreDocumentalBar({ panel, rondaId }: { panel: SgcPanel; rondaId: string }) {
+const CODIGO_RE = /(F-PSEA-\d+[A-Z]?|EVID-[A-Z]+|I-PSEA-\d+)/
+
+function enlacePendiente(rondaId: string, texto: string, items: SgcAvanceItem[]) {
+  const codigo = CODIGO_RE.exec(texto)?.[1]
+  const item = codigo ? items.find((i) => i.codigo === codigo) : undefined
+  if (item) return item.destino
+  return codigo ? `/dashboard/rondas/${rondaId}/sgc#doc-${codigo}` : `/dashboard/rondas/${rondaId}/sgc#expediente`
+}
+
+function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avance: SgcAvanceExpediente; rondaId: string }) {
   const drive = panel.driveCierre
   const puedePasarADocumentacion = panel.ronda.estado === 'activa'
   const puedeCerrar = panel.ronda.estado === 'documentacion_pendiente'
   const puedeReabrir = panel.ronda.estado === 'cerrada'
   const bloqueantesDocumentacion = [...panel.checklistBloqueantesDocumentacionPendiente, ...drive.bloqueantes]
   const bloqueantesCierre = [...panel.checklistBloqueantesCierre, ...drive.bloqueantes]
-  const bloqueantesActuales = puedePasarADocumentacion ? bloqueantesDocumentacion : bloqueantesCierre
-  const pendientesCriticos = drive.pendientesCriticos ?? []
+  const bloqueantesActuales = Array.from(new Set(puedePasarADocumentacion ? bloqueantesDocumentacion : bloqueantesCierre))
+  const criticos = avance.criticos
   const sinBloqueantesActuales = bloqueantesActuales.length === 0
+  const motivoId = 'cierre-motivo'
+  const motivo = sinBloqueantesActuales
+    ? null
+    : `No se puede avanzar: hay ${bloqueantesActuales.length} bloqueante${bloqueantesActuales.length === 1 ? '' : 's'} sin resolver.`
 
   return (
-    <section className="card flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between" aria-labelledby="cierre-documental-title">
-      <div className="flex flex-wrap items-center gap-3">
-        <h2 id="cierre-documental-title" className="text-sm font-semibold text-[var(--foreground)]">Cierre documental SGC</h2>
-        <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
-          {sinBloqueantesActuales ? 'Sin bloqueantes' : `${bloqueantesActuales.length} bloqueante(s)`}
-        </span>
-        {pendientesCriticos.length > 0 && (
-          <details className="text-xs text-amber-900">
-            <summary className="cursor-pointer font-semibold">{pendientesCriticos.length} crítico(s), no bloquean cierre</summary>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              {pendientesCriticos.map((pendiente) => <li key={pendiente}>{pendiente}</li>)}
-            </ul>
-          </details>
-        )}
-        {!sinBloqueantesActuales && (
-          <details className="text-xs text-rose-900">
-            <summary className="cursor-pointer font-semibold">Ver faltantes</summary>
-            <ul className="mt-2 list-disc space-y-1 pl-5">
-              {bloqueantesActuales.map((bloqueante) => <li key={bloqueante}>{bloqueante}</li>)}
-            </ul>
-          </details>
-        )}
+    <section id="cierre" className="card scroll-mt-24 grid gap-4 p-5" aria-labelledby="cierre-documental-title">
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <h2 id="cierre-documental-title" className="text-base font-semibold text-[var(--foreground)]">Cierre documental SGC</h2>
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+            {sinBloqueantesActuales ? 'Sin bloqueantes' : `${bloqueantesActuales.length} bloqueante${bloqueantesActuales.length === 1 ? '' : 's'}`}
+          </span>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          {puedePasarADocumentacion && (
+            <form action={transicionSgcAction}>
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <input type="hidden" name="accion" value="documentacion_pendiente" />
+              <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
+                Pasar a documentación pendiente
+              </button>
+            </form>
+          )}
+          {puedeCerrar && (
+            <form action={transicionSgcAction}>
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <input type="hidden" name="accion" value="cerrar" />
+              <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
+                Cerrar documentalmente
+              </button>
+            </form>
+          )}
+          {puedeReabrir && (
+            <form action={transicionSgcAction} className="flex flex-wrap gap-2">
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <input type="hidden" name="accion" value="reabrir" />
+              <input className="input" name="motivo" placeholder="Motivo de reapertura" aria-label="Motivo de reapertura" required />
+              <button className="btn-outline" type="submit">Reabrir</button>
+            </form>
+          )}
+        </div>
       </div>
+      {motivo && <p id={motivoId} className="text-sm font-medium text-rose-900">{motivo}</p>}
 
-      <div className="flex flex-wrap gap-2">
-        {puedePasarADocumentacion && (
-          <form action={transicionSgcAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <input type="hidden" name="accion" value="documentacion_pendiente" />
-            <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales}>
-              Pasar a documentacion pendiente
-            </button>
-          </form>
-        )}
-        {puedeCerrar && (
-          <form action={transicionSgcAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <input type="hidden" name="accion" value="cerrar" />
-            <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales}>
-              Cerrar documentalmente
-            </button>
-          </form>
-        )}
-        {puedeReabrir && (
-          <form action={transicionSgcAction} className="flex flex-wrap gap-2">
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <input type="hidden" name="accion" value="reabrir" />
-            <input className="input" name="motivo" placeholder="Motivo de reapertura" required />
-            <button className="btn-outline" type="submit">Reabrir</button>
-          </form>
-        )}
-      </div>
+      {!sinBloqueantesActuales && (
+        <div className="rounded-lg border-2 border-rose-300 bg-rose-50 p-3">
+          <h3 className="text-sm font-semibold text-rose-900">Bloqueantes: impiden el cierre</h3>
+          <ul className="mt-2 grid gap-1 text-sm text-rose-950">
+            {bloqueantesActuales.map((bloqueante) => (
+              <li key={bloqueante} className="flex items-start gap-2">
+                <span aria-hidden="true">●</span>
+                <Link className="underline-offset-2 hover:underline" href={enlacePendiente(rondaId, bloqueante, avance.items)}>{bloqueante}</Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {criticos.length > 0 && (
+        <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3">
+          <h3 className="text-xs font-semibold text-amber-900">Críticos: conviene resolverlos, pero no bloquean el cierre</h3>
+          <ul className="mt-1 grid gap-0.5 text-xs text-amber-950">
+            {criticos.map((item) => (
+              <li key={item.codigo}>
+                <Link className="underline-offset-2 hover:underline" href={item.destino}>{item.codigo} · {item.nombre}</Link>
+                <span className="text-amber-800"> — {item.motivo}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
     </section>
   )
 }
@@ -188,7 +218,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
           selectedDocId={getParam(query.doc) ?? null}
         />
 
-        <CierreDocumentalBar panel={panel} rondaId={id} />
+        <CierreDocumentalBar panel={panel} avance={avance} rondaId={id} />
       </div>
     </div>
   )
