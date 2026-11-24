@@ -818,6 +818,7 @@ export default function FormularioRonda({
                         const warnings = issue ? [] : statsWarnings(data)
                         const msgId = `msg-${item.id}-${group.id}`
                         const colCount = sampleGroups.length > 1 ? 11 : 10
+                        const cellLabel = `${contaminante} nivel ${item.level_label || item.run_code}${sampleGroups.length > 1 ? ` grupo ${group.sample_group}` : ''}`
 
                         const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
                           issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
@@ -840,6 +841,7 @@ export default function FormularioRonda({
                               <td key={field} className="px-2 py-2">
                                 <DecimalInput
                                   id={`${msgId}-${field}`}
+                                  aria-label={`${cellLabel} dato ${index + 1}`}
                                   aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
                                   aria-invalid={issue ? true : undefined}
                                   placeholder={index === 0 ? '' : 'NA'}
@@ -853,6 +855,7 @@ export default function FormularioRonda({
                             <td className="px-2 py-2">
                               <DecimalInput
                                 id={`${msgId}-meanValue`}
+                                aria-label={`${cellLabel} promedio`}
                                 aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
                                 aria-invalid={issue ? true : undefined}
                                 value={data.meanValue}
@@ -864,6 +867,7 @@ export default function FormularioRonda({
                             <td className="px-2 py-2">
                               <DecimalInput
                                 id={`${msgId}-sdValue`}
+                                aria-label={`${cellLabel} desviación estándar`}
                                 aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
                                 aria-invalid={issue ? true : undefined}
                                 value={data.sdValue}
@@ -875,6 +879,7 @@ export default function FormularioRonda({
                             <td className="px-2 py-2">
                               <DecimalInput
                                 id={`${msgId}-ux`}
+                                aria-label={`${cellLabel} incertidumbre estándar`}
                                 aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
                                 aria-invalid={issue ? true : undefined}
                                 value={data.ux}
@@ -886,6 +891,7 @@ export default function FormularioRonda({
                             <td className="px-2 py-2">
                               <DecimalInput
                                 id={`${msgId}-k`}
+                                aria-label={`${cellLabel} factor de cobertura k`}
                                 aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
                                 aria-invalid={issue ? true : undefined}
                                 value={data.k}
@@ -897,6 +903,7 @@ export default function FormularioRonda({
                             <td className="px-2 py-2">
                               <DecimalInput
                                 id={`${msgId}-uxExp`}
+                                aria-label={`${cellLabel} incertidumbre expandida`}
                                 aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
                                 aria-invalid={issue ? true : undefined}
                                 value={data.uxExp}
