@@ -9,7 +9,7 @@ import {
   type SgcChecklistItem,
 } from './checklist'
 import type { SgcFase, SgcFormatoCodigo } from './catalog'
-import type { SgcPoliticaDocumento, SincronizacionExpediente } from '../../../convex/_lib/sgc/expediente'
+import type { SgcAvanceExpediente, SgcPoliticaDocumento, SincronizacionExpediente } from '../../../convex/_lib/sgc/expediente'
 
 export type SgcPanel = {
   ronda: {
@@ -537,6 +537,29 @@ export async function actualizarExpedienteSgc(rondaId: string) {
   const token = await getConvexToken('operar SGC')
   return fetchMutation(api.sgc.index.actualizarExpediente, {
     rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
+export type { SgcAvanceExpediente, SgcAvanceItem, SgcNivelPendiente } from '../../../convex/_lib/sgc/expediente'
+
+export async function getAvanceExpedienteSgc(rondaId: string): Promise<SgcAvanceExpediente> {
+  const token = await getConvexToken('operar SGC')
+  return fetchQuery(api.sgc.index.getAvanceExpediente, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
+export async function marcarAplicaDocumentoSgc(rondaId: string, codigo: string, aplica: boolean) {
+  const token = await getConvexToken('operar SGC')
+  return fetchMutation(api.sgc.index.marcarAplicaDocumento, {
+    rondaId: rondaId as Id<'rondas'>, codigo, aplica
+  }, { token })
+}
+
+export async function aprobarDocumentoExpedienteSgc(rondaId: string, codigo: string, aprobado: boolean) {
+  const token = await getConvexToken('operar SGC')
+  return fetchMutation(api.sgc.index.aprobarDocumentoExpediente, {
+    rondaId: rondaId as Id<'rondas'>, codigo, aprobado
   }, { token })
 }
 

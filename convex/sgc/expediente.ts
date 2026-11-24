@@ -1,10 +1,152 @@
 import { v } from 'convex/values'
 
-import { compararExpedienteConCatalogo } from '../_lib/sgc/expediente'
+import type { Id } from '../_generated/dataModel'
+import type { MutationCtx, QueryCtx } from '../_generated/server'
+import { getSgcRondaDocumento } from '../_lib/sgc/catalog'
+import {
+  calcularAvanceExpediente,
+  compararExpedienteConCatalogo,
+  type EstadosNativosExpediente,
+} from '../_lib/sgc/expediente'
 import { inicializarDriveRondaConfig } from './drive'
-import { requireSgcViewer, type SgcMutationConfig, type SgcQueryConfig } from './shared'
+import {
+  collectChecklistFaltantes,
+  collectCoverage,
+  collectDriveCierreCalidad,
+  normalizeCodigoDocumento,
+  requireSgcManage,
+  requireSgcViewer,
+  writeAudit,
+  type SgcMutationConfig,
+  type SgcQueryConfig,
+} from './shared'
 
 const rondaArgs = { rondaId: v.id('rondas') }
+
+/** Codigos que admiten la marca explicita del coordinador (decisiones 5 y 17). */
+export const CODIGOS_CON_APROBACION = ['F-PSEA-05', 'EVID-CIERRE'] as const
+
+export async function collectEstadosNativosExpediente(
+  ctx: QueryCtx | MutationCtx,
+  rondaId: Id<'rondas'>
+): Promise<EstadosNativosExpediente> {
+  const [coverage, driveCierre, acta, relaciones, evaluacion] = await Promise.all([
+    collectCoverage(ctx, rondaId),
+    collectDriveCierreCalidad(ctx, rondaId),
+    ctx.db.query('sgcActasInicio').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
+    ctx.db.query('sgcInstrumentosRonda').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect(),
+    ctx.db.query('ptEvaluaciones').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
+  ])
+  const relacion = relaciones.sort((a, b) => b.updatedAt - a.updatedAt)[0] ?? null
+  const bloqueantesDrive = driveCierre.bloqueantes.filter((mensaje) => !mensaje.startsWith('EVID-CIERRE'))
+  return {
+    planFinalizado: coverage.planFinalizado,
+    revisionFinalizada: coverage.revisionFinalizada,
+    participantesEsperados: coverage.participantesEsperados,
+    participantesReclamados: coverage.participantesReclamados,
+    fichasEnviadas: coverage.fichasEnviadas,
+    actaInicioEstado: acta?.estado ?? null,
+    relacionInstrumentosEstado: relacion?.estado ?? null,
+    informePublicado: evaluacion?.estado === 'publicada' && Boolean(evaluacion.informeStorageId),
+    bloqueantesCierre: collectChecklistFaltantes(coverage).length + bloqueantesDrive.length,
+  }
+}
+
+async function getAvance(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
+  const [recursos, nativos] = await Promise.all([
+    ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect(),
+    collectEstadosNativosExpediente(ctx, rondaId),
+  ])
+  return calcularAvanceExpediente(String(rondaId), recursos, nativos)
+}
+
+/** B1.4: avance del expediente y pendientes clasificados (bloqueante / critico / advertencia). */
+export const getAvanceExpedienteConfig = {
+  args: rondaArgs,
+  handler: async (ctx, { rondaId }) => {
+    await requireSgcViewer(ctx)
+    return getAvance(ctx, rondaId)
+  },
+} satisfies SgcQueryConfig<typeof rondaArgs>
+
+async function findDocumentoExpediente(ctx: MutationCtx, rondaId: Id<'rondas'>, codigo: string) {
+  const recurso = await ctx.db
+    .query('sgcDriveRecursos')
+    .withIndex('by_rondaId_and_codigo', (q) => q.eq('rondaId', rondaId).eq('codigo', normalizeCodigoDocumento(codigo)))
+    .first()
+  if (!recurso || recurso.tipo === 'carpeta') {
+    throw new Error('Documento no encontrado en el expediente: actualice el expediente primero.')
+  }
+  return recurso
+}
+
+const marcarAplicaArgs = { rondaId: v.id('rondas'), codigo: v.string(), aplica: v.boolean() }
+
+/**
+ * B1.4: marca si un documento "si aplica" aplica en la ronda. Desmarcar no exige justificacion
+ * (decision 13). Los obligatorios no se pueden marcar.
+ */
+export const marcarAplicaDocumentoConfig = {
+  args: marcarAplicaArgs,
+  handler: async (ctx, { rondaId, codigo, aplica }) => {
+    const actor = await requireSgcManage(ctx)
+    const politica = getSgcRondaDocumento(codigo)
+    if (!politica) throw new Error('El documento no esta en el catalogo del expediente.')
+    if (politica.obligatoriedad !== 'si_aplica') throw new Error('Solo los documentos "si aplica" se pueden activar o desactivar.')
+    const recurso = await findDocumentoExpediente(ctx, rondaId, codigo)
+    if ((recurso.aplica ?? false) === aplica) return { cambiado: false }
+    await ctx.db.patch(recurso._id, { aplica, updatedAt: Date.now(), updatedBy: actor })
+    await writeAudit(ctx, {
+      rondaId,
+      actor,
+      evento: aplica ? 'sgc.expediente.aplica' : 'sgc.expediente.no_aplica',
+      detalle: politica.codigo,
+      targetTipo: 'sgcDriveRecursos',
+      targetId: recurso._id,
+    })
+    return { cambiado: true }
+  },
+} satisfies SgcMutationConfig<typeof marcarAplicaArgs>
+
+const aprobarArgs = { rondaId: v.id('rondas'), codigo: v.string(), aprobado: v.boolean() }
+
+/**
+ * B1.4: marca explicita del coordinador: "revisado" de F-PSEA-05 y aprobacion de EVID-CIERRE.
+ * EVID-CIERRE solo se aprueba con el checklist de cierre sin bloqueantes.
+ */
+export const aprobarDocumentoExpedienteConfig = {
+  args: aprobarArgs,
+  handler: async (ctx, { rondaId, codigo, aprobado }) => {
+    const actor = await requireSgcManage(ctx)
+    const normalizado = normalizeCodigoDocumento(codigo)
+    if (!(CODIGOS_CON_APROBACION as readonly string[]).includes(normalizado)) {
+      throw new Error('Este documento no requiere aprobacion explicita.')
+    }
+    const recurso = await findDocumentoExpediente(ctx, rondaId, normalizado)
+    if (aprobado && normalizado === 'EVID-CIERRE') {
+      const nativos = await collectEstadosNativosExpediente(ctx, rondaId)
+      if (nativos.bloqueantesCierre > 0) {
+        throw new Error(`No se puede aprobar el cierre: el checklist tiene ${nativos.bloqueantesCierre} bloqueante(s).`)
+      }
+    }
+    const now = Date.now()
+    await ctx.db.patch(recurso._id, {
+      aprobadoAt: aprobado ? now : null,
+      aprobadoPor: aprobado ? actor : null,
+      updatedAt: now,
+      updatedBy: actor,
+    })
+    await writeAudit(ctx, {
+      rondaId,
+      actor,
+      evento: aprobado ? 'sgc.expediente.aprobado' : 'sgc.expediente.aprobacion_retirada',
+      detalle: normalizado,
+      targetTipo: 'sgcDriveRecursos',
+      targetId: recurso._id,
+    })
+    return { aprobado }
+  },
+} satisfies SgcMutationConfig<typeof aprobarArgs>
 
 /** B1.3: compara el expediente guardado de la ronda con el catalogo vigente. */
 export const getSincronizacionExpedienteConfig = {

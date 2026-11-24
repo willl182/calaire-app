@@ -441,7 +441,6 @@ export function collectChecklistFaltantes(coverage: Awaited<ReturnType<typeof co
     coverage.enviosEsperados === 0 ||
     coverage.enviosFinales >= coverage.enviosEsperados ||
     hasJustificacion(coverage, 'F-PSEA-12')
-  const f11Ok = coverage.fPsea11NoAplica && Boolean(coverage.fPsea11Razon?.trim())
 
   if (!planOk) faltantes.push('F-PSEA-03/F-PSEA-06 plan finalizado con snapshot')
   if (!f05Ok) faltantes.push('F-PSEA-05 participantes reclamados o justificados')
@@ -449,12 +448,12 @@ export function collectChecklistFaltantes(coverage: Awaited<ReturnType<typeof co
   if (!f07Ok) faltantes.push('F-PSEA-07 codigos unicos y no provisionales')
   for (const formato of FORMATOS_ARCHIVO) {
     if (coverage.evidenciasVigentes[formato]) continue
-    // F-PSEA-14 solo aplica cuando existe queja, trabajo no conforme, NC o accion correctiva:
-    // una justificacion vigente documenta el "no aplica" y libera el cierre.
-    if (formato === 'F-PSEA-14' && hasJustificacion(coverage, 'F-PSEA-14')) continue
+    // F-PSEA-14 es "si aplica" y, aun abierto, no bloquea el cierre (decision 16, 2026-11-24).
+    if (formato === 'F-PSEA-14') continue
     faltantes.push(`${formato} evidencia vigente`)
   }
-  if (!f11Ok) faltantes.push('F-PSEA-11 no aplica con razon')
+  // F-PSEA-11 (etapa 05 H/E) es "si aplica" laxa: puede quedar no aplica sin justificacion
+  // (decision 13). Ya no bloquea el cierre; el avance del expediente lo refleja (B1.4).
   if (!f12Ok) faltantes.push('F-PSEA-12 envios finales completos o justificados')
   if (!revisionOk) faltantes.push('F-PSEA-13 finalizado con snapshot')
   if (coverage.hitosBloqueantesPendientes > 0) faltantes.push('hitos bloqueantes pendientes')
@@ -491,8 +490,18 @@ export async function collectDriveCierreCalidad(ctx: QueryCtx | MutationCtx, ron
           : null,
       }
     })
+  // B1.4: los "si aplica" no activados (aplica !== true) no entran al checklist de cierre.
+  const aplicaPorCodigo = new Map(
+    recursos.map((recurso) => [normalizeCodigoDocumento(recurso.codigo), recurso.aplica === true])
+  )
   const etapas = SGC_RONDA_ETAPAS.map((etapa) => ({
-    documentos: etapa.documentos.map((documento) => {
+    documentos: etapa.documentos
+      .filter(
+        (documento) =>
+          documento.obligatoriedad === 'obligatorio' ||
+          aplicaPorCodigo.get(normalizeCodigoDocumento(documento.codigo)) === true
+      )
+      .map((documento) => {
       const politica = getSgcRondaDocumento(documento.codigo)
       return {
         codigo: documento.codigo,

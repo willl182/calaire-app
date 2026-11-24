@@ -52,6 +52,35 @@ describe('sincronizacion del expediente (B1.3)', () => {
     expect(otraVez.reparados).toBe(0)
   })
 
+  test('avance: marcar "si aplica" y aprobaciones explicitas (B1.4)', async () => {
+    const t = convexTest(schema, modules)
+    const rondaId = await seedRonda(t)
+    const admin = t.withIdentity(adminIdentity)
+    await admin.mutation(api.sgc.index.actualizarExpediente, { rondaId })
+
+    const inicial = await admin.query(api.sgc.index.getAvanceExpediente, { rondaId })
+    expect(inicial.items.find((i) => i.codigo === 'F-PSEA-17')?.cuentaEnAvance).toBe(false)
+
+    await expect(
+      admin.mutation(api.sgc.index.marcarAplicaDocumento, { rondaId, codigo: 'F-PSEA-06', aplica: true })
+    ).rejects.toThrow(/si aplica/)
+    expect(await admin.mutation(api.sgc.index.marcarAplicaDocumento, { rondaId, codigo: 'f-psea-17', aplica: true })).toEqual({ cambiado: true })
+    expect(await admin.mutation(api.sgc.index.marcarAplicaDocumento, { rondaId, codigo: 'F-PSEA-17', aplica: true })).toEqual({ cambiado: false })
+    const activado = await admin.query(api.sgc.index.getAvanceExpediente, { rondaId })
+    expect(activado.total).toBe(inicial.total + 1)
+
+    await admin.mutation(api.sgc.index.aprobarDocumentoExpediente, { rondaId, codigo: 'F-PSEA-05', aprobado: true })
+    const revisado = await admin.query(api.sgc.index.getAvanceExpediente, { rondaId })
+    expect(revisado.items.find((i) => i.codigo === 'F-PSEA-05')?.estado).toBe('completo')
+
+    await expect(
+      admin.mutation(api.sgc.index.aprobarDocumentoExpediente, { rondaId, codigo: 'EVID-CIERRE', aprobado: true })
+    ).rejects.toThrow(/bloqueante/)
+    await expect(
+      admin.mutation(api.sgc.index.aprobarDocumentoExpediente, { rondaId, codigo: 'F-PSEA-06', aprobado: true })
+    ).rejects.toThrow(/no requiere/)
+  })
+
   test('sin rol SGC no consulta la sincronizacion', async () => {
     const t = convexTest(schema, modules)
     const rondaId = await seedRonda(t)
