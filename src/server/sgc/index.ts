@@ -9,6 +9,7 @@ import {
   type SgcChecklistItem,
 } from './checklist'
 import type { SgcFase, SgcFormatoCodigo } from './catalog'
+import type { SgcPoliticaDocumento } from '../../../convex/_lib/sgc/expediente'
 
 export type SgcPanel = {
   ronda: {
@@ -419,6 +420,8 @@ export type SgcDriveRecurso = {
   createdBy: string
   updatedAt: number
   updatedBy: string
+  // Politica vigente leida del catalogo (no de la copia guardada). Ver convex/_lib/sgc/expediente.ts.
+  politica?: SgcPoliticaDocumento
 }
 
 export type SgcDriveTree = {

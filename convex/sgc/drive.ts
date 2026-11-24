@@ -1,6 +1,7 @@
 import { v, type GenericValidator, type ObjectType, type PropertyValidators } from 'convex/values'
 
 import { SGC_FORMATOS_FASE_1, SGC_RONDA_ETAPAS } from '../_lib/sgc/catalog'
+import { enriquecerRecursoConCatalogo } from '../_lib/sgc/expediente'
 import type { Id } from '../_generated/dataModel'
 import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { normalizeCodigoDocumento, requireParticipanteOAdmin, requireSgcManage, requireSgcViewer, writeAudit } from './shared'
@@ -210,7 +211,8 @@ export const listDriveRecursosConfig = {
   returns: v.array(v.any()),
   handler: async (ctx, { rondaId }) => {
     await requireSgcViewer(ctx)
-    return ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
+    const recursos = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
+    return recursos.map(enriquecerRecursoConCatalogo)
   },
 } satisfies DriveQueryConfig<typeof listDriveRecursosArgs>
 
@@ -224,7 +226,9 @@ export const getDriveTreeConfig = {
   }),
   handler: async (ctx, { rondaId }) => {
     await requireSgcViewer(ctx)
-    const recursos = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
+    const guardados = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
+    // Orden, responsable, obligatoriedad, critico y bloqueaCierre salen del catalogo vigente.
+    const recursos = guardados.map(enriquecerRecursoConCatalogo)
     return {
       root: recursos.find((recurso) => recurso.codigo === DRIVE_ROOT_CODIGO) ?? null,
       recursos,

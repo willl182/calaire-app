@@ -1,7 +1,8 @@
 import { v, type ObjectType, type PropertyValidators } from 'convex/values'
 import { type MutationCtx, type QueryCtx } from '../_generated/server'
 import type { Id } from '../_generated/dataModel'
-import { getSgcFormato, SGC_RONDA_ETAPAS, type SgcFormatoCodigo } from '../_lib/sgc/catalog'
+import { getSgcFormato, getSgcRondaDocumento, SGC_RONDA_ETAPAS, type SgcFormatoCodigo } from '../_lib/sgc/catalog'
+import { enriquecerRecursoConCatalogo } from '../_lib/sgc/expediente'
 import { evaluateDriveCierreCalidad, normalizeCodigoDocumento } from '../../src/server/sgc/cierre'
 
 export { evaluateDriveCierreCalidad, normalizeCodigoDocumento }
@@ -478,6 +479,8 @@ export async function collectDriveCierreCalidad(ctx: QueryCtx | MutationCtx, ron
   const recursos = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
   const documentos = recursos
     .filter((recurso) => recurso.tipo !== 'carpeta')
+    // critico/bloqueaCierre vigentes desde el catalogo, no desde la copia guardada.
+    .map(enriquecerRecursoConCatalogo)
     .map((recurso) => {
       const formato = recurso.formatoRelacionado ? getSgcFormato(recurso.formatoRelacionado as SgcFormatoCodigo) : null
       return {
@@ -490,12 +493,12 @@ export async function collectDriveCierreCalidad(ctx: QueryCtx | MutationCtx, ron
     })
   const etapas = SGC_RONDA_ETAPAS.map((etapa) => ({
     documentos: etapa.documentos.map((documento) => {
-      const formato = documento.formatoOperativo ? getSgcFormato(documento.formatoOperativo) : null
+      const politica = getSgcRondaDocumento(documento.codigo)
       return {
         codigo: documento.codigo,
         nombre: documento.nombre,
-        critico: formato?.critico ?? null,
-        bloqueaCierre: formato?.bloqueaCierre ?? null,
+        critico: politica?.critico ?? null,
+        bloqueaCierre: politica?.bloqueaCierre ?? null,
       }
     }),
   }))
