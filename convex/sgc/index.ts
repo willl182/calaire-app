@@ -15,6 +15,7 @@ import { crearNotificacionConfig, listMisNotificacionesConfig, marcarNotificacio
 import { upsertResultadoPtAppConfig, crearCasoSgcConfig, actualizarCasoSgcConfig } from './casos'
 import { crearRegistroSgcConfig, getDocumentoMaestroConfig, importarDocumentosSeedSgcConfig, importarMapaSeedSgcConfig, importarRequisitosSeedSgcConfig, importarSeedSgcConfig, listExpedientesSgcConfig, listMapaSgcConfig, listNormativaSgcConfig, listSgcMaestroConfig, registrarVersionOficialConfig, upsertDocumentoMaestroConfig, upsertDocumentoRequisitoConfig } from './maestro'
 import { actualizarEstadoDriveRecursoConfig, actualizarVisibilidadDriveRecursoConfig, getDriveTreeConfig, inicializarDriveRondaConfig, listDriveRecursosConfig, listDriveRecursosParticipanteConfig, marcarDriveRecursoUsadoConfig, registrarAutomatizacionDriveConfig, reemplazarDriveRecursoConfig, retirarDriveRecursoConfig, upsertDriveRecursoConfig } from './drive'
+import { actualizarExpedienteConfig, getSincronizacionExpedienteConfig } from './expediente'
 import { actualizarActaInicioConfig, cambiarPublicacionActaInicioConfig, getActaInicioConfig, getActaInicioDownloadUrlConfig, inicializarActaInicioConfig, registrarDocxActaInicioConfig, registrarPdfFirmadoActaInicioConfig } from './actaInicio'
 import { actualizarInstrumentoRondaConfig, crearInstrumentoRondaConfig, devolverRelacionInstrumentosConfig, eliminarInstrumentoRondaConfig, enviarRelacionInstrumentosAValidacionConfig, getExportacionInstrumentosUrlConfig, getRelacionInstrumentosRondaConfig, inicializarRelacionInstrumentosConfig, registrarExportacionesInstrumentosConfig, registrarFotoInstrumentoRondaConfig, retirarFotoInstrumentoRondaConfig, validarRelacionInstrumentosConfig } from './instrumentosRonda'
 
@@ -98,6 +99,9 @@ export const actualizarVisibilidadDriveRecurso = mutation(actualizarVisibilidadD
 export const registrarAutomatizacionDrive = mutation(registrarAutomatizacionDriveConfig)
 export const retirarDriveRecurso = mutation(retirarDriveRecursoConfig)
 export const marcarDriveRecursoUsado = mutation(marcarDriveRecursoUsadoConfig)
+
+export const getSincronizacionExpediente = query(getSincronizacionExpedienteConfig)
+export const actualizarExpediente = mutation(actualizarExpedienteConfig)
 
 export const getActaInicio = query(getActaInicioConfig)
 export const getActaInicioDownloadUrl = query(getActaInicioDownloadUrlConfig)

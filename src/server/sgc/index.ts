@@ -9,7 +9,7 @@ import {
   type SgcChecklistItem,
 } from './checklist'
 import type { SgcFase, SgcFormatoCodigo } from './catalog'
-import type { SgcPoliticaDocumento } from '../../../convex/_lib/sgc/expediente'
+import type { SgcPoliticaDocumento, SincronizacionExpediente } from '../../../convex/_lib/sgc/expediente'
 
 export type SgcPanel = {
   ronda: {
@@ -523,6 +523,22 @@ export async function listDriveRecursosParticipante(rondaId: string): Promise<Sg
 }
 
 export const listDriveRecursosParticipanteWithStatus = withStatus('listDriveRecursosParticipante', listDriveRecursosParticipante, [])
+
+export type { SincronizacionExpediente } from '../../../convex/_lib/sgc/expediente'
+
+export async function getSincronizacionExpedienteSgc(rondaId: string): Promise<SincronizacionExpediente> {
+  const token = await getConvexToken('operar SGC')
+  return fetchQuery(api.sgc.index.getSincronizacionExpediente, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
+export async function actualizarExpedienteSgc(rondaId: string) {
+  const token = await getConvexToken('operar SGC')
+  return fetchMutation(api.sgc.index.actualizarExpediente, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
 
 export async function inicializarDriveRonda(rondaId: string) {
   const token = await getConvexToken('operar SGC')

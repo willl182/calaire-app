@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { enriquecerRecursoConCatalogo } from '../../../convex/_lib/sgc/expediente'
+import { compararExpedienteConCatalogo, enriquecerRecursoConCatalogo } from '../../../convex/_lib/sgc/expediente'
+import { SGC_RONDA_ETAPAS } from './catalog'
 
 describe('enriquecerRecursoConCatalogo', () => {
   it('toma orden, responsable y obligatoriedad del catalogo aunque la copia guardada sea antigua', () => {
@@ -20,5 +21,35 @@ describe('enriquecerRecursoConCatalogo', () => {
     const extra = enriquecerRecursoConCatalogo({ codigo: 'OTRO-1', tipo: 'documento', bloqueaCierre: true })
     expect(extra.bloqueaCierre).toBe(true)
     expect(extra.politica.enCatalogo).toBe(false)
+  })
+})
+
+function expedienteCompleto() {
+  return [
+    { _id: 'root', codigo: 'DRIVE_ROOT', tipo: 'carpeta', parentId: null },
+    ...SGC_RONDA_ETAPAS.map((e) => ({ _id: e.key, codigo: e.key.toUpperCase(), tipo: 'carpeta', parentId: 'root' })),
+    ...SGC_RONDA_ETAPAS.flatMap((e) =>
+      e.documentos.map((d) => ({ _id: d.codigo, codigo: d.codigo, tipo: 'documento', parentId: e.key }))
+    ),
+  ]
+}
+
+describe('compararExpedienteConCatalogo', () => {
+  it('sin raiz no esta inicializado', () => {
+    const r = compararExpedienteConCatalogo([])
+    expect(r.inicializado).toBe(false)
+    expect(r.carpetasFaltantes).toHaveLength(SGC_RONDA_ETAPAS.length)
+  })
+
+  it('detecta documento en otra carpeta y recursos fuera del catalogo', () => {
+    const recursos = [...expedienteCompleto(), { _id: 'x', codigo: 'VIEJO-1', tipo: 'documento', parentId: 'root' }]
+    expect(compararExpedienteConCatalogo(recursos).sincronizado).toBe(true)
+    const movido = recursos.map((r) => (r.codigo === 'F-PSEA-21' ? { ...r, parentId: 'inicio_ronda' } : r))
+    const res = compararExpedienteConCatalogo(movido)
+    expect(res.sincronizado).toBe(false)
+    expect(res.documentosEnOtraCarpeta).toEqual([
+      { codigo: 'F-PSEA-21', etapaKey: 'preparacion_item', carpeta: '03_preparacion_item' },
+    ])
+    expect(res.recursosFueraDeCatalogo).toEqual([{ codigo: 'VIEJO-1', tipo: 'documento' }])
   })
 })
