@@ -1,0 +1,13 @@
+⚠ claude.ai connectors are disabled because ANTHROPIC_API_KEY or another auth source is set and takes precedence over your claude.ai login · Unset it to load your organization's connectors
+Claude Code doesn't recognize the model "gpt-6-luna", so it assumes a context window of 200k tokens. Update Claude Code, or see https://code.claude.com/docs/en/model-config#correct-the-window-for-a-gateway-or-custom-model-id to set the window.
+[claude-code:unrecognized_model] {"model":"gpt-6-luna","query_source":"generate_session_title"}
+Redacté únicamente los tres archivos solicitados:
+
+- [P-PSEA-20 Competencia y autorizacion operativa del PEA.md](/home/w421/w421/calaire-app/_workspace/borradores/P-PSEA-20%20Competencia%20y%20autorizacion%20operativa%20del%20PEA.md)
+- [P-PSEA-21 Proveedores criticos del PEA.md](/home/w421/w421/calaire-app/_workspace/borradores/P-PSEA-21%20Proveedores%20criticos%20del%20PEA.md)
+- [notas_P-PSEA-20_21.md](/home/w421/w421/calaire-app/_workspace/borradores/notas_P-PSEA-20_21.md)
+
+Ambos procedimientos están en **Borrador para revisión**, versión **0.1**. Incluí las reglas de diligenciamiento por ronda de `F-PSEA-16` —obligatorio— y de uso de `F-PSEA-17` —si aplica—, además de las incertidumbres marcadas con **⚠️ Por confirmar:**.
+
+La comprobación documental concluye que el contenido antiguo de **“P-PSEA-20 — Comunicación PT”** corresponde temáticamente a `P-PSEA-05 Comunicaciones del PEA`, y **“P-PSEA-21 — Divulgación de Valores”** a `P-PSEA-16 Divulgacion y control de valores sensibles`, con los canales de comunicación relacionados también con P-PSEA-05. La nota advierte que esto verifica cobertura temática, no valida automáticamente los plazos, roles o códigos antiguos.
+exit=0
