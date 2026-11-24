@@ -88,6 +88,22 @@ function getCellIssue(data: CellData): string | null {
   return null
 }
 
+const FIELD_ORDER = ['d1', 'd2', 'd3', 'meanValue', 'sdValue', 'ux', 'k', 'uxExp'] as const
+const REQUIRED_FIELDS = new Set<string>(['d1', 'meanValue', 'sdValue', 'ux', 'k', 'uxExp'])
+
+/** Primer campo vacío obligatorio o inválido, para llevar el foco desde "Faltan N celdas". */
+function firstPendingField(data: CellData): (typeof FIELD_ORDER)[number] {
+  for (const field of FIELD_ORDER) {
+    const value = data[field]
+    if (value.trim() === '') {
+      if (REQUIRED_FIELDS.has(field)) return field
+      continue
+    }
+    if (!isValidNumberInput(value)) return field
+  }
+  return 'd1'
+}
+
 function isCellComplete(data: CellData): boolean {
   // Solo d1 es obligatorio. d2 y d3 pueden quedar vacios (NA) y se guardan como
   // null; no participan en ningun calculo.
@@ -441,6 +457,19 @@ export default function FormularioRonda({
     contaminante,
     items: ptItems.filter((item) => item.contaminante === contaminante),
   })).filter((entry) => entry.items.length > 0)
+
+  const pendingCells = ptItems.flatMap((item) =>
+    sampleGroups.map((group) => ({ item, group, key: toCellKey(item.id, group.id) }))
+  ).filter(({ key }) => {
+    const status = saveStatus[key] ?? 'idle'
+    return !isCellComplete(cells[key]) || getCellIssue(cells[key]) !== null || saveErrors[key] != null || status === 'dirty' || status === 'saving'
+  })
+
+  function focusPendingCell(itemId: string, groupId: string, data: CellData) {
+    const el = document.getElementById(`msg-${itemId}-${groupId}-${firstPendingField(data)}`)
+    el?.scrollIntoView({ block: 'center' })
+    el?.focus()
+  }
 
   return (
     <div className={adminTarget ? '' : 'min-h-screen bg-[var(--background)] px-6 py-8'}>
@@ -810,6 +839,9 @@ export default function FormularioRonda({
                             {(['d1', 'd2', 'd3'] as const).map((field, index) => (
                               <td key={field} className="px-2 py-2">
                                 <DecimalInput
+                                  id={`${msgId}-${field}`}
+                                  aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                  aria-invalid={issue ? true : undefined}
                                   placeholder={index === 0 ? '' : 'NA'}
                                   value={data[field]}
                                   disabled={soloLectura}
@@ -820,6 +852,9 @@ export default function FormularioRonda({
                             ))}
                             <td className="px-2 py-2">
                               <DecimalInput
+                                id={`${msgId}-meanValue`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.meanValue}
                                 disabled={soloLectura}
                                 onValueChange={(v) => updateCell(key, { ...data, meanValue: v })}
@@ -828,6 +863,9 @@ export default function FormularioRonda({
                             </td>
                             <td className="px-2 py-2">
                               <DecimalInput
+                                id={`${msgId}-sdValue`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.sdValue}
                                 disabled={soloLectura}
                                 onValueChange={(v) => updateCell(key, { ...data, sdValue: v })}
@@ -836,6 +874,9 @@ export default function FormularioRonda({
                             </td>
                             <td className="px-2 py-2">
                               <DecimalInput
+                                id={`${msgId}-ux`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.ux}
                                 disabled={soloLectura}
                                 onValueChange={(v) => updateCell(key, { ...data, ux: v })}
@@ -844,6 +885,9 @@ export default function FormularioRonda({
                             </td>
                             <td className="px-2 py-2">
                               <DecimalInput
+                                id={`${msgId}-k`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.k}
                                 disabled={soloLectura || kMode === 'grupal'}
                                 onValueChange={(v) => updateCell(key, { ...data, k: v })}
@@ -852,6 +896,9 @@ export default function FormularioRonda({
                             </td>
                             <td className="px-2 py-2">
                               <DecimalInput
+                                id={`${msgId}-uxExp`}
+                                aria-describedby={issue || warnings.length > 0 ? msgId : undefined}
+                                aria-invalid={issue ? true : undefined}
                                 value={data.uxExp}
                                 disabled={soloLectura}
                                 onValueChange={(v) => updateCell(key, { ...data, uxExp: v })}
@@ -862,7 +909,7 @@ export default function FormularioRonda({
                               {complete ? (
                                 <span className="text-base font-semibold text-emerald-600">✓</span>
                               ) : issue ? (
-                                <span className="text-xs text-rose-500" title={issue}>✗</span>
+                                <span className="text-xs text-rose-500" aria-hidden="true">✗</span>
                               ) : (
                                 <StatusIcon status={status} />
                               )}
@@ -893,11 +940,31 @@ export default function FormularioRonda({
 
         {!soloLectura && (
           <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
-            <p className="text-sm text-[var(--foreground-muted)]">
-              {canSubmit
-                ? 'Todas las combinaciones PT están completas y guardadas. Puedes enviar el informe final.'
-                : `Faltan ${Math.max(totalCells - completedCells, 0)} celdas por completar o guardar.`}
-            </p>
+            <div className="min-w-0 flex-1 text-sm text-[var(--foreground-muted)]">
+              {canSubmit ? (
+                <p>Todas las combinaciones PT están completas y guardadas. Puedes enviar el informe final.</p>
+              ) : (
+                <>
+                  <p>Faltan {pendingCells.length} celdas por completar o guardar{pendingCells.length > 0 ? ':' : '.'}</p>
+                  {pendingCells.length > 0 && (
+                    <ul className="mt-2 flex flex-wrap gap-2" aria-label="Celdas pendientes">
+                      {pendingCells.map(({ item, group, key }) => (
+                        <li key={key}>
+                          <button
+                            type="button"
+                            onClick={() => focusPendingCell(item.id, group.id, cells[key])}
+                            className="rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs text-amber-800 hover:bg-amber-100"
+                          >
+                            {item.contaminante} nivel {item.level_label || item.run_code}
+                            {sampleGroups.length > 1 ? ` · ${group.sample_group}` : ''}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </>
+              )}
+            </div>
             <button type="button" onClick={() => void handleSubmit()} className="btn-primary" disabled={!canSubmit}>
               Enviar informe final PT
             </button>
