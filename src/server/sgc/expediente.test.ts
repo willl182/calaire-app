@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import {
   calcularAvanceExpediente,
+  calcularEstadoDriveRonda,
   compararExpedienteConCatalogo,
   enriquecerRecursoConCatalogo,
   type EstadosNativosExpediente,
@@ -56,6 +57,23 @@ describe('compararExpedienteConCatalogo', () => {
       { codigo: 'F-PSEA-21', etapaKey: 'preparacion_item', carpeta: '03_preparacion_item' },
     ])
     expect(res.recursosFueraDeCatalogo).toEqual([{ codigo: 'VIEJO-1', tipo: 'documento' }])
+  })
+})
+
+describe('calcularEstadoDriveRonda', () => {
+  it('expediente inicializado no implica carpeta creada en Drive', () => {
+    const recursos = expedienteCompleto()
+    const sinDrive = calcularEstadoDriveRonda(recursos)
+    expect(sinDrive).toMatchObject({ expedienteInicializado: true, carpetaRondaCreada: false, carpetaRondaUrl: null })
+    expect(sinDrive.carpetas).toEqual({ total: SGC_RONDA_ETAPAS.length, creadasEnDrive: 0 })
+
+    const conDrive = calcularEstadoDriveRonda(
+      recursos.map((r) =>
+        r.codigo === 'DRIVE_ROOT' ? { ...r, driveFolderId: 'abc', webUrl: 'https://drive.google.com/open?id=abc' } : r
+      )
+    )
+    expect(conDrive).toMatchObject({ carpetaRondaCreada: true, carpetaRondaId: 'abc', carpetaRondaUrl: 'https://drive.google.com/open?id=abc' })
+    expect(calcularEstadoDriveRonda([]).expedienteInicializado).toBe(false)
   })
 })
 

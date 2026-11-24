@@ -5,6 +5,7 @@ import type { MutationCtx, QueryCtx } from '../_generated/server'
 import { getSgcRondaDocumento } from '../_lib/sgc/catalog'
 import {
   calcularAvanceExpediente,
+  calcularEstadoDriveRonda,
   compararExpedienteConCatalogo,
   type EstadosNativosExpediente,
 } from '../_lib/sgc/expediente'
@@ -59,6 +60,20 @@ async function getAvance(ctx: QueryCtx | MutationCtx, rondaId: Id<'rondas'>) {
   ])
   return calcularAvanceExpediente(String(rondaId), recursos, nativos)
 }
+
+/**
+ * B1.5: estado real de Drive de la ronda (carpeta creada = `driveFolderId` en la raiz). Si la
+ * integracion esta conectada depende de las credenciales del servidor Next: lo combina
+ * `getEstadoDriveRondaSgc` en `src/server/sgc/drive-google.ts`.
+ */
+export const getEstadoDriveRondaConfig = {
+  args: rondaArgs,
+  handler: async (ctx, { rondaId }) => {
+    await requireSgcViewer(ctx)
+    const recursos = await ctx.db.query('sgcDriveRecursos').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).collect()
+    return calcularEstadoDriveRonda(recursos)
+  },
+} satisfies SgcQueryConfig<typeof rondaArgs>
 
 /** B1.4: avance del expediente y pendientes clasificados (bloqueante / critico / advertencia). */
 export const getAvanceExpedienteConfig = {

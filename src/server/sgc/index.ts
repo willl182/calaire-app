@@ -9,7 +9,7 @@ import {
   type SgcChecklistItem,
 } from './checklist'
 import type { SgcFase, SgcFormatoCodigo } from './catalog'
-import type { SgcAvanceExpediente, SgcPoliticaDocumento, SincronizacionExpediente } from '../../../convex/_lib/sgc/expediente'
+import type { EstadoDriveRonda, SgcAvanceExpediente, SgcPoliticaDocumento, SincronizacionExpediente } from '../../../convex/_lib/sgc/expediente'
 
 export type SgcPanel = {
   ronda: {
@@ -545,6 +545,16 @@ export type { SgcAvanceExpediente, SgcAvanceItem, SgcNivelPendiente } from '../.
 export async function getAvanceExpedienteSgc(rondaId: string): Promise<SgcAvanceExpediente> {
   const token = await getConvexToken('operar SGC')
   return fetchQuery(api.sgc.index.getAvanceExpediente, {
+    rondaId: rondaId as Id<'rondas'>
+  }, { token })
+}
+
+export type { EstadoDriveRonda } from '../../../convex/_lib/sgc/expediente'
+
+/** Estado Drive guardado en Convex (sin saber si la integracion del servidor esta conectada). */
+export async function getEstadoDriveRondaGuardado(rondaId: string): Promise<EstadoDriveRonda> {
+  const token = await getConvexToken('operar SGC')
+  return fetchQuery(api.sgc.index.getEstadoDriveRonda, {
     rondaId: rondaId as Id<'rondas'>
   }, { token })
 }

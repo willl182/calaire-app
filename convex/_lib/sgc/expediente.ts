@@ -137,6 +137,46 @@ export function compararExpedienteConCatalogo(
 }
 
 // ---------------------------------------------------------------------------
+// Estado real de Drive por ronda (B1.5)
+// ---------------------------------------------------------------------------
+
+export type EstadoDriveRonda = {
+  expedienteInicializado: boolean
+  /** La carpeta raiz de la ronda existe en Google Drive (tiene `driveFolderId`). */
+  carpetaRondaCreada: boolean
+  carpetaRondaId: string | null
+  carpetaRondaUrl: string | null
+  carpetas: { total: number; creadasEnDrive: number }
+  documentos: { total: number; conEnlace: number }
+}
+
+type RecursoDrive = {
+  codigo: string
+  tipo: string
+  driveFolderId?: string | null
+  driveFileId?: string | null
+  webUrl?: string | null
+}
+
+/** Distingue "expediente en la app" de "carpeta de la ronda creada en Drive". */
+export function calcularEstadoDriveRonda(recursos: readonly RecursoDrive[]): EstadoDriveRonda {
+  const root = recursos.find((recurso) => norm(recurso.codigo) === DRIVE_ROOT_CODIGO) ?? null
+  const carpetas = recursos.filter((recurso) => recurso.tipo === 'carpeta' && recurso !== root)
+  const documentos = recursos.filter((recurso) => recurso.tipo !== 'carpeta')
+  return {
+    expedienteInicializado: Boolean(root),
+    carpetaRondaCreada: Boolean(root?.driveFolderId),
+    carpetaRondaId: root?.driveFolderId ?? null,
+    carpetaRondaUrl: root?.driveFolderId ? root.webUrl ?? null : null,
+    carpetas: { total: carpetas.length, creadasEnDrive: carpetas.filter((c) => Boolean(c.driveFolderId)).length },
+    documentos: {
+      total: documentos.length,
+      conEnlace: documentos.filter((d) => Boolean(d.driveFileId || d.webUrl?.trim())).length,
+    },
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Avance y checklist del expediente (B1.4)
 // ---------------------------------------------------------------------------
 

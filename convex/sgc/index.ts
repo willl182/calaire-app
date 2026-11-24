@@ -15,7 +15,7 @@ import { crearNotificacionConfig, listMisNotificacionesConfig, marcarNotificacio
 import { upsertResultadoPtAppConfig, crearCasoSgcConfig, actualizarCasoSgcConfig } from './casos'
 import { crearRegistroSgcConfig, getDocumentoMaestroConfig, importarDocumentosSeedSgcConfig, importarMapaSeedSgcConfig, importarRequisitosSeedSgcConfig, importarSeedSgcConfig, listExpedientesSgcConfig, listMapaSgcConfig, listNormativaSgcConfig, listSgcMaestroConfig, registrarVersionOficialConfig, upsertDocumentoMaestroConfig, upsertDocumentoRequisitoConfig } from './maestro'
 import { actualizarEstadoDriveRecursoConfig, actualizarVisibilidadDriveRecursoConfig, getDriveTreeConfig, inicializarDriveRondaConfig, listDriveRecursosConfig, listDriveRecursosParticipanteConfig, marcarDriveRecursoUsadoConfig, registrarAutomatizacionDriveConfig, reemplazarDriveRecursoConfig, retirarDriveRecursoConfig, upsertDriveRecursoConfig } from './drive'
-import { actualizarExpedienteConfig, aprobarDocumentoExpedienteConfig, getAvanceExpedienteConfig, getSincronizacionExpedienteConfig, marcarAplicaDocumentoConfig } from './expediente'
+import { actualizarExpedienteConfig, aprobarDocumentoExpedienteConfig, getAvanceExpedienteConfig, getEstadoDriveRondaConfig, getSincronizacionExpedienteConfig, marcarAplicaDocumentoConfig } from './expediente'
 import { actualizarActaInicioConfig, cambiarPublicacionActaInicioConfig, getActaInicioConfig, getActaInicioDownloadUrlConfig, inicializarActaInicioConfig, registrarDocxActaInicioConfig, registrarPdfFirmadoActaInicioConfig } from './actaInicio'
 import { actualizarInstrumentoRondaConfig, crearInstrumentoRondaConfig, devolverRelacionInstrumentosConfig, eliminarInstrumentoRondaConfig, enviarRelacionInstrumentosAValidacionConfig, getExportacionInstrumentosUrlConfig, getRelacionInstrumentosRondaConfig, inicializarRelacionInstrumentosConfig, registrarExportacionesInstrumentosConfig, registrarFotoInstrumentoRondaConfig, retirarFotoInstrumentoRondaConfig, validarRelacionInstrumentosConfig } from './instrumentosRonda'
 
@@ -103,6 +103,7 @@ export const marcarDriveRecursoUsado = mutation(marcarDriveRecursoUsadoConfig)
 export const getSincronizacionExpediente = query(getSincronizacionExpedienteConfig)
 export const actualizarExpediente = mutation(actualizarExpedienteConfig)
 export const getAvanceExpediente = query(getAvanceExpedienteConfig)
+export const getEstadoDriveRonda = query(getEstadoDriveRondaConfig)
 export const marcarAplicaDocumento = mutation(marcarAplicaDocumentoConfig)
 export const aprobarDocumentoExpediente = mutation(aprobarDocumentoExpedienteConfig)
 

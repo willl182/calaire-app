@@ -81,6 +81,16 @@ describe('sincronizacion del expediente (B1.3)', () => {
     ).rejects.toThrow(/no requiere/)
   })
 
+  test('estado Drive de la ronda (B1.5)', async () => {
+    const t = convexTest(schema, modules)
+    const rondaId = await seedRonda(t)
+    const admin = t.withIdentity(adminIdentity)
+    expect((await admin.query(api.sgc.index.getEstadoDriveRonda, { rondaId })).expedienteInicializado).toBe(false)
+    await admin.mutation(api.sgc.index.actualizarExpediente, { rondaId })
+    const estado = await admin.query(api.sgc.index.getEstadoDriveRonda, { rondaId })
+    expect(estado).toMatchObject({ expedienteInicializado: true, carpetaRondaCreada: false })
+  })
+
   test('sin rol SGC no consulta la sincronizacion', async () => {
     const t = convexTest(schema, modules)
     const rondaId = await seedRonda(t)
