@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SGC_FORMATOS_FASE_1, SGC_RONDA_ETAPAS, getSgcFormato } from './catalog'
+import { SGC_DOCUMENTOS_ORDEN_LOGICO, SGC_FORMATOS_FASE_1, SGC_RONDA_ETAPAS, getSgcFormato, getSgcRondaDocumento } from './catalog'
 
 describe('integridad del catalogo SGC', () => {
   it('codigos de formatos unicos', () => {
@@ -49,5 +49,49 @@ describe('integridad del catalogo SGC', () => {
     for (const codigo of ['F-PSEA-20', 'F-PSEA-21']) {
       expect(prep?.documentos.some((d) => d.codigo === codigo)).toBe(true)
     }
+  })
+
+  it('orden por etapa consecutivo y ordenLogico global unico', () => {
+    for (const etapa of SGC_RONDA_ETAPAS) {
+      expect(etapa.documentos.map((d) => d.orden), etapa.key).toEqual(etapa.documentos.map((_, i) => i + 1))
+    }
+    const logicos = SGC_DOCUMENTOS_ORDEN_LOGICO.map((d) => d.ordenLogico)
+    expect(new Set(logicos).size).toBe(logicos.length)
+  })
+
+  it('Planificacion sigue F-06, F-01, F-02, F-05, F-03, F-04, F-16, F-17', () => {
+    const plan = SGC_RONDA_ETAPAS.find((e) => e.key === 'planificacion')
+    expect(plan?.documentos.map((d) => d.codigo)).toEqual([
+      'F-PSEA-06', 'F-PSEA-01', 'F-PSEA-02', 'F-PSEA-05', 'F-PSEA-03', 'F-PSEA-04', 'F-PSEA-16', 'F-PSEA-17',
+    ])
+  })
+
+  it('orden logico respeta dependencias de las decisiones 2026-11-24', () => {
+    const pos = (codigo: string) => SGC_DOCUMENTOS_ORDEN_LOGICO.findIndex((d) => d.codigo === codigo)
+    expect(pos('F-PSEA-21')).toBeLessThan(pos('F-PSEA-19'))
+    expect(pos('F-PSEA-07')).toBeLessThan(pos('F-PSEA-19'))
+    expect(pos('F-PSEA-11')).toBeLessThan(pos('F-PSEA-12'))
+    expect(pos('F-PSEA-10')).toBeLessThan(pos('F-PSEA-11A'))
+    expect(pos('F-PSEA-13')).toBeLessThan(pos('EVID-ENVIO'))
+    expect(SGC_DOCUMENTOS_ORDEN_LOGICO.at(-1)?.codigo).toBe('EVID-CIERRE')
+  })
+
+  it('responsable y obligatoriedad segun decisiones del usuario', () => {
+    const doc = (codigo: string) => getSgcRondaDocumento(codigo)
+    expect(doc('F-PSEA-01')?.responsable).toBe('coordinador')
+    expect(doc('F-PSEA-05')?.responsable).toBe('automatico')
+    expect(doc('F-PSEA-04')).toMatchObject({ responsable: 'automatico', obligatoriedad: 'obligatorio' })
+    expect(doc('F-PSEA-16')?.obligatoriedad).toBe('obligatorio')
+    expect(doc('F-PSEA-17')?.obligatoriedad).toBe('si_aplica')
+    expect(doc('F-PSEA-18')?.obligatoriedad).toBe('obligatorio')
+    expect(doc('EVID-COM')?.responsable).toBe('automatico')
+    for (const codigo of ['EVID-CERT', 'EVID-MONT', 'F-PSEA-11', 'F-PSEA-11A', 'F-PSEA-11B', 'F-PSEA-11C', 'F-PSEA-11D', 'F-PSEA-14', 'F-PSEA-15']) {
+      expect(doc(codigo)?.obligatoriedad, codigo).toBe('si_aplica')
+      expect(doc(codigo)?.bloqueaCierre, codigo).toBe(false)
+    }
+    expect(doc('F-PSEA-12')?.responsable).toBe('coordinador')
+    expect(doc('EVID-SALIDAS')?.responsable).toBe('coordinador')
+    expect(doc('EVID-ENVIO')?.responsable).toBe('automatico')
+    expect(doc('f-psea-19')?.codigo).toBe('F-PSEA-19')
   })
 })

@@ -462,6 +462,11 @@ export default defineSchema({
     bloqueaCierre: v.optional(v.boolean()),
     usadoEnRonda: v.optional(v.boolean()),
     publicaParticipante: v.optional(v.boolean()),
+    // B1.4: un documento "si aplica" del catalogo solo cuenta en el avance cuando aplica === true.
+    aplica: v.optional(v.union(v.boolean(), v.null())),
+    // B1.4: marca explicita del coordinador ("revisado" de F-PSEA-05, aprobacion de EVID-CIERRE).
+    aprobadoAt: v.optional(v.union(v.number(), v.null())),
+    aprobadoPor: v.optional(v.union(v.string(), v.null())),
     // Enlace editable/principal: Google Doc/Sheet vivo, o carpeta para tipo 'carpeta'.
     driveFileId: v.optional(v.union(v.string(), v.null())),
     driveFolderId: v.optional(v.union(v.string(), v.null())),

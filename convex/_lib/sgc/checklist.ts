@@ -1,4 +1,8 @@
-import { SGC_FORMATOS_FASE_1, type SgcFase, type SgcFormatoCodigo } from './catalog'
+import { getSgcRondaDocumento, SGC_FORMATOS_FASE_1, type SgcFase, type SgcFormatoCodigo } from './catalog'
+
+export function bloqueaCierreVigente(codigo: string, porDefecto: boolean) {
+  return getSgcRondaDocumento(codigo)?.bloqueaCierre ?? porDefecto
+}
 
 export type SgcItemEstado = 'completo' | 'pendiente' | 'no_aplica' | 'advertencia'
 
@@ -175,7 +179,9 @@ export function calcularChecklistSgc(input: SgcCoverageInput): SgcChecklistItem[
       ultimaActualizacion,
       vinculo,
       observaciones,
-      bloqueante: formato.bloqueaCierre && (estado === 'pendiente' || estado === 'advertencia'),
+      // La politica de cierre sale del catalogo del expediente cuando el formato esta en el:
+      // los "si aplica" (F-PSEA-11, F-PSEA-14) no bloquean el cierre (decisiones 13 y 16).
+      bloqueante: bloqueaCierreVigente(formato.codigo, formato.bloqueaCierre) && (estado === 'pendiente' || estado === 'advertencia'),
     }
   })
 }

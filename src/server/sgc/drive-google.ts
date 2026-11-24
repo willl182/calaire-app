@@ -12,6 +12,7 @@ import {
 } from '@/server/google-drive'
 import {
   getDriveTreeSgc,
+  getEstadoDriveRondaGuardado,
   inicializarDriveRonda,
   registrarAutomatizacionDrive,
   upsertDriveRecurso,
@@ -138,6 +139,19 @@ export function getDriveGoogleAutomationStatus() {
   return {
     ...status,
     ready: status.clientEmail && status.privateKey && status.rootFolderId,
+  }
+}
+
+/**
+ * B1.5: estado real de Drive por ronda. Distingue "integracion conectada" (credenciales y carpeta
+ * raiz configuradas en el servidor) de "carpeta de la ronda creada" (`driveFolderId` en la raiz).
+ */
+export async function getEstadoDriveRondaSgc(rondaId: string) {
+  const integracion = getDriveGoogleAutomationStatus()
+  const ronda = await getEstadoDriveRondaGuardado(rondaId)
+  return {
+    integracionConectada: Boolean(integracion.ready),
+    ...ronda,
   }
 }
 
