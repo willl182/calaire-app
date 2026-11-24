@@ -14,13 +14,14 @@ La matriz `F-PSEA-16` debe actualizarse y verificarse en cada ronda. Este proced
 
 | Rol | Responsabilidad |
 |---|---|
+| Directora del PEA | Otorgar la aprobación final de las autorizaciones del personal registradas en `F-PSEA-16`, incluida la autorización para revisar y emitir informes finales. |
 | Coordinador del PEA / de ronda | Confirmar qué personas y funciones se requieren para la ronda; revisar que las autorizaciones necesarias estén vigentes antes de asignar tareas críticas y coordinar las decisiones de autorización. |
 | Responsable técnico | Definir y verificar los requisitos técnicos de las funciones asignadas; aportar evidencia de formación y experiencia; validar la competencia para preparación del ítem, análisis técnico y revisión de resultados. |
 | Responsable de datos / aplicativos | Aportar la evidencia de competencia para las tareas de manejo, procesamiento y transferencia de datos y operación de aplicativos que tenga asignadas. |
 | Gestor SGC / Responsable SGC | Mantener y controlar `F-PSEA-16`, comprobar su completitud y vigencia, vincular la copia diligenciada con el expediente de ronda y controlar el acceso a la información personal. |
 | Persona asignada a una función | Aportar soportes de formación y experiencia, y ejecutar únicamente las funciones para las que tenga autorización vigente. |
 
-⚠️ Por confirmar: quién tiene la aprobación final de autorizaciones de alto impacto y de la autorización para emitir informes finales. Mientras se confirma, el coordinador y el responsable técnico deben dejar documentada la decisión y no asignar la función hasta que conste una autorización verificable.
+La aprobación final de las autorizaciones, incluida la de emitir informes finales, corresponde a la directora del PEA. Ninguna función queda autorizada en `F-PSEA-16` sin su aprobación registrada.
 
 ## Condiciones para asignar funciones
 

@@ -14,7 +14,7 @@ Aplica únicamente a proveedores y servicios externos que puedan afectar la prep
 - Software o servicios digitales usados para generar, procesar, conservar o analizar datos del PEA, cuando su falla o cambio pueda afectar los resultados o su trazabilidad.
 - Transporte especializado u otros servicios externos, si pueden afectar equipos, insumos, datos o actividades del esquema.
 
-No aplica a compras generales ni a servicios administrativos sin efecto sobre la validez del ensayo. No autoriza transferir a un proveedor externo la responsabilidad del PEA por el diseño, la operación, la evaluación o la emisión de resultados del esquema.
+No aplica a compras generales ni a servicios administrativos sin efecto sobre la validez del ensayo. Las únicas actividades técnicas que se encargan a terceros son el suministro de gases y cilindros y la calibración y el mantenimiento de equipos; ninguna otra actividad del PEA (diseño, preparación del ítem, análisis, evaluación o emisión de informes) se terceriza. El software y el transporte se evalúan como servicios de apoyo, no como actividades tercerizadas. No autoriza transferir a un proveedor externo la responsabilidad del PEA por el diseño, la operación, la evaluación o la emisión de resultados del esquema.
 
 ## Definición y criterios de criticidad
 
@@ -36,12 +36,14 @@ La criticidad se determina por el uso concreto en el PEA, no solo por el tipo co
 
 | Rol | Responsabilidad |
 |---|---|
+| Directora del PEA | Aprobar o rechazar la inclusión de proveedores críticos y sus reevaluaciones, con base en la evaluación del comité de proveedores. |
+| Comité de proveedores (responsable de proyectos, responsable de calidad, responsable de infraestructura) | Evaluar los proveedores críticos según su ámbito: proyectos (contratación y condiciones del servicio), calidad (evidencias, trazabilidad y registro en `F-PSEA-17`) e infraestructura (equipos, instalaciones, gases y servicios técnicos). Recomendar la decisión a la directora del PEA. |
 | Coordinador del PEA / de ronda | Identificar, con el responsable técnico, proveedores que se prevé usar; asegurar que la evaluación aplicable esté disponible antes de su uso y coordinar decisiones ante cambios o incumplimientos. |
 | Responsable técnico | Determinar la criticidad y los criterios técnicos de aceptación; revisar certificados, trazabilidad y adecuación al uso; evaluar el efecto de fallas o cambios sobre la ronda. |
 | Gestor SGC / Responsable SGC | Mantener y controlar `F-PSEA-17`, comprobar que la evaluación y sus evidencias estén completas, conservarlas en el expediente correspondiente y registrar la decisión y seguimiento. |
 | Responsable de datos / aplicativos | Aportar los criterios y evidencias pertinentes cuando se evalúen software o servicios digitales usados para el procesamiento o conservación de datos. |
 
-⚠️ Por confirmar: quién aprueba formalmente la inclusión o el rechazo de un proveedor crítico. El formato maestro alude a aprobación de la lista y decisiones de rechazo por la “alta dirección”, rol que no está definido con ese nombre en los procedimientos operativos revisados. Mientras se confirma, el responsable técnico sustenta la decisión y el coordinador la revisa; se registra quién tomó la decisión y no se usa un proveedor no aprobado para una actividad crítica.
+La aprobación o el rechazo de un proveedor crítico corresponde a la directora del PEA, con base en la evaluación del comité de proveedores (responsable de proyectos, responsable de calidad y responsable de infraestructura). No se usa un proveedor no aprobado en una actividad crítica.
 
 ## Evaluación, aprobación y seguimiento
 
@@ -53,13 +55,13 @@ La criticidad se determina por el uso concreto en el PEA, no solo por el tipo co
    - **Mantenimiento:** competencia para el equipo, alcance ejecutado, repuestos o ajustes realizados, informe de servicio y verificaciones funcionales posteriores antes de volver a usar el equipo.
    - **Software / servicio digital:** adecuación a la función prevista, identificación de versión o cambio, controles de acceso y respaldo pertinentes, disponibilidad de registros y posibilidad de verificar los datos y resultados generados.
    - **Transporte u otro servicio crítico:** condiciones y controles requeridos para preservar la integridad del equipo, insumo o dato durante el servicio.
-4. **Decisión.** Se registra una de estas decisiones disponibles en el formato: aprobado, aprobado con condiciones, rechazado, suspendido, en observación o la opción vigente equivalente. La aprobación debe limitarse al producto o servicio y al alcance evaluados; no se presume que cubre otros servicios del mismo proveedor.
+4. **Decisión.** La evaluación es por criterios y decisión; no se usan puntajes ni umbrales numéricos. Se registra una de estas decisiones disponibles en el formato: aprobado, aprobado con condiciones, rechazado, suspendido, en observación o la opción vigente equivalente. La aprobación debe limitarse al producto o servicio y al alcance evaluados; no se presume que cubre otros servicios del mismo proveedor.
 5. **Verificación en cada uso.** Antes de usar el producto o servicio en una ronda, el responsable técnico comprueba que corresponda al alcance aprobado y revisa los requisitos de recepción o vigencia pertinentes. Para equipos calibrados o mantenidos, se aplica además `P-PSEA-06` y los controles específicos del equipo.
 6. **Seguimiento y reevaluación.** El responsable técnico y el gestor SGC revisan el desempeño cuando haya un incumplimiento, certificado vencido, cambio de alcance o método, cambio de software, desviación, queja, indisponibilidad o cualquier señal que pueda afectar el PEA. La reevaluación compara la evidencia y el desempeño con los criterios originales y registra nueva decisión, fecha, responsable, alcance y condiciones.
 7. **Proveedor no conforme.** Si un proveedor no cumple, se detiene o limita su uso para la actividad afectada, se identifica el efecto potencial sobre el ítem, los datos o resultados de la ronda y se informa al coordinador. Se evalúa si corresponde gestionar trabajo no conforme conforme a `P-PSEA-15`. El proveedor se marca suspendido, rechazado o en observación en `F-PSEA-17` hasta que una reevaluación documentada permita otro estado.
 8. **Cambio de proveedor o alternativa.** Todo proveedor alternativo se evalúa antes de utilizarlo en una actividad crítica. El cambio y las verificaciones realizadas se vinculan con los registros de preparación del ítem u otros registros técnicos de la ronda.
 
-⚠️ Por confirmar: el intervalo fijo de reevaluación periódica de proveedores que no presenten cambios o incumplimientos. Hasta acordarlo, la reevaluación se realiza antes del siguiente uso cuando haya vencimientos o cambios relevantes, ante cualquier desempeño insatisfactorio y al menos cuando se planifique una nueva ronda que vuelva a utilizar un servicio crítico, verificando que la aprobación y la evidencia sigan vigentes.
+Además de las reevaluaciones por cambios, vencimientos o desempeño insatisfactorio, cada proveedor crítico aprobado se reevalúa **una vez al año**. Al planificar una ronda se verifica que la aprobación y la evidencia sigan vigentes.
 
 ## Uso de `F-PSEA-17` por ronda
 
@@ -101,7 +103,6 @@ ISO/IEC 17043:2023 6.4 (productos y servicios suministrados externamente), inclu
 - No sustituye la aceptación técnica de productos y servicios en el punto de uso.
 - No convierte a los proveedores en responsables del esquema ni autoriza transferirles decisiones o actividades que corresponden al PEA.
 - No reemplaza la evaluación de competencia del personal interno (`P-PSEA-20`).
-- No se fija aquí un plazo de reevaluación independiente de la vigencia, cambios y desempeño hasta confirmar el criterio institucional aplicable.
 
 ## Control del documento
 
