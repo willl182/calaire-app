@@ -5,11 +5,10 @@ import { DocGrid, driveSplitGrid } from '@/components/ui/drive/DocGrid'
 import { DocMetaDot, DocRow } from '@/components/ui/drive/DocRow'
 import { DriveBreadcrumb } from '@/components/ui/drive/DriveBreadcrumb'
 import { DriveDetailAside } from '@/components/ui/drive/DriveDetailAside'
-import { DriveStatsBar } from '@/components/ui/drive/DriveStatsBar'
 import { FolderCard } from '@/components/ui/drive/FolderCard'
 import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
-import type { SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/server/sgc'
+import type { SgcAvanceItem, SgcDriveRecurso, SgcDriveTree, SgcPanel } from '@/server/sgc'
 import F20Control from './F20Control'
 import { SgcRegistroDiligenciable } from './SgcRegistroDiligenciable'
 import {
@@ -27,6 +26,7 @@ import {
 type Props = {
   drive: SgcDriveTree
   panel: SgcPanel
+  avanceItems: SgcAvanceItem[]
   rondaId: string
   rondaCodigo: string
   rondaNombre: string
@@ -263,14 +263,10 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
 }
 
 
-export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
+export function DriveDocumentalSgc({ drive, panel, avanceItems, rondaId, rondaCodigo, rondaNombre, driveGoogleReady, driveGoogleConfig, selectedCarpeta, selectedDocId }: Props) {
   const root = drive.root
   const recursos = drive.recursos
   const folders = root ? childrenOf(recursos, root._id).filter((recurso) => recurso.tipo === 'carpeta') : []
-  const documentos = recursos.filter((recurso) => recurso.tipo !== 'carpeta')
-  const completados = documentos.filter((recurso) => recurso.estado === 'diligenciado' || recurso.estado === 'no_aplica').length
-  const conEditable = documentos.filter((recurso) => Boolean(recurso.webUrl)).length
-  const conDefinitivo = documentos.filter((recurso) => Boolean(recurso.definitivo)).length
 
   const basePath = `/dashboard/rondas/${rondaId}/sgc`
   const activeFolder = folders.find((folder) => folder.codigo === selectedCarpeta) ?? null
@@ -279,15 +275,6 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
 
   return (
     <>
-      <DriveStatsBar
-        items={[
-          { label: 'Carpetas', value: folders.length },
-          { label: 'Editables', value: `${conEditable}/${documentos.length}`, tone: 'sky' },
-          { label: 'Cubiertos', value: `${completados}/${documentos.length}`, tone: 'emerald' },
-          { label: 'Definitivos', value: `${conDefinitivo}/${documentos.length}`, tone: 'emerald' },
-        ]}
-      />
-
       <section className="card overflow-hidden" aria-labelledby="drive-documental-title">
         <div className="sgc-panel-head">
           <div>
@@ -352,14 +339,16 @@ export function DriveDocumentalSgc({ drive, panel, rondaId, rondaCodigo, rondaNo
               <div className="grid gap-3 p-6 sm:grid-cols-2 lg:grid-cols-3">
                 {folders.map((folder) => {
                   const folderChildren = childrenOf(recursos, folder._id).filter((recurso) => recurso.tipo !== 'carpeta')
-                  const folderDone = folderChildren.filter((recurso) => recurso.estado === 'diligenciado' || recurso.estado === 'no_aplica').length
+                  const codigos = new Set(folderChildren.map((recurso) => recurso.codigo))
+                  const cuentan = avanceItems.filter((item) => codigos.has(item.codigo) && item.cuentaEnAvance)
+                  const folderDone = cuentan.filter((item) => item.estado === 'completo').length
                   return (
                     <FolderCard
                       key={folder._id}
                       href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}`}
                       nombre={folder.nombre}
                       sublabel={`Carpeta · ${folderChildren.length} documento${folderChildren.length === 1 ? '' : 's'}`}
-                      badge={`${folderDone}/${folderChildren.length}`}
+                      badge={`${folderDone}/${cuentan.length}`}
                     />
                   )
                 })}

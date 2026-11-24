@@ -3,13 +3,17 @@ import { Alert } from '@/components/ui/Alert'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { getRonda } from '@/server/rondas'
 import {
-  SGC_RONDA_ETAPAS,
-  type SgcRondaDocumento,
-} from '@/server/sgc/catalog'
-import { getDriveTreeSgc, getPanelSgc, inicializarPanelSgc, type SgcPanel } from '@/server/sgc'
+  getAvanceExpedienteSgc,
+  getDriveTreeSgc,
+  getPanelSgc,
+  getSincronizacionExpedienteSgc,
+  inicializarPanelSgc,
+  type SgcPanel,
+} from '@/server/sgc'
 import { getDriveGoogleAutomationStatus } from '@/server/sgc/drive-google'
 import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
+import { AvisoSincronizacion } from './AvisoSincronizacion'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
 import { transicionSgcAction } from './actions'
 
@@ -18,15 +22,8 @@ type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
 }
 
-const DOCUMENTO_ESTADOS_CUBIERTOS = new Set(['completo', 'no_aplica', 'disponible'])
-
 function getParam(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
-}
-
-function getDocumentoEstado(doc: SgcRondaDocumento, checklistByCodigo: Map<string, { estado: string }>) {
-  if (!doc.formatoOperativo) return doc.estado
-  return checklistByCodigo.get(doc.formatoOperativo)?.estado ?? doc.estado
 }
 
 function CierreDocumentalBar({ panel, rondaId }: { panel: SgcPanel; rondaId: string }) {
@@ -108,23 +105,17 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
   if (!ronda) notFound()
 
   await inicializarPanelSgc(id)
-  const [panel, drive] = await Promise.all([
+  const [panel, drive, sync, avance] = await Promise.all([
     getPanelSgc(id),
     getDriveTreeSgc(id),
+    getSincronizacionExpedienteSgc(id),
+    getAvanceExpedienteSgc(id),
   ])
   if (!panel) notFound()
   const driveGoogleStatus = getDriveGoogleAutomationStatus()
 
   const success = getParam(query.success)
   const error = getParam(query.error)
-  const checklistByCodigo = new Map(panel.checklist.map((item) => [item.codigo, item]))
-  const documentos = SGC_RONDA_ETAPAS.flatMap((seccion) => seccion.documentos.map((doc) => ({ seccion, doc })))
-  const cubiertos = documentos.filter(({ doc }) => {
-    const estado = getDocumentoEstado(doc, checklistByCodigo)
-    return DOCUMENTO_ESTADOS_CUBIERTOS.has(estado)
-  }).length
-  const progreso = documentos.length === 0 ? 0 : Math.round((cubiertos / documentos.length) * 100)
-
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
@@ -139,34 +130,34 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
         {success && <Alert tone="success" message={success} />}
         {error && <Alert tone="error" message={error} />}
 
-        <section className="sgc-kpis">
-          <div className="sgc-kpi bg-emerald-50/40">
-            <div className="sgc-kpi-label">Checklist</div>
-            <div className="sgc-kpi-value numeric">{progreso}%</div>
+        <AvisoSincronizacion sync={sync} rondaId={id} />
+
+        <section className="card p-4" aria-labelledby="avance-expediente-title">
+          <div className="flex flex-wrap items-baseline justify-between gap-2">
+            <h2 id="avance-expediente-title" className="text-sm font-semibold text-[var(--foreground)]">Avance del expediente</h2>
+            <span className="text-sm text-[var(--foreground-muted)]">
+              <span className="numeric font-semibold text-[var(--foreground)]">{avance.completos}</span> de {avance.total} documentos que aplican
+            </span>
           </div>
-          <div className="sgc-kpi">
-            <div className="sgc-kpi-label">Carpetas</div>
-            <div className="sgc-kpi-value numeric">{SGC_RONDA_ETAPAS.length}</div>
+          <div
+            className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"
+            role="progressbar"
+            aria-valuemin={0}
+            aria-valuemax={100}
+            aria-valuenow={avance.porcentaje}
+            aria-label={`Avance del expediente: ${avance.porcentaje} %`}
+          >
+            <div className="h-full rounded-full bg-[var(--pt-primary)]" style={{ width: `${avance.porcentaje}%` }} />
           </div>
-          <div className="sgc-kpi">
-            <div className="sgc-kpi-label">Cubiertos</div>
-            <div className="sgc-kpi-value numeric">
-              {cubiertos}
-              <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {documentos.length}</span>
-            </div>
-          </div>
-          <div className="sgc-kpi">
-            <div className="sgc-kpi-label">Definitivos</div>
-            <div className="sgc-kpi-value numeric">
-              {drive.recursos.filter((recurso) => recurso.definitivo).length}
-              <span className="text-xl font-normal text-[var(--foreground-muted)]"> / {drive.recursos.length}</span>
-            </div>
-          </div>
+          <p className="mt-2 text-xs text-[var(--foreground-muted)]">
+            Los documentos &quot;si aplica&quot; solo cuentan cuando se marcan como aplicables.
+          </p>
         </section>
 
         <DriveDocumentalSgc
           drive={drive}
           panel={panel}
+          avanceItems={avance.items}
           rondaId={id}
           rondaCodigo={ronda.codigo}
           rondaNombre={ronda.nombre}

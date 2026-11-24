@@ -38,6 +38,9 @@ import {
   upsertResultadoPtApp,
   crearNotificacion,
   upsertDriveRecurso,
+  actualizarExpedienteSgc,
+  aprobarDocumentoExpedienteSgc,
+  marcarAplicaDocumentoSgc,
   type SgcDriveEstado,
   type SgcDriveTipo,
 } from '@/server/sgc'
@@ -121,6 +124,49 @@ export async function inicializarDriveRondaAction(formData: FormData) {
   } catch (error) {
     unstable_rethrow(error)
     redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible inicializar el expediente Drive.')
+  }
+}
+
+export async function actualizarExpedienteAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  try {
+    await actualizarExpedienteSgc(rondaId)
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', 'Expediente actualizado con los documentos nuevos del catálogo.')
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible actualizar el expediente.')
+  }
+}
+
+export async function marcarAplicaDocumentoAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  const codigo = parseText(formData, 'codigo')
+  const aplica = parseText(formData, 'aplica') === 'true'
+  try {
+    await marcarAplicaDocumentoSgc(rondaId, codigo, aplica)
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', aplica ? `${codigo} marcado como "aplica".` : `${codigo} marcado como "no aplica".`)
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible cambiar la aplicabilidad.')
+  }
+}
+
+export async function aprobarDocumentoExpedienteAction(formData: FormData) {
+  await requireAdmin()
+  const rondaId = parseText(formData, 'ronda_id')
+  const codigo = parseText(formData, 'codigo')
+  const aprobado = parseText(formData, 'aprobado') !== 'false'
+  try {
+    await aprobarDocumentoExpedienteSgc(rondaId, codigo, aprobado)
+    revalidatePath(pageUrl(rondaId))
+    redirectWith(rondaId, 'success', aprobado ? `${codigo} aprobado por el coordinador.` : `Aprobación de ${codigo} retirada.`)
+  } catch (error) {
+    unstable_rethrow(error)
+    redirectWith(rondaId, 'error', error instanceof Error ? error.message : 'No fue posible registrar la aprobación.')
   }
 }
 
