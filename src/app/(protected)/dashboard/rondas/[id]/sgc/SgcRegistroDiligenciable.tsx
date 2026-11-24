@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { SGC_PLAN_BLOQUES } from '@/server/sgc/catalog'
 import type { SgcPanel } from '@/server/sgc'
+import { isoADdMmAaaa } from './fechas'
 import {
   finalizarPlanRondaAction,
   finalizarRevisionDatosAction,
@@ -40,7 +41,7 @@ function SectionShell({ children }: { children: React.ReactNode }) {
   )
 }
 
-function PlanRondaForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string }) {
+export function PlanRondaForm({ panel, rondaId, completa = false }: { panel: SgcPanel; rondaId: string; completa?: boolean }) {
   const planBloques = panel.plan?.bloques ?? {}
   const planCampos = panel.plan?.camposEstructurados ?? {}
   return (
@@ -54,11 +55,27 @@ function PlanRondaForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string })
       </div>
       <form action={guardarPlanRondaAction} className="mt-3 space-y-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
+        {completa && <input type="hidden" name="volver" value="f-psea-06" />}
         <div className="grid gap-3 sm:grid-cols-2">
-          <input className="input" name="responsable" placeholder="Responsable" defaultValue={planCampos.responsable ?? ''} />
-          <input className="input" name="fecha_plan" type="date" defaultValue={planCampos.fecha_plan ?? ''} />
+          <label className="grid gap-1 text-xs font-semibold text-[var(--foreground-muted)]">
+            Responsable
+            <input className="input" name="responsable" placeholder="Nombre del responsable" defaultValue={planCampos.responsable ?? ''} />
+          </label>
+          <label className="grid gap-1 text-xs font-semibold text-[var(--foreground-muted)]">
+            Fecha del plan (dd/mm/aaaa)
+            <input
+              className="input"
+              name="fecha_plan"
+              type="text"
+              inputMode="numeric"
+              placeholder="dd/mm/aaaa"
+              pattern="[0-9]{1,2}/[0-9]{1,2}/[0-9]{4}"
+              title="Use el formato dd/mm/aaaa"
+              defaultValue={isoADdMmAaaa(planCampos.fecha_plan)}
+            />
+          </label>
         </div>
-        <div className="max-h-[420px] space-y-4 overflow-y-auto rounded-lg border border-[var(--border)] bg-slate-50/50 p-4 pr-2">
+        <div className={`${completa ? '' : 'max-h-[420px] overflow-y-auto pr-2'} space-y-4 rounded-lg border border-[var(--border)] bg-slate-50/50 p-4`}>
           {SGC_PLAN_BLOQUES.map(({ key, label }) => (
             <div key={key} className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground-muted)]">{label}</label>
@@ -76,7 +93,8 @@ function PlanRondaForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string })
       </form>
       <form action={finalizarPlanRondaAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-outline" type="submit">Finalizar F-PSEA-06 y crear snapshot</button>
+        {completa && <input type="hidden" name="volver" value="f-psea-06" />}
+        <button className="btn-outline" type="submit">Finalizar registro</button>
       </form>
     </SectionShell>
   )
@@ -177,7 +195,14 @@ export function SgcRegistroDiligenciable({
   panel: SgcPanel
   rondaId: string
 }) {
-  if (codigo === 'F-PSEA-06') return <PlanRondaForm panel={panel} rondaId={rondaId} />
+  if (codigo === 'F-PSEA-06') {
+    return (
+      <SectionShell>
+        <p className="text-sm text-[var(--foreground-muted)]">El registro F-PSEA-06 se diligencia a pantalla completa.</p>
+        <Link className="btn-primary mt-2 inline-flex" href={`/dashboard/rondas/${rondaId}/sgc/f-psea-06`}>Abrir F-PSEA-06</Link>
+      </SectionShell>
+    )
+  }
   if (codigo === 'F-PSEA-13') return <InformeFinalForm panel={panel} rondaId={rondaId} />
   if (codigo === 'F-PSEA-11') return <HomogeneidadForm panel={panel} rondaId={rondaId} />
   return null

@@ -118,6 +118,45 @@ Los codigos de participante son el identificador anonimo de la ronda: no deben p
 7. Ejecutar la exportacion oficial de datos (F-PSEA-09) hacia pt_app.
 8. Registrar casos SGC de queja o NC cuando aplique.
 
+## 7A. Expediente documental de la ronda (pantalla SGC)
+
+La pantalla **Rondas → (ronda) → SGC** guía el expediente en este orden:
+
+1. **Siguiente paso** (barra superior): muestra la primera tarea pendiente según las dependencias, no según el número de carpeta. Antes del expediente pide los pasos previos: Configuración PT, códigos de participante y de réplica, hito `INICIO_RONDA` con fecha, inicializar el expediente e invitaciones. El botón "Ir al paso" lleva a la pantalla o sección que corresponde.
+2. **Aviso de desincronización**: si el catálogo documental cambió después de crear el expediente, aparece "Actualizar expediente (N documentos nuevos)". Actualizar no borra ni cambia lo ya diligenciado.
+3. **Avance del expediente**: un solo indicador, calculado sobre los documentos que aplican. Los "si aplica" solo cuentan cuando se marcan como aplicables.
+4. **Expediente por etapas**: cada documento aparece numerado en el orden de diligenciamiento, con su responsable (**Tú** = coordinador, **Participante**, **Automático**), su estado y una sola acción principal: *Crear en Drive → Diligenciar → Cargar definitivo → Publicar*. Las demás opciones (reemplazar enlace, retirar, visibilidad) están en "Más opciones".
+5. **Hitos del calendario** (`#hitos`): fechas en dd/mm/aaaa. Se registran antes o en paralelo al expediente; no impiden inicializarlo.
+6. **Explorador de carpetas**: vista de carpetas de Drive. Las insignias distinguen *integración Drive conectada* (credenciales del servidor) de *carpeta de la ronda creada*. "Crear en Google Drive" crea o reutiliza la carpeta de la ronda y sus subcarpetas, y copia las plantillas de los documentos que aún no tienen enlace.
+7. **Cierre documental**: los **bloqueantes** (recuadro rojo) impiden el cierre; los **críticos** (recuadro amarillo) conviene resolverlos pero no bloquean. Cada pendiente enlaza al documento.
+
+### 7A.1 Mapa de carpetas, etapas y documentos
+
+| Carpeta | Etapa | Documentos en orden (responsable; SA = si aplica) |
+|---|---|---|
+| `01_planificacion_ronda` | 01 Planificación | 1 F-PSEA-06 (Tú) · 2 F-PSEA-01 (Tú) · 3 F-PSEA-02 (Tú) · 4 F-PSEA-05 (Automático + "Marcar revisado") · 5 F-PSEA-03 (Participante) · 6 F-PSEA-04 (Automático) · 7 F-PSEA-16 (Tú) · F-PSEA-17 (Tú, SA) |
+| `02_comunicaciones_participantes` | 02 Comunicaciones | 1 I-PSEA-02 (Tú) · 2 F-PSEA-18 (Tú) · 3 EVID-COM (Automático: ingreso del participante a la app) · EVID-ACL (Tú, SA) |
+| `02A_inicio_ronda` | 02A Inicio de ronda | 1 F-PSEA-19 (Tú) |
+| `03_preparacion_item` | 03 Preparación del ítem | 1 F-PSEA-21 (Tú) · 2 F-PSEA-20 (Tú) · 3 F-PSEA-07 (Tú) · EVID-CERT (Tú, SA) · EVID-MONT (Tú, SA) |
+| `04_datos_y_preprocesamiento` | 04 Datos y preprocesamiento | 1 F-PSEA-08 (Participante) · 2 F-PSEA-09 (Automático) · 3 F-PSEA-10 (Tú) · 4 F-PSEA-12 (Tú) · EVID-CSV (Automático, SA) |
+| `05_homogeneidad_estabilidad` | 05 Homogeneidad y estabilidad | Toda la etapa SA: F-PSEA-11A, 11B, 11C, 11D, F-PSEA-11 (Tú). Se puede dejar en "no aplica" sin justificación. |
+| `06_analisis_e_informe` | 06 Análisis e informe | 1 EVID-SALIDAS (Tú, carga desde pt_app) · 2 F-PSEA-13 (Tú) · 3 EVID-ENVIO (Automático: informe publicado en el portal) |
+| `07_cierre_sgc` | 07 Cierre SGC | 1 EVID-CIERRE (Automático + "Aprobar cierre") · F-PSEA-14 (Tú, SA) · F-PSEA-15 (Tú, SA) |
+
+Notas de uso:
+
+- **F-PSEA-01, F-PSEA-02 y F-PSEA-04** tienen el botón "Descargar CSV" con los datos de la app (hitos y equipos declarados). F-PSEA-01 y F-PSEA-02 los sigue diligenciando el coordinador: la descarga es una ayuda, no los da por cumplidos.
+- **F-PSEA-06** se diligencia a pantalla completa y se cierra con "Finalizar registro".
+- **F-PSEA-19** tiene dos estados para el avance: *diligenciada / por subir* y *subida* (PDF firmado cargado). Solo "subida" cuenta como completa. Publicar el acta es una acción aparte que no cambia el avance. No se puede inicializar sin el hito `INICIO_RONDA` con fecha.
+- **F-PSEA-07** debe estar completo al momento de F-PSEA-19; **F-PSEA-21** va antes que F-PSEA-19 en la barra "Siguiente paso".
+
+### 7A.2 Glosario de la pantalla
+
+- **Diligenciado**: el contenido del documento está completo (en Drive o en la app).
+- **Enlace editable**: dirección del documento de trabajo en Google Drive; solo la ve el equipo Calaire.
+- **Versión definitiva**: copia final (PDF o archivo) que queda como evidencia del expediente.
+- **Publicar**: hace visible la versión definitiva a los participantes en la app. No cambia el avance.
+
 ## 8. Campos minimos
 
 La administracion de una ronda debe controlar como minimo:

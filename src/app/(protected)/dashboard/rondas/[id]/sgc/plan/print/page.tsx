@@ -3,6 +3,7 @@ import { isAdmin, requireAuth } from '@/server/auth'
 import { getRonda } from '@/server/rondas'
 import { getPanelSgc } from '@/server/sgc'
 import { SGC_PLAN_BLOQUES, SGC_LEYENDA_CODIGO_PROVISIONAL } from '@/server/sgc/catalog'
+import { isoADdMmAaaa } from '../../fechas'
 
 type PageProps = { params: Promise<{ id: string }> }
 
@@ -28,7 +29,7 @@ export default async function PlanRondaPrintPage({ params }: PageProps) {
       <div className="mt-6 grid gap-3 border-y border-slate-200 py-4 text-sm sm:grid-cols-2">
         <div><strong>Estado documental:</strong> {plan?.estado ?? 'borrador'}</div>
         <div><strong>Responsable:</strong> {plan?.camposEstructurados?.responsable ?? 'Sin responsable'}</div>
-        <div><strong>Fecha plan:</strong> {plan?.camposEstructurados?.fecha_plan ?? 'Sin fecha'}</div>
+        <div><strong>Fecha plan:</strong> {isoADdMmAaaa(plan?.camposEstructurados?.fecha_plan) || 'Sin fecha'}</div>
         <div><strong>Finalizado:</strong> {fmt(plan?.finalizadoAt)}</div>
         <div><strong>Finalizado por:</strong> {plan?.finalizadoBy ?? 'No finalizado'}</div>
         <div><strong>Snapshot/version:</strong> ver bitacora SGC</div>
