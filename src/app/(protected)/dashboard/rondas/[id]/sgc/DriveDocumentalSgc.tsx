@@ -275,11 +275,11 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, rondaId, rondaCo
 
   return (
     <>
-      <section className="card overflow-hidden" aria-labelledby="drive-documental-title">
+      <section id="explorador" className="card scroll-mt-24 overflow-hidden" aria-labelledby="drive-documental-title">
         <div className="sgc-panel-head">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--foreground-muted)]">{rondaCodigo}</p>
-            <h2 id="drive-documental-title">Drive documental SGC</h2>
+            <h2 id="drive-documental-title">Explorador de carpetas</h2>
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {driveGoogleReady && (

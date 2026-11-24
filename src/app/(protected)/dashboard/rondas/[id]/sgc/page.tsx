@@ -15,6 +15,7 @@ import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
 import { AvisoSincronizacion } from './AvisoSincronizacion'
 import { DriveDocumentalSgc } from './DriveDocumentalSgc'
+import { ExpedienteGuiado } from './ExpedienteGuiado'
 import { transicionSgcAction } from './actions'
 
 type PageProps = {
@@ -153,6 +154,14 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
             Los documentos &quot;si aplica&quot; solo cuentan cuando se marcan como aplicables.
           </p>
         </section>
+
+        <ExpedienteGuiado
+          avance={avance}
+          recursos={drive.recursos}
+          rondaId={id}
+          driveGoogleReady={driveGoogleStatus.ready}
+          carpetaRondaCreada={Boolean(drive.root?.driveFolderId)}
+        />
 
         <DriveDocumentalSgc
           drive={drive}
