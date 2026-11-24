@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { Suspense } from 'react'
+import { Suspense, useState } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
 import { signOutAction } from './actions'
 
@@ -62,6 +62,7 @@ function NavLink({
   return (
     <Link
       href={item.href}
+      aria-current={isActive ? 'page' : undefined}
       className={
         `${base} ` +
         (isActive
@@ -98,7 +99,7 @@ function AreaLink({
   }
 
   return (
-    <Link href={item.href} className={className}>
+    <Link href={item.href} className={className} aria-current={isActive ? 'page' : undefined}>
       {item.label}
     </Link>
   )
@@ -157,40 +158,44 @@ function TopNavInner({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: bool
     return false
   }
 
+  const sectionsLabel = isSgcDashboard ? 'Secciones Sistema de Gestión' : 'Secciones gestión de ronda'
+  const isAreaActive = (item: NavItem) =>
+    !item.external && (item.tabKey === '__sgc__' ? isSgcDashboard : !isSgcDashboard)
+
   const header = (
     <header className="sticky top-0 z-40 border-b-4 border-[var(--pt-primary)] bg-[var(--surface-panel)] shadow-sm">
-      <div className="flex items-stretch gap-5 px-6 max-w-screen-2xl mx-auto">
-        <div className="flex items-center gap-3 pr-6 border-r border-[var(--border-soft)] py-4">
+      <div className="mx-auto flex max-w-screen-2xl items-stretch gap-3 px-4 sm:px-6 lg:gap-5">
+        <Link href="/dashboard" className="flex shrink-0 items-center gap-3 py-3 lg:border-r lg:border-[var(--border-soft)] lg:pr-6">
           <LogoUnal height={32} />
-          <span className="text-xs font-bold tracking-[0.18em] uppercase text-[var(--foreground)]">
+          <span className="hidden text-xs font-bold uppercase tracking-[0.18em] text-[var(--foreground)] sm:inline">
             CALAIRE-APP{' '}
-            <span className="inline-block rounded px-1.5 py-0.5 text-[10px] font-bold tracking-wider bg-[var(--pt-primary)] text-[var(--foreground)]">
+            <span className="inline-block rounded bg-[var(--pt-primary)] px-1.5 py-0.5 text-[10px] font-bold tracking-wider text-[var(--foreground)]">
               EA
             </span>
           </span>
-        </div>
+        </Link>
 
-        <nav className="flex items-center gap-1 border-r border-[var(--border-soft)] pr-5" aria-label="Áreas principales">
+        <nav className="hidden items-center gap-1 border-r border-[var(--border-soft)] pr-5 lg:flex" aria-label="Áreas principales">
           {areaItems.map((item) => (
-            <AreaLink
-              key={item.label}
-              item={item}
-              isActive={!item.external && (item.tabKey === '__sgc__' ? isSgcDashboard : !isSgcDashboard)}
-            />
+            <AreaLink key={item.label} item={item} isActive={isAreaActive(item)} />
           ))}
         </nav>
 
-        <nav
-          className="flex min-w-0 flex-1 items-stretch gap-5 overflow-x-auto"
-          aria-label={isSgcDashboard ? 'Secciones Sistema de Gestión' : 'Secciones gestión de ronda'}
-        >
+        <nav className="hidden min-w-0 flex-1 items-stretch gap-5 overflow-x-auto lg:flex" aria-label={sectionsLabel}>
           {navItems.map((item) => (
             <NavLink key={item.label} item={item} isActive={isActive(item)} />
           ))}
         </nav>
 
-        <div className="flex shrink-0 items-center">
+        <div className="ml-auto flex shrink-0 items-center gap-1">
           <UserMenu userEmail={userEmail} />
+          <MobileNav
+            areaItems={areaItems}
+            navItems={navItems}
+            sectionsLabel={sectionsLabel}
+            isAreaActive={isAreaActive}
+            isActive={isActive}
+          />
         </div>
       </div>
     </header>
@@ -207,6 +212,75 @@ export function Sidebar({ canViewSgcMaestro, userEmail }: { canViewSgcMaestro: b
   )
 }
 
-export function MobileNav() {
-  return null
+export function MobileNav({
+  areaItems,
+  navItems,
+  sectionsLabel,
+  isAreaActive,
+  isActive,
+}: {
+  areaItems: NavItem[]
+  navItems: NavItem[]
+  sectionsLabel: string
+  isAreaActive: (item: NavItem) => boolean
+  isActive: (item: NavItem) => boolean
+}) {
+  const [open, setOpen] = useState(false)
+  // Cierra el menú al navegar.
+  const close = () => setOpen(false)
+
+  const itemClass = (active: boolean) =>
+    'flex items-center gap-1 rounded-md px-3 py-2 text-sm font-medium ' +
+    (active
+      ? 'bg-[var(--pt-primary)] text-[var(--foreground)]'
+      : 'text-[var(--foreground-muted)] hover:bg-[var(--surface-muted)] hover:text-[var(--foreground)]')
+
+  const renderItem = (item: NavItem, active: boolean) =>
+    item.external ? (
+      <a key={item.label} href={item.href} target="_blank" rel="noopener noreferrer" className={itemClass(false)} onClick={close}>
+        {item.label}
+        <span className="text-[9px] opacity-60" aria-hidden="true">↗</span>
+        <span className="sr-only">(abre en nueva pestaña)</span>
+      </a>
+    ) : (
+      <Link key={item.label} href={item.href} className={itemClass(active)} onClick={close} aria-current={active ? 'page' : undefined}>
+        {item.label}
+      </Link>
+    )
+
+  return (
+    <div className="lg:hidden">
+      <button
+        type="button"
+        className="inline-flex h-9 w-9 items-center justify-center rounded-md text-[var(--foreground)] hover:bg-[var(--surface-muted)]"
+        aria-expanded={open}
+        aria-controls="mobile-nav-panel"
+        aria-label={open ? 'Cerrar menú de navegación' : 'Abrir menú de navegación'}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          {open ? (
+            <path d="M6 6l12 12M18 6L6 18" />
+          ) : (
+            <path d="M4 7h16M4 12h16M4 17h16" />
+          )}
+        </svg>
+      </button>
+      {open && (
+        <div
+          id="mobile-nav-panel"
+          className="absolute inset-x-0 top-full max-h-[calc(100dvh-4rem)] overflow-y-auto border-b border-[var(--border-soft)] bg-[var(--surface-panel)] px-4 py-3 shadow-lg"
+        >
+          <nav aria-label="Áreas principales (móvil)" className="flex flex-col gap-1">
+            {areaItems.map((item) => renderItem(item, isAreaActive(item)))}
+          </nav>
+          {navItems.length > 0 && (
+            <nav aria-label={`${sectionsLabel} (móvil)`} className="mt-3 flex flex-col gap-1 border-t border-[var(--border-soft)] pt-3">
+              {navItems.map((item) => renderItem(item, isActive(item)))}
+            </nav>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }

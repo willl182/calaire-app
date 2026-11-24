@@ -740,6 +740,30 @@ table thead th {
   html {
     font-size: 14px;
   }
+  /* Evita el desborde horizontal a 390 px: contenedores de página más estrechos,
+     títulos que se parten por palabra y tablas con scroll propio. */
+  main,
+  .min-h-screen {
+    min-width: 0;
+  }
+  .min-h-screen.px-6 {
+    padding-inline: 1rem;
+  }
+  h1,
+  h2,
+  h3 {
+    overflow-wrap: anywhere;
+  }
+  .card,
+  .header-bar {
+    min-width: 0;
+    max-width: 100%;
+  }
+  .card:has(> table),
+  div:has(> table) {
+    overflow-x: auto;
+    max-width: 100%;
+  }
   .header-bar {
     border-radius: 0;
   }
