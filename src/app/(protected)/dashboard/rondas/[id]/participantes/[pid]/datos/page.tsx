@@ -75,9 +75,6 @@ export default async function DatosParticipanteAdminPage({ params }: Props) {
           <Link href={`/dashboard/rondas/${rondaId}/participantes/${participanteId}/ficha`} className="btn-outline">
             Editar ficha
           </Link>
-          <Link href={backHref} className="btn-outline">
-            Volver a participantes
-          </Link>
         </div>
       </div>
     </div>

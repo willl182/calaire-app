@@ -535,10 +535,12 @@ export default function FormularioReferencia({
 
         {adminTarget && (
           <section className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
-            <span className="font-semibold">Modo administrativo.</span> Guardando resultados en nombre de {participanteEmail}.
+            <span className="font-semibold">Modo administrativo.</span> Guardando resultados del laboratorio de referencia en nombre de {participanteEmail}.
           </section>
         )}
 
+        {/* En modo admin, RondaPageHeader ya muestra nombre y estado de la ronda. */}
+        {!adminTarget && (
         <section className="card p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
@@ -565,6 +567,7 @@ export default function FormularioReferencia({
             </span>
           </div>
         </section>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="card-accent px-5 py-4">
@@ -652,7 +655,7 @@ export default function FormularioReferencia({
           )}
         </section>
 
-        <section className={`card p-6 ${adminTarget ? 'order-3' : ''}`}>
+        <section className="card p-6">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
@@ -794,7 +797,7 @@ export default function FormularioReferencia({
         </section>
 
         {adminTarget && (
-          <section className="card order-1 p-6">
+          <section className="card p-6">
             <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
               Carga manual de resultados
             </h2>
@@ -815,7 +818,7 @@ export default function FormularioReferencia({
             )
 
           return (
-            <section key={contaminante} className={`card overflow-hidden ${adminTarget ? 'order-1' : ''}`}>
+            <section key={contaminante} className="card overflow-hidden">
               <div className="flex items-center justify-between border-b border-[var(--border)] px-6 py-4">
                 <div>
                   <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-[var(--foreground)]">
@@ -993,7 +996,7 @@ export default function FormularioReferencia({
         })}
 
         {!soloLectura && (
-          <section className={`card flex flex-wrap items-center justify-between gap-4 p-6 ${adminTarget ? 'order-2' : ''}`}>
+          <section className="card flex flex-wrap items-center justify-between gap-4 p-6">
             <div className="min-w-0 flex-1 text-sm text-[var(--foreground-muted)]">
               {canSubmit ? (
                 <p>Todas las combinaciones PT están completas y guardadas. Puedes enviar el informe final.</p>

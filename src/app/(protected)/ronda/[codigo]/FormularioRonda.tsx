@@ -502,6 +502,8 @@ export default function FormularioRonda({
           </section>
         )}
 
+        {/* En modo admin, RondaPageHeader ya muestra nombre y estado de la ronda. */}
+        {!adminTarget && (
         <section className="card p-6">
           <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
             <div className="space-y-1">
@@ -525,6 +527,7 @@ export default function FormularioRonda({
             </span>
           </div>
         </section>
+        )}
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <div className="card-accent px-5 py-4">
