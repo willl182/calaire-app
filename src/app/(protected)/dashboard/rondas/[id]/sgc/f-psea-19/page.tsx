@@ -2,15 +2,50 @@ import Link from 'next/link'
 import { revalidatePath } from 'next/cache'
 import { notFound, redirect } from 'next/navigation'
 import { canEditSgcMaestro, isAdmin, requireAuth } from '@/server/auth'
-import { actualizarActaInicio, cambiarPublicacionActaInicio, getActaInicio, getActaInicioDownloadUrl, inicializarActaInicio } from '@/server/sgc'
+import { actualizarActaInicio, cambiarPublicacionActaInicio, getActaInicio, getActaInicioDownloadUrl, getPanelSgc, inicializarActaInicio } from '@/server/sgc'
 import ActaArchivos from './ActaArchivos'
+
+const PASOS = [
+  { key: 'borrador', label: 'Borrador' },
+  { key: 'docx_generado', label: 'DOCX para firma' },
+  { key: 'pdf_firmado_cargado', label: 'PDF firmado subido' },
+  { key: 'publicado', label: 'Publicado' },
+] as const
+
+function fmtFecha(value?: string | null) {
+  const match = value ? /^(\d{4})-(\d{2})-(\d{2})/.exec(value) : null
+  return match ? `${match[3]}/${match[2]}/${match[1]}` : value ?? ''
+}
+
+function PasosActa({ estado }: { estado: string }) {
+  const actual = PASOS.findIndex((paso) => paso.key === estado)
+  return (
+    <ol className="grid gap-2 sm:grid-cols-4" aria-label="Pasos del acta">
+      {PASOS.map((paso, index) => {
+        const hecho = index <= actual
+        return (
+          <li
+            key={paso.key}
+            aria-current={index === actual ? 'step' : undefined}
+            className={`rounded-lg border px-3 py-2 text-sm ${hecho ? 'border-[var(--pt-primary)] bg-sky-50 font-semibold text-[var(--foreground)]' : 'border-[var(--border)] text-[var(--foreground-muted)]'}`}
+          >
+            <span className="numeric mr-1">{index + 1}.</span>{paso.label}
+            {index === actual && <span className="sr-only"> (paso actual)</span>}
+          </li>
+        )
+      })}
+    </ol>
+  )
+}
 
 export default async function ActaInicioPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
   if (!canEditSgcMaestro(auth)) redirect('/denied?reason=role')
-  const acta = await getActaInicio(id)
+  const [acta, panel] = await Promise.all([getActaInicio(id), getPanelSgc(id)])
+  const hitoInicio = panel?.hitos.find((hito) => hito.codigo === 'INICIO_RONDA' && hito.estado !== 'cancelado')
+  const inicioConFecha = Boolean(hitoInicio?.fechaObjetivo?.trim())
   const [docxUrl, pdfUrl] = acta
     ? await Promise.all([
         getActaInicioDownloadUrl(id, 'docx'),
@@ -55,10 +90,33 @@ export default async function ActaInicioPage({ params }: { params: Promise<{ id:
         <Link className="btn-outline" href={`/dashboard/rondas/${id}/sgc`}>Volver al expediente</Link>
       </div>
       {!acta ? (
-        <section className="card p-6"><p className="mb-4 text-sm text-[var(--foreground-muted)]">Inicialización toma fecha del hito INICIO_RONDA y asistentes de F-PSEA-03.</p><form action={inicializar}><button className="btn-primary">Inicializar acta</button></form></section>
+        <section className="card p-6">
+          <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+            El acta toma la fecha del hito INICIO_RONDA y los asistentes de F-PSEA-03.
+            {inicioConFecha && hitoInicio && <> Fecha de inicio: <strong>{fmtFecha(hitoInicio.fechaObjetivo)}</strong>.</>}
+          </p>
+          <form action={inicializar}>
+            <button className="btn-primary" disabled={!inicioConFecha} aria-describedby={inicioConFecha ? undefined : 'acta-sin-inicio'}>Inicializar acta</button>
+          </form>
+          {!inicioConFecha && (
+            <p id="acta-sin-inicio" className="mt-3 text-sm text-amber-900">
+              Falta el hito INICIO_RONDA con fecha.{' '}
+              <Link className="font-semibold underline" href={`/dashboard/rondas/${id}/sgc#hitos`}>Registrar el hito de inicio</Link>
+            </p>
+          )}
+        </section>
       ) : (
         <>
-          <section className="card p-6"><div className="flex flex-wrap gap-2"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{acta.estado}</span><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold">Crítico, no bloquea cierre</span></div></section>
+          <section className="card grid gap-3 p-6">
+            <PasosActa estado={acta.estado} />
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="font-semibold">Estado para el avance:</span>
+              {acta.pdfStorageId
+                ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">Subida</span>
+                : <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">Diligenciada / por subir</span>}
+              <span className="text-xs text-[var(--foreground-muted)]">Solo cuenta como completa con el PDF firmado subido. Publicar es aparte y no cambia el avance.</span>
+            </div>
+          </section>
           <form action={guardar} className="card grid gap-4 p-6">
             <input type="hidden" name="acta_id" value={acta._id} />
             <label className="grid gap-1 text-sm font-medium">Fecha<input className="input" name="fecha" defaultValue={acta.fecha} required /></label>
@@ -70,7 +128,7 @@ export default async function ActaInicioPage({ params }: { params: Promise<{ id:
           </form>
           <section className="card p-6"><h2 className="font-semibold">Firmantes precargados</h2><ul className="mt-3 grid gap-2 text-sm">{acta.firmantes.map((item: { _id: string; nombre: string; entidad: string; tipo: string }) => <li key={item._id} className="rounded border border-[var(--border)] p-2">{item.nombre || 'Pendiente'} · {item.entidad} · {item.tipo}</li>)}</ul></section>
           <ActaArchivos rondaId={id} actaId={acta._id} docxUrl={docxUrl} pdfUrl={pdfUrl} />
-          {isAdmin(auth) ? <form action={publicar} className="card flex items-center gap-3 p-6"><input type="hidden" name="acta_id" value={acta._id} /><button className="btn-primary" name="publicar" value={acta.publicaParticipante ? 'false' : 'true'} disabled={!acta.pdfStorageId}>{acta.publicaParticipante ? 'Despublicar acta' : 'Publicar PDF firmado'}</button>{!acta.pdfStorageId && <span className="text-sm text-[var(--foreground-muted)]">Carga de PDF firmado pendiente.</span>}</form> : <section className="card p-6 text-sm text-[var(--foreground-muted)]">Publicación reservada para coordinación.</section>}
+          {isAdmin(auth) ? <form action={publicar} className="card flex flex-wrap items-center gap-3 p-6"><h2 className="w-full font-semibold">Publicación a participantes <span className="text-xs font-normal text-[var(--foreground-muted)]">(acción aparte, no afecta el avance)</span></h2><input type="hidden" name="acta_id" value={acta._id} /><button className="btn-primary" name="publicar" value={acta.publicaParticipante ? 'false' : 'true'} disabled={!acta.pdfStorageId}>{acta.publicaParticipante ? 'Despublicar acta' : 'Publicar PDF firmado'}</button>{!acta.pdfStorageId && <span className="text-sm text-[var(--foreground-muted)]">Carga de PDF firmado pendiente.</span>}</form> : <section className="card p-6 text-sm text-[var(--foreground-muted)]">Publicación reservada para coordinación.</section>}
         </>
       )}
     </main>
