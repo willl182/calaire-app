@@ -228,3 +228,29 @@ Conviene integrar antes la rama en `main` para que prod no quede por delante del
 4. Segunda pasada en seco: 0 cambios (idempotente).
 5. Verificado en prod: en las 5 rondas la referencia tiene 1 y los participantes 2, 3, … sin repetidos.
 6. `git push origin main`.
+
+## 6. Altas nuevas y ediciones manuales de `replicateCode` (rama `ops/convex-prod-deploy`, sin desplegar en prod)
+
+- `d8e8593` `fix(rondas)`: `asignarReplicateCodeAlta` reemplaza a `generateNextReplicateCode` en todas las altas
+  (rondas, API de agente, alta en lote).
+  - Participante: siguiente libre (>= 2).
+  - Referencia: siempre 1. Si un participante tiene el 1 a mano, pasa al siguiente libre.
+  - Si ese participante ya tiene envíos PT finales, el alta se rechaza y pide corregirlo a mano en Configuración PT.
+- `cfa0f15` `fix(rondas)`: validación de los códigos puestos a mano en Configuración PT (`updateParticipantePT`),
+  la edición de admin (`updateParticipanteAdmin`) y el alta con código explícito (`addParticipante`), en rondas y en la API de agente.
+  - Referencia = 1, participantes >= 2, sin repetidos en la ronda; vacío permitido.
+  - Error como `ConvexError` para que el mensaje llegue a la pantalla en prod.
+  - Cambiar el perfil de un cupo a referencia exige poner también el 1.
+- Validación: `pnpm test` (148) OK, `pnpm lint` OK, `pnpm exec tsc --noEmit` OK, `convex dev --once` OK.
+- Prod ya cumple la regla: la migración en seco da 0 cambios, así que la validación nueva no bloquea ningún dato actual.
+
+## 7. Borradores de prueba de EA-PP2026-R3 (pendiente de decisión)
+
+- El cupo `ZFT5R6` (participante 01, pendiente) tiene 15 envíos PT en borrador. El usuario confirmó que son pruebas.
+- Riesgo: reclamar un cupo pendiente reutiliza la misma fila (`claimParticipanteTokenDefinition`).
+  El laboratorio que reclame ese cupo vería los 15 valores de prueba ya rellenos en su formulario.
+- No existe una función que borre solo los borradores. `removeParticipante` borra el cupo entero (cupo, ficha y envíos).
+- Opciones:
+  1. Una mutación interna nueva que borre solo los envíos sin `finalSubmittedAt` de un cupo, con `dryRun` por defecto.
+  2. Quitar el cupo y crear otro nuevo. Cambia el código de participante y el enlace de invitación.
+- Los 4 borradores de `mauricio.ramirez@siata.gov.co` en EA-PP2026-R1 son de un cupo reclamado; no se tocan.
