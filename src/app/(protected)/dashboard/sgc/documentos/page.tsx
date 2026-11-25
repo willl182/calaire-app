@@ -144,7 +144,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <option value="borrador">Borrador</option>
             <option value="obsoleto">Obsoleto</option>
           </select>
-          <SubmitButton className="btn-primary h-11 px-5 lg:col-span-2 xl:col-span-1">Filtrar</SubmitButton>
+          <SubmitButton className="btn-primary h-[44px] px-5 lg:col-span-2 xl:col-span-1">Filtrar</SubmitButton>
         </form>
       </section>
 

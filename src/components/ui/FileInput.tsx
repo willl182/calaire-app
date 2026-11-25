@@ -48,7 +48,7 @@ export function FileInput({ buttonLabel = 'Elegir archivo', multiple, onChange, 
       <label
         htmlFor={inputId}
         aria-hidden="true"
-        className={`btn-outline min-h-11 shrink-0 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--focus-outline)] ${
+        className={`btn-outline min-h-[44px] shrink-0 peer-focus-visible:outline peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[var(--focus-outline)] ${
           disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'
         }`}
       >

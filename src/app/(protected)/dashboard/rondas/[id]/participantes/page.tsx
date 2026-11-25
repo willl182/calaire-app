@@ -257,8 +257,8 @@ function ParticipanteRow({
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--foreground)] outline-none ring-0"
             />
             <SubmitButton
-              
-              className="w-fit rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black">
+              pendingLabel="Guardando…"
+              className="inline-flex min-h-[44px] w-fit items-center gap-1 rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-3 py-1 text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black">
               Guardar correo
             </SubmitButton>
           </form>
@@ -339,7 +339,7 @@ function ParticipanteRow({
                 message={`¿Eliminar a ${nombreVisible} de esta ronda? Se pierden su ficha y sus resultados en la ronda.`}
                 confirmLabel="Eliminar"
                 aria-label={`Eliminar a ${nombreVisible} de la ronda`}
-                className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold text-danger-strong transition hover:bg-danger-soft hover:text-danger-strong"
+                className="inline-flex min-h-[44px] items-center rounded-lg px-3 text-xs font-semibold text-danger-strong transition hover:bg-danger-soft hover:text-danger-strong"
               >
                 Eliminar
               </ConfirmSubmitButton>

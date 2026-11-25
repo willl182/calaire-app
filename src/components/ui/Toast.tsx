@@ -50,7 +50,7 @@ export function Toast({
           type="button"
           onClick={() => setVisible(false)}
           aria-label="Cerrar aviso"
-          className="-my-2 -mr-2 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-lg opacity-70 hover:opacity-100"
+          className="-my-2 -mr-2 inline-flex h-[44px] w-[44px] shrink-0 items-center justify-center rounded-lg opacity-70 hover:opacity-100"
         >
           <svg aria-hidden="true" viewBox="0 0 20 20" className="h-4 w-4">
             <path d="M5 5l10 10M15 5L5 15" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />

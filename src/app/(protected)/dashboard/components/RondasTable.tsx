@@ -13,7 +13,7 @@ import { EstadoBadge } from '@/components/ui/EstadoBadge'
 type EditandoParam = string
 
 const secondaryButtonClass =
-  'inline-flex h-11 min-w-16 items-center justify-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] disabled:opacity-50'
+  'inline-flex h-[44px] min-w-16 items-center justify-center gap-1.5 rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] disabled:opacity-50'
 
 import { RondaConfigForm } from './RondaConfigForm'
 
@@ -155,14 +155,14 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
           <div className="flex items-center justify-end gap-1.5">
             <Link
               href={`/dashboard/rondas/${round.id}`}
-              className="inline-flex h-11 min-w-20 items-center justify-center rounded-md bg-[var(--pt-primary)] px-3 text-xs font-semibold text-[var(--foreground)] shadow-sm transition hover:bg-[var(--pt-primary-deep)] hover:no-underline"
+              className="inline-flex h-[44px] min-w-20 items-center justify-center rounded-md bg-[var(--pt-primary)] px-3 text-xs font-semibold text-[var(--foreground)] shadow-sm transition hover:bg-[var(--pt-primary-deep)] hover:no-underline"
             >
               Gestionar
             </Link>
             {canEdit && (
               <Link
                 href={isEditing ? '/dashboard/rondas' : `/dashboard/rondas?editando=${round.id}`}
-                className="inline-flex h-11 min-w-16 items-center justify-center rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] hover:no-underline"
+                className="inline-flex h-[44px] min-w-16 items-center justify-center rounded-md border border-[var(--border)] px-2.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)] hover:no-underline"
               >
                 {isEditing ? 'Cerrar' : 'Editar'}
               </Link>
@@ -175,7 +175,7 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
                 title="Eliminar ronda"
                 message={`¿Borrar la ronda ${round.codigo}? Esta acción no se puede deshacer.`}
                 confirmLabel="Eliminar ronda"
-                className="inline-flex h-11 min-w-16 items-center justify-center rounded-md border border-danger-border px-2.5 text-xs font-medium text-danger-strong transition hover:border-danger hover:bg-danger-soft hover:text-danger-strong"
+                className="inline-flex h-[44px] min-w-16 items-center justify-center rounded-md border border-danger-border px-2.5 text-xs font-medium text-danger-strong transition hover:border-danger hover:bg-danger-soft hover:text-danger-strong"
               >
                 Eliminar
               </ConfirmSubmitButton>

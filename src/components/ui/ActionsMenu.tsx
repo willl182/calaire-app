@@ -45,7 +45,7 @@ export function ActionsMenu({ label = 'Acciones', children }: { label?: string; 
         aria-expanded={open}
         aria-controls={menuId}
         onClick={() => setOpen((value) => !value)}
-        className="btn-outline min-h-11 gap-1.5 px-3 text-xs"
+        className="btn-outline min-h-[44px] gap-1.5 px-3 text-xs"
       >
         {label}
         <svg aria-hidden="true" viewBox="0 0 20 20" className={`h-4 w-4 transition ${open ? 'rotate-180' : ''}`}>

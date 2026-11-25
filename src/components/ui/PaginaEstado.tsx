@@ -27,7 +27,7 @@ export function PaginaEstado({
         <LogoUnal height={56} />
         <section className="card-accent flex w-full flex-col gap-5 p-8">
           <div className="flex items-center gap-3">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--pt-primary-subtle)] text-[var(--pt-primary-dark)]">
+            <span className="inline-flex h-[44px] w-[44px] items-center justify-center rounded-xl bg-[var(--pt-primary-subtle)] text-[var(--pt-primary-dark)]">
               <Icon name={icono} className="h-6 w-6" />
             </span>
             <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)]">{etiqueta}</p>

@@ -17,7 +17,7 @@ function AttentionList({ items }: { items: AvisoPanel[] }) {
           <li key={item.id}>
             <Link
               href={item.href}
-              className={`flex min-h-11 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm transition hover:border-[var(--pt-primary)] hover:no-underline ${TONO_AVISO[item.tono]}`}
+              className={`flex min-h-[44px] items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm transition hover:border-[var(--pt-primary)] hover:no-underline ${TONO_AVISO[item.tono]}`}
             >
               <span>{item.mensaje}</span>
               <span className="flex items-center gap-2">

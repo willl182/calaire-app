@@ -181,7 +181,7 @@ export function DirectorioPanel({
           </div>
         )}
         <details className="group border-t border-[var(--border-soft)]">
-          <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-muted)]">
+          <summary className="flex min-h-[44px] cursor-pointer items-center gap-2 px-4 py-3 text-sm font-semibold text-[var(--foreground)] hover:bg-[var(--surface-muted)]">
             <span aria-hidden="true" className="transition group-open:rotate-90">›</span>
             Agregar o actualizar un laboratorio
           </summary>
