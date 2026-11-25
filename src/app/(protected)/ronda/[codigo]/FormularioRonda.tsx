@@ -8,6 +8,7 @@ import type { AdminPTTarget } from './formulario-pt'
 import { TablasCapturaPT } from './TablasCapturaPT'
 import { useFormularioPT } from './useFormularioPT'
 import { FileInput } from '@/components/ui/FileInput'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 
 export type { AdminPTTarget } from './formulario-pt'
 
@@ -113,7 +114,7 @@ export default function FormularioRonda({
         </header>}
 
         {adminTarget && (
-          <section className="rounded-lg border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-800">
+          <section className="rounded-lg border border-info-border bg-info-soft px-4 py-3 text-sm text-info-strong">
             <span className="font-semibold">Modo administrativo.</span> Guardando resultados en nombre de {participanteEmail}.
           </section>
         )}
@@ -130,17 +131,7 @@ export default function FormularioRonda({
                 Código de Ronda: {ronda.codigo}
               </p>
             </div>
-            <span
-              className={`self-start rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${
-                ronda.estado === 'activa'
-                  ? 'bg-emerald-100 text-emerald-800'
-                  : cerrada
-                    ? 'bg-slate-200 text-slate-700'
-                    : 'bg-amber-100 text-amber-800'
-              }`}
-            >
-              Ronda {ronda.estado}
-            </span>
+            <span className="self-start"><EstadoBadge estado={ronda.estado} /></span>
           </div>
         </section>
         )}
@@ -193,31 +184,31 @@ export default function FormularioRonda({
           </div>
 
           {enBorrador && !adminTarget && (
-            <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div role="alert" className="rounded-lg border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
               La ronda está en borrador: la captura quedará habilitada cuando el coordinador la active.
             </div>
           )}
 
           {cerrada && (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="rounded-lg border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger-strong">
               Esta ronda está cerrada. Los datos son de solo lectura.
             </div>
           )}
 
           {!hasPTConfig && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-lg border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
               La configuración PT no está completa. Debe existir al menos una corrida PT y un grupo de muestra.
             </div>
           )}
 
           {!hasParticipantCodes && (
-            <div className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-lg border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
               No tienes asignado `participant_id` o `replicate`. Solicita al coordinador completar esa configuración.
             </div>
           )}
 
           {submitDone && (
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-success-border bg-success-soft px-4 py-3 text-sm text-success-strong">
               <span>
                 {adminTarget ? 'El informe final PT fue enviado correctamente.' : 'Tu informe final PT fue enviado correctamente.'}
                 {submittedAt ? ` Fecha de envío: ${new Date(submittedAt).toLocaleString('es-CO', { timeZone: 'America/Bogota' })}.` : ''}
@@ -231,7 +222,7 @@ export default function FormularioRonda({
           )}
 
           {formMessage && (
-            <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="rounded-lg border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger-strong">
               {formMessage}
             </div>
           )}
@@ -321,8 +312,8 @@ export default function FormularioRonda({
               <div
                 className={`mt-4 rounded-lg border px-4 py-3 text-sm ${
                   importStatus === 'saved'
-                    ? 'border-emerald-200 bg-emerald-50 text-emerald-800'
-                    : 'border-rose-200 bg-rose-50 text-rose-700'
+                    ? 'border-success-border bg-success-soft text-success-strong'
+                    : 'border-danger-border bg-danger-soft text-danger-strong'
                 }`}
               >
                 {importMessage}
@@ -330,7 +321,7 @@ export default function FormularioRonda({
             )}
 
             {importPreview && importPreview.warnings.length > 0 && (
-              <div className="mt-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              <div className="mt-4 rounded-lg border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
                 {importPreview.warnings.slice(0, 4).map((warning) => (
                   <div key={warning}>{warning}</div>
                 ))}
@@ -339,7 +330,7 @@ export default function FormularioRonda({
             )}
 
             {importPreview && importPreview.errors.length > 0 && (
-              <div className="mt-4 rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div className="mt-4 rounded-lg border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger-strong">
                 {importPreview.errors.map((error) => (
                   <div key={error}>{error}</div>
                 ))}
