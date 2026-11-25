@@ -36,7 +36,7 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
         >
           Dashboard
         </Link>
-        <span className="text-[var(--border)] text-xs">/</span>
+        <span aria-hidden="true" className="text-xs text-[var(--foreground-muted)]">/</span>
         <Link
           href={`/dashboard/rondas/${rondaId}`}
           className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]"

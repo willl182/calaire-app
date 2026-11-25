@@ -223,7 +223,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
             >
               Dashboard
             </Link>
-            <span className="text-xs text-[var(--border)]">/</span>
+            <span aria-hidden="true" className="text-xs text-[var(--foreground-muted)]">/</span>
             <Link
               href="/dashboard/participantes"
               className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]"
@@ -463,7 +463,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
                                     </div>
                                   </div>
                                 ) : (
-                                  <span className="text-[var(--border)]">Sin dato</span>
+                                  <span className="text-xs text-[var(--foreground-muted)]">Sin dato</span>
                                 )}
                               </td>
                             )

@@ -80,7 +80,7 @@ export function ResultadosDashboardTable({
                           <div className="numeric text-xs text-[var(--foreground-muted)]">sd {celda.sd_value}</div>
                         </div>
                       ) : (
-                        <span className="text-[var(--border)]">Sin dato</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">Sin dato</span>
                       )}
                     </td>
                   )

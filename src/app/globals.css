@@ -201,7 +201,7 @@ a, button, input, select, textarea {
 }
 .input::placeholder {
   color: var(--foreground-muted);
-  opacity: 0.8;
+  opacity: 1;
 }
 .input:hover {
   border-color: #B8C0CC;
@@ -251,7 +251,7 @@ a, button, input, select, textarea {
   margin-bottom: 0.75rem;
 }
 .footer-section p {
-  color: rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 0.8125rem;
   line-height: 1.6;
@@ -269,7 +269,7 @@ a, button, input, select, textarea {
   text-align: center;
 }
 .footer-bottom p {
-  color: rgba(255, 255, 255, 0.5);
+  color: rgba(255, 255, 255, 0.8);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 0.75rem;
   margin: 0;
