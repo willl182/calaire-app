@@ -244,7 +244,7 @@ Conviene integrar antes la rama en `main` para que prod no quede por delante del
 - Validación: `pnpm test` (148) OK, `pnpm lint` OK, `pnpm exec tsc --noEmit` OK, `convex dev --once` OK.
 - Prod ya cumple la regla: la migración en seco da 0 cambios, así que la validación nueva no bloquea ningún dato actual.
 
-## 7. Borradores de prueba de EA-PP2026-R3 (pendiente de decisión)
+## 7. Borradores de prueba de EA-PP2026-R3 (resuelto)
 
 - El cupo `ZFT5R6` (participante 01, pendiente) tiene 15 envíos PT en borrador. El usuario confirmó que son pruebas.
 - Riesgo: reclamar un cupo pendiente reutiliza la misma fila (`claimParticipanteTokenDefinition`).
@@ -254,3 +254,11 @@ Conviene integrar antes la rama en `main` para que prod no quede por delante del
   1. Una mutación interna nueva que borre solo los envíos sin `finalSubmittedAt` de un cupo, con `dryRun` por defecto.
   2. Quitar el cupo y crear otro nuevo. Cambia el código de participante y el enlace de invitación.
 - Los 4 borradores de `mauricio.ramirez@siata.gov.co` en EA-PP2026-R1 son de un cupo reclamado; no se tocan.
+
+### Ejecutado: borrado de los borradores de prueba (2026-11-25, confirmado por el usuario: "elimina eso de los borradores")
+- Rama `ops/borradores-pt` (`184adc7`), integrada en `main` como `0c986dc`. Añade la mutación interna `migrations:eliminarBorradoresPT`:
+  borra solo los envíos sin `finalSubmittedAt` de un cupo pendiente, por defecto en seco, y rechaza cupos reclamados.
+- `convex deploy` a prod con solo ese cambio en `convex/`, sin los cambios de altas de la sección 6. OK.
+- En seco: 15 borradores, 0 finales. Aplicado: 15 eliminados.
+- Quedan en prod: 15 envíos finales de la referencia de EA-PP2026-R3 y 4 borradores del cupo reclamado de EA-PP2026-R1.
+- `main` local (`0c986dc`) aún no tiene push. Prod tiene esa función interna, que `origin/main` todavía no contiene.
