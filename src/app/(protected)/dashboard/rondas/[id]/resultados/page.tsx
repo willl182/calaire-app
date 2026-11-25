@@ -160,7 +160,7 @@ function ResultadosTable({
                   scope="row"
                   className="sticky left-0 z-10 min-w-56 border-b border-r border-[var(--border-soft)] border-r-[var(--border)] bg-[var(--surface)] px-4 py-4 text-left font-normal shadow-[4px_0_6px_-4px_rgba(17,24,39,0.15)]"
                 >
-                  <div className="font-medium text-[var(--foreground)]">{resultado.email}</div>
+                  <div className="font-medium text-[var(--foreground)]">{resultado.email.includes('@') ? resultado.email : <span className="text-[var(--foreground-muted)]">Sin correo asignado</span>}</div>
                   <div className="mt-1 text-xs text-[var(--foreground-muted)]">
                     Código:{' '}
                     <span className="numeric text-[var(--foreground)]">

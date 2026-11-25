@@ -111,7 +111,7 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
             {bloqueantesActuales.map((bloqueante) => (
               <li key={bloqueante} className="flex items-start gap-2">
                 <span aria-hidden="true">●</span>
-                <Link className="underline-offset-2 hover:underline" href={enlacePendiente(rondaId, bloqueante, avance.items)}>{bloqueante}</Link>
+                <Link className="underline-offset-2 hover:underline" href={enlacePendiente(rondaId, bloqueante, avance.items)}>{etiquetaVisible(bloqueante)}</Link>
               </li>
             ))}
           </ul>

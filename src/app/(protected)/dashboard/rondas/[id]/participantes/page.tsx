@@ -305,7 +305,7 @@ function ParticipanteRow({
       </td>
 
       {/* Col 6: Acciones */}
-      <td className="px-5 py-4 align-top">
+      <td className="py-4 pr-4 align-top">
         <div className="flex items-center justify-end gap-2">
           <ActionsMenu>
             <Link
@@ -529,14 +529,14 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[64rem] table-fixed">
+              <table className="w-full min-w-[65rem] table-fixed">
                 <colgroup>
-                  <col className="w-[12rem]" />
-                  <col className="w-[17rem]" />
-                  <col className="w-[11rem]" />
-                  <col className="w-[9rem]" />
-                  <col className="w-[9rem]" />
-                  <col className="w-[13rem]" />
+                  <col className="w-[10rem]" />
+                  <col className="w-[15rem]" />
+                  <col className="w-[10rem]" />
+                  <col className="w-[8rem]" />
+                  <col className="w-[7rem]" />
+                  <col className="w-[15rem]" />
                 </colgroup>
                 <thead>
                   <tr className="border-b-2 border-[var(--pt-primary)]">
