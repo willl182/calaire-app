@@ -23,10 +23,11 @@ export default async function DashboardParticipantesPage({ searchParams }: Dashb
       userEmail={auth.user?.email ?? ''}
       success={success}
       error={error}
+      showKpis={false}
     >
       <div className="grid gap-6">
-        <DirectorioPanel allParticipantes={data.allParticipantes} />
         <ParticipantesGlobalView participantes={data.allParticipantes} />
+        <DirectorioPanel directorio={data.directorio} allParticipantes={data.allParticipantes} />
       </div>
     </AdminDashboardFrame>
   )

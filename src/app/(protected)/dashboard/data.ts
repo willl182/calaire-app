@@ -1,6 +1,7 @@
 import {
   getRondaMetricasCompletasWithStatus,
   listAllParticipantesWithStatus,
+  listDirectorioParticipantes,
   listParticipantesRondaResumenWithStatus,
   listPTItemsWithStatus,
   listPTSampleGroupsWithStatus,
@@ -111,14 +112,16 @@ export async function loadDashboardRegistrosData() {
 }
 
 export async function loadDashboardParticipantesData() {
-  const [base, allParticipantesResult] = await Promise.all([
+  const [base, allParticipantesResult, directorio] = await Promise.all([
     loadDashboardBaseData(),
     listAllParticipantesWithStatus(),
+    listDirectorioParticipantes(),
   ])
 
   return {
     ...base,
     allParticipantes: allParticipantesResult.data,
+    directorio,
     backendOffline: base.backendOffline || allParticipantesResult.offline,
   }
 }
