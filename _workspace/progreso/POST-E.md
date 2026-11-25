@@ -6,13 +6,16 @@
 - El usuario pidió resolver Convex en un hilo aparte (Opus 5.5, esfuerzo medio, rama `ops/convex-prod-deploy`). Reporte: `OPS-convex-prod.md`.
 - No se hizo push. Orden propuesto: `convex deploy` a prod → `git push origin main` (desde cfc7a7c o posterior).
 
-## 2. Ola F — bloqueada
-- No hay credenciales de Drive en `.env.local` ni en Convex dev. No se tocó ningún Drive.
-- El usuario propone autenticarse con su cuenta (modo `GOOGLE_DRIVE_AUTH_MODE=oauth`, ya soportado por `src/server/google-drive.ts` y `scripts/google-drive-oauth.mjs`). Falta: cliente OAuth y carpeta raíz de prueba.
+## 2. Drive de desarrollo — configurado; Ola F pendiente de arrancar
+- Las variables `GOOGLE_DRIVE_*` de Vercel prod son de tipo Secret (no se pueden leer); no se reutilizaron.
+- Cliente OAuth nuevo `calaire-app-dev` (aplicación de escritorio) en el proyecto `calaire-app-sgc`; el de producción (`calaire-app-drive`) y la service account no se tocaron. JSON del cliente en `~/.config/calaire/oauth-client-dev.json` (600, fuera del repo).
+- Token de `wilsonsalasc@gmail.com` (alcance `drive`) en `dev/drive/google-drive-oauth.env` (ignorado por git) y en `.env.local`.
+- Carpeta raíz de desarrollo: «calaire-app DEV» (`1Sye0KtpVYHKyOFUGYIlZAod681rEcYpU`) en Mi unidad. Sin `GOOGLE_DRIVE_TEMPLATE_MAP` en desarrollo.
+- Ojo: si la pantalla de consentimiento del proyecto está en modo «Testing», el token caduca a los 7 días; se renueva con `node scripts/google-drive-oauth.mjs url|token` y un receptor en `localhost:53682`.
 
 ## 3. Verificaciones manuales (§9)
 - Reparar expediente en PRUEBA-LOCAL-01 — hecho: "0 creados, 43 reutilizados, 0 reparados" (idempotente).
-- Carpeta en Drive — bloqueado (sin Drive de desarrollo; "Integración Drive: sin configurar").
+- Carpeta en Drive — hecho con el Drive de desarrollo: «raíz creada, 8 carpetas nuevas, 34 sin plantilla»; verificado por la API que `PRUEBA-LOCAL-01 - Ronda de prueba local` y sus 8 etapas quedaron dentro de «calaire-app DEV».
 - F-PSEA-21 — hecho: "Inicializar relación" crea 7 instrumentos (4 analizadores), borrador, revisión 1.
 - F-PSEA-19 — hecho: requería el hito INICIO_RONDA; se creó con fecha 01/12/2026 y el acta quedó en borrador con 4 firmantes precargados.
 - Datos de prueba nuevos en Convex dev: hito INICIO_RONDA, acta F-PSEA-19 en borrador y relación F-PSEA-21.
