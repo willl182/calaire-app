@@ -1,7 +1,5 @@
 import Link from 'next/link'
 
-import type { Ronda } from '@/server/rondas'
-
 type CoordinatorKpiBarProps = {
   rondasActivas: number
   rondasBorrador: number
@@ -33,7 +31,7 @@ function CoordinatorKpiBar({
     {
       label: 'Cupos sin reclamar',
       value: enlacesSinReclamar,
-      href: '/dashboard/participantes',
+      href: '/dashboard/participantes#sin-enlace',
       negative: true,
     },
     {
@@ -56,13 +54,13 @@ function CoordinatorKpiBar({
         <Link
           key={label}
           href={href}
-          className={`sgc-kpi hover:no-underline ${value > 0 && negative ? 'bg-amber-50/50' : ''}`}
+          className={`sgc-kpi hover:no-underline ${value > 0 && negative ? 'bg-warning-soft/50' : ''}`}
         >
           <p className="sgc-kpi-label">
             {label}
           </p>
           <div className={`sgc-kpi-value numeric ${
-            value > 0 && negative ? 'text-amber-700' : 'text-[var(--foreground)]'
+            value > 0 && negative ? 'text-warning-strong' : 'text-[var(--foreground)]'
           }`}>
             {value}
           </div>
@@ -72,26 +70,4 @@ function CoordinatorKpiBar({
   )
 }
 
-export function CoordinatorKpis({
-  rondas,
-  rondasActivas,
-  fichasPendientesCount,
-  enlacesSinReclamar,
-  rondasListasParaExportar,
-}: {
-  rondas: Ronda[]
-  rondasActivas: Ronda[]
-  fichasPendientesCount: number
-  enlacesSinReclamar: number
-  rondasListasParaExportar: number
-}) {
-  return (
-    <CoordinatorKpiBar
-      rondasActivas={rondasActivas.length}
-      rondasBorrador={rondas.filter((r) => r.estado === 'borrador').length}
-      fichasPendientes={fichasPendientesCount}
-      enlacesSinReclamar={enlacesSinReclamar}
-      rondasListasParaExportar={rondasListasParaExportar}
-    />
-  )
-}
+export const CoordinatorKpis = CoordinatorKpiBar

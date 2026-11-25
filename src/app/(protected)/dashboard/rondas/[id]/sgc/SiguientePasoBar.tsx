@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import type { PasoPrevio, SiguientePaso } from '@/server/sgc'
 import { RESPONSABLE_LABELS } from './ExpedienteGuiado'
+import { Icon } from '@/components/ui/Icon'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type Props = {
   pasosPrevios: PasoPrevio[]
@@ -21,7 +23,7 @@ export function SiguientePasoBar({ pasosPrevios, siguiente }: Props) {
     destino = siguiente.paso.destino
     responsable = siguiente.paso.responsable
   } else if (siguiente.tipo === 'documento') {
-    titulo = `${siguiente.documento.codigo} · ${siguiente.documento.nombre}`
+    titulo = `${siguiente.documento.codigo} · ${etiquetaVisible(siguiente.documento.nombre)}`
     motivo = siguiente.documento.motivo
     destino = siguiente.documento.destino
     responsable = siguiente.documento.responsable
@@ -45,9 +47,9 @@ export function SiguientePasoBar({ pasosPrevios, siguiente }: Props) {
             <ol className="mt-2 grid gap-1 pl-1">
               {pasosPrevios.map((paso) => (
                 <li key={paso.key} className="flex items-center gap-2">
-                  <span aria-hidden="true" className={paso.completo ? 'text-emerald-700' : 'text-slate-400'}>{paso.completo ? '✓' : '○'}</span>
+                  <span aria-hidden="true" className={paso.completo ? 'text-success-strong' : 'text-muted'}>{paso.completo ? <Icon name="check" className="h-3.5 w-3.5" /> : '○'}</span>
                   <span className="sr-only">{paso.completo ? 'Hecho:' : 'Pendiente:'}</span>
-                  <Link className="underline-offset-2 hover:underline" href={paso.destino}>{paso.nombre}</Link>
+                  <Link className="underline-offset-2 hover:underline" href={paso.destino}>{etiquetaVisible(paso.nombre)}</Link>
                 </li>
               ))}
             </ol>

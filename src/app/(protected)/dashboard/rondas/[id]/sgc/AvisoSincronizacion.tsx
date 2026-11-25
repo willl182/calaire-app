@@ -1,5 +1,6 @@
 import type { SincronizacionExpediente } from '@/server/sgc'
 import { actualizarExpedienteAction, inicializarDriveRondaAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 /** Aviso cuando el expediente guardado no coincide con el catálogo vigente (DIAG 2.3). */
 export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExpediente; rondaId: string }) {
@@ -8,7 +9,7 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
       <section
         role="status"
         aria-labelledby="aviso-sync-title"
-        className="flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 md:flex-row md:items-center md:justify-between"
+        className="flex flex-col gap-3 rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong md:flex-row md:items-center md:justify-between"
       >
         <div>
           <h2 id="aviso-sync-title" className="font-semibold">El expediente de esta ronda aún no está inicializado</h2>
@@ -19,9 +20,9 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
         </div>
         <form action={inicializarDriveRondaAction}>
           <input type="hidden" name="ronda_id" value={rondaId} />
-          <button className="btn-primary whitespace-nowrap" type="submit">
+          <SubmitButton className="btn-primary whitespace-nowrap">
             Inicializar expediente
-          </button>
+          </SubmitButton>
         </form>
       </section>
     )
@@ -39,7 +40,7 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
     <section
       role="status"
       aria-labelledby="aviso-sync-title"
-      className="flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 md:flex-row md:items-center md:justify-between"
+      className="flex flex-col gap-3 rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong md:flex-row md:items-center md:justify-between"
     >
       <div>
         <h2 id="aviso-sync-title" className="font-semibold">El expediente no está al día con el catálogo</h2>
@@ -55,9 +56,9 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
       </div>
       <form action={actualizarExpedienteAction}>
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-primary whitespace-nowrap" type="submit">
+        <SubmitButton className="btn-primary whitespace-nowrap">
           Actualizar expediente ({etiqueta})
-        </button>
+        </SubmitButton>
       </form>
     </section>
   )

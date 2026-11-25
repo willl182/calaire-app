@@ -14,6 +14,9 @@ import {
   listPTSampleGroups,
 } from '@/server/rondas'
 import { RondaPageHeader } from '../../../RondaPageHeader'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados PT del participante' }
 
 type Props = {
   params: Promise<{ id: string; pid: string }>
@@ -68,6 +71,21 @@ export default async function DatosParticipanteAdminPage({ params }: Props) {
             </Link>
           )}
         />
+
+        {ronda.estado !== 'activa' && (
+          <div role="alert" className="rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
+            {ronda.estado === 'borrador' ? (
+              <>
+                La ronda está en borrador: la captura queda en solo lectura hasta activarla.{' '}
+                <Link href={`/dashboard/rondas/${rondaId}`} className="font-semibold underline underline-offset-2">
+                  Ir a activar la ronda
+                </Link>
+              </>
+            ) : (
+              'La ronda ya no admite cambios en los resultados: la captura está en solo lectura.'
+            )}
+          </div>
+        )}
 
         {isReferencia ? <FormularioReferencia {...formProps} /> : <FormularioRonda {...formProps} />}
 

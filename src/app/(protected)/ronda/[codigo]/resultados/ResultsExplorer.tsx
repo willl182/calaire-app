@@ -35,7 +35,7 @@ function Distribution({ result }: { result: Result }) {
   const bins = result.stats?.bins ?? []
   if (!result.stats || bins.length === 0) {
     return (
-      <span className="text-xs text-slate-500">
+      <span className="text-xs text-muted">
         Oculta: menos de 3 participantes
       </span>
     )
@@ -51,28 +51,28 @@ function Distribution({ result }: { result: Result }) {
 
   return (
     <div className="min-w-40" aria-label={`Distribución anonimizada de ${result.stats.n} participantes`}>
-      <div className="mb-1 flex items-center justify-between text-[11px] text-slate-500">
+      <div className="mb-1 flex items-center justify-between text-[11px] text-muted">
         <span>n = {result.stats.n}</span>
-        <span className="font-medium text-sky-800">◆ valor propio</span>
+        <span className="font-medium text-info-strong">◆ valor propio</span>
       </div>
-      <div className="relative flex h-12 items-end gap-0.5 border-b border-slate-300" role="img">
+      <div className="relative flex h-12 items-end gap-0.5 border-b border-line" role="img">
         {bins.map((bin, index) => (
           <div
             key={`${bin.desde}-${bin.hasta}-${index}`}
             title={`${formatNumber(bin.desde)}–${formatNumber(bin.hasta)}: ${bin.n}`}
-            className="min-w-2 flex-1 rounded-t-sm bg-sky-300"
+            className="min-w-2 flex-1 rounded-t-sm bg-info-border"
             style={{ height: `${Math.max(8, (bin.n / maxCount) * 100)}%` }}
           />
         ))}
         <span
           aria-hidden="true"
-          className="absolute bottom-0 -translate-x-1/2 text-xs leading-none text-sky-900 drop-shadow-[0_1px_0_white]"
+          className="absolute bottom-0 -translate-x-1/2 text-xs leading-none text-info-strong drop-shadow-[0_1px_0_white]"
           style={{ left: `${ownPosition}%` }}
         >
           ◆
         </span>
       </div>
-      <div className="mt-1 flex justify-between text-[10px] text-slate-500">
+      <div className="mt-1 flex justify-between text-[10px] text-muted">
         <span>{formatNumber(first)}</span>
         <span>{formatNumber(last)}</span>
       </div>
@@ -132,7 +132,7 @@ export function ResultsExplorer({ results }: { results: Result[] }) {
 
       <div className="overflow-x-auto rounded-xl border border-[var(--border-soft)]">
         <table className="w-full min-w-[980px] text-sm">
-          <thead className="bg-slate-50 text-left">
+          <thead className="bg-surface text-left">
             <tr>
               {['Contaminante', 'Run / nivel', 'Método', 'Valor propio', 'Valor asignado', STATISTIC_LABELS[statistic], 'Clasificación', 'Distribución'].map((label) => <th className="px-4 py-3" key={label}>{label}</th>)}
             </tr>
@@ -141,13 +141,13 @@ export function ResultsExplorer({ results }: { results: Result[] }) {
             {filtered.map((row) => (
               <tr className="border-t border-[var(--border-soft)] align-top" key={row._id}>
                 <td className="px-4 py-3 font-semibold">{row.item?.contaminante ?? '—'}</td>
-                <td className="px-4 py-3"><span className="block text-xs text-slate-500">{row.item?.runCode ?? '—'}</span>{row.item?.levelLabel ?? '—'}</td>
+                <td className="px-4 py-3"><span className="block text-xs text-muted">{row.item?.runCode ?? '—'}</span>{row.item?.levelLabel ?? '—'}</td>
                 <td className="px-4 py-3">{row.metodo}</td>
                 <td className="px-4 py-3 tabular-nums">{formatNumber(row.valorParticipante)} {row.unidad}</td>
                 <td className="px-4 py-3 tabular-nums">{formatNumber(row.valorAsignado)} {row.unidad}</td>
                 <td className="px-4 py-3 font-mono tabular-nums">{formatNumber(row[statistic])}</td>
                 <td className="px-4 py-3">
-                  <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${row.clasificacion === 'satisfactorio' ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'}`}>
+                  <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${row.clasificacion === 'satisfactorio' ? 'bg-success-soft text-success-strong' : 'bg-danger-soft text-danger-strong'}`}>
                     {row.clasificacion === 'satisfactorio' ? 'Satisfactorio' : 'No satisfactorio'}
                   </span>
                 </td>

@@ -9,6 +9,9 @@ import {
   renderTemplate,
 } from '@/server/sgc/templates'
 import { CopyButton } from './CopyButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Plantilla de comunicación' }
 
  type PageProps = {
   params: Promise<{ id: string; name: string }>
@@ -16,9 +19,9 @@ import { CopyButton } from './CopyButton'
 
 const TITLES: Record<string, string> = {
   convocatoria: 'Convocatoria',
-  'recordatorio-ficha': 'Recordatorio ficha de inscripcion',
-  'recordatorio-envio-resultados': 'Recordatorio envio de resultados',
-  'publicacion-resultados': 'Publicacion de resultados',
+  'recordatorio-ficha': 'Recordatorio ficha de inscripción',
+  'recordatorio-envio-resultados': 'Recordatorio de envío de resultados',
+  'publicacion-resultados': 'Publicación de resultados',
   'cierre-ronda': 'Cierre de ronda',
 }
 
@@ -49,29 +52,29 @@ export default async function TemplateViewPage({ params }: PageProps) {
     <main className="mx-auto max-w-3xl px-6 py-10">
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
+          <p className="text-xs font-semibold uppercase tracking-wider text-muted">
             Plantilla P-20
           </p>
-          <h1 className="mt-1 text-2xl font-semibold text-slate-950">
+          <h1 className="mt-1 text-2xl font-semibold text-foreground">
             {TITLES[name] ?? name}
           </h1>
-          <p className="mt-1 text-sm text-slate-600">
+          <p className="mt-1 text-sm text-muted">
             Ronda {ronda.codigo} — {ronda.nombre}
           </p>
         </div>
         <CopyButton text={rendered} />
       </div>
 
-      <div className="mt-6 rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-slate-500">
+      <div className="mt-6 rounded-lg border border-line-soft bg-surface p-4">
+        <p className="mb-2 text-xs font-medium uppercase tracking-wider text-muted">
           Vista previa
         </p>
-        <pre className="whitespace-pre-wrap text-sm leading-6 text-slate-800">
+        <pre className="whitespace-pre-wrap text-sm leading-6 text-foreground">
           {rendered}
         </pre>
       </div>
 
-      <div className="mt-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="mt-6 rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong">
         <strong>Nota:</strong> los campos marcados con corchetes (ej.{' '}
         <code>[FECHA LIMITE — COMPLETAR]</code>) deben reemplazarse manualmente
         antes de enviar. En Fase 1 no hay envio automatico de correos.

@@ -2,20 +2,26 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Alert } from '@/components/ui/Alert'
+import { ConfirmSubmitButton } from '@/components/ui/ConfirmSubmitButton'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
   getRondaWithStatus,
   getRondaMetricasCompletasWithStatus,
-  type EstadoOperativo,
   type RondaMetricas,
   type EstadoRonda,
   type Ronda,
 } from '@/server/rondas'
+import { getEstadoRondaVisible, type EstadoRondaVisible } from '@/lib/rondas/estado-visible'
+import { TONO_INSIGNIA } from '@/lib/ui/tonos'
 import { RondaContextNav } from './RondaContextNav'
 import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
 import { updateRondaReplicasAction } from '../../actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Estado de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -30,27 +36,12 @@ function getParam(v: string | string[] | undefined) {
 // Badge helpers
 // ---------------------------------------------------------------------------
 
-const ESTADO_OPERATIVO_CONFIG: Record<
-  EstadoOperativo,
-  { label: string; icon: string; classes: string }
-> = {
-  preparar_ronda: { label: 'Preparar ronda', icon: '⚠️', classes: 'bg-amber-100 text-amber-800 border-amber-200' },
-  invitar_participantes: { label: 'Invitar participantes', icon: '📨', classes: 'bg-sky-100 text-sky-800 border-sky-200' },
-  esperando_fichas: { label: 'Esperando fichas', icon: '📋', classes: 'bg-violet-100 text-violet-800 border-violet-200' },
-  recibiendo_resultados: { label: 'Recibiendo resultados', icon: '📥', classes: 'bg-blue-100 text-blue-800 border-blue-200' },
-  revisar_incompletos: { label: 'Revisar incompletos', icon: '⚡', classes: 'bg-orange-100 text-orange-800 border-orange-200' },
-  lista_para_exportar: { label: 'Lista para exportar', icon: '✓', classes: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  cerrada: { label: 'Cerrada', icon: '🔒', classes: 'bg-slate-100 text-slate-700 border-slate-200' },
-}
-
-function EstadoOperativoBadge({ estado }: { estado: EstadoOperativo }) {
-  const config = ESTADO_OPERATIVO_CONFIG[estado]
+function EstadoOperativoBadge({ estado }: { estado: EstadoRondaVisible }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${config.classes}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${TONO_INSIGNIA[estado.tono]}`}
     >
-      <span>{config.icon}</span>
-      {config.label}
+      {estado.etiqueta}
     </span>
   )
 }
@@ -74,9 +65,9 @@ function MetricaCard({
 }) {
   const variantClass = {
     default: '',
-    success: 'bg-emerald-50/40',
-    warning: 'bg-amber-50/50',
-    danger: 'bg-rose-50/50',
+    success: 'bg-success-soft/40',
+    warning: 'bg-warning-soft/50',
+    danger: 'bg-danger-soft/50',
   }[variant]
 
   const inner = (
@@ -135,10 +126,10 @@ function AlertasOperativas({ metricas, rondaId }: { metricas: RondaMetricas; ron
   if (alertas.length === 0) return null
 
   const toneClasses = {
-    amber: 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100',
-    sky: 'border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100',
-    violet: 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100',
-    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100',
+    amber: 'border-warning-border bg-warning-soft text-warning-strong hover:bg-warning-border/50',
+    sky: 'border-info-border bg-info-soft text-info-strong hover:bg-info-border/50',
+    violet: 'border-special-border bg-special-soft text-special-strong hover:bg-special-border/50',
+    emerald: 'border-success-border bg-success-soft text-success-strong hover:bg-success-border/50',
   }
 
   return (
@@ -161,92 +152,84 @@ function AlertasOperativas({ metricas, rondaId }: { metricas: RondaMetricas; ron
 // Acciones de estado
 // ---------------------------------------------------------------------------
 
-function AccionesDeEstado({
-  rondaId,
-  estado,
-  confirmCerrar,
-  confirmReabrir,
-}: {
-  rondaId: string
-  estado: EstadoRonda
-  confirmCerrar: boolean
-  confirmReabrir: boolean
-}) {
+function AccionesDeEstado({ rondaId, estado }: { rondaId: string; estado: EstadoRonda }) {
+  if (estado === 'borrador') {
+    return (
+      <section className="card p-6">
+        <h2 className="mb-1 text-lg font-semibold text-[var(--foreground)]">Activar la ronda</h2>
+        <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+          Al activarla, los participantes pueden reclamar sus cupos y empezar a capturar resultados.
+        </p>
+        <form action={activarRondaAction}>
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <ConfirmSubmitButton
+            tone="primary"
+            title="Activar ronda"
+            message="Los participantes podrán reclamar sus cupos y capturar resultados. Revise antes la configuración PT y los participantes."
+            confirmLabel="Activar ronda"
+            pendingLabel="Activando…"
+            className="btn-primary"
+          >
+            Activar ronda
+          </ConfirmSubmitButton>
+        </form>
+      </section>
+    )
+  }
+
+  if (estado === 'cerrada') {
+    return (
+      <section className="card p-6">
+        <h2 className="mb-1 text-lg font-semibold text-[var(--foreground)]">Reabrir la ronda</h2>
+        <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+          Vuelve a permitir cambios en participantes, fichas y resultados.
+        </p>
+        <form action={reabrirRondaAction}>
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <input type="hidden" name="confirm" value="1" />
+          <ConfirmSubmitButton
+            tone="primary"
+            title="Reabrir ronda"
+            message="¿Reabrir la ronda? Vuelve a permitir cambios en participantes, fichas y resultados."
+            confirmLabel="Reabrir ronda"
+            pendingLabel="Reabriendo…"
+            className="btn-outline"
+          >
+            Reabrir ronda
+          </ConfirmSubmitButton>
+        </form>
+      </section>
+    )
+  }
+
+  if (estado !== 'activa') return null
+
   return (
-    <section className="card p-6">
-      <h2 className="text-lg font-semibold text-[var(--foreground)] mb-1">Acciones de estado</h2>
-      <p className="text-sm text-[var(--foreground-muted)] mb-4">
-        Transiciones del ciclo de vida de la ronda.
-      </p>
-
-      <div className="flex flex-wrap gap-3">
-        {estado === 'borrador' && (
-          <form action={activarRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-primary">
-              Activar ronda →
-            </button>
-          </form>
-        )}
-
-        {estado === 'activa' && !confirmCerrar && (
-          <form action={cerrarRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-outline">
-              Cerrar ronda
-            </button>
-          </form>
-        )}
-
-        {estado === 'activa' && confirmCerrar && (
-          <div className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
-            <span className="text-sm text-rose-800">¿Está seguro de cerrar la ronda?</span>
-            <form action={cerrarRondaAction}>
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="confirm" value="1" />
-              <button
-                type="submit"
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700"
-              >
-                Confirmar cierre
-              </button>
-            </form>
-            <Link
-              href={`/dashboard/rondas/${rondaId}`}
-              className="text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
-            >
-              Cancelar
-            </Link>
-          </div>
-        )}
-
-        {estado === 'cerrada' && !confirmReabrir && (
-          <form action={reabrirRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-outline">
-              Reabrir ronda
-            </button>
-          </form>
-        )}
-
-        {estado === 'cerrada' && confirmReabrir && (
-          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <span className="text-sm text-amber-800">¿Está seguro de reabrir la ronda?</span>
-            <form action={reabrirRondaAction}>
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="confirm" value="1" />
-              <button type="submit" className="btn-primary">
-                Confirmar reapertura
-              </button>
-            </form>
-            <Link
-              href={`/dashboard/rondas/${rondaId}`}
-              className="text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
-            >
-              Cancelar
-            </Link>
-          </div>
-        )}
+    <section aria-labelledby="zona-peligro" className="rounded-xl border-2 border-danger-border bg-[var(--surface-panel)] p-6">
+      <h2 id="zona-peligro" className="mb-1 text-lg font-semibold text-danger-strong">
+        Zona de peligro
+      </h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[var(--foreground)]">Cerrar ronda</p>
+          <p className="text-sm text-[var(--foreground-muted)]">
+            Detiene la captura de resultados y pasa la ronda a documentación pendiente. Los participantes ya
+            no podrán enviar datos.
+          </p>
+        </div>
+        <form action={cerrarRondaAction} className="shrink-0">
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <input type="hidden" name="confirm" value="1" />
+          <ConfirmSubmitButton
+            title="Cerrar ronda"
+            message="Los participantes ya no podrán enviar datos y la ronda pasará a documentación pendiente. ¿Desea continuar?"
+            confirmLabel="Cerrar ronda"
+            pendingLabel="Cerrando…"
+            className="btn-danger-outline"
+          >
+            Cerrar ronda
+          </ConfirmSubmitButton>
+        </form>
       </div>
     </section>
   )
@@ -291,9 +274,9 @@ function ReplicasForm({ ronda }: { ronda: Ronda }) {
           </div>
 
           <div className="flex justify-end">
-            <button type="submit" className="btn-primary">
+            <SubmitButton className="btn-primary">
               Guardar réplicas
-            </button>
+            </SubmitButton>
           </div>
         </form>
       ) : (
@@ -317,7 +300,7 @@ function ReplicasForm({ ronda }: { ronda: Ronda }) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default async function RondaResumenPage({ params, searchParams }: PageProps) {
+export default async function RondaEstadoPage({ params, searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
   if (!isAdmin(auth)) redirect('/denied?reason=role')
@@ -329,7 +312,7 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
     return (
       <div className="min-h-screen bg-[var(--background)] px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-6">
-          <BackendOfflineBanner detail="No se pudo verificar la ronda solicitada porque Convex no responde." />
+          <BackendOfflineBanner detail="No se pudo verificar la ronda solicitada porque el servidor no responde." />
           <section className="card p-8 text-center">
             <h1 className="text-xl font-semibold text-[var(--foreground)]">Ronda no disponible</h1>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
@@ -344,12 +327,11 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
 
   const metricasResult = await getRondaMetricasCompletasWithStatus(rondaId, ronda)
   const metricas = metricasResult.data
+  const estadoVisible = getEstadoRondaVisible(ronda, metricas)
 
   const sp = searchParams ? await searchParams : {}
   const success = getParam(sp.success)
   const error = getParam(sp.error)
-  const confirmCerrar = getParam(sp.confirm_cerrar) === '1'
-  const confirmReabrir = getParam(sp.confirm_reabrir) === '1'
 
   // Derive metric card variants
   const cuposVariant =
@@ -381,16 +363,16 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
 
         <RondaPageHeader
           ronda={ronda}
-          section="Resumen"
-          description={metricas.accion_recomendada}
-          actions={<EstadoOperativoBadge estado={metricas.estado_operativo} />}
+          section="Estado de la ronda"
+          description={estadoVisible.descripcion}
+          actions={<EstadoOperativoBadge estado={estadoVisible} />}
         />
 
         {/* Alerts */}
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
         {metricasResult.offline && (
-          <BackendOfflineBanner detail="La ronda cargo, pero las metricas operativas se muestran vacias temporalmente porque Convex no responde." />
+          <BackendOfflineBanner detail="La ronda cargó, pero las métricas operativas se muestran vacías temporalmente porque el servidor no responde." />
         )}
 
         {/* Progress Metrics */}
@@ -428,12 +410,7 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
         <ReplicasForm ronda={ronda} />
 
         {/* State Actions */}
-        <AccionesDeEstado
-          rondaId={rondaId}
-          estado={ronda.estado}
-          confirmCerrar={confirmCerrar}
-          confirmReabrir={confirmReabrir}
-        />
+        <AccionesDeEstado rondaId={rondaId} estado={ronda.estado} />
       </div>
     </div>
   )

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { computeStats, differsBeyondTolerance, parseDecimal, statsWarnings } from './decimal'
+import { computeStats, differsBeyondTolerance, formatDecimal, parseDecimal, statsWarnings } from './decimal'
 
 describe('parseDecimal', () => {
   it('acepta coma decimal', () => {
@@ -39,5 +39,15 @@ describe('estadísticos', () => {
     expect(statsWarnings({ d1: '1', d2: '2', d3: '3', meanValue: '2', sdValue: '1' })).toEqual([])
     expect(statsWarnings({ d1: '1', d2: '2', d3: '3', meanValue: '2,5', sdValue: '1' })).toHaveLength(1)
     expect(statsWarnings({ d1: '1', d2: '', d3: '', meanValue: '1', sdValue: '0,3' })).toEqual([])
+  })
+})
+
+describe('formatDecimal', () => {
+  it('muestra los valores guardados con coma decimal', () => {
+    expect(formatDecimal(10.1)).toBe('10,1')
+    expect(formatDecimal(2)).toBe('2')
+    expect(formatDecimal(0.05)).toBe('0,05')
+    expect(formatDecimal(null)).toBe('')
+    expect(formatDecimal(undefined)).toBe('')
   })
 })

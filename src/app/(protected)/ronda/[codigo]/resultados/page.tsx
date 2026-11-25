@@ -5,6 +5,9 @@ import { requireAuth } from '@/server/auth'
 import { getMyPtCases, getMyPtCertificate, getMyPtResults, getRondaByCodigo } from '@/server/rondas'
 
 import { ResultsExplorer } from './ResultsExplorer'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados' }
 
 const CASE_STATUS_LABELS = {
   abierto: 'Pendiente de análisis',
@@ -35,7 +38,7 @@ export default async function ParticipantResultsPage({ params }: { params: Promi
     <main className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto max-w-7xl space-y-6">
         <header className="header-bar px-8 py-6">
-          <Link href={`/ronda/${codigo}`} className="text-sm font-medium text-sky-700">← Volver a la ronda</Link>
+          <Link href={`/ronda/${codigo}`} className="text-sm font-medium text-info-strong">← Volver a la ronda</Link>
           <p className="mt-4 text-xs font-bold uppercase tracking-[0.18em] text-[var(--pt-primary-dark)]">Evaluación publicada</p>
           <h1 className="mt-1 text-2xl font-bold">Resultados · {ronda.codigo}</h1>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">
@@ -45,13 +48,13 @@ export default async function ParticipantResultsPage({ params }: { params: Promi
         </header>
 
         <section className="grid gap-4 sm:grid-cols-3" aria-label="Resumen de resultados">
-          <div className="card p-5"><div className="text-sm text-slate-500">Resultados</div><div className="mt-1 text-3xl font-bold">{data.resultados.length}</div></div>
-          <div className="card p-5"><div className="text-sm text-slate-500">Satisfactorios</div><div className="mt-1 text-3xl font-bold text-emerald-700">{satisfactory}</div></div>
-          <div className="card p-5"><div className="text-sm text-slate-500">No satisfactorios</div><div className="mt-1 text-3xl font-bold text-red-700">{nonSatisfactory}</div></div>
+          <div className="card p-5"><div className="text-sm text-muted">Resultados</div><div className="mt-1 text-3xl font-bold">{data.resultados.length}</div></div>
+          <div className="card p-5"><div className="text-sm text-muted">Satisfactorios</div><div className="mt-1 text-3xl font-bold text-success-strong">{satisfactory}</div></div>
+          <div className="card p-5"><div className="text-sm text-muted">No satisfactorios</div><div className="mt-1 text-3xl font-bold text-danger-strong">{nonSatisfactory}</div></div>
         </section>
 
         {nonSatisfactory > 0 && (
-          <section className="rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-950" aria-labelledby="improvement-title">
+          <section className="rounded-xl border border-warning-border bg-warning-soft p-5 text-warning-strong" aria-labelledby="improvement-title">
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 id="improvement-title" className="font-semibold">Expediente de mejora</h2>
@@ -75,7 +78,7 @@ export default async function ParticipantResultsPage({ params }: { params: Promi
             <a className="btn-outline" href={`/ronda/${codigo}/resultados/propios.csv`}>Mi evaluación CSV</a>
             {certificate?.estado === 'generado' && <a className="btn-outline" href={`/ronda/${codigo}/resultados/certificado`}>Certificado de participación</a>}
             {certificate && certificate.estado !== 'generado' && (
-              <span className="rounded-lg bg-slate-100 px-3 py-2 text-sm text-slate-700">Certificado: {certificate.estado}</span>
+              <span className="rounded-lg bg-surface-muted px-3 py-2 text-sm text-foreground">Certificado: {certificate.estado}</span>
             )}
           </div>
         </section>

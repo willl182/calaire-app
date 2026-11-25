@@ -50,7 +50,7 @@ export function ResultadosDashboardTable({
             return (
               <tr key={resultado.participante_id} className="align-top">
                 <td className="sticky left-0 z-10 border-b border-[var(--border-soft)] bg-[var(--surface)] px-4 py-4">
-                  <div className="font-medium text-[var(--foreground)]">{resultado.email}</div>
+                  <div className="font-medium text-[var(--foreground)]">{resultado.email.includes('@') ? resultado.email : <span className="text-[var(--foreground-muted)]">Sin correo asignado</span>}</div>
                   <div className="mt-1 text-xs text-[var(--foreground-muted)]">
                     participant_id:{' '}
                     <span className="numeric text-[var(--foreground)]">{resultado.participant_code ?? '—'}</span>
@@ -62,7 +62,7 @@ export function ResultadosDashboardTable({
                 </td>
                 <td className="border-b border-[var(--border-soft)] px-4 py-4">
                   <span className={`numeric rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    completo ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    completo ? 'bg-success-soft text-success-strong' : 'bg-warning-soft text-warning-strong'
                   }`}>
                     {resultado.completados}/{resultado.total_esperado}
                   </span>
@@ -80,7 +80,7 @@ export function ResultadosDashboardTable({
                           <div className="numeric text-xs text-[var(--foreground-muted)]">sd {celda.sd_value}</div>
                         </div>
                       ) : (
-                        <span className="text-[var(--border)]">Sin dato</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">Sin dato</span>
                       )}
                     </td>
                   )

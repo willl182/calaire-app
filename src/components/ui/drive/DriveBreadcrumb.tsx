@@ -13,8 +13,8 @@ export function DriveBreadcrumb({
   actions?: ReactNode
 }) {
   return (
-    <nav aria-label="Ruta" className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-slate-50 px-6 py-3 text-sm">
-      <Link href={rootHref} className={`font-semibold ${folderLabel ? 'text-sky-700 hover:underline' : 'text-[var(--foreground)]'}`}>
+    <nav aria-label="Ruta" className="flex flex-wrap items-center gap-2 border-b border-[var(--border)] bg-surface px-6 py-3 text-sm">
+      <Link href={rootHref} className={`font-semibold ${folderLabel ? 'text-info-strong hover:underline' : 'text-[var(--foreground)]'}`}>
         {rootLabel}
       </Link>
       {folderLabel && (

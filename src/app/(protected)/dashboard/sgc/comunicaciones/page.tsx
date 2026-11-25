@@ -2,6 +2,11 @@ import { redirect } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { listRondas } from '@/server/rondas'
 import { listComunicaciones, createComunicacion, deleteComunicacion } from '@/server/sgc'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Comunicaciones SGC' }
 
 async function ComunicacionesPage() {
   const auth = await requireAuth()
@@ -33,9 +38,7 @@ async function ComunicacionesPage() {
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">{ronda.codigo}</h2>
                 <p className="text-sm text-[var(--foreground-muted)]">{ronda.nombre}</p>
               </div>
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] bg-[var(--surface-muted)] text-[var(--foreground-muted)]">
-                {ronda.estado}
-              </span>
+              <EstadoBadge estado={ronda.estado} />
             </div>
 
             <form
@@ -67,7 +70,7 @@ async function ComunicacionesPage() {
               <input className="input" name="fecha" type="date" />
               <input className="input" name="responsable" placeholder="Responsable" />
               <input className="input md:col-span-5" name="notas" placeholder="Notas (opcional)" />
-              <button className="btn-primary md:col-span-1" type="submit">Registrar</button>
+              <SubmitButton className="btn-primary md:col-span-1">Registrar</SubmitButton>
             </form>
 
             {comunicaciones.length === 0 ? (
@@ -93,7 +96,7 @@ async function ComunicacionesPage() {
                         }}
                       >
                         <input type="hidden" name="comunicacion_id" value={com._id} />
-                        <button className="btn-outline text-xs" type="submit">Eliminar</button>
+                        <SubmitButton className="btn-outline text-xs">Eliminar</SubmitButton>
                       </form>
                     </div>
                     {com.notas && (

@@ -1,5 +1,7 @@
 import type { SgcPanel } from '@/server/sgc'
 import { actualizarHitoRondaAction, crearHitoRondaAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type Hito = SgcPanel['hitos'][number]
 
@@ -29,9 +31,9 @@ function HitoFechaForm({ hito, rondaId }: { hito: Hito; rondaId: string }) {
         type="date"
         name="fecha_objetivo"
         defaultValue={hito.fechaObjetivo ?? ''}
-        aria-label={`Fecha objetivo de ${hito.nombre}`}
+        aria-label={`Fecha objetivo de ${etiquetaVisible(hito.nombre)}`}
       />
-      <button className="btn-outline px-3 py-1 text-xs" type="submit">Guardar fecha</button>
+      <SubmitButton className="btn-outline px-3 py-1 text-xs">Guardar fecha</SubmitButton>
     </form>
   )
 }
@@ -48,16 +50,16 @@ export function HitosRonda({ hitos, rondaId }: { hitos: SgcPanel['hitos']; ronda
         Fechas en formato dd/mm/aaaa.
       </p>
       {!inicio && (
-        <form action={crearHitoRondaAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <form action={crearHitoRondaAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-warning-border bg-warning-soft p-3">
           <input type="hidden" name="ronda_id" value={rondaId} />
           <input type="hidden" name="codigo" value="INICIO_RONDA" />
           <input type="hidden" name="nombre" value="Inicio de ronda" />
           <input type="hidden" name="fase" value="inicio" />
-          <label className="grid gap-1 text-xs font-semibold text-amber-950">
+          <label className="grid gap-1 text-xs font-semibold text-warning-strong">
             Fecha de INICIO_RONDA
             <input className="input" type="date" name="fecha_objetivo" required />
           </label>
-          <button className="btn-primary" type="submit">Crear hito de inicio</button>
+          <SubmitButton className="btn-primary">Crear hito de inicio</SubmitButton>
         </form>
       )}
       {ordenados.length > 0 && (
@@ -65,7 +67,7 @@ export function HitosRonda({ hitos, rondaId }: { hitos: SgcPanel['hitos']; ronda
           {ordenados.map((hito) => (
             <li key={hito._id} className="flex flex-col gap-2 rounded-lg border border-[var(--border)] px-3 py-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-sm font-medium text-[var(--foreground)]">{hito.nombre}</div>
+                <div className="text-sm font-medium text-[var(--foreground)]">{etiquetaVisible(hito.nombre)}</div>
                 <div className="text-xs text-[var(--foreground-muted)]">
                   {hito.codigo} · {fmtFechaIso(hito.fechaObjetivo)} · {hito.estado.replace('_', ' ')}
                 </div>

@@ -6,7 +6,7 @@ import Link from 'next/link'
 type Props = { rondaId: string; rondaCodigo: string; ptConfigurado?: boolean }
 
 const TABS = [
-  { label: 'Resumen', href: (id: string) => `/dashboard/rondas/${id}` },
+  { label: 'Estado', href: (id: string) => `/dashboard/rondas/${id}` },
   { label: 'Configuración PT', href: (id: string) => `/dashboard/rondas/${id}/configuracion-pt` },
   { label: 'Participantes', href: (id: string) => `/dashboard/rondas/${id}/participantes` },
   { label: 'Resultados', href: (id: string) => `/dashboard/rondas/${id}/resultados` },
@@ -19,8 +19,8 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
 
   function isActive(tab: (typeof TABS)[number]) {
     const tabPath = tab.href(rondaId)
-    // "Resumen" tab: exact match only (no trailing segment)
-    if (tab.label === 'Resumen') {
+    // Pestaña "Estado": solo coincidencia exacta (sin segmentos adicionales)
+    if (tab.label === 'Estado') {
       return pathname === tabPath
     }
     // Other tabs: startsWith for nested routes
@@ -36,7 +36,7 @@ export function RondaContextNav({ rondaId, rondaCodigo }: Props) {
         >
           Dashboard
         </Link>
-        <span className="text-[var(--border)] text-xs">/</span>
+        <span aria-hidden="true" className="text-xs text-[var(--foreground-muted)]">/</span>
         <Link
           href={`/dashboard/rondas/${rondaId}`}
           className="text-xs font-semibold uppercase tracking-[0.2em] text-[var(--foreground-muted)] transition hover:text-[var(--foreground)]"

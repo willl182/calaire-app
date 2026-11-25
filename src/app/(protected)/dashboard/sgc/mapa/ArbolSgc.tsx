@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { bloqueGeneralCarpetas } from '@/lib/sgc/arbolBloqueGeneral'
+import { Icon } from '@/components/ui/Icon'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type ArbolSgcProps = {
   /** Códigos con ficha en el inventario maestro, para enlazar el nodo del árbol. */
@@ -20,10 +22,10 @@ const descripciones: Record<string, string> = {
 }
 
 const familiaClass: Record<string, string> = {
-  DG: 'border-amber-300 bg-amber-50 text-amber-800',
-  P: 'border-slate-300 bg-slate-100 text-slate-700',
-  I: 'border-violet-300 bg-violet-50 text-violet-700',
-  F: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+  DG: 'border-warning-border bg-warning-soft text-warning-strong',
+  P: 'border-line bg-surface-muted text-foreground',
+  I: 'border-special-border bg-special-soft text-special-strong',
+  F: 'border-success-border bg-success-soft text-success-strong',
 }
 
 /** `P-PSEA-04 Planificacion de ronda EA` -> `P-PSEA-04`. */
@@ -104,8 +106,8 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
                   <span aria-hidden="true" className="text-[var(--foreground-muted)]">
                     {abierto(carpeta.nombre) ? '▾' : '▸'}
                   </span>
-                  <span aria-hidden="true">📁</span>
-                  <span className="truncate">{carpeta.nombre}/</span>
+                  <Icon name="carpeta" />
+                  <span className="truncate">{etiquetaVisible(carpeta.nombre)}/</span>
                   <span className="ml-auto rounded bg-[var(--surface-muted)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--foreground-muted)]">
                     {carpeta.items.length}
                   </span>
@@ -119,8 +121,8 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
                       const fichaId = codigo ? fichasPorCodigo[codigo] : undefined
                       const etiqueta = (
                         <>
-                          <span aria-hidden="true">{item.carpeta ? '📂' : '📄'}</span>
-                          <span className="truncate text-[var(--foreground)]" title={item.nombre}>
+                          <Icon name={item.carpeta ? 'carpetaAbierta' : 'archivo'} />
+                          <span className="truncate text-[var(--foreground)]" title={etiquetaVisible(item.nombre)}>
                             {codigo ?? item.nombre}
                             {item.carpeta ? '/' : ''}
                           </span>

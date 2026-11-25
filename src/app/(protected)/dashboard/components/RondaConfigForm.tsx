@@ -2,6 +2,7 @@ import Link from 'next/link'
 
 import { updateRondaAction } from '../actions'
 import { CONTAMINANTES, type Ronda } from '@/server/rondas'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 export function RondaConfigForm({ round }: { round: Ronda }) {
   const contaminantesByName = new Map(round.contaminantes.map((item) => [item.contaminante, item]))
@@ -97,9 +98,9 @@ export function RondaConfigForm({ round }: { round: Ronda }) {
         <Link href="/dashboard/rondas" className="btn-outline">
           Cancelar
         </Link>
-        <button type="submit" className="btn-primary">
+        <SubmitButton className="btn-primary">
           Guardar configuración
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )

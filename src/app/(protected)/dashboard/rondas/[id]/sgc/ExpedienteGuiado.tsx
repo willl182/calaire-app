@@ -3,6 +3,8 @@ import type { SgcAvanceExpediente, SgcAvanceItem, SgcDriveRecurso } from '@/serv
 import { SGC_RONDA_ETAPAS } from '@/server/sgc/catalog'
 import { AccionPrincipal } from './AccionPrincipal'
 import { marcarAplicaDocumentoAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 export const RESPONSABLE_LABELS: Record<SgcAvanceItem['responsable'], string> = {
   coordinador: 'Tú',
@@ -11,9 +13,9 @@ export const RESPONSABLE_LABELS: Record<SgcAvanceItem['responsable'], string> = 
 }
 
 const RESPONSABLE_TONE: Record<SgcAvanceItem['responsable'], string> = {
-  coordinador: 'bg-sky-100 text-sky-900',
-  participante: 'bg-violet-100 text-violet-900',
-  automatico: 'bg-slate-200 text-slate-800',
+  coordinador: 'bg-info-soft text-info-strong',
+  participante: 'bg-special-soft text-special-strong',
+  automatico: 'bg-line-soft text-foreground',
 }
 
 const ESTADO_LABELS: Record<SgcAvanceItem['estado'], string> = {
@@ -24,10 +26,10 @@ const ESTADO_LABELS: Record<SgcAvanceItem['estado'], string> = {
 }
 
 const ESTADO_TONE: Record<SgcAvanceItem['estado'], string> = {
-  completo: 'bg-emerald-100 text-emerald-900',
-  en_proceso: 'bg-amber-100 text-amber-900',
-  pendiente: 'bg-slate-100 text-slate-800',
-  no_aplica: 'bg-slate-100 text-slate-600',
+  completo: 'bg-success-soft text-success-strong',
+  en_proceso: 'bg-warning-soft text-warning-strong',
+  pendiente: 'bg-surface-muted text-foreground',
+  no_aplica: 'bg-surface-muted text-muted',
 }
 
 const SUBESTADO_LABELS: Record<string, string> = {
@@ -62,18 +64,17 @@ function AplicaToggle({ item, rondaId }: { item: SgcAvanceItem; rondaId: string 
       <input type="hidden" name="ronda_id" value={rondaId} />
       <input type="hidden" name="codigo" value={item.codigo} />
       <input type="hidden" name="aplica" value={item.aplica ? 'false' : 'true'} />
-      <button
-        type="submit"
+      <SubmitButton
+        
         role="switch"
         aria-checked={item.aplica}
         aria-label={`${item.codigo} ${item.aplica ? 'aplica' : 'no aplica'}: cambiar`}
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--pt-primary)]"
-      >
-        <span aria-hidden="true" className={`relative inline-block h-4 w-7 rounded-full transition ${item.aplica ? 'bg-[var(--pt-primary)]' : 'bg-slate-300'}`}>
+        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--pt-primary)]">
+        <span aria-hidden="true" className={`relative inline-block h-4 w-7 rounded-full transition ${item.aplica ? 'bg-[var(--pt-primary)]' : 'bg-line'}`}>
           <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition ${item.aplica ? 'left-3.5' : 'left-0.5'}`} />
         </span>
         {item.aplica ? 'Aplica' : 'No aplica'}
-      </button>
+      </SubmitButton>
     </form>
   )
 }
@@ -107,7 +108,7 @@ function DocumentoFila({
   return (
     <li
       id={`doc-${item.codigo}`}
-      className={`scroll-mt-24 flex flex-col gap-2 rounded-lg border px-3 py-2.5 md:flex-row md:items-center md:justify-between ${apagado ? 'border-dashed border-slate-200 bg-slate-50 text-slate-500' : 'border-[var(--border)] bg-white'}`}
+      className={`scroll-mt-24 flex flex-col gap-2 rounded-lg border px-3 py-2.5 md:flex-row md:items-center md:justify-between ${apagado ? 'border-dashed border-line-soft bg-surface text-muted' : 'border-[var(--border)] bg-white'}`}
     >
       <div className="flex min-w-0 items-start gap-3">
         <span className="numeric mt-0.5 w-6 shrink-0 text-right text-xs font-semibold text-[var(--foreground-muted)]" aria-hidden={numero === null}>
@@ -115,17 +116,17 @@ function DocumentoFila({
         </span>
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
-            <span className={`text-xs font-semibold ${apagado ? 'text-slate-500' : 'text-[var(--foreground-muted)]'}`}>{item.codigo}</span>
-            <span className={`text-sm font-medium ${apagado ? 'text-slate-500' : 'text-[var(--foreground)]'}`}>{item.nombre}</span>
+            <span className={`text-xs font-semibold ${apagado ? 'text-muted' : 'text-[var(--foreground-muted)]'}`}>{item.codigo}</span>
+            <span className={`text-sm font-medium ${apagado ? 'text-muted' : 'text-[var(--foreground)]'}`}>{etiquetaVisible(item.nombre)}</span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <ResponsableBadge responsable={item.responsable} />
             <span className={`rounded-full px-2 py-0.5 text-[11px] font-semibold ${ESTADO_TONE[item.estado]}`}>
               {item.subestado && SUBESTADO_LABELS[item.subestado] ? SUBESTADO_LABELS[item.subestado] : ESTADO_LABELS[item.estado]}
             </span>
-            {item.nivel === 'bloqueante' && <span className="rounded-full bg-rose-100 px-2 py-0.5 text-[11px] font-semibold text-rose-900">Bloquea el cierre</span>}
+            {item.nivel === 'bloqueante' && <span className="rounded-full bg-danger-soft px-2 py-0.5 text-[11px] font-semibold text-danger-strong">Bloquea el cierre</span>}
             {item.estado !== 'completo' && item.estado !== 'no_aplica' && (
-              <span className="text-xs text-[var(--foreground-muted)]">{item.motivo}</span>
+              <span className="text-xs text-[var(--foreground-muted)]">{etiquetaVisible(item.motivo)}</span>
             )}
           </div>
         </div>
@@ -209,17 +210,17 @@ export function ExpedienteGuiado({ avance, recursos, rondaId, rondaCodigo, ronda
             <li key={etapa.key} id={`etapa-${etapa.key}`} className="scroll-mt-24 rounded-xl border border-[var(--border)] bg-[var(--surface-panel,white)] p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-base font-semibold text-[var(--foreground)]">
-                  <span className="numeric text-[var(--foreground-muted)]">{etapa.numero}</span> · {etapa.nombre}
+                  <span className="numeric text-[var(--foreground-muted)]">{etapa.numero}</span> · {etiquetaVisible(etapa.nombre)}
                 </h3>
                 <div className="flex items-center gap-2 text-xs text-[var(--foreground-muted)]">
                   <span className="numeric font-semibold text-[var(--foreground)]">{completos}/{total}</span>
                   <div
-                    className="h-1.5 w-24 overflow-hidden rounded-full bg-slate-100"
+                    className="h-1.5 w-24 overflow-hidden rounded-full bg-surface-muted"
                     role="progressbar"
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={pct}
-                    aria-label={`Avance de la etapa ${etapa.nombre}: ${completos} de ${total}`}
+                    aria-label={`Avance de la etapa ${etiquetaVisible(etapa.nombre)}: ${completos} de ${total}`}
                   >
                     <div className="h-full bg-[var(--pt-primary)]" style={{ width: `${pct}%` }} />
                   </div>
@@ -232,8 +233,8 @@ export function ExpedienteGuiado({ avance, recursos, rondaId, rondaCodigo, ronda
               )}
               {siAplica.length > 0 && (
                 <div className="mt-3">
-                  <h4 className="text-xs font-semibold uppercase tracking-[0.08em] text-slate-500">Si aplica</h4>
-                  <p className="mb-2 text-xs text-slate-500">Solo cuentan en el avance si se marcan como aplicables. Se pueden dejar en &quot;no aplica&quot; sin justificación.</p>
+                  <h4 className="text-xs font-semibold uppercase tracking-[0.08em] text-muted">Si aplica</h4>
+                  <p className="mb-2 text-xs text-muted">Solo cuentan en el avance si se marcan como aplicables. Se pueden dejar en &quot;no aplica&quot; sin justificación.</p>
                   <ul className="grid gap-2">
                     {siAplica.map((item) => fila(item, null))}
                   </ul>

@@ -26,18 +26,18 @@ const routes = [
   { value: '', label: 'Ruta: ninguna' },
   { value: 'data', label: 'Flujo de datos' },
   { value: 'he', label: 'H/E' },
-  { value: 'planning', label: 'Planificacion' },
+  { value: 'planning', label: 'Planificación' },
   { value: 'round', label: 'Estructura' },
   { value: 'sgc', label: 'Cierre SGC' },
-  { value: 'update', label: 'Elaboracion' },
+  { value: 'update', label: 'Elaboración' },
 ]
 
 const legend = [
-  { label: 'DG', className: 'border-amber-500 bg-amber-50' },
-  { label: 'P', className: 'border-slate-600 bg-slate-100' },
-  { label: 'I', className: 'border-violet-500 bg-violet-50' },
-  { label: 'F', className: 'border-emerald-600 bg-emerald-50' },
-  { label: 'Fuera', className: 'border-red-500 bg-red-50' },
+  { label: 'DG', className: 'border-warning bg-warning-soft' },
+  { label: 'P', className: 'border-line-strong bg-surface-muted' },
+  { label: 'I', className: 'border-special bg-special-soft' },
+  { label: 'F', className: 'border-success-strong bg-success-soft' },
+  { label: 'Fuera', className: 'border-danger bg-danger-soft' },
 ]
 
 type MapaSgcFrameProps = {
@@ -81,7 +81,7 @@ export function MapaSgcFrame({ src, title }: MapaSgcFrameProps) {
           className="h-8 min-w-48 flex-1 rounded-md border border-[var(--border)] bg-white px-2 text-xs outline-none focus:border-[var(--pt-primary)]"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar codigo o relacion"
+          placeholder="Buscar código o relación"
           type="search"
         />
         <select className="h-8 rounded-md border border-[var(--border)] bg-white px-2 text-xs" value={family} onChange={(event) => setFamily(event.target.value)}>

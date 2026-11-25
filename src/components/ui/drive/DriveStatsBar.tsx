@@ -6,10 +6,10 @@ export type DriveStat = {
 
 const VALUE_TONES: Record<NonNullable<DriveStat['tone']>, string> = {
   default: 'text-[var(--foreground)]',
-  emerald: 'text-emerald-700',
-  amber: 'text-amber-700',
-  rose: 'text-rose-700',
-  sky: 'text-sky-700',
+  emerald: 'text-success-strong',
+  amber: 'text-warning-strong',
+  rose: 'text-danger-strong',
+  sky: 'text-info-strong',
 }
 
 // Franja horizontal compacta de stats, compartida por el centro documental y

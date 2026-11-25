@@ -25,6 +25,11 @@ import { nombrarUsuarios } from './notas'
 import { getNombresUsuarios } from './textos'
 import { SiguientePasoBar } from './SiguientePasoBar'
 import { transicionSgcAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Expediente SGC de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -64,7 +69,7 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex flex-wrap items-center gap-3">
           <h2 id="cierre-documental-title" className="text-base font-semibold text-[var(--foreground)]">Cierre documental SGC</h2>
-          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}`}>
+          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${sinBloqueantesActuales ? 'bg-success-soft text-success-strong' : 'bg-danger-soft text-danger-strong'}`}>
             {sinBloqueantesActuales ? 'Sin bloqueantes' : `${bloqueantesActuales.length} bloqueante${bloqueantesActuales.length === 1 ? '' : 's'}`}
           </span>
         </div>
@@ -73,18 +78,18 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
             <form action={transicionSgcAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="accion" value="documentacion_pendiente" />
-              <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
+              <SubmitButton className="btn-primary"  disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
                 Pasar a documentación pendiente
-              </button>
+              </SubmitButton>
             </form>
           )}
           {puedeCerrar && (
             <form action={transicionSgcAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="accion" value="cerrar" />
-              <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
+              <SubmitButton className="btn-primary"  disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
                 Cerrar documentalmente
-              </button>
+              </SubmitButton>
             </form>
           )}
           {puedeReabrir && (
@@ -92,21 +97,21 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="accion" value="reabrir" />
               <input className="input" name="motivo" placeholder="Motivo de reapertura" aria-label="Motivo de reapertura" required />
-              <button className="btn-outline" type="submit">Reabrir</button>
+              <SubmitButton className="btn-outline">Reabrir</SubmitButton>
             </form>
           )}
         </div>
       </div>
-      {motivo && <p id={motivoId} className="text-sm font-medium text-rose-900">{motivo}</p>}
+      {motivo && <p id={motivoId} className="text-sm font-medium text-danger-strong">{motivo}</p>}
 
       {!sinBloqueantesActuales && (
-        <div className="rounded-lg border-2 border-rose-300 bg-rose-50 p-3">
-          <h3 className="text-sm font-semibold text-rose-900">Bloqueantes: impiden el cierre</h3>
-          <ul className="mt-2 grid gap-1 text-sm text-rose-950">
+        <div className="rounded-lg border-2 border-danger-border bg-danger-soft p-3">
+          <h3 className="text-sm font-semibold text-danger-strong">Bloqueantes: impiden el cierre</h3>
+          <ul className="mt-2 grid gap-1 text-sm text-danger-strong">
             {bloqueantesActuales.map((bloqueante) => (
               <li key={bloqueante} className="flex items-start gap-2">
                 <span aria-hidden="true">●</span>
-                <Link className="underline-offset-2 hover:underline" href={enlacePendiente(rondaId, bloqueante, avance.items)}>{bloqueante}</Link>
+                <Link className="underline-offset-2 hover:underline" href={enlacePendiente(rondaId, bloqueante, avance.items)}>{etiquetaVisible(bloqueante)}</Link>
               </li>
             ))}
           </ul>
@@ -114,13 +119,13 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
       )}
 
       {criticos.length > 0 && (
-        <div className="rounded-lg border border-amber-200 bg-amber-50/60 p-3">
-          <h3 className="text-xs font-semibold text-amber-900">Críticos: conviene resolverlos, pero no bloquean el cierre</h3>
-          <ul className="mt-1 grid gap-0.5 text-xs text-amber-950">
+        <div className="rounded-lg border border-warning-border bg-warning-soft/60 p-3">
+          <h3 className="text-xs font-semibold text-warning-strong">Críticos: conviene resolverlos, pero no bloquean el cierre</h3>
+          <ul className="mt-1 grid gap-0.5 text-xs text-warning-strong">
             {criticos.map((item) => (
               <li key={item.codigo}>
-                <Link className="underline-offset-2 hover:underline" href={item.destino}>{item.codigo} · {item.nombre}</Link>
-                <span className="text-amber-800"> — {item.motivo}</span>
+                <Link className="underline-offset-2 hover:underline" href={item.destino}>{item.codigo} · {etiquetaVisible(item.nombre)}</Link>
+                <span className="text-warning-strong"> — {etiquetaVisible(item.motivo)}</span>
               </li>
             ))}
           </ul>
@@ -190,7 +195,7 @@ export default async function SgcRondaPage({ params, searchParams }: PageProps) 
             </span>
           </div>
           <div
-            className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100"
+            className="mt-2 h-2 overflow-hidden rounded-full bg-surface-muted"
             role="progressbar"
             aria-valuemin={0}
             aria-valuemax={100}

@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { Icon } from '@/components/ui/Icon'
 
 export function CopyInvitationLinkButton({ url }: { url: string }) {
   const [copied, setCopied] = useState(false)
@@ -13,11 +14,13 @@ export function CopyInvitationLinkButton({ url }: { url: string }) {
 
   return (
     <button
+      type="button"
       onClick={handleCopy}
-      className="rounded-lg border border-[var(--border)] px-2.5 py-1 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
+      aria-live="polite"
+      className="inline-flex min-h-[44px] items-center gap-1 rounded-lg border border-[var(--border)] px-3 py-1 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
       title={url}
     >
-      {copied ? 'Copiado ✓' : 'Copiar enlace'}
+      {copied ? <><Icon name="check" /> Copiado</> : 'Copiar enlace'}
     </button>
   )
 }

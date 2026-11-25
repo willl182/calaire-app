@@ -332,9 +332,17 @@ export const listAllParticipantesDefinition = defineRondaQuery({
         directorioByLookup.get(row.email.toLowerCase()) ??
         directorioByLookup.get(row.workosUserId) ??
         null
-      const groupKey = directorio?.nit.toLowerCase() ?? row.workosUserId
+      // Agrupa por laboratorio del directorio; si no hay, por correo real (un mismo
+      // correo puede tener un cupo reclamado y otro pendiente en rondas distintas).
+      // Los cupos pendientes con correo de marcador ("Participante 01 (pendiente)")
+      // quedan cada uno por separado.
+      const correo = row.email.trim().toLowerCase()
+      const groupKey = directorio?.nit.toLowerCase() ?? (correo.includes('@') ? correo : row.workosUserId)
 
       let entry = grouped.get(groupKey)
+      if (entry && estadoEnlace === 'reclamado' && (!entry.workos_user_id || entry.workos_user_id.startsWith(PENDING_PREFIX))) {
+        entry.workos_user_id = row.workosUserId
+      }
       if (!entry) {
         entry = {
           workos_user_id: row.workosUserId,

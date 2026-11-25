@@ -2,12 +2,15 @@ import { redirect } from 'next/navigation'
 import Link from 'next/link'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { P20_TEMPLATE_NAMES } from '@/server/sgc/templates'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Plantillas de comunicación' }
 
 const TITLES: Record<string, string> = {
   convocatoria: 'Convocatoria',
-  'recordatorio-ficha': 'Recordatorio ficha de inscripcion',
-  'recordatorio-envio-resultados': 'Recordatorio envio de resultados',
-  'publicacion-resultados': 'Publicacion de resultados',
+  'recordatorio-ficha': 'Recordatorio ficha de inscripción',
+  'recordatorio-envio-resultados': 'Recordatorio de envío de resultados',
+  'publicacion-resultados': 'Publicación de resultados',
   'cierre-ronda': 'Cierre de ronda',
 }
 

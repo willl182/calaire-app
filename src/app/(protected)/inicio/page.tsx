@@ -5,6 +5,10 @@ import { signOut } from '@workos-inc/authkit-nextjs'
 import { LogoUnal } from '@/components/LogoUnal'
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
 import { isStaff, requireAuth } from '@/server/auth'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Inicio' }
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
@@ -37,9 +41,9 @@ export default async function InicioPage() {
                 await signOut({ returnTo: buildAbsoluteAppUrl('/login') })
               }}
             >
-              <button type="submit" className="btn-outline">
+              <SubmitButton className="btn-outline">
                 Cerrar sesión
-              </button>
+              </SubmitButton>
             </form>
           </div>
         </header>

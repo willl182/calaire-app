@@ -60,17 +60,6 @@ export function formatDate(value: string) {
   }).format(new Date(value))
 }
 
-export function statusClasses(status: Ronda['estado']) {
-  switch (status) {
-    case 'activa':
-      return 'bg-emerald-100 text-emerald-800'
-    case 'cerrada':
-      return 'bg-slate-200 text-slate-700'
-    default:
-      return 'bg-amber-100 text-amber-800'
-  }
-}
-
 export function getResultadoColumns(
   ptItems: RondaPTItem[],
   sampleGroups: RondaPTSampleGroup[],

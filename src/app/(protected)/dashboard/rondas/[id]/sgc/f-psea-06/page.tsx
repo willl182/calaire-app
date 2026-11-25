@@ -4,6 +4,9 @@ import { Alert } from '@/components/ui/Alert'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { getPanelSgc } from '@/server/sgc'
 import { PlanRondaForm } from '../SgcRegistroDiligenciable'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'F-PSEA-06 Planificación de ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>

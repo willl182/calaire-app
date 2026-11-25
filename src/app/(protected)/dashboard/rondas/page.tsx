@@ -3,6 +3,9 @@ import { AdminDashboardFrame } from '../AdminDashboardFrame'
 import { RondasTable } from '../components/RondasTable'
 import { loadDashboardRondasData } from '../data'
 import { getParamValue } from '../view-model'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Rondas' }
 
 type DashboardRondasPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>

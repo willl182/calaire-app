@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { generarDocxF19Action, registrarPdfFirmadoF19Action, solicitarUploadF19Action } from './actions'
+import { FileInput } from '@/components/ui/FileInput'
 
 export default function ActaArchivos({ rondaId, actaId, docxUrl, pdfUrl }: { rondaId: string; actaId: string; docxUrl?: string | null; pdfUrl?: string | null }) {
   const router = useRouter()
@@ -28,5 +29,5 @@ export default function ActaArchivos({ rondaId, actaId, docxUrl, pdfUrl }: { ron
     } catch (cause) { setError(cause instanceof Error ? cause.message : 'No fue posible subir PDF firmado.') }
     finally { setUploading(false) }
   }
-  return <section className="card grid gap-4 p-6"><h2 className="font-semibold">Archivos del acta</h2>{error && <p className="rounded border border-red-200 bg-red-50 p-2 text-sm text-red-800" role="alert">{error}</p>}<div className="flex flex-wrap gap-3"><button className="btn-primary" type="button" disabled={pending} onClick={generate}>{pending ? 'Generando…' : 'Generar DOCX para firma'}</button>{docxUrl && <a className="btn-outline" href={docxUrl}>Descargar DOCX</a>}</div><label className="grid gap-2 text-sm font-medium">PDF firmado y escaneado<input type="file" accept="application/pdf,.pdf" disabled={uploading} onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file) }} /></label>{pdfUrl && <a className="btn-outline justify-self-start" href={pdfUrl}>Descargar PDF firmado</a>}<p className="text-xs text-[var(--foreground-muted)]">Carga directa a Convex Storage. Reemplazar PDF despublica acta hasta nueva revisión.</p></section>
+  return <section className="card grid gap-4 p-6"><h2 className="font-semibold">Archivos del acta</h2>{error && <p className="rounded border border-danger-border bg-danger-soft p-2 text-sm text-danger-strong" role="alert">{error}</p>}<div className="flex flex-wrap gap-3"><button className="btn-primary" type="button" disabled={pending} onClick={generate}>{pending ? 'Generando…' : 'Generar DOCX para firma'}</button>{docxUrl && <a className="btn-outline" href={docxUrl}>Descargar DOCX</a>}</div><div className="grid gap-2 text-sm font-medium"><span id="acta-pdf-firmado">PDF firmado y escaneado</span><FileInput aria-labelledby="acta-pdf-firmado" accept="application/pdf,.pdf" disabled={uploading} buttonLabel={uploading ? 'Subiendo…' : 'Elegir archivo'} onChange={(event) => { const file = event.target.files?.[0]; if (file) void upload(file) }} /></div>{pdfUrl && <a className="btn-outline justify-self-start" href={pdfUrl}>Descargar PDF firmado</a>}<p className="text-xs text-[var(--foreground-muted)]">Carga directa a Convex Storage. Reemplazar PDF despublica acta hasta nueva revisión.</p></section>
 }

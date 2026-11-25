@@ -5,6 +5,10 @@ import { getParticipanteRondaResumen, getRonda } from '@/server/rondas'
 import { getOrCreateFicha, getFichaByRondaParticipante } from '@/server/rondas/fichas'
 import { RondaPageHeader } from '../../../RondaPageHeader'
 import FichaAdminEditor from './FichaAdminEditor'
+import { Icon } from '@/components/ui/Icon'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Ficha del participante' }
 
 type Props = {
   params: Promise<{ id: string; pid: string }>
@@ -55,8 +59,8 @@ export default async function FichaAdminPage({ params }: Props) {
               Ronda: {ronda.codigo}{participante.participant_code ? ` · Participante: ${participante.participant_code}` : ''}
             </p>
             {fichaCompleta.estado === 'enviado' && (
-              <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
-                Ficha enviada ✓
+              <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1 text-xs font-semibold text-success-strong">
+                <Icon name="check" className="h-4 w-4" /> Ficha enviada
               </div>
             )}
           </div>

@@ -4,6 +4,9 @@ import { DirectorioPanel } from '../components/DirectorioPanel'
 import { ParticipantesGlobalView } from '../components/ParticipantesPanel'
 import { loadDashboardParticipantesData } from '../data'
 import { getParamValue } from '../view-model'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Participantes' }
 
 type DashboardParticipantesPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -23,10 +26,11 @@ export default async function DashboardParticipantesPage({ searchParams }: Dashb
       userEmail={auth.user?.email ?? ''}
       success={success}
       error={error}
+      showKpis={false}
     >
       <div className="grid gap-6">
-        <DirectorioPanel allParticipantes={data.allParticipantes} />
         <ParticipantesGlobalView participantes={data.allParticipantes} />
+        <DirectorioPanel directorio={data.directorio} allParticipantes={data.allParticipantes} />
       </div>
     </AdminDashboardFrame>
   )

@@ -10,10 +10,10 @@ import { getCellIssue, isCellComplete, toCellKey, type SaveStatus } from './form
 import type { FormularioPT } from './useFormularioPT'
 
 function StatusIcon({ status }: { status: SaveStatus }) {
-  if (status === 'saving') return <span className="text-xs text-slate-500">guardando…</span>
-  if (status === 'saved') return <span className="text-xs text-emerald-600">✓</span>
-  if (status === 'error') return <span className="text-xs text-rose-600">✗</span>
-  if (status === 'dirty') return <span className="text-xs text-amber-600">•</span>
+  if (status === 'saving') return <span className="text-xs text-muted">guardando…</span>
+  if (status === 'saved') return <span className="text-xs text-success-strong">✓</span>
+  if (status === 'error') return <span className="text-xs text-danger-strong">✗</span>
+  if (status === 'dirty') return <span className="text-xs text-warning-strong">•</span>
   return null
 }
 
@@ -56,11 +56,11 @@ export function TablasCapturaPT({ form, sampleGroups }: { form: FormularioPT; sa
                 </p>
               </div>
               {contaminanteComplete ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+                <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-3 py-1 text-xs font-semibold text-success-strong">
                   ✓ Completo
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700">
+                <span className="inline-flex items-center gap-1 rounded-full bg-warning-soft px-3 py-1 text-xs font-semibold text-warning-strong">
                   Pendiente
                 </span>
               )}
@@ -98,7 +98,7 @@ export function TablasCapturaPT({ form, sampleGroups }: { form: FormularioPT; sa
                       const cellLabel = `${contaminante} nivel ${item.level_label || item.run_code}${sampleGroups.length > 1 ? ` grupo ${group.sample_group}` : ''}`
 
                       const inputCls = `w-20 rounded border px-2 py-1 text-sm outline-none numeric disabled:bg-[var(--surface-muted)] disabled:text-[var(--foreground-muted)] ${
-                        issue ? 'border-rose-300 bg-rose-50/40' : 'border-[var(--border)]'
+                        issue ? 'border-danger-border bg-danger-soft/40' : 'border-[var(--border)]'
                       }`
 
                       const wideCls = inputCls.replace('w-20', 'w-28')
@@ -107,8 +107,8 @@ export function TablasCapturaPT({ form, sampleGroups }: { form: FormularioPT; sa
                         <Fragment key={key}>
                         <tr
                           className={`transition-colors hover:bg-[var(--surface-muted)]/40 ${
-                            complete ? 'bg-emerald-50/20' : ''
-                          } ${issue ? 'bg-rose-50/20' : ''}`}
+                            complete ? 'bg-success-soft/20' : ''
+                          } ${issue ? 'bg-danger-soft/20' : ''}`}
                         >
                           <td className="px-4 py-2 font-mono text-xs text-[var(--foreground)]">{item.run_code}</td>
                           {sampleGroups.length > 1 && (
@@ -191,9 +191,9 @@ export function TablasCapturaPT({ form, sampleGroups }: { form: FormularioPT; sa
                           </td>
                           <td className="px-4 py-2 text-center">
                             {complete ? (
-                              <span className="text-base font-semibold text-emerald-600">✓</span>
+                              <span className="text-base font-semibold text-success-strong">✓</span>
                             ) : issue ? (
-                              <span className="text-xs text-rose-500" aria-hidden="true">✗</span>
+                              <span className="text-xs text-danger-strong" aria-hidden="true">✗</span>
                             ) : (
                               <StatusIcon status={status} />
                             )}
@@ -203,9 +203,9 @@ export function TablasCapturaPT({ form, sampleGroups }: { form: FormularioPT; sa
                           <tr>
                             <td colSpan={colCount} className="px-4 pb-2 pt-0">
                               <div id={msgId} role="status" className="text-xs">
-                                {issue && <p className="text-rose-700">✗ {issue}</p>}
+                                {issue && <p className="text-danger-strong">✗ {issue}</p>}
                                 {warnings.map((w) => (
-                                  <p key={w} className="text-amber-700">⚠ {w} Revise el valor escrito; no se corrige automáticamente.</p>
+                                  <p key={w} className="text-warning-strong">⚠ {w} Revise el valor escrito; no se corrige automáticamente.</p>
                                 ))}
                               </div>
                             </td>
@@ -237,7 +237,7 @@ export function TablasCapturaPT({ form, sampleGroups }: { form: FormularioPT; sa
                         <button
                           type="button"
                           onClick={() => focusPendingCell(item.id, group.id, cells[key])}
-                          className="rounded border border-amber-300 bg-amber-50 px-2 py-0.5 text-xs text-amber-800 hover:bg-amber-100"
+                          className="rounded border border-warning-border bg-warning-soft px-2 py-0.5 text-xs text-warning-strong hover:bg-warning-border/50"
                         >
                           {item.contaminante} nivel {item.level_label || item.run_code}
                           {sampleGroups.length > 1 ? ` · ${group.sample_group}` : ''}

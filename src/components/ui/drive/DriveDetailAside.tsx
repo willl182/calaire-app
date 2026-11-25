@@ -17,7 +17,7 @@ export function DriveDetailAside({
   children: ReactNode
 }) {
   return (
-    <aside className="border-t border-[var(--border)] bg-slate-50 p-5 lg:border-l lg:border-t-0">
+    <aside className="border-t border-[var(--border)] bg-surface p-5 lg:border-l lg:border-t-0">
       <div className="sticky top-24">
         <div className="mb-4 flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -28,7 +28,7 @@ export function DriveDetailAside({
           </div>
           <Link
             href={closeHref}
-            className="shrink-0 rounded-md border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground-muted)] hover:bg-slate-100"
+            className="shrink-0 rounded-md border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground-muted)] hover:bg-line-soft"
             aria-label="Cerrar detalle"
           >
             Cerrar

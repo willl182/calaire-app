@@ -13,6 +13,12 @@ import {
 import { importPtScoresAction, publishPtResultsAction, uploadPtReportAction } from './actions'
 import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
+import { FileInput } from '@/components/ui/FileInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Alert } from '@/components/ui/Alert'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -43,7 +49,7 @@ function completitudBadge(resultado: ResultadoParticipantePT) {
   return (
     <span
       className={`numeric rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-        done ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+        done ? 'bg-success-soft text-success-strong' : 'bg-warning-soft text-warning-strong'
       }`}
     >
       {resultado.completados}/{resultado.total_esperado} ({resultado.porcentaje_completitud}%)
@@ -74,8 +80,8 @@ function MetricaCard({
 }) {
   const variantClass = {
     default: '',
-    success: 'bg-emerald-50/40',
-    warning: 'bg-amber-50/50',
+    success: 'bg-success-soft/40',
+    warning: 'bg-warning-soft/50',
   }[variant]
 
   return (
@@ -93,6 +99,19 @@ function MetricaCard({
   )
 }
 
+const ETIQUETA_EVALUACION: Record<string, string> = {
+  sin_cargar: 'Sin cargar',
+  importando: 'Importando',
+  borrador_validado: 'Borrador validado',
+  publicada: 'Publicada',
+}
+
+const NUMERO = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 6 })
+
+function formatNumero(value: number) {
+  return NUMERO.format(value)
+}
+
 function ResultadosTable({
   resultados,
   columnas,
@@ -107,7 +126,7 @@ function ResultadosTable({
       <table className="border-separate border-spacing-0 text-sm" style={{ minWidth }}>
         <thead>
           <tr>
-            <th className="sticky left-0 z-20 border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+            <th className="sticky left-0 z-20 min-w-56 border-b-2 border-r border-[var(--pt-primary)] border-r-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)] shadow-[4px_0_6px_-4px_rgba(17,24,39,0.15)]">
               Participante
             </th>
             <th className="border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
@@ -137,21 +156,24 @@ function ResultadosTable({
             const celdas = getCellMap(resultado)
             return (
               <tr key={resultado.participante_id} className="align-top">
-                <td className="sticky left-0 z-10 border-b border-[var(--border-soft)] bg-[var(--surface)] px-4 py-4">
-                  <div className="font-medium text-[var(--foreground)]">{resultado.email}</div>
+                <th
+                  scope="row"
+                  className="sticky left-0 z-10 min-w-56 border-b border-r border-[var(--border-soft)] border-r-[var(--border)] bg-[var(--surface)] px-4 py-4 text-left font-normal shadow-[4px_0_6px_-4px_rgba(17,24,39,0.15)]"
+                >
+                  <div className="font-medium text-[var(--foreground)]">{resultado.email.includes('@') ? resultado.email : <span className="text-[var(--foreground-muted)]">Sin correo asignado</span>}</div>
                   <div className="mt-1 text-xs text-[var(--foreground-muted)]">
-                    participant_id:{' '}
+                    Código:{' '}
                     <span className="numeric text-[var(--foreground)]">
                       {resultado.participant_code ?? '—'}
                     </span>
                   </div>
                   <div className="text-xs text-[var(--foreground-muted)]">
-                    replicate:{' '}
+                    Réplica:{' '}
                     <span className="numeric text-[var(--foreground)]">
                       {resultado.replicate_code ?? '—'}
                     </span>
                   </div>
-                </td>
+                </th>
                 <td className="border-b border-[var(--border-soft)] px-4 py-4">
                   {completitudBadge(resultado)}
                 </td>
@@ -168,14 +190,14 @@ function ResultadosTable({
                       {celda ? (
                         <div className="space-y-1">
                           <div className="numeric text-sm font-medium text-[var(--foreground)]">
-                            mean {celda.mean_value}
+                            <abbr title="Promedio" className="no-underline">x̄</abbr> {formatNumero(celda.mean_value)}
                           </div>
                           <div className="numeric text-xs text-[var(--foreground-muted)]">
-                            sd {celda.sd_value}
+                            <abbr title="Desviación estándar" className="no-underline">s</abbr> {formatNumero(celda.sd_value)}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-[var(--border)]">Sin dato</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">Sin dato</span>
                       )}
                     </td>
                   )
@@ -247,36 +269,36 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
           }
         />
 
-        {getParam(resolvedSearchParams.error) && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{getParam(resolvedSearchParams.error)}</div>}
-        {getParam(resolvedSearchParams.success) && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{getParam(resolvedSearchParams.success)}</div>}
+        <Alert tone="error" message={getParam(resolvedSearchParams.error)} />
+        <Alert tone="success" message={getParam(resolvedSearchParams.success)} />
 
         <section className="card p-6">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-            <div><h2 className="text-lg font-semibold">Evaluación importada</h2><p className="text-sm text-[var(--foreground-muted)]">Preview estricto, borrador reemplazable y publicación irreversible.</p></div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{evaluacion?.estado ?? 'sin_cargar'}</span>
+            <div><h2 className="text-lg font-semibold">Evaluación importada</h2><p className="text-sm text-[var(--foreground-muted)]">Se valida el CSV completo antes de importarlo; el borrador se puede reemplazar y la publicación es definitiva.</p></div>
+            <span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold">{ETIQUETA_EVALUACION[evaluacion?.estado ?? 'sin_cargar']}</span>
           </div>
           {evaluacion?.estado !== 'publicada' ? <div className="grid gap-5 lg:grid-cols-3">
             <form action={importPtScoresAction} className="rounded-xl border border-[var(--border-soft)] p-4">
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <label className="mb-2 block text-sm font-semibold">1. Puntajes CSV</label>
-              <input required name="csv" type="file" accept=".csv,text/csv" className="block w-full text-sm" />
-              <button className="btn-outline mt-4" type="submit">Validar e importar borrador</button>
+              <label className="mb-2 block text-sm font-semibold" htmlFor="pt-scores-csv">1. Puntajes CSV</label>
+              <FileInput id="pt-scores-csv" required name="csv" accept=".csv,text/csv" />
+              <SubmitButton className="btn-outline mt-4" pendingLabel="Validando…">Validar e importar borrador</SubmitButton>
             </form>
             <form action={uploadPtReportAction} className="rounded-xl border border-[var(--border-soft)] p-4">
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <label className="mb-2 block text-sm font-semibold">2. Informe general PDF</label>
-              <input required name="informe" type="file" accept="application/pdf" className="block w-full text-sm" />
-              <button className="btn-outline mt-4" type="submit">Subir informe</button>
-              {evaluacion?.informeNombreArchivo && <p className="mt-2 text-xs text-emerald-700">Actual: {evaluacion.informeNombreArchivo}</p>}
+              <label className="mb-2 block text-sm font-semibold" htmlFor="pt-informe-pdf">2. Informe general PDF</label>
+              <FileInput id="pt-informe-pdf" required name="informe" accept="application/pdf" />
+              <SubmitButton className="btn-outline mt-4" pendingLabel="Subiendo…">Subir informe</SubmitButton>
+              {evaluacion?.informeNombreArchivo && <p className="mt-2 text-xs text-success-strong">Actual: {evaluacion.informeNombreArchivo}</p>}
             </form>
-            <form action={publishPtResultsAction} className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+            <form action={publishPtResultsAction} className="rounded-xl border border-warning-border bg-warning-soft p-4">
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <label className="block text-sm font-semibold text-amber-900">3. Publicar</label>
-              <p className="my-2 text-xs text-amber-800">No se puede editar, reemplazar ni despublicar después.</p>
-              <input required name="confirmacion" placeholder="Escriba PUBLICAR" className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm" />
-              <button disabled={evaluacion?.estado !== 'borrador_validado' || !evaluacion.informeStorageId} className="btn-primary mt-4 disabled:cursor-not-allowed disabled:opacity-50" type="submit">Publicar resultados</button>
+              <label className="block text-sm font-semibold text-warning-strong" htmlFor="pt-publicar-confirmacion">3. Publicar</label>
+              <p className="my-2 text-xs text-warning-strong">No se puede editar, reemplazar ni despublicar después.</p>
+              <input id="pt-publicar-confirmacion" required name="confirmacion" placeholder="Escriba PUBLICAR" className="w-full rounded-lg border border-warning-border bg-white px-3 py-2 text-sm" />
+              <SubmitButton disabled={evaluacion?.estado !== 'borrador_validado' || !evaluacion.informeStorageId} className="btn-primary mt-4" pendingLabel="Publicando…">Publicar resultados</SubmitButton>
             </form>
-          </div> : <p className="text-sm text-emerald-700">Publicada el {evaluacion.publicadaAt ? formatDate(new Date(evaluacion.publicadaAt).toISOString()) : '—'} por {evaluacion.publicadaBy}.</p>}
+          </div> : <p className="text-sm text-success-strong">Publicada el {evaluacion.publicadaAt ? formatDate(new Date(evaluacion.publicadaAt).toISOString()) : '—'} por {evaluacion.publicadaBy}.</p>}
         </section>
 
         <section className="sgc-kpis">
@@ -316,7 +338,7 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
 
         {!canExport && resultados.length > 0 && (
           <section className="card p-4">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
               El CSV PT exporta únicamente combinaciones con envío final confirmado.
             </div>
           </section>
@@ -324,7 +346,7 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
 
         {columnas.length === 0 ? (
           <section className="card p-6">
-            <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div className="rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
               No hay columnas PT para revisar. Configura corridas y grupos de muestra en “Configuración PT”.
             </div>
           </section>

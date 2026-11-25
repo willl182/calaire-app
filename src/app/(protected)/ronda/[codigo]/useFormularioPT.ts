@@ -39,6 +39,8 @@ import {
   type KMode,
   type SaveStatus,
 } from './formulario-pt'
+import { formatDecimal } from '@/lib/decimal'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 export type GuardarCsvResult = { ok?: boolean; saved?: number; errors?: string[]; error?: string }
 
@@ -78,10 +80,13 @@ export function useFormularioPT({
   const [kMode, setKMode] = useState<KMode>('individual')
   const [globalK, setGlobalK] = useState('2')
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const { confirm, dialog: confirmDialog } = useConfirm()
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
 
   const cerrada = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
-  const soloLectura = cerrada || submitDone
+  // Solo una ronda activa admite cambios: en borrador la captura también queda en solo lectura.
+  const enBorrador = ronda.estado === 'borrador'
+  const soloLectura = ronda.estado !== 'activa' || submitDone
   const hasPTConfig = ptItems.length > 0 && sampleGroups.length > 0
   const hasParticipantCodes = Boolean(participantCode) && replicateCode != null
 
@@ -240,14 +245,14 @@ export function useFormularioPT({
         const next = { ...prev }
         for (const row of savedRows) {
           next[toCellKey(row.ptItemId, row.sampleGroupId)] = {
-            d1: String(row.d1),
-            d2: row.d2 != null ? String(row.d2) : '',
-            d3: row.d3 != null ? String(row.d3) : '',
-            meanValue: String(row.meanValue),
-            sdValue: String(row.sdValue),
-            ux: String(row.ux),
-            k: String(row.k),
-            uxExp: String(row.uxExp),
+            d1: formatDecimal(row.d1),
+            d2: formatDecimal(row.d2),
+            d3: formatDecimal(row.d3),
+            meanValue: formatDecimal(row.meanValue),
+            sdValue: formatDecimal(row.sdValue),
+            ux: formatDecimal(row.ux),
+            k: formatDecimal(row.k),
+            uxExp: formatDecimal(row.uxExp),
           }
         }
         return next
@@ -315,9 +320,12 @@ export function useFormularioPT({
 
   async function handleReopen() {
     if (!adminTarget || ronda.estado !== 'activa') return
-    const confirmed = window.confirm(
-      'Se conservarán los valores, pero el informe volverá a borrador y podrá editarse hasta enviarlo nuevamente. ¿Continuar?'
-    )
+    const confirmed = await confirm({
+      title: 'Reabrir informe',
+      message: 'Se conservarán los valores, pero el informe volverá a borrador y podrá editarse hasta enviarlo nuevamente. ¿Continuar?',
+      confirmLabel: 'Reabrir informe',
+      tone: 'primary',
+    })
     if (!confirmed) return
     setFormMessage(null)
     const result = await adminReabrirInformeFinalAction(ronda.id, adminTarget.rondaParticipanteId)
@@ -367,6 +375,7 @@ export function useFormularioPT({
     globalK,
     importFileInputRef,
     cerrada,
+    enBorrador,
     soloLectura,
     hasPTConfig,
     hasParticipantCodes,
@@ -385,6 +394,7 @@ export function useFormularioPT({
     resetCaptura,
     handleSubmit,
     handleReopen,
+    confirmDialog,
     itemsByContaminante,
     pendingCells,
     focusPendingCell,

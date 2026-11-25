@@ -37,37 +37,35 @@ export function SgcResumenView({
       />
 
       {backendOffline && (
-        <BackendOfflineBanner detail="Los contadores y accesos SGC se muestran con datos vacios hasta que Convex responda." />
+        <BackendOfflineBanner detail="Los contadores y accesos SGC se muestran con datos vacíos hasta que el servidor responda." />
       )}
 
-      <section className="sgc-kpis">
-        <div className="sgc-kpi">
-          <div className="sgc-kpi-label">Documentos</div>
-          <div className="sgc-kpi-value numeric">{totalDocumentos}</div>
-        </div>
-        <div className="sgc-kpi">
-          <div className="sgc-kpi-label">Sin version</div>
-          <div className="sgc-kpi-value numeric">{sinVersion}</div>
-        </div>
-        <div className="sgc-kpi">
-          <div className="sgc-kpi-label">Requisitos</div>
-          <div className="sgc-kpi-value numeric">{requisitos}</div>
-        </div>
-        <div className="sgc-kpi">
-          <div className="sgc-kpi-label">Relaciones</div>
-          <div className="sgc-kpi-value numeric">{relaciones}</div>
-        </div>
+      <section className="sgc-kpis" aria-label="Indicadores SGC">
+        {[
+          ['Documentos', totalDocumentos, `${SGC_BASE_PATH}/documentos`],
+          ['Sin versión', sinVersion, `${SGC_BASE_PATH}/documentos`],
+          ['Requisitos', requisitos, `${SGC_BASE_PATH}/normativa`],
+          ['Relaciones', relaciones, `${SGC_BASE_PATH}/mapa`],
+        ].map(([label, value, href]) => (
+          <Link key={label} href={String(href)} className="sgc-kpi hover:bg-[var(--surface-muted)] hover:no-underline">
+            <div className="sgc-kpi-label">{label}</div>
+            <div className="sgc-kpi-value numeric">{value}</div>
+          </Link>
+        ))}
       </section>
 
       <nav className="sgc-quicknav" aria-label="Accesos SGC">
         {[
-          ['Centro documental', `${SGC_BASE_PATH}/documentos`, 'Documentos maestros, fuente editable y version oficial.'],
+          ['Centro documental', `${SGC_BASE_PATH}/documentos`, 'Documentos maestros, fuente editable y versión oficial.'],
           ['Matriz normativa', `${SGC_BASE_PATH}/normativa`, 'Requisitos 17043/13528 y cobertura documental.'],
           ['Mapa SGC', `${SGC_BASE_PATH}/mapa`, 'Relaciones navegables desde el inventario maestro.'],
         ].map(([label, href, description]) => (
-          <Link key={href} href={href}>
-            <div>{label}</div>
-            <div className="mt-2 text-xs text-[var(--foreground-muted)]">{description}</div>
+          <Link key={href} href={href} className="group transition hover:bg-[var(--surface-muted)] hover:no-underline">
+            <div className="flex items-center justify-between gap-2">
+              <span className="group-hover:underline group-hover:underline-offset-4">{label}</span>
+              <span aria-hidden="true" className="text-[var(--foreground-muted)] transition group-hover:translate-x-0.5 group-hover:text-[var(--foreground)]">→</span>
+            </div>
+            <div className="mt-2 text-xs font-normal text-[var(--foreground-muted)]">{description}</div>
           </Link>
         ))}
       </nav>

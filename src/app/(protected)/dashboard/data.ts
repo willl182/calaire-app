@@ -1,5 +1,7 @@
 import {
+  getRondaMetricasCompletasWithStatus,
   listAllParticipantesWithStatus,
+  listDirectorioParticipantes,
   listParticipantesRondaResumenWithStatus,
   listPTItemsWithStatus,
   listPTSampleGroupsWithStatus,
@@ -8,7 +10,7 @@ import {
   listRondasParticipante,
   type Ronda,
 } from '@/server/rondas'
-import { listWorkOSUsers } from '@/server/auth/workos'
+import { listWorkOSUsersCached } from '@/server/auth/workos'
 import type { ResultadoDashboardRonda } from './view-model'
 
 export type AdminDashboardBaseData = Awaited<ReturnType<typeof loadDashboardBaseData>>
@@ -67,17 +69,21 @@ async function loadDashboardBaseData() {
   const rondasResult = await listRondasWithStatus()
   const rondas = rondasResult.data
   const rondasActivas = rondas.filter((r) => r.estado === 'activa')
-  const participantesRondasActivasResults = await Promise.all(
-    rondasActivas.map((r) => listParticipantesRondaResumenWithStatus(r.id))
-  )
+  const [participantesRondasActivasResults, metricasRondasActivasResults] = await Promise.all([
+    Promise.all(rondasActivas.map((r) => listParticipantesRondaResumenWithStatus(r.id))),
+    // Mismas métricas que el detalle de ronda, para que el estado visible coincida.
+    Promise.all(rondasActivas.map((r) => getRondaMetricasCompletasWithStatus(r.id, r))),
+  ])
 
   return {
     rondas,
     rondasActivas,
     participantesRondasActivas: participantesRondasActivasResults.map((result) => result.data),
+    metricasRondasActivas: metricasRondasActivasResults.map((result) => result.data),
     backendOffline: (
       rondasResult.offline ||
-      participantesRondasActivasResults.some((result) => result.offline)
+      participantesRondasActivasResults.some((result) => result.offline) ||
+      metricasRondasActivasResults.some((result) => result.offline)
     ),
   }
 }
@@ -94,7 +100,7 @@ export async function loadDashboardRegistrosData() {
   const [base, allParticipantesResult, workosUsers] = await Promise.all([
     loadDashboardBaseData(),
     listAllParticipantesWithStatus(),
-    listWorkOSUsers(),
+    listWorkOSUsersCached(),
   ])
 
   return {
@@ -106,14 +112,16 @@ export async function loadDashboardRegistrosData() {
 }
 
 export async function loadDashboardParticipantesData() {
-  const [base, allParticipantesResult] = await Promise.all([
+  const [base, allParticipantesResult, directorio] = await Promise.all([
     loadDashboardBaseData(),
     listAllParticipantesWithStatus(),
+    listDirectorioParticipantes(),
   ])
 
   return {
     ...base,
     allParticipantes: allParticipantesResult.data,
+    directorio,
     backendOffline: base.backendOffline || allParticipantesResult.offline,
   }
 }

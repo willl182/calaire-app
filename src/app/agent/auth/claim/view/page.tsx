@@ -1,6 +1,9 @@
 import { withAuth } from '@workos-inc/authkit-nextjs'
 import { redirect } from 'next/navigation'
 import { generateOtp, getClaimViewState, saveOtp } from '@/server/auth/agent-auth'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Vincular agente' }
 
 export const dynamic = 'force-dynamic'
 

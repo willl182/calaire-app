@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 
 import { LogoUnal } from '@/components/LogoUnal'
 import { getAuthenticatedLandingPath } from '@/server/auth'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Ingresar' }
 
 export default async function LoginPage() {
   const auth = await withAuth()

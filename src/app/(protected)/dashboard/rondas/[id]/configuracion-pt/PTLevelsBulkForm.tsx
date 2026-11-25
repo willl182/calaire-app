@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 
 import type { Contaminante } from '@/server/rondas'
 import { createPTItemsBulkAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type LevelRow = {
   id: number
@@ -128,7 +129,7 @@ export function PTLevelsBulkForm({ rondaId, contaminantes }: Props) {
                   type="button"
                   onClick={() => removeRow(row.id)}
                   disabled={rows.length === 1}
-                  className="rounded-md px-2 py-1 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="rounded-md px-2 py-1 text-sm font-semibold text-danger-strong transition hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label={`Quitar fila ${index + 1}`}
                 >
                   x
@@ -156,9 +157,9 @@ export function PTLevelsBulkForm({ rondaId, contaminantes }: Props) {
             + 5 filas
           </button>
         </div>
-        <button type="submit" className="btn-primary min-w-44">
+        <SubmitButton className="btn-primary min-w-44">
           Agregar niveles PT
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )

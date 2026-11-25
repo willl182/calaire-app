@@ -5,12 +5,15 @@ import {
   readTemplate,
   renderTemplate,
 } from '@/server/sgc/templates'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Plantilla de comunicación' }
 
 const TITLES: Record<string, string> = {
   convocatoria: 'Convocatoria',
-  'recordatorio-ficha': 'Recordatorio ficha de inscripcion',
-  'recordatorio-envio-resultados': 'Recordatorio envio de resultados',
-  'publicacion-resultados': 'Publicacion de resultados',
+  'recordatorio-ficha': 'Recordatorio ficha de inscripción',
+  'recordatorio-envio-resultados': 'Recordatorio de envío de resultados',
+  'publicacion-resultados': 'Publicación de resultados',
   'cierre-ronda': 'Cierre de ronda',
 }
 
@@ -60,7 +63,7 @@ export default async function TemplateGlobalViewPage({
         </pre>
       </div>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong">
         <strong>Nota:</strong> los campos marcados con corchetes deben reemplazarse
         manualmente. Para generar una version con variables de una ronda especifica,
         use el panel SGC de la ronda.

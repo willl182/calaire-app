@@ -65,7 +65,8 @@ export async function upsertDirectorioFromParticipant(
     ciudad: args.ciudad ?? null,
     departamento: args.departamento ?? null,
     telefono: args.telefono ?? null,
-    workosUserId: args.workosUserId ?? null,
+    // Sin workosUserId en la entrada se conserva la cuenta ya vinculada.
+    workosUserId: args.workosUserId === undefined ? (existing?.workosUserId ?? null) : args.workosUserId,
     updatedAt: now,
   }
 

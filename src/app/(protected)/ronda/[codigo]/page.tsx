@@ -17,6 +17,13 @@ import { isAdmin } from '@/server/auth'
 import { getFichaByRondaParticipante } from '@/server/rondas/fichas'
 import FormularioRonda from './FormularioRonda'
 import FormularioReferencia from './FormularioReferencia'
+import { Icon } from '@/components/ui/Icon'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ codigo: string }> }): Promise<Metadata> {
+  const { codigo } = await params
+  return { title: `Ronda ${decodeURIComponent(codigo)}` }
+}
 
 export default async function RondaPage({
   params,
@@ -70,11 +77,11 @@ export default async function RondaPage({
 
     if (ronda.estado === 'borrador') {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-surface flex items-center justify-center">
           <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
             <div className="text-4xl mb-4">⏳</div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Ronda no disponible</h2>
-            <p className="text-gray-500 text-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-2">Ronda no disponible</h2>
+            <p className="text-muted text-sm">
               La ronda <strong>{codigo}</strong> aún no ha sido activada. Vuelve más tarde.
             </p>
           </div>
@@ -89,17 +96,17 @@ export default async function RondaPage({
       ])
       if (envio.offline) return <RondaOfflineState codigo={codigo} />
       return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+        <div className="flex min-h-screen items-center justify-center bg-surface px-6">
           <div className="w-full max-w-lg rounded-xl bg-white p-10 text-center shadow">
-            <div className="text-4xl mb-4">{evaluacion.estado === 'publicada' ? '📊' : '⏳'}</div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <div className="mb-4 flex justify-center text-muted"><Icon name={evaluacion.estado === 'publicada' ? 'grafica' : 'reloj'} className="h-10 w-10" /></div>
+            <h2 className="text-lg font-semibold text-foreground mb-2">
               {evaluacion.estado === 'publicada' ? 'Resultados disponibles' : 'En evaluación'}
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted text-sm">
               {evaluacion.estado === 'publicada' ? 'La evaluación oficial ya fue publicada.' : 'El envío fue cerrado y la evaluación aún no ha sido publicada.'}
             </p>
             {evaluacion.estado !== 'publicada' && envio.data.enviado && (
-              <p className="mt-3 text-xs text-gray-500">
+              <p className="mt-3 text-xs text-muted">
                 Envío final confirmado{envio.data.enviados_at ? ` el ${new Intl.DateTimeFormat('es-CO', { dateStyle: 'long' }).format(new Date(envio.data.enviados_at))}` : ''}.
               </p>
             )}
@@ -117,10 +124,10 @@ export default async function RondaPage({
     if (participantePTResult.offline) return <RondaOfflineState codigo={codigo} />
     if (!participantePTResult.data) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+        <div className="min-h-screen bg-surface flex items-center justify-center px-6">
           <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Sin asignación</h2>
-            <p className="text-gray-500 text-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-2">Sin asignación</h2>
+            <p className="text-muted text-sm">
               No tiene una asignación en esta ronda para ingresar resultados.
             </p>
           </div>
@@ -181,7 +188,7 @@ function RondaOfflineState({ codigo }: { codigo: string }) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <BackendOfflineBanner detail="No se pudo cargar la ronda del participante. Las acciones de carga quedan deshabilitadas hasta recuperar conexion." />
+        <BackendOfflineBanner detail="No se pudo cargar la ronda del participante. Las acciones de carga quedan deshabilitadas hasta recuperar la conexión." />
         <section className="card p-8 text-center">
           <h1 className="text-xl font-semibold text-[var(--foreground)]">Ronda no disponible</h1>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">

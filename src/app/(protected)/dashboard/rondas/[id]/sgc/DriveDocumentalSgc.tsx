@@ -23,6 +23,9 @@ import {
   retirarDriveRecursoAction,
   subirDriveDefinitivoAction,
 } from './actions'
+import { FileInput } from '@/components/ui/FileInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type Props = {
   drive: SgcDriveTree
@@ -114,7 +117,7 @@ function LinkActions({ recurso }: { recurso: SgcDriveRecurso }) {
         </Link>
       )}
       {recurso.definitivo && 'storageId' in recurso.definitivo && (
-        <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+        <span className="rounded-md bg-success-soft px-2.5 py-1 text-xs font-semibold text-success-strong">
           Archivo cargado{recurso.definitivo.fileName ? `: ${recurso.definitivo.fileName}` : ''}
         </span>
       )}
@@ -143,7 +146,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <HiddenRecursoFields recurso={recurso} rondaId={rondaId} />
             <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_120px]">
               <input id={`web-url-${recurso._id}`} className="input" name="web_url" type="url" placeholder="https://drive.google.com/..." required />
-              <button className="btn-primary px-3 text-xs" type="submit">Registrar</button>
+              <SubmitButton className="btn-primary px-3 text-xs">Registrar</SubmitButton>
             </div>
             <input className="input" name="notas" placeholder="Notas" defaultValue={recurso.notas ?? ''} />
           </form>
@@ -154,7 +157,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <input type="hidden" name="tipo" value={recurso.tipo} />
             <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_120px]">
               <input id={`replace-url-${recurso._id}`} className="input" name="web_url" type="url" placeholder="Nueva URL de Drive" required />
-              <button className="btn-outline px-3 text-xs" type="submit">Reemplazar</button>
+              <SubmitButton className="btn-outline px-3 text-xs">Reemplazar</SubmitButton>
             </div>
             <input className="input" name="motivo" placeholder="Motivo obligatorio de reemplazo" required />
           </form>
@@ -178,7 +181,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                   <option value="documento">Doc</option>
                   <option value="archivo">Archivo</option>
                 </select>
-                <button className="btn-outline px-3 text-xs" type="submit">Guardar</button>
+                <SubmitButton className="btn-outline px-3 text-xs">Guardar</SubmitButton>
               </div>
             </form>
 
@@ -190,13 +193,13 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                 Cargar archivo
               </label>
               <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_96px_120px]">
-                <input id={`def-file-${recurso._id}`} className="input" name="archivo" type="file" required />
+                <FileInput id={`def-file-${recurso._id}`} name="archivo" required />
                 <select className="input" name="definitivo_tipo" defaultValue="pdf">
                   <option value="pdf">PDF</option>
                   <option value="documento">Doc</option>
                   <option value="archivo">Archivo</option>
                 </select>
-                <button className="btn-outline px-3 text-xs" type="submit">Cargar</button>
+                <SubmitButton className="btn-outline px-3 text-xs" pendingLabel="Cargando…">Cargar</SubmitButton>
               </div>
               <p className="text-xs text-[var(--foreground-muted)]">
                 El participante lo descarga desde la app (solo lectura); no requiere permisos ni cuenta de Google Drive.
@@ -212,29 +215,29 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="estado" value="diligenciado" />
-            <button className="btn-outline w-full px-3 text-xs" type="submit" disabled={!recurso.webUrl || recurso.estado === 'diligenciado'}>
+            <SubmitButton className="btn-outline w-full px-3 text-xs"  disabled={!recurso.webUrl || recurso.estado === 'diligenciado'}>
               Marcar diligenciado
-            </button>
+            </SubmitButton>
           </form>
           <form action={cambiarEstadoDriveAction} className="grid gap-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="estado" value="no_aplica" />
             <input className="input" name="notas" placeholder="Justificación de no aplica" required />
-            <button className="btn-outline px-3 text-xs" type="submit">No aplica</button>
+            <SubmitButton className="btn-outline px-3 text-xs">No aplica</SubmitButton>
           </form>
           <form action={retirarDriveRecursoAction} className="grid gap-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input className="input" name="motivo" placeholder="Motivo de retiro" required />
-            <button className="btn-outline px-3 text-xs" type="submit">Retirar</button>
+            <SubmitButton className="btn-outline px-3 text-xs">Retirar</SubmitButton>
           </form>
         </div>
       </FormSection>
 
       {recurso.tipo !== 'carpeta' && !['F-PSEA-20', 'F-PSEA-21'].includes(recurso.codigo) && (
         <FormSection title="Visibilidad">
-          <form action={cambiarVisibilidadDriveAction} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-slate-50 px-3 py-2">
+          <form action={cambiarVisibilidadDriveAction} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-surface px-3 py-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="publica_participante" value={recurso.publicaParticipante ? 'false' : 'true'} />
@@ -250,14 +253,14 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                 </div>
               )}
               {recurso.evidenciaSerieId && (
-                <div className="mt-1 text-xs text-amber-700">
+                <div className="mt-1 text-xs text-warning-strong">
                   Esta acción aplica a todos los documentos Drive de la misma serie.
                 </div>
               )}
             </div>
-            <button className="btn-outline px-3 text-xs" type="submit">
+            <SubmitButton className="btn-outline px-3 text-xs">
               {recurso.publicaParticipante ? 'Despublicar' : 'Publicar'}
-            </button>
+            </SubmitButton>
           </form>
         </FormSection>
       )}
@@ -266,14 +269,14 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
 }
 
 const LEYENDA_PUNTOS = [
-  { color: 'bg-amber-400', texto: 'Punto grande amarillo: pendiente' },
-  { color: 'bg-sky-500', texto: 'Punto grande azul: creado, falta diligenciar' },
-  { color: 'bg-emerald-500', texto: 'Punto grande verde: diligenciado' },
-  { color: 'bg-rose-500', texto: 'Punto grande rojo: retirado' },
-  { color: 'bg-sky-500', texto: 'Tiene enlace editable en Drive' },
-  { color: 'bg-emerald-500', texto: 'Tiene versión definitiva cargada' },
-  { color: 'bg-violet-500', texto: 'Publicado para participantes' },
-  { color: 'bg-rose-500', texto: 'Documento crítico' },
+  { color: 'bg-warning', texto: 'Punto grande amarillo: pendiente' },
+  { color: 'bg-info', texto: 'Punto grande azul: creado, falta diligenciar' },
+  { color: 'bg-success', texto: 'Punto grande verde: diligenciado' },
+  { color: 'bg-danger', texto: 'Punto grande rojo: retirado' },
+  { color: 'bg-info', texto: 'Tiene enlace editable en Drive' },
+  { color: 'bg-success', texto: 'Tiene versión definitiva cargada' },
+  { color: 'bg-special', texto: 'Publicado para participantes' },
+  { color: 'bg-danger', texto: 'Documento crítico' },
 ]
 
 const GLOSARIO = [
@@ -340,13 +343,13 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
             </span>
             <form action={inicializarDriveRondaAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <button className="btn-outline" type="submit">{root ? 'Reparar expediente' : 'Inicializar expediente documental'}</button>
+              <SubmitButton className="btn-outline">{root ? 'Reparar expediente' : 'Inicializar expediente documental'}</SubmitButton>
             </form>
             <form action={crearDriveGoogleAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="ronda_codigo" value={rondaCodigo} />
               <input type="hidden" name="ronda_nombre" value={rondaNombre} />
-              <button className="btn-primary" type="submit" disabled={!driveGoogleReady} aria-describedby="crear-drive-ayuda">Crear en Google Drive</button>
+              <SubmitButton className="btn-primary"  disabled={!driveGoogleReady} aria-describedby="crear-drive-ayuda">Crear en Google Drive</SubmitButton>
             </form>
           </div>
         </div>
@@ -356,7 +359,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
         </p>
 
         {!driveGoogleReady && (
-          <div className="m-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <div className="m-5 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm text-warning-strong">
             <div className="font-semibold">Integración con Google Drive sin configurar</div>
             <div className="mt-1">
               Cuenta: {driveGoogleConfig.clientEmail ? 'configurada' : 'faltante'} · Llave: {driveGoogleConfig.privateKey ? 'configurada' : 'faltante'} · Raíz: {driveGoogleConfig.rootFolderId ? 'configurada' : 'faltante'} · Plantillas: {driveGoogleConfig.templateMap ? 'mapeadas' : 'sin mapa'}
@@ -365,7 +368,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
         )}
 
         {root && (
-          <details className="m-5 rounded-lg border border-[var(--border)] bg-slate-50">
+          <details className="m-5 rounded-lg border border-[var(--border)] bg-surface">
             <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[var(--foreground)]">Administrar carpeta raíz</summary>
             <div className="border-t border-[var(--border)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -403,7 +406,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                     <FolderCard
                       key={folder._id}
                       href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}#explorador`}
-                      nombre={folder.nombre}
+                      nombre={etiquetaVisible(folder.nombre)}
                       sublabel={`Carpeta · ${folderChildren.length} documento${folderChildren.length === 1 ? '' : 's'}`}
                       badge={`${folderDone}/${cuentan.length}`}
                     />
@@ -419,7 +422,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                 <div className="p-6">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
+                      <h3 className="text-lg font-semibold text-[var(--foreground)]">{etiquetaVisible(activeFolder.nombre)}</h3>
                       <p className="text-sm text-[var(--foreground-muted)]">{notaVisible(activeFolder.notas) ?? activeFolder.codigo}</p>
                     </div>
                     <LinkActions recurso={activeFolder} />
@@ -434,7 +437,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                         estado={recurso.estado}
                         estadoLabel={ESTADO_LABELS[recurso.estado]}
                         codigo={recurso.codigo}
-                        nombre={recurso.nombre}
+                        nombre={etiquetaVisible(recurso.nombre)}
                         meta={
                           <>
                             <span>{tipoLabel(recurso.tipo)}</span>
@@ -462,13 +465,13 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                   <DriveDetailAside
                     chips={
                       <>
-                        <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{tipoLabel(selectedDoc.tipo)}</span>
+                        <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-foreground">{tipoLabel(selectedDoc.tipo)}</span>
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoBadgeTone(selectedDoc.estado)}`}>{ESTADO_LABELS[selectedDoc.estado]}</span>
                         {selectedDoc.formatoRelacionado && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.formatoRelacionado}</span>}
                       </>
                     }
                     codigo={selectedDoc.codigo}
-                    nombre={selectedDoc.nombre}
+                    nombre={etiquetaVisible(selectedDoc.nombre)}
                     subtitle={
                       <>
                         {notaVisible(selectedDoc.notas) && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{notaVisible(selectedDoc.notas)}</p>}

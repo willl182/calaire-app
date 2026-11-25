@@ -10,12 +10,13 @@ import {
   guardarRevisionDatosAction,
   guardarRevisionHomogeneidadAction,
 } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 const INFORME_CHECK_LABELS: Record<string, string> = {
-  participantes_revisados: 'Participantes, codigos y fichas revisados',
-  fichas_revisadas: 'F-PSEA-03 y registros de participacion consistentes',
-  envios_finales_revisados: 'F-PSEA-08/F-PSEA-12 revisados contra envios finales',
-  metricas_revisadas: 'Metricas y salidas usadas en el informe revisadas',
+  participantes_revisados: 'Participantes, códigos y fichas revisados',
+  fichas_revisadas: 'F-PSEA-03 y registros de participación consistentes',
+  envios_finales_revisados: 'F-PSEA-08/F-PSEA-12 revisados contra envíos finales',
+  metricas_revisadas: 'Métricas y salidas usadas en el informe revisadas',
   evidencias_revisadas: 'Evidencias F-PSEA-09, F-PSEA-10 y anexos revisadas',
   inconsistencias_resueltas: 'Inconsistencias resueltas o justificadas',
   f_psea_11_no_aplica: 'Homogeneidad/estabilidad revisada o no aplicabilidad justificada',
@@ -23,11 +24,11 @@ const INFORME_CHECK_LABELS: Record<string, string> = {
 
 const HOMOGENEIDAD_CHECK_LABELS: Record<string, string> = {
   plan_muestreo_revisado: 'Plan de muestreo revisado',
-  criterios_aceptacion_definidos: 'Criterios de aceptacion definidos',
+  criterios_aceptacion_definidos: 'Criterios de aceptación definidos',
   resultados_homogeneidad_revisados: 'Resultados de homogeneidad revisados',
   resultados_estabilidad_revisados: 'Resultados de estabilidad revisados',
   desviaciones_documentadas: 'Desviaciones documentadas',
-  conclusion_lote_aprobada: 'Conclusion de lote aprobada',
+  conclusion_lote_aprobada: 'Conclusión de lote aprobada',
 }
 
 /** Codigos de recurso Drive que tienen un registro diligenciable embebido en el detalle. */
@@ -75,7 +76,7 @@ export function PlanRondaForm({ panel, rondaId, completa = false }: { panel: Sgc
             />
           </label>
         </div>
-        <div className={`${completa ? '' : 'max-h-[420px] overflow-y-auto pr-2'} space-y-4 rounded-lg border border-[var(--border)] bg-slate-50/50 p-4`}>
+        <div className={`${completa ? '' : 'max-h-[420px] overflow-y-auto pr-2'} space-y-4 rounded-lg border border-[var(--border)] bg-surface/50 p-4`}>
           {SGC_PLAN_BLOQUES.map(({ key, label }) => (
             <div key={key} className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground-muted)]">{label}</label>
@@ -89,12 +90,12 @@ export function PlanRondaForm({ panel, rondaId, completa = false }: { panel: Sgc
           ))}
         </div>
         <input className="input" name="motivo_revision" placeholder="Motivo si edita un plan finalizado" />
-        <button className="btn-primary" type="submit">Guardar F-PSEA-06</button>
+        <SubmitButton className="btn-primary">Guardar F-PSEA-06</SubmitButton>
       </form>
       <form action={finalizarPlanRondaAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
         {completa && <input type="hidden" name="volver" value="f-psea-06" />}
-        <button className="btn-outline" type="submit">Finalizar registro</button>
+        <SubmitButton className="btn-outline">Finalizar registro</SubmitButton>
       </form>
     </SectionShell>
   )
@@ -123,15 +124,15 @@ function InformeFinalForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
                 <input type="checkbox" name={`check_${key}`} defaultChecked={check?.cumple ?? false} />
                 {INFORME_CHECK_LABELS[key]}
               </label>
-              <input className="input mt-2" name={`obs_${key}`} placeholder="Observacion si no cumple" defaultValue={check?.observacion ?? ''} />
+              <input className="input mt-2" name={`obs_${key}`} placeholder="Observación si no cumple" defaultValue={check?.observacion ?? ''} />
             </div>
           )
         })}
-        <button className="btn-primary" type="submit">Guardar F-PSEA-13</button>
+        <SubmitButton className="btn-primary">Guardar F-PSEA-13</SubmitButton>
       </form>
       <form action={finalizarRevisionDatosAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-outline" type="submit">Finalizar F-PSEA-13 y crear snapshot</button>
+        <SubmitButton className="btn-outline">Finalizar F-PSEA-13 y crear snapshot</SubmitButton>
       </form>
     </SectionShell>
   )
@@ -154,7 +155,7 @@ function HomogeneidadForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
         <textarea
           className="input min-h-24"
           name="homogeneidad_conclusiones"
-          placeholder="Conclusion documentada de homogeneidad y estabilidad"
+          placeholder="Conclusión documentada de homogeneidad y estabilidad"
           defaultValue={panel.revisionHomogeneidad?.conclusiones ?? ''}
         />
         <div className="grid gap-3 lg:grid-cols-2">
@@ -166,16 +167,16 @@ function HomogeneidadForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
                   <input type="checkbox" name={`homogeneidad_check_${key}`} defaultChecked={check?.cumple ?? false} />
                   {HOMOGENEIDAD_CHECK_LABELS[key]}
                 </label>
-                <input className="input mt-2" name={`homogeneidad_obs_${key}`} placeholder="Observacion si no cumple" defaultValue={check?.observacion ?? ''} />
+                <input className="input mt-2" name={`homogeneidad_obs_${key}`} placeholder="Observación si no cumple" defaultValue={check?.observacion ?? ''} />
               </div>
             )
           })}
         </div>
-        <button className="btn-primary" type="submit">Guardar F-PSEA-11</button>
+        <SubmitButton className="btn-primary">Guardar F-PSEA-11</SubmitButton>
       </form>
       <form action={finalizarRevisionHomogeneidadAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-outline" type="submit">Finalizar F-PSEA-11 y crear snapshot</button>
+        <SubmitButton className="btn-outline">Finalizar F-PSEA-11 y crear snapshot</SubmitButton>
       </form>
     </SectionShell>
   )

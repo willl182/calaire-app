@@ -5,6 +5,12 @@ import { listNormativaSgcWithStatus, listSgcMaestroWithStatus, type DocumentoReq
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
 import { relacionarDocumentoRequisitoAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Alert } from '@/components/ui/Alert'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Matriz normativa' }
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -15,10 +21,10 @@ function firstParam(value: string | string[] | undefined) {
 }
 
 function coverageTone(state: string) {
-  if (state === 'cubierto') return 'bg-emerald-100 text-emerald-800'
-  if (state === 'parcial') return 'bg-amber-100 text-amber-800'
-  if (state === 'no_aplica') return 'bg-slate-200 text-slate-700'
-  return 'bg-rose-100 text-rose-800'
+  if (state === 'cubierto') return 'bg-success-soft text-success-strong'
+  if (state === 'parcial') return 'bg-warning-soft text-warning-strong'
+  if (state === 'no_aplica') return 'bg-line-soft text-foreground'
+  return 'bg-danger-soft text-danger-strong'
 }
 
 function aggregateCoverage(relaciones: Array<{ estadoCobertura: string }>) {
@@ -105,10 +111,10 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
         email={auth.user.email}
       />
 
-      {firstParam(params.success) && <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{firstParam(params.success)}</div>}
-      {firstParam(params.error) && <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{firstParam(params.error)}</div>}
+      <Alert tone="success" message={firstParam(params.success)} />
+      <Alert tone="error" message={firstParam(params.error)} />
       {backendOffline && (
-        <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras Convex no responde." />
+        <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras el servidor no responde." />
       )}
 
       <section className="sgc-kpis">
@@ -130,9 +136,9 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
               <div>{card.norma}</div>
               <div className="mt-2 text-xs text-[var(--foreground-muted)]">{card.requisitos} requisitos</div>
               <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                <div><div className="font-semibold text-emerald-700">{card.cubiertos}</div><div className="text-[var(--foreground-muted)]">cubiertos</div></div>
-                <div><div className="font-semibold text-amber-700">{card.parciales}</div><div className="text-[var(--foreground-muted)]">parciales</div></div>
-                <div><div className="font-semibold text-rose-700">{card.pendientes}</div><div className="text-[var(--foreground-muted)]">pendientes</div></div>
+                <div><div className="font-semibold text-success-strong">{card.cubiertos}</div><div className="text-[var(--foreground-muted)]">cubiertos</div></div>
+                <div><div className="font-semibold text-warning-strong">{card.parciales}</div><div className="text-[var(--foreground-muted)]">parciales</div></div>
+                <div><div className="font-semibold text-danger-strong">{card.pendientes}</div><div className="text-[var(--foreground-muted)]">pendientes</div></div>
               </div>
             </Link>
           )
@@ -152,7 +158,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
             <option value="pendiente">Pendiente</option>
             <option value="no_aplica">No aplica</option>
           </select>
-          <button className="btn-primary" type="submit">Filtrar</button>
+          <SubmitButton className="btn-primary">Filtrar</SubmitButton>
         </form>
       </section>
 
@@ -161,7 +167,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
           <div>
             <h2>Requisitos normativos</h2>
             <p>
-              Pagina {data.pagination.page} de {data.pagination.totalPages} · {data.pagination.totalRows} requisitos filtrados
+              Página {data.pagination.page} de {data.pagination.totalPages} · {data.pagination.totalRows} requisitos filtrados
             </p>
           </div>
           <div className="flex gap-2">
@@ -207,7 +213,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         {documentos.map((doc) => <Link key={doc._id} className="rounded-full bg-white px-2 py-1 text-xs font-semibold text-[var(--pt-primary-dark)]" href={`/dashboard/sgc/documentos/${doc._id}`}>{doc.codigo}</Link>)}
-                        {documentos.length === 0 && <span className="text-rose-700">Sin relacion verificada</span>}
+                        {documentos.length === 0 && <span className="text-danger-strong">Sin relación verificada</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -222,7 +228,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                           <input type="hidden" name="requisito_id" value={requisito._id} />
                           <select className="input text-xs" name="documento_id" defaultValue={documentosMaestros.documentos[0]?._id ?? ''} required>
                             {documentosMaestros.documentos.map((doc) => (
-                              <option key={doc._id} value={doc._id}>{doc.codigo} · {doc.nombre}</option>
+                              <option key={doc._id} value={doc._id}>{doc.codigo} · {etiquetaVisible(doc.nombre)}</option>
                             ))}
                           </select>
                           <div className="grid grid-cols-2 gap-2">
@@ -242,7 +248,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                           <input className="input text-xs" name="responsable" placeholder="Responsable" />
                           <input className="input text-xs" name="fecha_revision" type="date" />
                           <input className="input text-xs" name="observacion" placeholder="Observacion" />
-                          <button className="btn-outline justify-self-start text-xs" type="submit">Guardar cobertura</button>
+                          <SubmitButton className="btn-outline justify-self-start text-xs">Guardar cobertura</SubmitButton>
                         </form>
                       )}
                     </td>

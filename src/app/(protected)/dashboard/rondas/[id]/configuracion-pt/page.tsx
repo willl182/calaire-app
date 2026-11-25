@@ -17,6 +17,10 @@ import {
   deletePTItemAction,
 } from './actions'
 import { PTLevelsBulkForm } from './PTLevelsBulkForm'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Configuración PT' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -60,19 +64,18 @@ function PTItemRow({ item, canEdit }: { item: RondaPTItem; canEdit: boolean }) {
         </td>
         <td className="py-3 text-right">
           <div className="flex justify-end gap-2">
-            <button
-              type="submit"
+            <SubmitButton
+              
               form={`pt-item-${item.id}`}
-              className="rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]"
-            >
+              className="rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-xs font-medium text-[var(--foreground)] transition hover:border-[var(--pt-primary)] hover:bg-[var(--pt-primary-subtle)]">
               Guardar
-            </button>
+            </SubmitButton>
             <form action={deletePTItemAction} className="inline">
               <input type="hidden" name="ronda_id" value={item.ronda_id} />
               <input type="hidden" name="item_id" value={item.id} />
-              <button type="submit" className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800">
+              <SubmitButton className="rounded-lg border border-danger-border px-2.5 py-1.5 text-xs font-medium text-danger-strong transition hover:border-danger hover:bg-danger-soft hover:text-danger-strong">
                 Eliminar
-              </button>
+              </SubmitButton>
             </form>
           </div>
         </td>
@@ -125,9 +128,9 @@ function ParticipantePTRow({ participante, canEdit }: { participante: RondaParti
                 className="w-20 rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 text-xs text-[var(--foreground)]"
               />
             </label>
-            <button type="submit" className="btn-primary text-xs px-3 py-1">
+            <SubmitButton className="btn-primary text-xs px-3 py-1">
               Guardar
-            </button>
+            </SubmitButton>
           </form>
         ) : (
           <span className="text-sm text-[var(--foreground-muted)]">

@@ -26,7 +26,6 @@ export async function upsertDirectorioParticipanteAction(formData: FormData) {
   const ciudad = parseText(formData, 'ciudad') || null
   const departamento = parseText(formData, 'departamento') || null
   const telefono = parseText(formData, 'telefono') || null
-  const workosUserId = parseText(formData, 'workos_user_id') || null
 
   if (!nit || !correo) {
     redirect('/dashboard/participantes?error=' + encodeURIComponent('NIT y correo son obligatorios.'))
@@ -41,7 +40,6 @@ export async function upsertDirectorioParticipanteAction(formData: FormData) {
     ciudad,
     departamento,
     telefono,
-    workosUserId,
   })
 
   revalidatePath('/dashboard/participantes')
