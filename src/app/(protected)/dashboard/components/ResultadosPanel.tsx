@@ -6,9 +6,9 @@ import {
   getResultadosSummary,
   type ResultadoDashboardRonda,
 } from '../view-model'
-import { statusClasses } from '../view-model'
 
 import { ResultadosDashboardTable } from './ResultadosDashboardTable'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 
 export function ResultadosGlobalView({
   rondasResultados,
@@ -122,9 +122,7 @@ export function ResultadosGlobalView({
                   return (
                     <tr key={ronda.id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
                       <td className="px-4 py-4">
-                        <span className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${statusClasses(ronda.estado)}`}>
-                          {ronda.estado}
-                        </span>
+                        <EstadoBadge estado={ronda.estado} />
                       </td>
                       <td className="px-4 py-4">
                         <div className="font-medium text-sm text-[var(--foreground)]">{ronda.nombre}</div>

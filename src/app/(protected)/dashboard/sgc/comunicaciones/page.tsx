@@ -2,6 +2,7 @@ import { redirect } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { listRondas } from '@/server/rondas'
 import { listComunicaciones, createComunicacion, deleteComunicacion } from '@/server/sgc'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 
 async function ComunicacionesPage() {
   const auth = await requireAuth()
@@ -33,9 +34,7 @@ async function ComunicacionesPage() {
                 <h2 className="text-lg font-semibold text-[var(--foreground)]">{ronda.codigo}</h2>
                 <p className="text-sm text-[var(--foreground-muted)]">{ronda.nombre}</p>
               </div>
-              <span className="rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] bg-[var(--surface-muted)] text-[var(--foreground-muted)]">
-                {ronda.estado}
-              </span>
+              <EstadoBadge estado={ronda.estado} />
             </div>
 
             <form

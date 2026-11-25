@@ -7,11 +7,12 @@ import { requireAuth, isAdmin } from '@/server/auth'
 import {
   getRondaWithStatus,
   getRondaMetricasCompletasWithStatus,
-  type EstadoOperativo,
   type RondaMetricas,
   type EstadoRonda,
   type Ronda,
 } from '@/server/rondas'
+import { getEstadoRondaVisible, type EstadoRondaVisible } from '@/lib/rondas/estado-visible'
+import { TONO_INSIGNIA } from '@/lib/ui/tonos'
 import { RondaContextNav } from './RondaContextNav'
 import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
@@ -30,27 +31,12 @@ function getParam(v: string | string[] | undefined) {
 // Badge helpers
 // ---------------------------------------------------------------------------
 
-const ESTADO_OPERATIVO_CONFIG: Record<
-  EstadoOperativo,
-  { label: string; icon: string; classes: string }
-> = {
-  preparar_ronda: { label: 'Preparar ronda', icon: '⚠️', classes: 'bg-amber-100 text-amber-800 border-amber-200' },
-  invitar_participantes: { label: 'Invitar participantes', icon: '📨', classes: 'bg-sky-100 text-sky-800 border-sky-200' },
-  esperando_fichas: { label: 'Esperando fichas', icon: '📋', classes: 'bg-violet-100 text-violet-800 border-violet-200' },
-  recibiendo_resultados: { label: 'Recibiendo resultados', icon: '📥', classes: 'bg-blue-100 text-blue-800 border-blue-200' },
-  revisar_incompletos: { label: 'Revisar incompletos', icon: '⚡', classes: 'bg-orange-100 text-orange-800 border-orange-200' },
-  lista_para_exportar: { label: 'Lista para exportar', icon: '✓', classes: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
-  cerrada: { label: 'Cerrada', icon: '🔒', classes: 'bg-slate-100 text-slate-700 border-slate-200' },
-}
-
-function EstadoOperativoBadge({ estado }: { estado: EstadoOperativo }) {
-  const config = ESTADO_OPERATIVO_CONFIG[estado]
+function EstadoOperativoBadge({ estado }: { estado: EstadoRondaVisible }) {
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${config.classes}`}
+      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${TONO_INSIGNIA[estado.tono]}`}
     >
-      <span>{config.icon}</span>
-      {config.label}
+      {estado.etiqueta}
     </span>
   )
 }
@@ -317,7 +303,7 @@ function ReplicasForm({ ronda }: { ronda: Ronda }) {
 // Page
 // ---------------------------------------------------------------------------
 
-export default async function RondaResumenPage({ params, searchParams }: PageProps) {
+export default async function RondaEstadoPage({ params, searchParams }: PageProps) {
   const auth = await requireAuth()
   if (!auth.user) redirect('/login')
   if (!isAdmin(auth)) redirect('/denied?reason=role')
@@ -344,6 +330,7 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
 
   const metricasResult = await getRondaMetricasCompletasWithStatus(rondaId, ronda)
   const metricas = metricasResult.data
+  const estadoVisible = getEstadoRondaVisible(ronda, metricas)
 
   const sp = searchParams ? await searchParams : {}
   const success = getParam(sp.success)
@@ -381,16 +368,16 @@ export default async function RondaResumenPage({ params, searchParams }: PagePro
 
         <RondaPageHeader
           ronda={ronda}
-          section="Resumen"
-          description={metricas.accion_recomendada}
-          actions={<EstadoOperativoBadge estado={metricas.estado_operativo} />}
+          section="Estado de la ronda"
+          description={estadoVisible.descripcion}
+          actions={<EstadoOperativoBadge estado={estadoVisible} />}
         />
 
         {/* Alerts */}
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
         {metricasResult.offline && (
-          <BackendOfflineBanner detail="La ronda cargo, pero las metricas operativas se muestran vacias temporalmente porque Convex no responde." />
+          <BackendOfflineBanner detail="La ronda cargó, pero las métricas operativas se muestran vacías temporalmente porque Convex no responde." />
         )}
 
         {/* Progress Metrics */}

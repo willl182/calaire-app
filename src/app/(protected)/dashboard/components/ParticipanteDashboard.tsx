@@ -1,12 +1,7 @@
 import Link from 'next/link'
 
-import type { Ronda, RondaParticipanteAsignada } from '@/server/rondas'
-
-function estadoParticipanteBadge(estado: Ronda['estado']) {
-  if (estado === 'activa') return 'bg-emerald-100 text-emerald-800'
-  if (estado === 'cerrada') return 'bg-slate-200 text-slate-700'
-  return 'bg-amber-100 text-amber-800'
-}
+import type { RondaParticipanteAsignada } from '@/server/rondas'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 
 function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estado'] }) {
   if (estado === 'enviado') {
@@ -47,11 +42,7 @@ function RondaParticipanteCard({ ronda }: { ronda: RondaParticipanteAsignada }) 
         <div className="space-y-1">
           <div className="flex flex-wrap items-center gap-2">
             <h2 className="text-lg font-semibold text-[var(--foreground)]">{ronda.nombre}</h2>
-            <span
-              className={`rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.14em] ${estadoParticipanteBadge(ronda.estado)}`}
-            >
-              {ronda.estado}
-            </span>
+            <EstadoBadge estado={ronda.estado} />
           </div>
           <p className="text-sm text-[var(--foreground-muted)]">
             Código <span className="font-medium text-[var(--foreground)]">{ronda.codigo}</span>

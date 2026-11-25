@@ -1,11 +1,11 @@
 import Link from 'next/link'
 
-import type { AttentionItem, EstadoOperativo } from '@/server/rondas/service'
-import { derivarEstadoOperativo } from '@/server/rondas/service'
-import type { ParticipanteRondaResumen, Ronda } from '@/server/rondas'
+import type { AvisoPanel, EstadoRondaVisible } from '@/lib/rondas/estado-visible'
+import { TONO_AVISO, TONO_INSIGNIA } from '@/lib/ui/tonos'
+import type { Ronda, RondaMetricas } from '@/server/rondas'
 
 /* ─── Attention List ─────────────────────────────────────────────────── */
-function AttentionList({ items }: { items: AttentionItem[] }) {
+function AttentionList({ items }: { items: AvisoPanel[] }) {
   if (items.length === 0) return null
   return (
     <section className="grid gap-2">
@@ -17,19 +17,14 @@ function AttentionList({ items }: { items: AttentionItem[] }) {
           <li key={item.id}>
             <Link
               href={item.href}
-              className={`flex items-center justify-between rounded-xl border px-4 py-3 text-sm transition hover:border-[var(--pt-primary)] ${
-                item.severity === 'warning'
-                  ? 'border-amber-200 bg-amber-50/60 text-amber-800'
-                  : 'border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]'
-              }`}
+              className={`flex min-h-11 items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm transition hover:border-[var(--pt-primary)] hover:no-underline ${TONO_AVISO[item.tono]}`}
             >
-              <span>{item.message}</span>
-              <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                item.severity === 'warning'
-                  ? 'bg-amber-200 text-amber-800'
-                  : 'bg-[var(--pt-primary-subtle)] text-[var(--foreground)]'
-              }`}>
-                {item.count}
+              <span>{item.mensaje}</span>
+              <span className="flex items-center gap-2">
+                <span className="rounded-full bg-[var(--surface-panel)] px-2.5 py-0.5 text-xs font-semibold">
+                  {item.cantidad}
+                </span>
+                <span aria-hidden="true">→</span>
               </span>
             </Link>
           </li>
@@ -40,18 +35,10 @@ function AttentionList({ items }: { items: AttentionItem[] }) {
 }
 
 /* ─── Estado Operativo Badge ─────────────────────────────────────────── */
-const estadoColorClasses: Record<EstadoOperativo['color'], string> = {
-  amber: 'bg-amber-100 text-amber-800',
-  blue: 'bg-blue-100 text-blue-800',
-  emerald: 'bg-emerald-100 text-emerald-800',
-  slate: 'bg-slate-200 text-slate-700',
-  violet: 'bg-violet-100 text-violet-800',
-}
-
-function EstadoOperativoBadge({ estado }: { estado: EstadoOperativo }) {
+function EstadoOperativoBadge({ estado }: { estado: EstadoRondaVisible }) {
   return (
-    <span className={`rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${estadoColorClasses[estado.color]}`}>
-      {estado.label}
+    <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] whitespace-nowrap ${TONO_INSIGNIA[estado.tono]}`}>
+      {estado.etiqueta}
     </span>
   )
 }
@@ -72,10 +59,12 @@ function MiniProgressBar({ current, total }: { current: number; total: number })
 /* ─── Rondas en Curso (inicio view) ──────────────────────────────────── */
 function RondasEnCurso({
   rondasActivas,
-  participantesPorRonda,
+  estados,
+  metricas,
 }: {
   rondasActivas: Ronda[]
-  participantesPorRonda: ParticipanteRondaResumen[][]
+  estados: EstadoRondaVisible[]
+  metricas: RondaMetricas[]
 }) {
   if (rondasActivas.length === 0) {
     return (
@@ -105,14 +94,18 @@ function RondasEnCurso({
             </thead>
             <tbody>
               {rondasActivas.map((ronda, i) => {
-                const participantes = participantesPorRonda[i] ?? []
-                const estado = derivarEstadoOperativo(ronda, participantes)
-                const fichasEnviadas = participantes.filter((p) => p.ficha_estado === 'enviado').length
-                const totalEnviosPT = participantes.reduce((sum, p) => sum + p.envios_pt_count, 0)
+                const estado = estados[i]
+                const m = metricas[i]
                 return (
                   <tr key={ronda.id} className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
                     <td className="px-4 py-4">
                       <EstadoOperativoBadge estado={estado} />
+                      <Link
+                        href={estado.href}
+                        className="mt-1.5 block text-xs text-[var(--foreground-muted)] underline-offset-2 hover:text-[var(--foreground)] hover:underline"
+                      >
+                        {estado.accion}
+                      </Link>
                     </td>
                     <td className="px-4 py-4">
                       <div className="font-medium text-sm text-[var(--foreground)]">{ronda.nombre}</div>
@@ -120,17 +113,17 @@ function RondasEnCurso({
                     </td>
                     <td className="px-4 py-4">
                       <span className="numeric text-sm text-[var(--foreground)]">
-                        {ronda.participantes_asignados ?? 0}/{ronda.participantes_planeados ?? 0}
+                        {m.cupos_reclamados}/{m.cupos_totales}
                       </span>
-                      <MiniProgressBar current={ronda.participantes_asignados ?? 0} total={ronda.participantes_planeados ?? 0} />
+                      <MiniProgressBar current={m.cupos_reclamados} total={m.cupos_totales} />
                     </td>
                     <td className="px-4 py-4">
                       <span className="numeric text-sm text-[var(--foreground)]">
-                        {fichasEnviadas}/{participantes.length}
+                        {m.fichas_enviadas}/{m.cupos_reclamados}
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <span className="numeric text-sm text-[var(--foreground)]">{totalEnviosPT}</span>
+                      <span className="numeric text-sm text-[var(--foreground)]">{m.envios_finales}/{m.envios_esperados}</span>
                     </td>
                     <td className="px-4 py-4 text-right">
                       <Link
@@ -152,25 +145,20 @@ function RondasEnCurso({
 }
 
 export function CoordinatorOverview({
-  activeTab,
   rondasActivas,
-  participantesRondasActivas,
-  attentionItems,
+  estados,
+  metricas,
+  avisos,
 }: {
-  activeTab: string
   rondasActivas: Ronda[]
-  participantesRondasActivas: ParticipanteRondaResumen[][]
-  attentionItems: AttentionItem[]
+  estados: EstadoRondaVisible[]
+  metricas: RondaMetricas[]
+  avisos: AvisoPanel[]
 }) {
-  if (activeTab !== 'inicio') return null
-
   return (
     <>
-      <AttentionList items={attentionItems} />
-      <RondasEnCurso
-        rondasActivas={rondasActivas}
-        participantesPorRonda={participantesRondasActivas}
-      />
+      <AttentionList items={avisos} />
+      <RondasEnCurso rondasActivas={rondasActivas} estados={estados} metricas={metricas} />
       <a
         href="https://w421.shinyapps.io/pt_app/"
         target="_blank"

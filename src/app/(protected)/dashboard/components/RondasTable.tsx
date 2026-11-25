@@ -7,7 +7,8 @@ import {
   reabrirRondaAction,
 } from '../actions'
 import type { Ronda } from '@/server/rondas'
-import { formatDate, statusClasses } from '../view-model'
+import { formatDate } from '../view-model'
+import { EstadoBadge } from '@/components/ui/EstadoBadge'
 
 type EditandoParam = string
 
@@ -108,11 +109,7 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
     <>
       <tr className="border-b border-[var(--border-soft)] last:border-0 hover:bg-[var(--surface-muted)]">
         <td className="px-4 py-4">
-          <span
-            className={`rounded-full px-2.5 py-1 text-xs font-semibold uppercase tracking-[0.12em] ${statusClasses(round.estado)}`}
-          >
-            {round.estado}
-          </span>
+          <EstadoBadge estado={round.estado} />
         </td>
         <td className="px-4 py-4">
           <div className="font-medium text-sm text-[var(--foreground)]">{round.nombre}</div>

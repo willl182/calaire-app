@@ -1,16 +1,12 @@
-const CLASSES: Record<string, string> = {
-  activa: 'bg-emerald-100 text-emerald-800',
-  documentacion_pendiente: 'bg-sky-100 text-sky-800',
-  cerrada: 'bg-slate-200 text-slate-700',
-  borrador: 'bg-amber-100 text-amber-800',
-}
+import { etiquetaEstadoRonda, tonoEstadoRonda } from '@/lib/rondas/estado-visible'
+import { TONO_INSIGNIA } from '@/lib/ui/tonos'
 
 export function EstadoBadge({ estado }: { estado: string }) {
   return (
     <span
-      className={`rounded-full px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] ${CLASSES[estado] ?? CLASSES.borrador}`}
+      className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold uppercase tracking-[0.14em] ${TONO_INSIGNIA[tonoEstadoRonda(estado)]}`}
     >
-      {estado}
+      {etiquetaEstadoRonda(estado)}
     </span>
   )
 }

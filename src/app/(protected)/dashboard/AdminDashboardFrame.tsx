@@ -4,7 +4,7 @@ import type { ReactNode } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
-import { buildAttentionItems } from '@/server/rondas/service'
+import { resumirPanel } from '@/lib/rondas/estado-visible'
 import { CoordinatorKpis } from './components/CoordinatorKpis'
 import { CoordinatorOverview } from './components/CoordinatorOverview'
 import type { AdminDashboardBaseData } from './data'
@@ -15,6 +15,8 @@ type AdminDashboardFrameProps = AdminDashboardBaseData & {
   success?: string
   error?: string
   showOverview?: boolean
+  /** Indicadores globales; las vistas con indicadores propios los ocultan. */
+  showKpis?: boolean
   children?: ReactNode
 }
 
@@ -24,21 +26,17 @@ export function AdminDashboardFrame({
   success,
   error,
   showOverview = false,
+  showKpis = true,
   children,
   rondas,
   rondasActivas,
-  participantesRondasActivas,
+  metricasRondasActivas,
   backendOffline,
 }: AdminDashboardFrameProps) {
-  const participantesActivos = participantesRondasActivas.flat()
-  const fichasPendientesCount = participantesActivos.filter((p) => p.ficha_estado !== 'enviado').length
-  const enlacesSinReclamar = participantesActivos.filter((p) => p.estado === 'pendiente').length
-  const rondasListasParaExportar = rondasActivas.filter((_, i) =>
-    participantesRondasActivas[i]?.some((p) => p.envios_pt_count > 0)
-  ).length
-  const attentionItems = showOverview
-    ? buildAttentionItems(rondas, participantesRondasActivas)
-    : []
+  const resumen = resumirPanel(
+    rondas,
+    rondasActivas.map((ronda, i) => ({ ronda, metricas: metricasRondasActivas[i] }))
+  )
 
   return (
     <div className="min-h-screen px-6 py-8">
@@ -60,20 +58,22 @@ export function AdminDashboardFrame({
         {backendOffline && <BackendOfflineBanner />}
 
         <div className="grid gap-6">
-          <CoordinatorKpis
-            rondas={rondas}
-            rondasActivas={rondasActivas}
-            fichasPendientesCount={fichasPendientesCount}
-            enlacesSinReclamar={enlacesSinReclamar}
-            rondasListasParaExportar={rondasListasParaExportar}
-          />
+          {showKpis && (
+            <CoordinatorKpis
+              rondasActivas={rondasActivas.length}
+              rondasBorrador={resumen.borradores}
+              fichasPendientes={resumen.fichasPendientes}
+              enlacesSinReclamar={resumen.cuposSinReclamar}
+              rondasListasParaExportar={resumen.listasParaExportar}
+            />
+          )}
 
           {showOverview && (
             <CoordinatorOverview
-              activeTab="inicio"
               rondasActivas={rondasActivas}
-              participantesRondasActivas={participantesRondasActivas}
-              attentionItems={attentionItems}
+              estados={resumen.estados}
+              metricas={metricasRondasActivas}
+              avisos={resumen.avisos}
             />
           )}
 
