@@ -86,5 +86,7 @@ ISO/IEC 17043:2023 6.2 (personal: competencia, autorización y seguimiento). ⚠
 
 | Campo | Valor |
 |---|---|
-| Estado | Borrador para revisión |
-| Versión | 0.1 |
+| Estado | Aprobado |
+| Versión | 1.0 |
+| Fecha de aprobación | 2026-11-25 |
+| Cambios | 0.1 → 1.0: redacción revisada y aprobada por el usuario; se restauró el control de autorización de `F-PSEA-21`. |
