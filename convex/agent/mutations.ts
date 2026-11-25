@@ -3,7 +3,7 @@ import type { Id } from '../_generated/dataModel'
 import { defineAgentMutation } from './definitions'
 import { assertCapacidadNivelesPT, assertNivelesPTCuadran } from '../rondas/ptLevels'
 import { assertAllowedEstadoTransition, generateUniqueParticipantCode, getDirectorioByLookup, requireAgentAdmin } from './shared'
-import { asignarReplicateCodeAlta } from '../rondas/codes'
+import { asignarReplicateCodeAlta, assertReplicateCodeManual } from '../rondas/codes'
 
 export const createRondaDefinition = defineAgentMutation({
   args: {
@@ -238,6 +238,7 @@ export const addParticipanteDefinition = defineAgentMutation({
       .unique()
     if (existing) throw new Error('Este usuario ya esta asignado a esta ronda.')
 
+    await assertReplicateCodeManual(ctx, rondaId, null, participantProfile, replicateCode)
     const assignedParticipantCode = participantCode ?? await generateUniqueParticipantCode(ctx, rondaId)
     const directorio = await getDirectorioByLookup(ctx, email)
 
@@ -280,6 +281,8 @@ export const updateParticipanteAdminDefinition = defineAgentMutation({
       const duplicate = participantes.find((p) => p._id !== participanteId && p.participantCode === normalizedCode)
       if (duplicate) throw new Error('Ya existe otro cupo con ese codigo en la ronda.')
     }
+
+    await assertReplicateCodeManual(ctx, participante.rondaId, participanteId, participantProfile, replicateCode)
 
     await ctx.db.patch(participanteId, {
       email: normalizedEmail,

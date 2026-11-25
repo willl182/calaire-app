@@ -2,6 +2,7 @@ import { ConvexError, v } from 'convex/values'
 import { query, mutation, MutationCtx, QueryCtx } from '../_generated/server'
 import { Doc, Id } from '../_generated/dataModel'
 import { assertCapacidadNivelesPT } from '../rondas/ptLevels'
+import { assertReplicateCodeManual } from '../rondas/codes'
 import {
   requireAdminIdentity,
   requireManagerIdentity,
@@ -578,6 +579,9 @@ export const updateParticipantePT = mutation({
   },
   handler: async (ctx, { participanteId, participantCode, replicateCode }) => {
     await requireManagerIdentity(ctx)
+    const participante = await ctx.db.get(participanteId)
+    if (!participante) throw new ConvexError('Participante no encontrado.')
+    await assertReplicateCodeManual(ctx, participante.rondaId, participanteId, participante.participantProfile, replicateCode)
     const patch: {
       participantCode?: string | null
       replicateCode?: number | null

@@ -98,6 +98,42 @@ export async function asignarReplicateCodeAlta(
   return REFERENCE_REPLICATE_CODE
 }
 
+/**
+ * Motivo por el que un codigo de replica puesto a mano incumple la convencion, o null si es valido.
+ * Sin codigo (null) es valido: el cupo queda pendiente de configurar.
+ */
+export function motivoReplicateCodeInvalido(
+  otros: Array<{ replicateCode?: number | null }>,
+  profile: ParticipantProfile,
+  code: number | null | undefined
+): string | null {
+  if (code == null) return null
+  if (!Number.isInteger(code) || code < 1) return 'El código de réplica debe ser un entero mayor o igual a 1.'
+  if (profile === 'member_special' && code !== REFERENCE_REPLICATE_CODE) return 'La referencia siempre lleva el código de réplica 1.'
+  if (profile === 'member' && code === REFERENCE_REPLICATE_CODE) {
+    return 'El código de réplica 1 está reservado a la referencia. Los participantes usan 2, 3, …'
+  }
+  if (otros.some((otro) => otro.replicateCode === code)) return `Ya existe otro cupo con el código de réplica ${code} en la ronda.`
+  return null
+}
+
+/** Rechaza un codigo de replica puesto a mano que incumpla la convencion (referencia = 1, participantes >= 2, unicos). */
+export async function assertReplicateCodeManual(
+  ctx: MutationCtx,
+  rondaId: Id<'rondas'>,
+  participanteId: Id<'rondaParticipantes'> | null,
+  profile: ParticipantProfile,
+  code: number | null | undefined
+) {
+  if (code == null) return
+  const participantes = await ctx.db
+    .query('rondaParticipantes')
+    .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
+    .collect()
+  const motivo = motivoReplicateCodeInvalido(participantes.filter((p) => p._id !== participanteId), profile, code)
+  if (motivo) throw new ConvexError(motivo)
+}
+
 export type ReplicateCodeCambio<Id extends string = string> = {
   participanteId: Id
   anterior: number | null
