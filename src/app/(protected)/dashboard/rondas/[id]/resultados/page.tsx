@@ -13,6 +13,7 @@ import {
 import { importPtScoresAction, publishPtResultsAction, uploadPtReportAction } from './actions'
 import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
+import { getNombresUsuarios } from '../sgc/textos'
 import { FileInput } from '@/components/ui/FileInput'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { Alert } from '@/components/ui/Alert'
@@ -221,11 +222,12 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
   const ronda = await getRonda(rondaId)
   if (!ronda) notFound()
 
-  const [ptItems, sampleGroups, resultados, evaluacion] = await Promise.all([
+  const [ptItems, sampleGroups, resultados, evaluacion, nombresUsuarios] = await Promise.all([
     listPTItems(rondaId),
     listPTSampleGroups(rondaId),
     listResultadosPTRonda(rondaId),
     getPtEvaluationAdmin(rondaId),
+    getNombresUsuarios(),
   ])
 
   const columnas: ColumnaPT[] = ptItems.flatMap((item) =>
@@ -298,7 +300,7 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
               <input id="pt-publicar-confirmacion" required name="confirmacion" placeholder="Escriba PUBLICAR" className="w-full rounded-lg border border-warning-border bg-white px-3 py-2 text-sm" />
               <SubmitButton disabled={evaluacion?.estado !== 'borrador_validado' || !evaluacion.informeStorageId} className="btn-primary mt-4" pendingLabel="Publicando…">Publicar resultados</SubmitButton>
             </form>
-          </div> : <p className="text-sm text-success-strong">Publicada el {evaluacion.publicadaAt ? formatDate(new Date(evaluacion.publicadaAt).toISOString()) : '—'} por {evaluacion.publicadaBy}.</p>}
+          </div> : <p className="text-sm text-success-strong">Publicada el {evaluacion.publicadaAt ? formatDate(new Date(evaluacion.publicadaAt).toISOString()) : '—'} por {evaluacion.publicadaBy ? nombresUsuarios[evaluacion.publicadaBy] ?? evaluacion.publicadaBy : '—'}.</p>}
         </section>
 
         <section className="sgc-kpis">
