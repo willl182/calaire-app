@@ -18,7 +18,7 @@ export const createRondaDefinition = defineAgentMutation({
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
       .first()
-    if (existing) throw new Error('Ya existe una ronda con ese codigo.')
+    if (existing) throw new Error('Ya existe una ronda con ese código.')
     return ctx.db.insert('rondas', { codigo, nombre, estado, createdAt: Date.now() })
   },
 })
@@ -45,7 +45,7 @@ export const createConfiguredRondaDefinition = defineAgentMutation({
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
       .first()
-    if (existing) throw new Error('Ya existe una ronda con ese codigo.')
+    if (existing) throw new Error('Ya existe una ronda con ese código.')
 
     const now = Date.now()
     const rondaId = await ctx.db.insert('rondas', { codigo, nombre, estado: 'borrador', createdAt: now })
@@ -111,7 +111,7 @@ export const updateRondaConfigDefinition = defineAgentMutation({
     if (ronda.estado === 'cerrada') throw new Error('No se puede editar una ronda cerrada.')
 
     const sameCode = await ctx.db.query('rondas').withIndex('by_codigo', (q) => q.eq('codigo', codigo)).first()
-    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese codigo.')
+    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese código.')
 
     await ctx.db.patch(id, { codigo, nombre })
 
@@ -142,7 +142,7 @@ export const updateRondaBasicInfoDefinition = defineAgentMutation({
     if (ronda.estado === 'cerrada') throw new Error('No se puede editar una ronda cerrada.')
 
     const sameCode = await ctx.db.query('rondas').withIndex('by_codigo', (q) => q.eq('codigo', codigo)).first()
-    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese codigo.')
+    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese código.')
 
     await ctx.db.patch(id, { codigo, nombre })
   },
@@ -279,7 +279,7 @@ export const updateParticipanteAdminDefinition = defineAgentMutation({
         .withIndex('by_ronda', (q) => q.eq('rondaId', participante.rondaId))
         .collect()
       const duplicate = participantes.find((p) => p._id !== participanteId && p.participantCode === normalizedCode)
-      if (duplicate) throw new Error('Ya existe otro cupo con ese codigo en la ronda.')
+      if (duplicate) throw new Error('Ya existe otro cupo con ese código en la ronda.')
     }
 
     await assertReplicateCodeManual(ctx, participante.rondaId, participanteId, participantProfile, replicateCode)

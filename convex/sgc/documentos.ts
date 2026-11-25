@@ -134,7 +134,7 @@ export const upsertDocumentoSgcConfig = {
     if (!codigo || !nombre || !proceso) throw new Error('Codigo, nombre y proceso son obligatorios.')
     const existingByCodigo = await ctx.db.query('documentosSgc').withIndex('by_codigo', (q) => q.eq('codigo', codigo)).first()
     if (existingByCodigo && existingByCodigo._id !== args.documentoId) {
-      throw new Error('Ya existe un documento SGC con ese codigo.')
+      throw new Error('Ya existe un documento SGC con ese código.')
     }
     const now = Date.now()
     const patch = {
