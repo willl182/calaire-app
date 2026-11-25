@@ -43,7 +43,7 @@ export function SgcResumenView({
       <section className="sgc-kpis" aria-label="Indicadores SGC">
         {[
           ['Documentos', totalDocumentos, `${SGC_BASE_PATH}/documentos`],
-          ['Sin versión', sinVersion, `${SGC_BASE_PATH}/documentos`],
+          ['Sin versión', sinVersion, `${SGC_BASE_PATH}/documentos?version=sin`],
           ['Requisitos', requisitos, `${SGC_BASE_PATH}/normativa`],
           ['Relaciones', relaciones, `${SGC_BASE_PATH}/mapa`],
         ].map(([label, value, href]) => (

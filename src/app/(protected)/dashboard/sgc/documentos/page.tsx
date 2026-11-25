@@ -55,7 +55,7 @@ function buildDocumentosHref(
   overrides: Record<string, string | null>
 ) {
   const search = new URLSearchParams()
-  for (const key of ['q', 'familia', 'estado', 'modo']) {
+  for (const key of ['q', 'familia', 'estado', 'modo', 'version']) {
     const value = firstParam(params[key])
     if (value) search.set(key, value)
   }
@@ -86,7 +86,10 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
     modoDiligenciamiento: (firstParam(params.modo) as DocumentoSgc['modoDiligenciamiento']) ?? null,
     texto: firstParam(params.q) ?? null,
   })
-  const data = result.data
+  const soloSinVersion = firstParam(params.version) === 'sin'
+  const data = soloSinVersion
+    ? { ...result.data, documentos: result.data.documentos.filter((doc) => !versionFor(doc, result.data.versiones)?.vigente) }
+    : result.data
   const canEdit = canEditSgcMaestro(auth)
   const selectedCarpeta = firstParam(params.carpeta) as NonNullable<DocumentoSgc['familia']> | undefined
   const selectedDocId = firstParam(params.doc) ?? null
@@ -132,8 +135,8 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
       <section className="sgc-filters">
         <form className="grid items-center gap-3 lg:grid-cols-12">
           {activeFolder && <input type="hidden" name="carpeta" value={activeFolder.familia} />}
-          <input className="input min-w-0 lg:col-span-5 xl:col-span-6" name="q" placeholder="Código o nombre" defaultValue={firstParam(params.q) ?? ''} />
-          <select className="input min-w-0 lg:col-span-3" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
+          <input className="input min-w-0 lg:col-span-4 xl:col-span-5" name="q" placeholder="Código o nombre" defaultValue={firstParam(params.q) ?? ''} />
+          <select className="input min-w-0 lg:col-span-2" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
             <option value="">Todas las familias</option>
             {data.familias.map((familia) => <option key={familia} value={familia}>{familia}</option>)}
           </select>
@@ -143,6 +146,10 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <option value="en_revision">En revisión</option>
             <option value="borrador">Borrador</option>
             <option value="obsoleto">Obsoleto</option>
+          </select>
+          <select className="input min-w-0 lg:col-span-2" name="version" aria-label="Versión oficial" defaultValue={soloSinVersion ? 'sin' : ''}>
+            <option value="">Con y sin versión</option>
+            <option value="sin">Sin versión</option>
           </select>
           <SubmitButton className="btn-primary h-[44px] px-5 lg:col-span-2 xl:col-span-1">Filtrar</SubmitButton>
         </form>
