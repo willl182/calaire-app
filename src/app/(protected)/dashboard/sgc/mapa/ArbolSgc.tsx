@@ -20,10 +20,10 @@ const descripciones: Record<string, string> = {
 }
 
 const familiaClass: Record<string, string> = {
-  DG: 'border-amber-300 bg-amber-50 text-amber-800',
-  P: 'border-slate-300 bg-slate-100 text-slate-700',
-  I: 'border-violet-300 bg-violet-50 text-violet-700',
-  F: 'border-emerald-300 bg-emerald-50 text-emerald-700',
+  DG: 'border-warning-border bg-warning-soft text-warning-strong',
+  P: 'border-line bg-surface-muted text-foreground',
+  I: 'border-special-border bg-special-soft text-special-strong',
+  F: 'border-success-border bg-success-soft text-success-strong',
 }
 
 /** `P-PSEA-04 Planificacion de ronda EA` -> `P-PSEA-04`. */

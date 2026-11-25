@@ -6,20 +6,20 @@ export type Tono = 'neutral' | 'info' | 'exito' | 'aviso' | 'peligro' | 'especia
 
 /** Insignia o recuadro: fondo suave, texto fuerte y borde. */
 export const TONO_INSIGNIA: Record<Tono, string> = {
-  neutral: 'border-slate-200 bg-slate-100 text-slate-700',
-  info: 'border-sky-200 bg-sky-100 text-sky-800',
-  exito: 'border-emerald-200 bg-emerald-100 text-emerald-800',
-  aviso: 'border-amber-200 bg-amber-100 text-amber-800',
-  peligro: 'border-rose-200 bg-rose-100 text-rose-800',
-  especial: 'border-violet-200 bg-violet-100 text-violet-800',
+  neutral: 'border-line-soft bg-surface-muted text-foreground',
+  info: 'border-info-border bg-info-soft text-info-strong',
+  exito: 'border-success-border bg-success-soft text-success-strong',
+  aviso: 'border-warning-border bg-warning-soft text-warning-strong',
+  peligro: 'border-danger-border bg-danger-soft text-danger-strong',
+  especial: 'border-special-border bg-special-soft text-special-strong',
 }
 
 /** Aviso enlazado (fila clicable): como la insignia, con estado hover. */
 export const TONO_AVISO: Record<Tono, string> = {
-  neutral: 'border-slate-200 bg-slate-50 text-slate-800 hover:bg-slate-100',
-  info: 'border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100',
-  exito: 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100',
-  aviso: 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100',
-  peligro: 'border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100',
-  especial: 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100',
+  neutral: 'border-line-soft bg-surface text-foreground hover:bg-line-soft',
+  info: 'border-info-border bg-info-soft text-info-strong hover:bg-info-border/50',
+  exito: 'border-success-border bg-success-soft text-success-strong hover:bg-success-border/50',
+  aviso: 'border-warning-border bg-warning-soft text-warning-strong hover:bg-warning-border/50',
+  peligro: 'border-danger-border bg-danger-soft text-danger-strong hover:bg-danger-border/50',
+  especial: 'border-special-border bg-special-soft text-special-strong hover:bg-special-border/50',
 }

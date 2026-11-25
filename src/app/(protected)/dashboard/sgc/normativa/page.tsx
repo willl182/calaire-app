@@ -17,10 +17,10 @@ function firstParam(value: string | string[] | undefined) {
 }
 
 function coverageTone(state: string) {
-  if (state === 'cubierto') return 'bg-emerald-100 text-emerald-800'
-  if (state === 'parcial') return 'bg-amber-100 text-amber-800'
-  if (state === 'no_aplica') return 'bg-slate-200 text-slate-700'
-  return 'bg-rose-100 text-rose-800'
+  if (state === 'cubierto') return 'bg-success-soft text-success-strong'
+  if (state === 'parcial') return 'bg-warning-soft text-warning-strong'
+  if (state === 'no_aplica') return 'bg-line-soft text-foreground'
+  return 'bg-danger-soft text-danger-strong'
 }
 
 function aggregateCoverage(relaciones: Array<{ estadoCobertura: string }>) {
@@ -132,9 +132,9 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
               <div>{card.norma}</div>
               <div className="mt-2 text-xs text-[var(--foreground-muted)]">{card.requisitos} requisitos</div>
               <div className="mt-2 grid grid-cols-3 gap-2 text-xs">
-                <div><div className="font-semibold text-emerald-700">{card.cubiertos}</div><div className="text-[var(--foreground-muted)]">cubiertos</div></div>
-                <div><div className="font-semibold text-amber-700">{card.parciales}</div><div className="text-[var(--foreground-muted)]">parciales</div></div>
-                <div><div className="font-semibold text-rose-700">{card.pendientes}</div><div className="text-[var(--foreground-muted)]">pendientes</div></div>
+                <div><div className="font-semibold text-success-strong">{card.cubiertos}</div><div className="text-[var(--foreground-muted)]">cubiertos</div></div>
+                <div><div className="font-semibold text-warning-strong">{card.parciales}</div><div className="text-[var(--foreground-muted)]">parciales</div></div>
+                <div><div className="font-semibold text-danger-strong">{card.pendientes}</div><div className="text-[var(--foreground-muted)]">pendientes</div></div>
               </div>
             </Link>
           )
@@ -209,7 +209,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         {documentos.map((doc) => <Link key={doc._id} className="rounded-full bg-white px-2 py-1 text-xs font-semibold text-[var(--pt-primary-dark)]" href={`/dashboard/sgc/documentos/${doc._id}`}>{doc.codigo}</Link>)}
-                        {documentos.length === 0 && <span className="text-rose-700">Sin relacion verificada</span>}
+                        {documentos.length === 0 && <span className="text-danger-strong">Sin relacion verificada</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3">

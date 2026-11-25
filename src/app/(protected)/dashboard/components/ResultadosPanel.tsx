@@ -48,7 +48,7 @@ export function ResultadosGlobalView({
           <div className="sgc-kpi-label">Participantes</div>
           <div className="sgc-kpi-value numeric">{totalParticipantes}</div>
         </div>
-        <div className="sgc-kpi bg-emerald-50/40">
+        <div className="sgc-kpi bg-success-soft/40">
           <div className="sgc-kpi-label">Envios finales</div>
           <div className="sgc-kpi-value numeric">{totalEnviosFinales}</div>
         </div>
@@ -141,7 +141,7 @@ export function ResultadosGlobalView({
                         <span className="numeric text-sm text-[var(--foreground)]">{resultados.length}</span>
                       </td>
                       <td className="px-4 py-4 text-center">
-                        <span className="numeric rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+                        <span className="numeric rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong">
                           {enviosFinales}
                         </span>
                       </td>

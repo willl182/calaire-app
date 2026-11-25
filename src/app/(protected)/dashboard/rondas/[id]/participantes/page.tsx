@@ -41,13 +41,13 @@ function getParam(v: string | string[] | undefined) {
 function perfilBadge(p: ParticipanteRondaResumen) {
   if (p.participant_profile === 'member_special') {
     return (
-      <span className="rounded-full bg-sky-100 px-2 py-0.5 text-[10px] font-semibold text-sky-800">
+      <span className="rounded-full bg-info-soft px-2 py-0.5 text-[10px] font-semibold text-info-strong">
         Referencia
       </span>
     )
   }
   return (
-    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-700">
+    <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[10px] font-semibold text-foreground">
       Participante
     </span>
   )
@@ -60,7 +60,7 @@ function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
     return (
       <Link
         href={href}
-        className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800 transition hover:opacity-80"
+        className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong transition hover:opacity-80"
       >
         Enviada ✓
       </Link>
@@ -70,7 +70,7 @@ function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
     return (
       <Link
         href={href}
-        className="rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800 transition hover:opacity-80"
+        className="rounded-full bg-warning-soft px-2.5 py-0.5 text-xs font-semibold text-warning-strong transition hover:opacity-80"
       >
         Borrador
       </Link>
@@ -79,7 +79,7 @@ function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
   return (
     <Link
       href={href}
-      className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 transition hover:bg-slate-200 hover:text-slate-800"
+      className="rounded-full bg-surface-muted px-2.5 py-0.5 text-xs font-medium text-muted transition hover:bg-line-soft hover:text-foreground"
     >
       No iniciada
     </Link>
@@ -159,11 +159,11 @@ function ResumenStrip({
 }) {
   const cards = [
     { label: 'Total cupos', value: totalCupos, filtro: 'todos' as const, color: '' },
-    { label: 'Enlace pendiente', value: enlacesPendientes, filtro: 'enlace_pendiente' as const, color: enlacesPendientes > 0 ? 'bg-amber-50/50' : '' },
-    { label: 'Reclamados', value: cuposReclamados, filtro: 'todos' as const, color: cuposReclamados > 0 ? 'bg-emerald-50/40' : '' },
-    { label: 'Ficha pendiente', value: fichasPendientes, filtro: 'ficha_pendiente' as const, color: fichasPendientes > 0 ? 'bg-amber-50/50' : '' },
-    { label: 'Ficha enviada', value: fichasEnviadas, filtro: 'ficha_enviada' as const, color: fichasEnviadas > 0 ? 'bg-emerald-50/40' : '' },
-    { label: 'Con envíos PT', value: conEnvios, filtro: 'con_envios' as const, color: conEnvios > 0 ? 'bg-sky-50/40' : '' },
+    { label: 'Enlace pendiente', value: enlacesPendientes, filtro: 'enlace_pendiente' as const, color: enlacesPendientes > 0 ? 'bg-warning-soft/50' : '' },
+    { label: 'Reclamados', value: cuposReclamados, filtro: 'todos' as const, color: cuposReclamados > 0 ? 'bg-success-soft/40' : '' },
+    { label: 'Ficha pendiente', value: fichasPendientes, filtro: 'ficha_pendiente' as const, color: fichasPendientes > 0 ? 'bg-warning-soft/50' : '' },
+    { label: 'Ficha enviada', value: fichasEnviadas, filtro: 'ficha_enviada' as const, color: fichasEnviadas > 0 ? 'bg-success-soft/40' : '' },
+    { label: 'Con envíos PT', value: conEnvios, filtro: 'con_envios' as const, color: conEnvios > 0 ? 'bg-info-soft/40' : '' },
   ]
 
   return (
@@ -223,8 +223,8 @@ function ParticipanteRow({
           {perfilBadge(p)}
           <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${
             p.estado === 'reclamado'
-              ? 'bg-emerald-100 text-emerald-800'
-              : 'bg-amber-100 text-amber-800'
+              ? 'bg-success-soft text-success-strong'
+              : 'bg-warning-soft text-warning-strong'
           }`}>
             {p.estado === 'reclamado' ? 'Reclamado' : 'Pendiente'}
           </span>
@@ -273,7 +273,7 @@ function ParticipanteRow({
               <CopyInvitationLinkButton url={enlace} />
             </div>
           ) : p.estado === 'reclamado' ? (
-            <span className="rounded-full bg-emerald-100 px-2.5 py-0.5 text-xs font-semibold text-emerald-800">
+            <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong">
               Reclamado
             </span>
           ) : (
@@ -290,7 +290,7 @@ function ParticipanteRow({
       {/* Col 5: Envíos PT */}
       <td className="py-3 pr-4 text-sm">
         {p.envios_pt_count > 0 ? (
-          <span className="rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+          <span className="rounded-full bg-info-soft px-2.5 py-0.5 text-xs font-semibold text-info-strong">
             {p.envios_pt_count} envío{p.envios_pt_count !== 1 ? 's' : ''}
           </span>
         ) : (
@@ -335,7 +335,7 @@ function ParticipanteRow({
                 message={`¿Eliminar a ${nombreVisible} de esta ronda? Se pierden su ficha y sus resultados en la ronda.`}
                 confirmLabel="Eliminar"
                 aria-label={`Eliminar a ${nombreVisible} de la ronda`}
-                className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 hover:text-rose-800"
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold text-danger-strong transition hover:bg-danger-soft hover:text-danger-strong"
               >
                 Eliminar
               </ConfirmSubmitButton>
@@ -388,7 +388,7 @@ function FoundUserCard({
   canInvite: boolean
 }) {
   return (
-    <div className="flex flex-col gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-xl border border-success-border bg-success-soft p-4 text-sm sm:flex-row sm:items-center sm:justify-between">
       <div>
         <div className="font-semibold text-[var(--foreground)]">{foundName}</div>
         <div className="text-[var(--foreground-muted)]">{foundEmail}</div>
@@ -589,7 +589,7 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
               )}
 
               {referencias.length > 0 && (
-                <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900">
+                <div className="rounded-xl border border-info-border bg-info-soft px-4 py-3 text-sm text-info-strong">
                   Esta ronda ya tiene referencia configurada.
                 </div>
               )}
@@ -597,8 +597,8 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
               <SearchForm rondaId={rondaId} currentEmail={busquedaEmail} />
 
               {busquedaEmail && notFound_ && (
-                <div className="flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
-                  <p className="text-sm text-amber-800">
+                <div className="flex flex-col gap-3 rounded-xl border border-warning-border bg-warning-soft p-4">
+                  <p className="text-sm text-warning-strong">
                     No se encontró ningún usuario con el correo <strong>{busquedaEmail}</strong> en
                     WorkOS. Puede crearlo e invitarlo directamente:
                   </p>
@@ -609,13 +609,13 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
                       type="text"
                       name="first_name"
                       placeholder="Nombre (opcional)"
-                      className="rounded-lg border border-amber-300 bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0"
+                      className="rounded-lg border border-warning-border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0"
                     />
                     <input
                       type="text"
                       name="last_name"
                       placeholder="Apellido (opcional)"
-                      className="rounded-lg border border-amber-300 bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0"
+                      className="rounded-lg border border-warning-border bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0"
                     />
                     <SubmitButton className="btn-primary">
                       Crear e invitar

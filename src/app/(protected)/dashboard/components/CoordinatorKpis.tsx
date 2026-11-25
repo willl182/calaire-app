@@ -54,13 +54,13 @@ function CoordinatorKpiBar({
         <Link
           key={label}
           href={href}
-          className={`sgc-kpi hover:no-underline ${value > 0 && negative ? 'bg-amber-50/50' : ''}`}
+          className={`sgc-kpi hover:no-underline ${value > 0 && negative ? 'bg-warning-soft/50' : ''}`}
         >
           <p className="sgc-kpi-label">
             {label}
           </p>
           <div className={`sgc-kpi-value numeric ${
-            value > 0 && negative ? 'text-amber-700' : 'text-[var(--foreground)]'
+            value > 0 && negative ? 'text-warning-strong' : 'text-[var(--foreground)]'
           }`}>
             {value}
           </div>

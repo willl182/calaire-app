@@ -20,8 +20,8 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 function FieldSaveIndicator({ state }: { state: SaveState }) {
   if (state === 'saving') return <span className="text-xs text-[var(--foreground-muted)]">Guardando…</span>
-  if (state === 'saved') return <span className="text-xs text-emerald-600">✓ Guardado</span>
-  if (state === 'error') return <span className="text-xs text-rose-600">Error al guardar</span>
+  if (state === 'saved') return <span className="text-xs text-success-strong">✓ Guardado</span>
+  if (state === 'error') return <span className="text-xs text-danger-strong">Error al guardar</span>
   return null
 }
 
@@ -293,7 +293,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
                   Rol
                   <button
                     type="button"
-                    className="text-xs text-rose-500 hover:text-rose-700"
+                    className="text-xs text-danger-strong hover:text-danger-strong"
                     onClick={() => {
                       setAcompanantes((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 })))
                       setListSaved(false)
@@ -371,7 +371,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
                 </span>
                 <button
                   type="button"
-                  className="text-xs text-rose-500 hover:text-rose-700"
+                  className="text-xs text-danger-strong hover:text-danger-strong"
                   onClick={() => {
                     setAnalizadores((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 })))
                     setListSaved(false)
@@ -435,7 +435,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
                       }}
                     />
                     <span className="text-[var(--foreground-muted)]">Seleccionar</span>
-                    <span className={`min-w-10 rounded-full px-2.5 py-0.5 text-center text-xs font-semibold ${isAffirmative(item.incertidumbre_declarada) ? 'bg-emerald-100 text-emerald-800' : 'bg-[var(--surface-muted)] text-[var(--foreground-muted)]'}`}>
+                    <span className={`min-w-10 rounded-full px-2.5 py-0.5 text-center text-xs font-semibold ${isAffirmative(item.incertidumbre_declarada) ? 'bg-success-soft text-success-strong' : 'bg-[var(--surface-muted)] text-[var(--foreground-muted)]'}`}>
                       {isAffirmative(item.incertidumbre_declarada) ? 'Sí' : 'No'}
                     </span>
                   </span>
@@ -491,7 +491,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
               <label className={labelClass}>
                 <span className="flex items-center justify-between">
                   Cantidad
-                  <button type="button" className="text-xs text-rose-500 hover:text-rose-700"
+                  <button type="button" className="text-xs text-danger-strong hover:text-danger-strong"
                     onClick={() => { setInstrumentos((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 }))); setListSaved(false) }}>
                     Quitar
                   </button>
@@ -625,8 +625,8 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
           >
             {listSaving ? 'Guardando…' : 'Guardar datos temporalmente'}
           </button>
-          {listSaved && <span className="text-sm text-emerald-600">✓ Listas guardadas</span>}
-          {listError && <span className="text-sm text-rose-600">{listError}</span>}
+          {listSaved && <span className="text-sm text-success-strong">✓ Listas guardadas</span>}
+          {listError && <span className="text-sm text-danger-strong">{listError}</span>}
         </div>
       </section>
     </div>

@@ -116,7 +116,7 @@ function LinkActions({ recurso }: { recurso: SgcDriveRecurso }) {
         </Link>
       )}
       {recurso.definitivo && 'storageId' in recurso.definitivo && (
-        <span className="rounded-md bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+        <span className="rounded-md bg-success-soft px-2.5 py-1 text-xs font-semibold text-success-strong">
           Archivo cargado{recurso.definitivo.fileName ? `: ${recurso.definitivo.fileName}` : ''}
         </span>
       )}
@@ -236,7 +236,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
 
       {recurso.tipo !== 'carpeta' && !['F-PSEA-20', 'F-PSEA-21'].includes(recurso.codigo) && (
         <FormSection title="Visibilidad">
-          <form action={cambiarVisibilidadDriveAction} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-slate-50 px-3 py-2">
+          <form action={cambiarVisibilidadDriveAction} className="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-[var(--border)] bg-surface px-3 py-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="publica_participante" value={recurso.publicaParticipante ? 'false' : 'true'} />
@@ -252,7 +252,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                 </div>
               )}
               {recurso.evidenciaSerieId && (
-                <div className="mt-1 text-xs text-amber-700">
+                <div className="mt-1 text-xs text-warning-strong">
                   Esta acción aplica a todos los documentos Drive de la misma serie.
                 </div>
               )}
@@ -268,14 +268,14 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
 }
 
 const LEYENDA_PUNTOS = [
-  { color: 'bg-amber-400', texto: 'Punto grande amarillo: pendiente' },
-  { color: 'bg-sky-500', texto: 'Punto grande azul: creado, falta diligenciar' },
-  { color: 'bg-emerald-500', texto: 'Punto grande verde: diligenciado' },
-  { color: 'bg-rose-500', texto: 'Punto grande rojo: retirado' },
-  { color: 'bg-sky-500', texto: 'Tiene enlace editable en Drive' },
-  { color: 'bg-emerald-500', texto: 'Tiene versión definitiva cargada' },
-  { color: 'bg-violet-500', texto: 'Publicado para participantes' },
-  { color: 'bg-rose-500', texto: 'Documento crítico' },
+  { color: 'bg-warning', texto: 'Punto grande amarillo: pendiente' },
+  { color: 'bg-info', texto: 'Punto grande azul: creado, falta diligenciar' },
+  { color: 'bg-success', texto: 'Punto grande verde: diligenciado' },
+  { color: 'bg-danger', texto: 'Punto grande rojo: retirado' },
+  { color: 'bg-info', texto: 'Tiene enlace editable en Drive' },
+  { color: 'bg-success', texto: 'Tiene versión definitiva cargada' },
+  { color: 'bg-special', texto: 'Publicado para participantes' },
+  { color: 'bg-danger', texto: 'Documento crítico' },
 ]
 
 const GLOSARIO = [
@@ -358,7 +358,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
         </p>
 
         {!driveGoogleReady && (
-          <div className="m-5 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          <div className="m-5 rounded-lg border border-warning-border bg-warning-soft p-3 text-sm text-warning-strong">
             <div className="font-semibold">Integración con Google Drive sin configurar</div>
             <div className="mt-1">
               Cuenta: {driveGoogleConfig.clientEmail ? 'configurada' : 'faltante'} · Llave: {driveGoogleConfig.privateKey ? 'configurada' : 'faltante'} · Raíz: {driveGoogleConfig.rootFolderId ? 'configurada' : 'faltante'} · Plantillas: {driveGoogleConfig.templateMap ? 'mapeadas' : 'sin mapa'}
@@ -367,7 +367,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
         )}
 
         {root && (
-          <details className="m-5 rounded-lg border border-[var(--border)] bg-slate-50">
+          <details className="m-5 rounded-lg border border-[var(--border)] bg-surface">
             <summary className="cursor-pointer px-4 py-3 text-sm font-semibold text-[var(--foreground)]">Administrar carpeta raíz</summary>
             <div className="border-t border-[var(--border)] p-4">
               <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
@@ -464,7 +464,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                   <DriveDetailAside
                     chips={
                       <>
-                        <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-slate-700">{tipoLabel(selectedDoc.tipo)}</span>
+                        <span className="rounded-md bg-white px-2 py-1 text-xs font-semibold text-foreground">{tipoLabel(selectedDoc.tipo)}</span>
                         <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoBadgeTone(selectedDoc.estado)}`}>{ESTADO_LABELS[selectedDoc.estado]}</span>
                         {selectedDoc.formatoRelacionado && <span className="rounded-full bg-white px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.formatoRelacionado}</span>}
                       </>

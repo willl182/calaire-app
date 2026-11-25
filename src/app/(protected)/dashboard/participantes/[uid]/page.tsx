@@ -48,7 +48,7 @@ function perfilLabel(perfil: RondaParticipanteAsignada['participant_profile']) {
 
 function perfilBadgeClasses(perfil: RondaParticipanteAsignada['participant_profile']) {
   return perfil === 'member_special'
-    ? 'bg-violet-100 text-violet-800'
+    ? 'bg-special-soft text-special-strong'
     : 'bg-[var(--pt-primary)] text-black'
 }
 
@@ -78,7 +78,7 @@ function estadoOperativoParticipante(rondas: RondaParticipanteAsignada[]) {
     return {
       label: 'Revisar fichas',
       message: 'Hay fichas pendientes para este participante.',
-      classes: 'bg-orange-100 text-orange-800 border-orange-200',
+      classes: 'bg-warning-soft text-warning-strong border-warning-border',
       icon: '⚡',
     }
   }
@@ -87,7 +87,7 @@ function estadoOperativoParticipante(rondas: RondaParticipanteAsignada[]) {
     return {
       label: 'Revisar incompletos',
       message: 'Hay rondas en las que el participante no ha enviado resultados.',
-      classes: 'bg-orange-100 text-orange-800 border-orange-200',
+      classes: 'bg-warning-soft text-warning-strong border-warning-border',
       icon: '⚡',
     }
   }
@@ -95,7 +95,7 @@ function estadoOperativoParticipante(rondas: RondaParticipanteAsignada[]) {
   return {
     label: 'Completo',
     message: 'El participante tiene fichas y envíos finales completos en sus rondas.',
-    classes: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+    classes: 'bg-success-soft text-success-strong border-success-border',
     icon: '✓',
   }
 }
@@ -128,9 +128,9 @@ function MetricaCard({
 }) {
   const variantClass = {
     default: 'border-l-[var(--pt-primary)]',
-    success: 'border-l-emerald-500 bg-emerald-50/40',
-    warning: 'border-l-amber-500 bg-amber-50/50',
-    danger: 'border-l-rose-500 bg-rose-50/50',
+    success: 'border-l-emerald-500 bg-success-soft/40',
+    warning: 'border-l-amber-500 bg-warning-soft/50',
+    danger: 'border-l-rose-500 bg-danger-soft/50',
   }[variant]
 
   const inner = (
@@ -303,7 +303,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
         {enviosFinales > 0 && (
           <Link
             href={`${participantBaseHref}?tab=resultados`}
-            className="flex items-center justify-between rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-medium text-emerald-800 transition hover:bg-emerald-100"
+            className="flex items-center justify-between rounded-xl border border-success-border bg-success-soft px-4 py-3 text-sm font-medium text-success-strong transition hover:bg-success-border/50"
           >
             <span>
               {enviosFinales} envío{enviosFinales !== 1 ? 's' : ''} final
@@ -356,7 +356,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
                         </span>
                       </td>
                       <td className="px-4 py-4">
-                        <span className="numeric rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-semibold text-blue-800">
+                        <span className="numeric rounded-full bg-info-soft px-2.5 py-0.5 text-xs font-semibold text-info-strong">
                           {ronda.envios_pt_count} envío{ronda.envios_pt_count !== 1 ? 's' : ''}
                         </span>
                       </td>
@@ -370,7 +370,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
                           </Link>
                           <Link
                             href={`/dashboard/rondas/${ronda.id}/participantes/${ronda.ronda_participante_id}/datos`}
-                            className="rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700 transition hover:border-blue-400 hover:bg-blue-100"
+                            className="rounded-lg border border-info-border bg-info-soft px-2.5 py-1 text-xs font-semibold text-info-strong transition hover:border-info hover:bg-info-border/50"
                           >
                             Editar datos
                           </Link>
@@ -423,7 +423,7 @@ export default async function ParticipanteDashboardPage({ params, searchParams }
                 </div>
 
                 {columnas.length === 0 ? (
-                  <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  <div className="rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
                     Esta ronda todavía no tiene columnas PT configuradas.
                   </div>
                 ) : (

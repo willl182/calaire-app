@@ -69,7 +69,7 @@ function ParticipantGroupTable({
 
   if (participantes.length === 0) {
     return (
-      <div id={id} className={`scroll-mt-24 rounded-xl border border-dashed px-6 py-10 text-center text-sm ${tone === 'success' ? 'border-emerald-200 bg-emerald-50 text-emerald-900' : 'border-amber-200 bg-amber-50 text-amber-900'}`}>
+      <div id={id} className={`scroll-mt-24 rounded-xl border border-dashed px-6 py-10 text-center text-sm ${tone === 'success' ? 'border-success-border bg-success-soft text-success-strong' : 'border-warning-border bg-warning-soft text-warning-strong'}`}>
         {emptyMessage}
       </div>
     )
@@ -128,19 +128,19 @@ function ParticipantGroupTable({
                       </div>
                     </td>
                     <td className="px-4 py-4">
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${reclamados === 0 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}`}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${reclamados === 0 ? 'bg-warning-soft text-warning-strong' : 'bg-success-soft text-success-strong'}`}>
                         {reclamados === 0 ? 'Sin enlace' : pendientes > 0 ? `Con enlace · ${pendientes} pendiente${pendientes === 1 ? '' : 's'}` : 'Con enlace'}
                       </span>
                     </td>
                     <td className="px-4 py-4">
-                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.ficha_estado === 'enviado' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}`}>
+                      <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${p.ficha_estado === 'enviado' ? 'bg-success-soft text-success-strong' : 'bg-warning-soft text-warning-strong'}`}>
                         {fichaLabel}
                       </span>
                     </td>
                     <td className="px-4 py-4 text-right">
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         {p.correo_laboratorio && (
-                          <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                          <span className="rounded-full bg-info-soft px-3 py-1 text-xs font-semibold text-info-strong">
                             Laboratorio manual
                           </span>
                         )}

@@ -3,31 +3,31 @@
 // (pendiente/creado/diligenciado/...).
 
 const DOT_TONES: Record<string, string> = {
-  vigente: 'bg-emerald-500 ring-emerald-100',
-  diligenciado: 'bg-emerald-500 ring-emerald-100',
-  en_revision: 'bg-amber-400 ring-amber-100',
-  pendiente: 'bg-amber-400 ring-amber-100',
-  creado: 'bg-sky-500 ring-sky-100',
-  obsoleto: 'bg-slate-400 ring-slate-100',
-  no_aplica: 'bg-slate-400 ring-slate-100',
-  reemplazado: 'bg-violet-500 ring-violet-100',
+  vigente: 'bg-success ring-success-border',
+  diligenciado: 'bg-success ring-success-border',
+  en_revision: 'bg-warning ring-warning-border',
+  pendiente: 'bg-warning ring-warning-border',
+  creado: 'bg-info ring-info-border',
+  obsoleto: 'bg-line-strong ring-line-soft',
+  no_aplica: 'bg-line-strong ring-line-soft',
+  reemplazado: 'bg-special ring-special-border',
 }
 
 export function estadoDotTone(estado: string) {
-  return DOT_TONES[estado] ?? 'bg-rose-500 ring-rose-100'
+  return DOT_TONES[estado] ?? 'bg-danger ring-danger-border'
 }
 
 const BADGE_TONES: Record<string, string> = {
-  vigente: 'bg-emerald-100 text-emerald-800',
-  diligenciado: 'bg-emerald-100 text-emerald-800',
-  en_revision: 'bg-amber-100 text-amber-800',
-  pendiente: 'bg-amber-100 text-amber-800',
-  creado: 'bg-sky-100 text-sky-800',
-  obsoleto: 'bg-slate-200 text-slate-700',
-  no_aplica: 'bg-slate-100 text-slate-700',
-  reemplazado: 'bg-violet-100 text-violet-800',
+  vigente: 'bg-success-soft text-success-strong',
+  diligenciado: 'bg-success-soft text-success-strong',
+  en_revision: 'bg-warning-soft text-warning-strong',
+  pendiente: 'bg-warning-soft text-warning-strong',
+  creado: 'bg-info-soft text-info-strong',
+  obsoleto: 'bg-line-soft text-foreground',
+  no_aplica: 'bg-surface-muted text-foreground',
+  reemplazado: 'bg-special-soft text-special-strong',
 }
 
 export function estadoBadgeTone(estado: string) {
-  return BADGE_TONES[estado] ?? 'bg-rose-100 text-rose-800'
+  return BADGE_TONES[estado] ?? 'bg-danger-soft text-danger-strong'
 }

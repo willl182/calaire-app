@@ -87,15 +87,15 @@ export default function InstrumentosEditor(props: Props) {
   return (
     <div className="grid gap-6">
       {dialog}
-      {error && <p className="rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-800" role="alert">{error}</p>}
-      {props.observacionDevolucion && <p className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">Devolución: {props.observacionDevolucion}</p>}
+      {error && <p className="rounded-lg border border-danger-border bg-danger-soft p-3 text-sm text-danger-strong" role="alert">{error}</p>}
+      {props.observacionDevolucion && <p className="rounded-lg border border-warning-border bg-warning-soft p-3 text-sm text-warning-strong">Devolución: {props.observacionDevolucion}</p>}
 
       <section className="grid gap-4">
         {props.items.map((item, index) => (
           <form key={item._id} action={(formData) => run(() => guardarInstrumentoAction(props.rondaId, formData))} className="card grid gap-3 p-5">
             <input type="hidden" name="item_id" value={item._id} />
             <input type="hidden" name="relacion_id" value={props.relacionId} />
-            <div className="flex items-center justify-between gap-3"><h2 className="font-semibold">Instrumento {index + 1}</h2><button className="text-xs font-semibold text-red-700 underline" type="button" disabled={pending} onClick={async () => { if (await confirm({ title: 'Eliminar instrumento', message: '¿Eliminar el instrumento y sus referencias de fotos?', confirmLabel: 'Eliminar' })) run(() => eliminarInstrumentoAction(props.rondaId, item._id)) }}>Eliminar</button></div>
+            <div className="flex items-center justify-between gap-3"><h2 className="font-semibold">Instrumento {index + 1}</h2><button className="text-xs font-semibold text-danger-strong underline" type="button" disabled={pending} onClick={async () => { if (await confirm({ title: 'Eliminar instrumento', message: '¿Eliminar el instrumento y sus referencias de fotos?', confirmLabel: 'Eliminar' })) run(() => eliminarInstrumentoAction(props.rondaId, item._id)) }}>Eliminar</button></div>
             <div className="grid gap-3 md:grid-cols-5">
               <select className="input" name="tipo" defaultValue={item.tipo}>{tipos.map(([value, label]) => <option key={value} value={value}>{label}</option>)}</select>
               <input className="input" name="codigo_interno" defaultValue={item.codigoInterno} placeholder="Código interno" required />
@@ -109,7 +109,7 @@ export default function InstrumentosEditor(props: Props) {
                 const current = tipoFoto === 'general' ? item.fotoGeneralStorageId : item.fotoPlacaStorageId
                 const fileName = tipoFoto === 'general' ? item.fotoGeneralFileName : item.fotoPlacaFileName
                 const key = `${item._id}:${tipoFoto}`
-                return <div className="rounded-lg border border-[var(--border)] p-3" key={tipoFoto}><div className="mb-2 text-xs font-semibold uppercase">{tipoFoto === 'general' ? 'Foto general' : 'Foto placa/serial'}</div><FileInput aria-label={tipoFoto === 'general' ? 'Foto general' : 'Foto placa/serial'} accept="image/jpeg,image/png" disabled={uploading === key || pending} buttonLabel={uploading === key ? 'Subiendo…' : 'Elegir imagen'} onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (file) void upload(item._id, tipoFoto, file).finally(() => { input.value = '' }) }} />{current && <div className="mt-2 flex items-center justify-between gap-2 text-xs"><span>{fileName ?? 'Imagen cargada'}</span><button type="button" className="text-red-700 underline" onClick={() => run(() => retirarFotoF21Action(props.rondaId, item._id, tipoFoto))}>Retirar</button></div>}</div>
+                return <div className="rounded-lg border border-[var(--border)] p-3" key={tipoFoto}><div className="mb-2 text-xs font-semibold uppercase">{tipoFoto === 'general' ? 'Foto general' : 'Foto placa/serial'}</div><FileInput aria-label={tipoFoto === 'general' ? 'Foto general' : 'Foto placa/serial'} accept="image/jpeg,image/png" disabled={uploading === key || pending} buttonLabel={uploading === key ? 'Subiendo…' : 'Elegir imagen'} onChange={(event) => { const input = event.currentTarget; const file = input.files?.[0]; if (file) void upload(item._id, tipoFoto, file).finally(() => { input.value = '' }) }} />{current && <div className="mt-2 flex items-center justify-between gap-2 text-xs"><span>{fileName ?? 'Imagen cargada'}</span><button type="button" className="text-danger-strong underline" onClick={() => run(() => retirarFotoF21Action(props.rondaId, item._id, tipoFoto))}>Retirar</button></div>}</div>
               })}
             </div>
             <button className="btn-outline justify-self-start" disabled={pending}>Guardar instrumento</button>

@@ -31,8 +31,8 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 function FieldSaveIndicator({ state }: { state: SaveState }) {
   if (state === 'saving') return <span className="text-xs text-[var(--foreground-muted)]">Guardando…</span>
-  if (state === 'saved') return <span className="text-xs text-emerald-600">✓ Guardado</span>
-  if (state === 'error') return <span className="text-xs text-rose-600">Error al guardar</span>
+  if (state === 'saved') return <span className="text-xs text-success-strong">✓ Guardado</span>
+  if (state === 'error') return <span className="text-xs text-danger-strong">Error al guardar</span>
   return null
 }
 
@@ -201,7 +201,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               Ronda: {rondaCodigo} {participanteCodigo && `· Participante: ${participanteCodigo}`}
             </p>
             {enviado && (
-              <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">
+              <div className="mt-2 inline-flex items-center gap-2 rounded-full bg-success-soft px-3 py-1 text-xs font-semibold text-success-strong">
                 Ficha enviada ✓
               </div>
             )}
@@ -332,7 +332,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                     {!disabled && (
                       <button
                         type="button"
-                        className="text-xs text-rose-500 hover:text-rose-700"
+                        className="text-xs text-danger-strong hover:text-danger-strong"
                         onClick={() => {
                           setAcompanantes((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 })))
                           setListSaved(false)
@@ -419,7 +419,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                   {!disabled && (
                     <button
                       type="button"
-                      className="text-xs text-rose-500 hover:text-rose-700"
+                      className="text-xs text-danger-strong hover:text-danger-strong"
                       onClick={() => {
                         setAnalizadores((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 })))
                         setListSaved(false)
@@ -489,7 +489,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                         }}
                       />
                       <span className="text-[var(--foreground-muted)]">Seleccionar</span>
-                      <span className={`min-w-10 rounded-full px-2.5 py-0.5 text-center text-xs font-semibold ${isAffirmative(item.incertidumbre_declarada) ? 'bg-emerald-100 text-emerald-800' : 'bg-[var(--surface-muted)] text-[var(--foreground-muted)]'}`}>
+                      <span className={`min-w-10 rounded-full px-2.5 py-0.5 text-center text-xs font-semibold ${isAffirmative(item.incertidumbre_declarada) ? 'bg-success-soft text-success-strong' : 'bg-[var(--surface-muted)] text-[var(--foreground-muted)]'}`}>
                         {isAffirmative(item.incertidumbre_declarada) ? 'Sí' : 'No'}
                       </span>
                     </span>
@@ -551,7 +551,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                   <span className="flex items-center justify-between">
                     Cantidad
                     {!disabled && (
-                      <button type="button" className="text-xs text-rose-500 hover:text-rose-700"
+                      <button type="button" className="text-xs text-danger-strong hover:text-danger-strong"
                         onClick={() => { setInstrumentos((prev) => prev.filter((_, i) => i !== idx).map((a, i) => ({ ...a, sort_order: i + 1 }))); setListSaved(false) }}>
                         Quitar
                       </button>
@@ -702,19 +702,19 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               >
                 {listSaving ? 'Guardando…' : 'Guardar datos temporalmente'}
               </button>
-              {listSaved && <span className="text-sm text-emerald-600">✓ Listas guardadas</span>}
-              {listError && <span className="text-sm text-rose-600">{listError}</span>}
+              {listSaved && <span className="text-sm text-success-strong">✓ Listas guardadas</span>}
+              {listError && <span className="text-sm text-danger-strong">{listError}</span>}
             </div>
 
             {/* Submit */}
             {enviado ? (
-              <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm font-semibold text-emerald-800">
+              <div className="rounded-xl border border-success-border bg-success-soft px-4 py-3 text-sm font-semibold text-success-strong">
                 Ficha enviada correctamente. Puede seguir editando mientras la ronda esté abierta.
               </div>
             ) : (
               <div className="grid gap-4">
                 {submitErrores.length > 0 && (
-                  <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  <div className="rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger-strong">
                     <p className="font-semibold mb-2">Complete los siguientes campos obligatorios:</p>
                     <ul className="list-inside list-disc space-y-1">
                       {submitErrores.map((e, i) => <li key={i}>{e}</li>)}
@@ -722,7 +722,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                   </div>
                 )}
                 {submitError && (
-                  <div className="rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                  <div className="rounded-xl border border-danger-border bg-danger-soft px-4 py-3 text-sm text-danger-strong">
                     {submitError}
                   </div>
                 )}

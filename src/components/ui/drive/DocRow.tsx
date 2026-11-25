@@ -4,12 +4,12 @@ import { FileIcon, type FileTone } from './DriveIcons'
 import { estadoDotTone } from './estadoTone'
 
 const META_DOT_TONES: Record<FileTone, string> = {
-  sky: 'bg-sky-500',
-  violet: 'bg-violet-500',
-  emerald: 'bg-emerald-500',
-  amber: 'bg-amber-500',
-  rose: 'bg-rose-500',
-  slate: 'bg-slate-400',
+  sky: 'bg-info',
+  violet: 'bg-special',
+  emerald: 'bg-success',
+  amber: 'bg-warning',
+  rose: 'bg-danger',
+  slate: 'bg-line-strong',
 }
 
 export function DocMetaDot({ label, tone }: { label: string; tone: FileTone }) {

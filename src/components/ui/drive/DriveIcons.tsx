@@ -1,17 +1,17 @@
 export type FileTone = 'sky' | 'violet' | 'emerald' | 'amber' | 'rose' | 'slate'
 
 const FILE_TONES: Record<FileTone, string> = {
-  sky: 'text-sky-500',
-  violet: 'text-violet-500',
-  emerald: 'text-emerald-500',
-  amber: 'text-amber-500',
-  rose: 'text-rose-500',
-  slate: 'text-slate-400',
+  sky: 'text-info-strong',
+  violet: 'text-special-strong',
+  emerald: 'text-success-strong',
+  amber: 'text-warning-strong',
+  rose: 'text-danger-strong',
+  slate: 'text-muted',
 }
 
 export function FolderIcon({ className = 'h-9 w-9' }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden className={`shrink-0 text-sky-500 ${className}`} fill="currentColor">
+    <svg viewBox="0 0 24 24" aria-hidden className={`shrink-0 text-info-strong ${className}`} fill="currentColor">
       <path d="M10 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z" />
     </svg>
   )

@@ -52,7 +52,7 @@ function FolderGlyph({ restringida = false }: { restringida?: boolean }) {
     <span
       aria-hidden="true"
       className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
-        restringida ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-700'
+        restringida ? 'bg-warning-soft text-warning-strong' : 'bg-info-soft text-info-strong'
       }`}
     >
       {restringida ? '🔒' : '📁'}
@@ -66,7 +66,7 @@ export function DirectorioServicio() {
       <div className="border-b border-[var(--border)] px-5 py-4 sm:px-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-sky-700">Arquitectura documental</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-info-strong">Arquitectura documental</p>
             <h2 id="directorio-servicio-title" className="mt-1 text-lg font-semibold text-[var(--foreground)]">
               Directorio del servicio comercial
             </h2>
@@ -74,23 +74,23 @@ export function DirectorioServicio() {
               Organiza los entregables por etapa del ciclo comercial. La ejecución técnica de cada ronda permanece en el Sistema de Gestión y se referencia sin duplicarla.
             </p>
           </div>
-          <span className="rounded-full border border-sky-200 bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-800">
+          <span className="rounded-full border border-info-border bg-info-soft px-3 py-1 text-xs font-semibold text-info-strong">
             7 etapas · 2 restringidas
           </span>
         </div>
       </div>
 
       <div className="grid lg:grid-cols-[minmax(250px,0.75fr)_minmax(0,2fr)]">
-        <div className="border-b border-[var(--border)] bg-slate-950 p-5 font-mono text-sm text-slate-200 lg:border-b-0 lg:border-r">
-          <div className="mb-4 flex items-center justify-between border-b border-slate-700 pb-3">
+        <div className="border-b border-[var(--border)] bg-foreground p-5 font-mono text-sm text-line-soft lg:border-b-0 lg:border-r">
+          <div className="mb-4 flex items-center justify-between border-b border-line-strong pb-3">
             <strong className="text-white">servicio_comercial/</strong>
-            <span className="text-[10px] font-semibold tracking-[0.12em] text-sky-300">ESTRUCTURA</span>
+            <span className="text-[10px] font-semibold tracking-[0.12em] text-info">ESTRUCTURA</span>
           </div>
           <div aria-label="Estructura del directorio del servicio comercial" className="space-y-2">
             <div className="font-semibold text-white">📁 servicio_comercial/</div>
-            <div className="space-y-2 border-l border-slate-700 pl-4">
+            <div className="space-y-2 border-l border-line-strong pl-4">
               {carpetas.map((carpeta) => (
-                <div key={carpeta.nombre} className={carpeta.restringida ? 'text-amber-300' : undefined}>
+                <div key={carpeta.nombre} className={carpeta.restringida ? 'text-warning' : undefined}>
                   {carpeta.restringida ? '🔒' : '📁'} {carpeta.nombre}/
                 </div>
               ))}
@@ -114,13 +114,13 @@ export function DirectorioServicio() {
                 </div>
                 <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">{carpeta.descripcion}</p>
                 {carpeta.restringida && (
-                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-amber-800">Acceso controlado</p>
+                  <p className="mt-2 text-[11px] font-semibold uppercase tracking-[0.06em] text-warning-strong">Acceso controlado</p>
                 )}
               </div>
             </article>
           ))}
 
-          <article className="flex gap-3 bg-sky-50/60 p-4 sm:p-5">
+          <article className="flex gap-3 bg-info-soft/60 p-4 sm:p-5">
             <FolderGlyph />
             <div>
               <h3 className="font-mono text-sm font-semibold text-[var(--foreground)]">fichas/</h3>
@@ -128,12 +128,12 @@ export function DirectorioServicio() {
             </div>
           </article>
 
-          <article className="bg-emerald-50/60 p-4 sm:p-5">
-            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-emerald-800">Fuente técnica vinculada</p>
+          <article className="bg-success-soft/60 p-4 sm:p-5">
+            <p className="text-xs font-semibold uppercase tracking-[0.08em] text-success-strong">Fuente técnica vinculada</p>
             <p className="mt-1 text-xs leading-5 text-[var(--foreground-muted)]">
               Los expedientes, formatos y evidencias de ejecución se administran en el SGC.
             </p>
-            <Link className="mt-3 inline-flex text-xs font-semibold text-emerald-800 hover:underline" href="/dashboard/sgc/documentos">
+            <Link className="mt-3 inline-flex text-xs font-semibold text-success-strong hover:underline" href="/dashboard/sgc/documentos">
               Abrir Centro documental →
             </Link>
           </article>

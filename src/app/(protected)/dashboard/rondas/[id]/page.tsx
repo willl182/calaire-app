@@ -62,9 +62,9 @@ function MetricaCard({
 }) {
   const variantClass = {
     default: '',
-    success: 'bg-emerald-50/40',
-    warning: 'bg-amber-50/50',
-    danger: 'bg-rose-50/50',
+    success: 'bg-success-soft/40',
+    warning: 'bg-warning-soft/50',
+    danger: 'bg-danger-soft/50',
   }[variant]
 
   const inner = (
@@ -123,10 +123,10 @@ function AlertasOperativas({ metricas, rondaId }: { metricas: RondaMetricas; ron
   if (alertas.length === 0) return null
 
   const toneClasses = {
-    amber: 'border-amber-200 bg-amber-50 text-amber-800 hover:bg-amber-100',
-    sky: 'border-sky-200 bg-sky-50 text-sky-800 hover:bg-sky-100',
-    violet: 'border-violet-200 bg-violet-50 text-violet-800 hover:bg-violet-100',
-    emerald: 'border-emerald-200 bg-emerald-50 text-emerald-800 hover:bg-emerald-100',
+    amber: 'border-warning-border bg-warning-soft text-warning-strong hover:bg-warning-border/50',
+    sky: 'border-info-border bg-info-soft text-info-strong hover:bg-info-border/50',
+    violet: 'border-special-border bg-special-soft text-special-strong hover:bg-special-border/50',
+    emerald: 'border-success-border bg-success-soft text-success-strong hover:bg-success-border/50',
   }
 
   return (

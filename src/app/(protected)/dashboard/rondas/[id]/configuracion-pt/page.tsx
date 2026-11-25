@@ -70,7 +70,7 @@ function PTItemRow({ item, canEdit }: { item: RondaPTItem; canEdit: boolean }) {
             <form action={deletePTItemAction} className="inline">
               <input type="hidden" name="ronda_id" value={item.ronda_id} />
               <input type="hidden" name="item_id" value={item.id} />
-              <SubmitButton className="rounded-lg border border-rose-200 px-2.5 py-1.5 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800">
+              <SubmitButton className="rounded-lg border border-danger-border px-2.5 py-1.5 text-xs font-medium text-danger-strong transition hover:border-danger hover:bg-danger-soft hover:text-danger-strong">
                 Eliminar
               </SubmitButton>
             </form>

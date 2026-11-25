@@ -47,7 +47,7 @@ export default async function MapaSgcPage() {
           <div className="sgc-kpi-label">Bloques</div>
           <div className="sgc-kpi-value numeric">{mapa.data.bloques.length}</div>
         </div>
-        <div className="sgc-kpi bg-amber-50/50">
+        <div className="sgc-kpi bg-warning-soft/50">
           <div className="sgc-kpi-label">Pendientes</div>
           <div className="sgc-kpi-value numeric">{mapa.data.pendientes}</div>
         </div>

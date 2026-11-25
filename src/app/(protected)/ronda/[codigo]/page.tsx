@@ -70,11 +70,11 @@ export default async function RondaPage({
 
     if (ronda.estado === 'borrador') {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="min-h-screen bg-surface flex items-center justify-center">
           <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
             <div className="text-4xl mb-4">⏳</div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Ronda no disponible</h2>
-            <p className="text-gray-500 text-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-2">Ronda no disponible</h2>
+            <p className="text-muted text-sm">
               La ronda <strong>{codigo}</strong> aún no ha sido activada. Vuelve más tarde.
             </p>
           </div>
@@ -89,17 +89,17 @@ export default async function RondaPage({
       ])
       if (envio.offline) return <RondaOfflineState codigo={codigo} />
       return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-6">
+        <div className="flex min-h-screen items-center justify-center bg-surface px-6">
           <div className="w-full max-w-lg rounded-xl bg-white p-10 text-center shadow">
             <div className="text-4xl mb-4">{evaluacion.estado === 'publicada' ? '📊' : '⏳'}</div>
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">
+            <h2 className="text-lg font-semibold text-foreground mb-2">
               {evaluacion.estado === 'publicada' ? 'Resultados disponibles' : 'En evaluación'}
             </h2>
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted text-sm">
               {evaluacion.estado === 'publicada' ? 'La evaluación oficial ya fue publicada.' : 'El envío fue cerrado y la evaluación aún no ha sido publicada.'}
             </p>
             {evaluacion.estado !== 'publicada' && envio.data.enviado && (
-              <p className="mt-3 text-xs text-gray-500">
+              <p className="mt-3 text-xs text-muted">
                 Envío final confirmado{envio.data.enviados_at ? ` el ${new Intl.DateTimeFormat('es-CO', { dateStyle: 'long' }).format(new Date(envio.data.enviados_at))}` : ''}.
               </p>
             )}
@@ -117,10 +117,10 @@ export default async function RondaPage({
     if (participantePTResult.offline) return <RondaOfflineState codigo={codigo} />
     if (!participantePTResult.data) {
       return (
-        <div className="min-h-screen bg-gray-50 flex items-center justify-center px-6">
+        <div className="min-h-screen bg-surface flex items-center justify-center px-6">
           <div className="bg-white rounded-xl shadow p-10 text-center max-w-md">
-            <h2 className="text-lg font-semibold text-gray-800 mb-2">Sin asignación</h2>
-            <p className="text-gray-500 text-sm">
+            <h2 className="text-lg font-semibold text-foreground mb-2">Sin asignación</h2>
+            <p className="text-muted text-sm">
               No tiene una asignación en esta ronda para ingresar resultados.
             </p>
           </div>

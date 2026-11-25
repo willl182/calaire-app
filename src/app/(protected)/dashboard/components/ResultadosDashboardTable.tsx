@@ -62,7 +62,7 @@ export function ResultadosDashboardTable({
                 </td>
                 <td className="border-b border-[var(--border-soft)] px-4 py-4">
                   <span className={`numeric rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                    completo ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'
+                    completo ? 'bg-success-soft text-success-strong' : 'bg-warning-soft text-warning-strong'
                   }`}>
                     {resultado.completados}/{resultado.total_esperado}
                   </span>

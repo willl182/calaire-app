@@ -32,9 +32,9 @@ export default async function InstrumentosRondaPage({ params }: { params: Promis
       ) : (
         <>
           <section className="card grid gap-4 p-6">
-            <div className="flex flex-wrap gap-2"><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{relacion.estado}</span><span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold">Crítico, no bloquea cierre</span><span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">Revisión {relacion.revision}</span></div>
+            <div className="flex flex-wrap gap-2"><span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold">{relacion.estado}</span><span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-semibold">Crítico, no bloquea cierre</span><span className="rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold">Revisión {relacion.revision}</span></div>
             <div className="grid gap-3 sm:grid-cols-4"><div>Total: {relacion.resumen.total}</div><div>Analizadores: {relacion.resumen.analizadores}/4</div><div>Fotos generales pendientes: {relacion.resumen.itemsSinFotoGeneral}</div><div>Fotos de placa pendientes: {relacion.resumen.itemsSinFotoPlaca}</div></div>
-            {relacion.resumen.errores.length > 0 && <ul className="list-disc pl-5 text-sm text-amber-900">{relacion.resumen.errores.map((error: string) => <li key={error}>{error}</li>)}</ul>}
+            {relacion.resumen.errores.length > 0 && <ul className="list-disc pl-5 text-sm text-warning-strong">{relacion.resumen.errores.map((error: string) => <li key={error}>{error}</li>)}</ul>}
           </section>
           <InstrumentosEditor
             rondaId={id}

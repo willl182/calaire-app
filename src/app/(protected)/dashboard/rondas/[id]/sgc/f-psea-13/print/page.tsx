@@ -51,38 +51,38 @@ export default async function FPsea13PrintPage({ params }: PageProps) {
   const metricas = { ...panel.metricasActuales, ...(revision?.metricas ?? {}) }
 
   return (
-    <main className="mx-auto max-w-4xl bg-white px-8 py-10 text-slate-950 print:px-0">
-      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">F-PSEA-13</p>
+    <main className="mx-auto max-w-4xl bg-white px-8 py-10 text-foreground print:px-0">
+      <p className="text-xs font-semibold uppercase tracking-[0.18em] text-muted">F-PSEA-13</p>
       <h1 className="mt-2 text-3xl font-semibold">Revision de datos {ronda.codigo}</h1>
-      <p className="mt-1 text-slate-600">{ronda.nombre}</p>
-      <div className="mt-6 grid gap-3 border-y border-slate-200 py-4 text-sm sm:grid-cols-2">
+      <p className="mt-1 text-muted">{ronda.nombre}</p>
+      <div className="mt-6 grid gap-3 border-y border-line-soft py-4 text-sm sm:grid-cols-2">
         <div><strong>Estado documental:</strong> {revision?.estado ?? 'borrador'}</div>
         <div><strong>Finalizado:</strong> {fmt(revision?.finalizadoAt)}</div>
         <div><strong>Finalizado por:</strong> {revision?.finalizadoBy ?? 'No finalizado'}</div>
         <div><strong>Snapshot/version:</strong> ver bitacora SGC</div>
       </div>
-      <p className="mt-4 rounded border border-amber-300 bg-amber-50 p-3 text-sm font-medium text-amber-900">
+      <p className="mt-4 rounded border border-warning-border bg-warning-soft p-3 text-sm font-medium text-warning-strong">
         {SGC_LEYENDA_CODIGO_PROVISIONAL}
       </p>
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Metricas de apoyo</h2>
-        <div className="mt-3 divide-y divide-slate-200 rounded border border-slate-200">
+        <div className="mt-3 divide-y divide-line-soft rounded border border-line-soft">
           {Object.entries(METRIC_LABELS).map(([key, label]) => (
             <div key={key} className="grid gap-2 p-3 text-sm sm:grid-cols-[240px_1fr]">
               <div className="font-medium">{label}</div>
-              <div className="text-slate-700">{fmtMetric(metricas[key])}</div>
+              <div className="text-foreground">{fmtMetric(metricas[key])}</div>
             </div>
           ))}
         </div>
       </section>
       <section className="mt-8">
         <h2 className="text-lg font-semibold">Checks</h2>
-        <div className="mt-3 divide-y divide-slate-200 rounded border border-slate-200">
+        <div className="mt-3 divide-y divide-line-soft rounded border border-line-soft">
           {Object.entries(revision?.checks ?? {}).map(([key, check]) => (
             <div key={key} className="grid gap-2 p-3 text-sm sm:grid-cols-[1fr_120px_1fr]">
               <div className="font-medium">{key}</div>
               <div>{check.cumple ? 'Cumple' : 'No cumple'}</div>
-              <div className="text-slate-600">{check.observacion ?? 'Sin observacion'}</div>
+              <div className="text-muted">{check.observacion ?? 'Sin observacion'}</div>
             </div>
           ))}
         </div>

@@ -37,11 +37,11 @@ function operativeStatus(item: CalendarItem, today: string) {
 
 const STATUS_LABELS = { proximo: 'Próximo', completado: 'Completado', vencido: 'Vencido', cancelado: 'Cancelado', no_aplica: 'No aplica' }
 const STATUS_CLASSES = {
-  proximo: 'border-sky-200 bg-sky-50 text-sky-800',
-  completado: 'border-emerald-200 bg-emerald-50 text-emerald-800',
-  vencido: 'border-rose-200 bg-rose-50 text-rose-800',
-  cancelado: 'border-slate-200 bg-slate-100 text-slate-600',
-  no_aplica: 'border-stone-200 bg-stone-50 text-stone-600',
+  proximo: 'border-info-border bg-info-soft text-info-strong',
+  completado: 'border-success-border bg-success-soft text-success-strong',
+  vencido: 'border-danger-border bg-danger-soft text-danger-strong',
+  cancelado: 'border-line-soft bg-surface-muted text-muted',
+  no_aplica: 'border-line-soft bg-surface text-muted',
 }
 
 function monthKey(date: Date) {

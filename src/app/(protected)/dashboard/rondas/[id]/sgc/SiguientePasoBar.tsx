@@ -45,7 +45,7 @@ export function SiguientePasoBar({ pasosPrevios, siguiente }: Props) {
             <ol className="mt-2 grid gap-1 pl-1">
               {pasosPrevios.map((paso) => (
                 <li key={paso.key} className="flex items-center gap-2">
-                  <span aria-hidden="true" className={paso.completo ? 'text-emerald-700' : 'text-slate-400'}>{paso.completo ? '✓' : '○'}</span>
+                  <span aria-hidden="true" className={paso.completo ? 'text-success-strong' : 'text-muted'}>{paso.completo ? '✓' : '○'}</span>
                   <span className="sr-only">{paso.completo ? 'Hecho:' : 'Pendiente:'}</span>
                   <Link className="underline-offset-2 hover:underline" href={paso.destino}>{paso.nombre}</Link>
                 </li>

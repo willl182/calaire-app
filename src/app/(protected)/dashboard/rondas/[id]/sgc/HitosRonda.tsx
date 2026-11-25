@@ -49,12 +49,12 @@ export function HitosRonda({ hitos, rondaId }: { hitos: SgcPanel['hitos']; ronda
         Fechas en formato dd/mm/aaaa.
       </p>
       {!inicio && (
-        <form action={crearHitoRondaAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <form action={crearHitoRondaAction} className="mt-3 flex flex-wrap items-end gap-2 rounded-lg border border-warning-border bg-warning-soft p-3">
           <input type="hidden" name="ronda_id" value={rondaId} />
           <input type="hidden" name="codigo" value="INICIO_RONDA" />
           <input type="hidden" name="nombre" value="Inicio de ronda" />
           <input type="hidden" name="fase" value="inicio" />
-          <label className="grid gap-1 text-xs font-semibold text-amber-950">
+          <label className="grid gap-1 text-xs font-semibold text-warning-strong">
             Fecha de INICIO_RONDA
             <input className="input" type="date" name="fecha_objetivo" required />
           </label>

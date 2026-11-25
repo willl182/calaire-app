@@ -76,7 +76,7 @@ export function PlanRondaForm({ panel, rondaId, completa = false }: { panel: Sgc
             />
           </label>
         </div>
-        <div className={`${completa ? '' : 'max-h-[420px] overflow-y-auto pr-2'} space-y-4 rounded-lg border border-[var(--border)] bg-slate-50/50 p-4`}>
+        <div className={`${completa ? '' : 'max-h-[420px] overflow-y-auto pr-2'} space-y-4 rounded-lg border border-[var(--border)] bg-surface/50 p-4`}>
           {SGC_PLAN_BLOQUES.map(({ key, label }) => (
             <div key={key} className="space-y-1.5">
               <label className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground-muted)]">{label}</label>

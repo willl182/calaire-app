@@ -60,7 +60,7 @@ export default async function TemplateGlobalViewPage({
         </pre>
       </div>
 
-      <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+      <div className="rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong">
         <strong>Nota:</strong> los campos marcados con corchetes deben reemplazarse
         manualmente. Para generar una version con variables de una ronda especifica,
         use el panel SGC de la ronda.

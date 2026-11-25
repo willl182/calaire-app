@@ -27,7 +27,7 @@ function PasosActa({ estado }: { estado: string }) {
           <li
             key={paso.key}
             aria-current={index === actual ? 'step' : undefined}
-            className={`rounded-lg border px-3 py-2 text-sm ${hecho ? 'border-[var(--pt-primary)] bg-sky-50 font-semibold text-[var(--foreground)]' : 'border-[var(--border)] text-[var(--foreground-muted)]'}`}
+            className={`rounded-lg border px-3 py-2 text-sm ${hecho ? 'border-[var(--pt-primary)] bg-info-soft font-semibold text-[var(--foreground)]' : 'border-[var(--border)] text-[var(--foreground-muted)]'}`}
           >
             <span className="numeric mr-1">{index + 1}.</span>{paso.label}
             {index === actual && <span className="sr-only"> (paso actual)</span>}
@@ -99,7 +99,7 @@ export default async function ActaInicioPage({ params }: { params: Promise<{ id:
             <button className="btn-primary" disabled={!inicioConFecha} aria-describedby={inicioConFecha ? undefined : 'acta-sin-inicio'}>Inicializar acta</button>
           </form>
           {!inicioConFecha && (
-            <p id="acta-sin-inicio" className="mt-3 text-sm text-amber-900">
+            <p id="acta-sin-inicio" className="mt-3 text-sm text-warning-strong">
               Falta el hito INICIO_RONDA con fecha.{' '}
               <Link className="font-semibold underline" href={`/dashboard/rondas/${id}/sgc#hitos`}>Registrar el hito de inicio</Link>
             </p>
@@ -112,8 +112,8 @@ export default async function ActaInicioPage({ params }: { params: Promise<{ id:
             <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="font-semibold">Estado para el avance:</span>
               {acta.pdfStorageId
-                ? <span className="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-900">Subida</span>
-                : <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-900">Diligenciada / por subir</span>}
+                ? <span className="rounded-full bg-success-soft px-3 py-1 text-xs font-semibold text-success-strong">Subida</span>
+                : <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-semibold text-warning-strong">Diligenciada / por subir</span>}
               <span className="text-xs text-[var(--foreground-muted)]">Solo cuenta como completa con el PDF firmado subido. Publicar es aparte y no cambia el avance.</span>
             </div>
           </section>

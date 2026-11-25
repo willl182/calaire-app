@@ -33,11 +33,11 @@ const routes = [
 ]
 
 const legend = [
-  { label: 'DG', className: 'border-amber-500 bg-amber-50' },
-  { label: 'P', className: 'border-slate-600 bg-slate-100' },
-  { label: 'I', className: 'border-violet-500 bg-violet-50' },
-  { label: 'F', className: 'border-emerald-600 bg-emerald-50' },
-  { label: 'Fuera', className: 'border-red-500 bg-red-50' },
+  { label: 'DG', className: 'border-warning bg-warning-soft' },
+  { label: 'P', className: 'border-line-strong bg-surface-muted' },
+  { label: 'I', className: 'border-special bg-special-soft' },
+  { label: 'F', className: 'border-success-strong bg-success-soft' },
+  { label: 'Fuera', className: 'border-danger bg-danger-soft' },
 ]
 
 type MapaSgcFrameProps = {

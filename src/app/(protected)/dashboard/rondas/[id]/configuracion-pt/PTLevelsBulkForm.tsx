@@ -129,7 +129,7 @@ export function PTLevelsBulkForm({ rondaId, contaminantes }: Props) {
                   type="button"
                   onClick={() => removeRow(row.id)}
                   disabled={rows.length === 1}
-                  className="rounded-md px-2 py-1 text-sm font-semibold text-rose-600 transition hover:bg-rose-50 disabled:cursor-not-allowed disabled:opacity-30"
+                  className="rounded-md px-2 py-1 text-sm font-semibold text-danger-strong transition hover:bg-danger-soft disabled:cursor-not-allowed disabled:opacity-30"
                   aria-label={`Quitar fila ${index + 1}`}
                 >
                   x

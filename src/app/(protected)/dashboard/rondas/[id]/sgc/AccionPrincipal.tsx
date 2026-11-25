@@ -71,7 +71,7 @@ export function AccionPrincipal({ item, recurso, rondaId, rondaCodigo, rondaNomb
         <SubmitButton className={aprobado ? clsSec : cls}  disabled={bloqueado} title={bloqueado ? item.motivo : undefined}>
           {aprobado ? aprobable.retirar : aprobable.aprobar}
         </SubmitButton>
-        {bloqueado && <span className="text-xs text-rose-800">Resuelva primero los bloqueantes.</span>}
+        {bloqueado && <span className="text-xs text-danger-strong">Resuelva primero los bloqueantes.</span>}
       </form>
     )
   }
@@ -118,7 +118,7 @@ export function AccionPrincipal({ item, recurso, rondaId, rondaCodigo, rondaNomb
     return (
       <div className="flex flex-wrap gap-2">
         {csv}
-        <span className="rounded-md bg-emerald-50 px-2 py-1 text-xs font-semibold text-emerald-800">
+        <span className="rounded-md bg-success-soft px-2 py-1 text-xs font-semibold text-success-strong">
           {recurso.publicaParticipante ? 'Publicado' : 'Definitivo cargado'}
         </span>
       </div>

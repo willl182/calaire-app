@@ -91,7 +91,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
                   )}
                 </div>
               ) : (
-                <p className="mt-2 text-sm text-rose-700">Sin version oficial vigente.</p>
+                <p className="mt-2 text-sm text-danger-strong">Sin version oficial vigente.</p>
               )}
             </div>
           </div>
@@ -164,7 +164,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
 
         <div className="card p-5">
           <h2 className="text-lg font-semibold">Crear registro derivado</h2>
-          {!versionVigente && <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">No hay version vigente; el registro puede crearse, pero quedara sin version base.</p>}
+          {!versionVigente && <p className="mt-2 rounded-lg border border-warning-border bg-warning-soft px-3 py-2 text-sm text-warning-strong">No hay version vigente; el registro puede crearse, pero quedara sin version base.</p>}
           <form action={crearRegistroDerivadoAction} className="mt-4 grid gap-3">
             <input type="hidden" name="documento_id" value={documento._id} />
             <input type="hidden" name="version_base_id" value={versionVigente?._id ?? ''} />

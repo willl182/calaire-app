@@ -26,12 +26,12 @@ export function ConvexErrorView({ error, retry, section, title, children }: Prop
   return (
     <div className="card p-8">
       <h1 className="text-2xl font-semibold text-[var(--foreground)]">{section}</h1>
-      <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-5 text-amber-950">
+      <div className="mt-6 rounded-xl border border-warning-border bg-warning-soft p-5 text-warning-strong">
         <h2 className="text-lg font-semibold">{heading}</h2>
         <p className="mt-2 text-sm">{description}</p>
         {children}
         {error.digest && (
-          <p className="mt-3 text-xs font-medium text-amber-900">Digest: {error.digest}</p>
+          <p className="mt-3 text-xs font-medium text-warning-strong">Digest: {error.digest}</p>
         )}
         <button type="button" onClick={() => retry()} className="btn-primary mt-4 text-sm">
           Reintentar

@@ -198,7 +198,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                           {fuenteEditableUrl && <DocMetaDot label="Editable disponible" tone="sky" />}
                         </>
                       }
-                      trailing={version?.vigente && <span className="rounded bg-emerald-50 px-1.5 py-0.5 text-[11px] font-semibold text-emerald-700">v{version.vigente.version}</span>}
+                      trailing={version?.vigente && <span className="rounded bg-success-soft px-1.5 py-0.5 text-[11px] font-semibold text-success-strong">v{version.vigente.version}</span>}
                     />
                   )
                 })}
@@ -209,7 +209,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
               <DriveDetailAside
                 chips={
                   <>
-                    <span className="rounded-md bg-[var(--surface-panel)] px-2 py-1 text-xs font-semibold text-slate-700">{selectedDoc.tipo}</span>
+                    <span className="rounded-md bg-[var(--surface-panel)] px-2 py-1 text-xs font-semibold text-foreground">{selectedDoc.tipo}</span>
                     <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${estadoBadgeTone(selectedDoc.estado)}`}>{selectedDoc.estado}</span>
                     <span className="rounded-full bg-[var(--surface-panel)] px-2.5 py-1 text-xs font-semibold text-[var(--foreground-muted)]">{selectedDoc.modoDiligenciamiento ?? 'no_diligenciable'}</span>
                   </>

@@ -175,7 +175,7 @@ function RondaRow({ round, editando }: { round: Ronda; editando: EditandoParam }
                 title="Eliminar ronda"
                 message={`¿Borrar la ronda ${round.codigo}? Esta acción no se puede deshacer.`}
                 confirmLabel="Eliminar ronda"
-                className="inline-flex h-11 min-w-16 items-center justify-center rounded-md border border-rose-200 px-2.5 text-xs font-medium text-rose-600 transition hover:border-rose-400 hover:bg-rose-50 hover:text-rose-800"
+                className="inline-flex h-11 min-w-16 items-center justify-center rounded-md border border-danger-border px-2.5 text-xs font-medium text-danger-strong transition hover:border-danger hover:bg-danger-soft hover:text-danger-strong"
               >
                 Eliminar
               </ConfirmSubmitButton>

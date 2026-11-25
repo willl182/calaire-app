@@ -27,11 +27,11 @@ export function RegistrosTabView({
           <div className="sgc-kpi-label">Total</div>
           <div className="sgc-kpi-value numeric">{participantesGlobal.length}</div>
         </div>
-        <div className="sgc-kpi bg-emerald-50/40">
+        <div className="sgc-kpi bg-success-soft/40">
           <div className="sgc-kpi-label">Con enlace</div>
           <div className="sgc-kpi-value numeric">{conEnlace.length}</div>
         </div>
-        <div className="sgc-kpi bg-amber-50/50">
+        <div className="sgc-kpi bg-warning-soft/50">
           <div className="sgc-kpi-label">Sin reclamar</div>
           <div className="sgc-kpi-value numeric">{sinEnlace.length}</div>
         </div>
@@ -85,10 +85,10 @@ export function RegistrosTabView({
                       <td className="px-4 py-4">
                         <span className={`rounded-full px-2.5 py-0.5 text-xs font-semibold ${
                           p.ficha_estado === 'enviado'
-                            ? 'bg-emerald-100 text-emerald-800'
+                            ? 'bg-success-soft text-success-strong'
                             : p.ficha_estado === 'borrador'
-                              ? 'bg-amber-100 text-amber-800'
-                              : 'bg-slate-100 text-slate-600'
+                              ? 'bg-warning-soft text-warning-strong'
+                              : 'bg-surface-muted text-muted'
                         }`}>
                           {p.ficha_estado === 'enviado' ? 'Enviada' : p.ficha_estado === 'borrador' ? 'Borrador' : 'No iniciada'}
                         </span>
@@ -96,11 +96,11 @@ export function RegistrosTabView({
                       <td className="px-4 py-4 text-right">
                         <div className="flex flex-wrap items-center justify-end gap-2">
                           {p.correo_laboratorio && (
-                            <span className="rounded-full bg-sky-100 px-3 py-1 text-xs font-semibold text-sky-800">
+                            <span className="rounded-full bg-info-soft px-3 py-1 text-xs font-semibold text-info-strong">
                               Admin creado
                             </span>
                           )}
-                          <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">
+                          <span className="rounded-full bg-warning-soft px-3 py-1 text-xs font-semibold text-warning-strong">
                             {rondasPendientes} pendientes
                           </span>
                           <Link href={`/dashboard/participantes/${encodeURIComponent(p.workos_user_id)}`} className="btn-primary inline-flex px-3 py-1 text-xs">

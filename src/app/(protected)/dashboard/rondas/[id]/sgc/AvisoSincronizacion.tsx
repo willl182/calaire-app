@@ -9,7 +9,7 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
       <section
         role="status"
         aria-labelledby="aviso-sync-title"
-        className="flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 md:flex-row md:items-center md:justify-between"
+        className="flex flex-col gap-3 rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong md:flex-row md:items-center md:justify-between"
       >
         <div>
           <h2 id="aviso-sync-title" className="font-semibold">El expediente de esta ronda aún no está inicializado</h2>
@@ -40,7 +40,7 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
     <section
       role="status"
       aria-labelledby="aviso-sync-title"
-      className="flex flex-col gap-3 rounded-lg border border-amber-300 bg-amber-50 p-4 text-sm text-amber-950 md:flex-row md:items-center md:justify-between"
+      className="flex flex-col gap-3 rounded-lg border border-warning-border bg-warning-soft p-4 text-sm text-warning-strong md:flex-row md:items-center md:justify-between"
     >
       <div>
         <h2 id="aviso-sync-title" className="font-semibold">El expediente no está al día con el catálogo</h2>
