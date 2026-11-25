@@ -133,6 +133,35 @@ test('no pisa un codigo dado a mano y usa el siguiente libre', async () => {
   expect(await codesByUser(t, rondaId)).toEqual({ m: 2, x: 3 })
 })
 
+test('alta de referencia: toma el 1 y mueve al participante que lo tenia a mano', async () => {
+  const t = convexTest(schema, modules)
+  const asAdmin = t.withIdentity(ADMIN)
+  const rondaId = await seedRonda(t)
+  await t.run(async (ctx) => {
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab1', email: 'lab1@x', participantProfile: 'member', replicateCode: 1, invitadoAt: 1 })
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab2', email: 'lab2@x', participantProfile: 'member', replicateCode: 2, invitadoAt: 2 })
+  })
+
+  await asAdmin.mutation(api.rondas.index.addReferenceSlot, { rondaId, workosUserId: 'ref', email: 'ref@lab.test' })
+  expect(await codesByUser(t, rondaId)).toEqual({ lab1: 3, lab2: 2, ref: 1 })
+})
+
+test('alta de referencia: se rechaza si quien tiene el 1 ya tiene envios PT finales', async () => {
+  const t = convexTest(schema, modules)
+  const asAdmin = t.withIdentity(ADMIN)
+  const rondaId = await seedRonda(t)
+  await t.run(async (ctx) => {
+    const now = Date.now()
+    const lab = await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab1', email: 'lab1@x', participantProfile: 'member', participantCode: 'LAB001', replicateCode: 1, invitadoAt: 1 })
+    const ptItemId = await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'N1', sortOrder: 1, createdAt: now })
+    const sampleGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'A', sortOrder: 1, createdAt: now })
+    await ctx.db.insert('enviosPt', { rondaId, rondaParticipanteId: lab, ptItemId, sampleGroupId, meanValue: 1, sdValue: 0, draftSavedAt: now, finalSubmittedAt: now, updatedAt: now })
+  })
+
+  await expect(asAdmin.mutation(api.rondas.index.addReferenceSlot, { rondaId, workosUserId: 'ref', email: 'ref@lab.test' })).rejects.toThrow(/LAB001/)
+  expect(await codesByUser(t, rondaId)).toEqual({ lab1: 1 })
+})
+
 test('agent API addParticipante asigna codigo de replica', async () => {
   const t = convexTest(schema, modules)
   const rondaId = await seedRonda(t)

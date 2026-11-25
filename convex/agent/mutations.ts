@@ -3,7 +3,7 @@ import type { Id } from '../_generated/dataModel'
 import { defineAgentMutation } from './definitions'
 import { assertCapacidadNivelesPT, assertNivelesPTCuadran } from '../rondas/ptLevels'
 import { assertAllowedEstadoTransition, generateUniqueParticipantCode, getDirectorioByLookup, requireAgentAdmin } from './shared'
-import { generateNextReplicateCode } from '../rondas/codes'
+import { asignarReplicateCodeAlta } from '../rondas/codes'
 
 export const createRondaDefinition = defineAgentMutation({
   args: {
@@ -58,7 +58,7 @@ export const createConfiguredRondaDefinition = defineAgentMutation({
 
     for (const slot of slots) {
       const participantCode = await generateUniqueParticipantCode(ctx, rondaId)
-      const replicateCode = await generateNextReplicateCode(ctx, rondaId, slot.participantProfile)
+      const replicateCode = await asignarReplicateCodeAlta(ctx, rondaId, slot.participantProfile)
       const directorio = await getDirectorioByLookup(ctx, slot.email)
       await ctx.db.insert('rondaParticipantes', {
         rondaId,
@@ -248,7 +248,7 @@ export const addParticipanteDefinition = defineAgentMutation({
       directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode: assignedParticipantCode,
-      replicateCode: replicateCode ?? await generateNextReplicateCode(ctx, rondaId, participantProfile),
+      replicateCode: replicateCode ?? await asignarReplicateCodeAlta(ctx, rondaId, participantProfile),
       invitadoAt: Date.now(),
     })
   },
