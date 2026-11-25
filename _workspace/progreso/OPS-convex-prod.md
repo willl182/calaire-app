@@ -262,3 +262,9 @@ Conviene integrar antes la rama en `main` para que prod no quede por delante del
 - En seco: 15 borradores, 0 finales. Aplicado: 15 eliminados.
 - Quedan en prod: 15 envíos finales de la referencia de EA-PP2026-R3 y 4 borradores del cupo reclamado de EA-PP2026-R1.
 - `main` local (`0c986dc`) aún no tiene push. Prod tiene esa función interna, que `origin/main` todavía no contiene.
+
+## 8. Cierre (2026-11-25, confirmado por el usuario: "listo manda todo a prod y a main")
+- `ops/convex-prod-deploy` integrada en `main` como `8c935d9` (sección 6: códigos de réplica en cupos nuevos y en ediciones manuales).
+- `convex deploy` a prod: OK, sin índices eliminados, esquema validado.
+- Migración en seco tras el deploy: 0 cambios. Los datos de prod cumplen la regla.
+- `git push origin main`.
