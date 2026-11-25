@@ -4,6 +4,9 @@ import { getRonda } from '@/server/rondas'
 import { getPanelSgc } from '@/server/sgc'
 import { SGC_PLAN_BLOQUES, SGC_LEYENDA_CODIGO_PROVISIONAL } from '@/server/sgc/catalog'
 import { isoADdMmAaaa } from '../../fechas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Plan de la ronda (impresión)' }
 
 type PageProps = { params: Promise<{ id: string }> }
 
@@ -32,7 +35,7 @@ export default async function PlanRondaPrintPage({ params }: PageProps) {
         <div><strong>Fecha plan:</strong> {isoADdMmAaaa(plan?.camposEstructurados?.fecha_plan) || 'Sin fecha'}</div>
         <div><strong>Finalizado:</strong> {fmt(plan?.finalizadoAt)}</div>
         <div><strong>Finalizado por:</strong> {plan?.finalizadoBy ?? 'No finalizado'}</div>
-        <div><strong>Snapshot/version:</strong> ver bitacora SGC</div>
+        <div><strong>Instantánea/versión:</strong> ver bitácora SGC</div>
       </div>
       <p className="mt-4 rounded border border-warning-border bg-warning-soft p-3 text-sm font-medium text-warning-strong">
         {SGC_LEYENDA_CODIGO_PROVISIONAL}

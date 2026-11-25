@@ -1,6 +1,9 @@
 import { notFound } from 'next/navigation'
 import { getPtCase, getPtVerificationCandidates, getRonda } from '@/server/rondas'
 import { linkVerificationAction, reviewCaseAction } from '../actions'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Caso de la ronda' }
 
 export default async function AdminCaseDetail({ params }: { params: Promise<{ id: string; casoId: string }> }) {
   const { id, casoId } = await params

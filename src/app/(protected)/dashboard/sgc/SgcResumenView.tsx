@@ -37,7 +37,7 @@ export function SgcResumenView({
       />
 
       {backendOffline && (
-        <BackendOfflineBanner detail="Los contadores y accesos SGC se muestran con datos vacíos hasta que Convex responda." />
+        <BackendOfflineBanner detail="Los contadores y accesos SGC se muestran con datos vacíos hasta que el servidor responda." />
       )}
 
       <section className="sgc-kpis" aria-label="Indicadores SGC">

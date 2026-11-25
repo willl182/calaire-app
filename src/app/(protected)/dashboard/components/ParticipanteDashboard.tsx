@@ -2,12 +2,13 @@ import Link from 'next/link'
 
 import type { RondaParticipanteAsignada } from '@/server/rondas'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { Icon } from '@/components/ui/Icon'
 
 function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estado'] }) {
   if (estado === 'enviado') {
     return (
-      <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong">
-        Ficha enviada ✓
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong">
+        <Icon name="check" className="h-3.5 w-3.5" /> Ficha enviada
       </span>
     )
   }

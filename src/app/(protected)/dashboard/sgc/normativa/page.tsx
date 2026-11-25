@@ -7,6 +7,10 @@ import { SgcHeader } from '@/components/ui/SgcHeader'
 import { relacionarDocumentoRequisitoAction } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { Alert } from '@/components/ui/Alert'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Matriz normativa' }
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -110,7 +114,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
       <Alert tone="success" message={firstParam(params.success)} />
       <Alert tone="error" message={firstParam(params.error)} />
       {backendOffline && (
-        <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras Convex no responde." />
+        <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras el servidor no responde." />
       )}
 
       <section className="sgc-kpis">
@@ -163,7 +167,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
           <div>
             <h2>Requisitos normativos</h2>
             <p>
-              Pagina {data.pagination.page} de {data.pagination.totalPages} · {data.pagination.totalRows} requisitos filtrados
+              Página {data.pagination.page} de {data.pagination.totalPages} · {data.pagination.totalRows} requisitos filtrados
             </p>
           </div>
           <div className="flex gap-2">
@@ -209,7 +213,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-2">
                         {documentos.map((doc) => <Link key={doc._id} className="rounded-full bg-white px-2 py-1 text-xs font-semibold text-[var(--pt-primary-dark)]" href={`/dashboard/sgc/documentos/${doc._id}`}>{doc.codigo}</Link>)}
-                        {documentos.length === 0 && <span className="text-danger-strong">Sin relacion verificada</span>}
+                        {documentos.length === 0 && <span className="text-danger-strong">Sin relación verificada</span>}
                       </div>
                     </td>
                     <td className="px-4 py-3">
@@ -224,7 +228,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                           <input type="hidden" name="requisito_id" value={requisito._id} />
                           <select className="input text-xs" name="documento_id" defaultValue={documentosMaestros.documentos[0]?._id ?? ''} required>
                             {documentosMaestros.documentos.map((doc) => (
-                              <option key={doc._id} value={doc._id}>{doc.codigo} · {doc.nombre}</option>
+                              <option key={doc._id} value={doc._id}>{doc.codigo} · {etiquetaVisible(doc.nombre)}</option>
                             ))}
                           </select>
                           <div className="grid grid-cols-2 gap-2">

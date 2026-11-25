@@ -9,6 +9,9 @@ import {
   renderTemplate,
 } from '@/server/sgc/templates'
 import { CopyButton } from './CopyButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Plantilla de comunicación' }
 
  type PageProps = {
   params: Promise<{ id: string; name: string }>
@@ -16,9 +19,9 @@ import { CopyButton } from './CopyButton'
 
 const TITLES: Record<string, string> = {
   convocatoria: 'Convocatoria',
-  'recordatorio-ficha': 'Recordatorio ficha de inscripcion',
-  'recordatorio-envio-resultados': 'Recordatorio envio de resultados',
-  'publicacion-resultados': 'Publicacion de resultados',
+  'recordatorio-ficha': 'Recordatorio ficha de inscripción',
+  'recordatorio-envio-resultados': 'Recordatorio de envío de resultados',
+  'publicacion-resultados': 'Publicación de resultados',
   'cierre-ronda': 'Cierre de ronda',
 }
 

@@ -4,6 +4,9 @@ import { AdminDashboardFrame } from '../AdminDashboardFrame'
 import { ResultadosGlobalView } from '../components/ResultadosPanel'
 import { loadDashboardResultadosData } from '../data'
 import { getParamValue } from '../view-model'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados' }
 
 type DashboardResultadosPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>

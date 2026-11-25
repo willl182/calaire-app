@@ -27,6 +27,10 @@ import {
   updateParticipanteEmailAction,
 } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Icon } from '@/components/ui/Icon'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Participantes de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -60,9 +64,9 @@ function fichaEstadoBadge(p: ParticipanteRondaResumen, rondaId: string) {
     return (
       <Link
         href={href}
-        className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong transition hover:opacity-80"
+        className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong transition hover:opacity-80"
       >
-        Enviada ✓
+        <Icon name="check" className="h-3.5 w-3.5" /> Enviada
       </Link>
     )
   }

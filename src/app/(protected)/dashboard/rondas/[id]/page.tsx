@@ -19,6 +19,9 @@ import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
 import { updateRondaReplicasAction } from '../../actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Estado de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -309,7 +312,7 @@ export default async function RondaEstadoPage({ params, searchParams }: PageProp
     return (
       <div className="min-h-screen bg-[var(--background)] px-6 py-8">
         <div className="mx-auto flex max-w-7xl flex-col gap-6">
-          <BackendOfflineBanner detail="No se pudo verificar la ronda solicitada porque Convex no responde." />
+          <BackendOfflineBanner detail="No se pudo verificar la ronda solicitada porque el servidor no responde." />
           <section className="card p-8 text-center">
             <h1 className="text-xl font-semibold text-[var(--foreground)]">Ronda no disponible</h1>
             <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
@@ -369,7 +372,7 @@ export default async function RondaEstadoPage({ params, searchParams }: PageProp
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
         {metricasResult.offline && (
-          <BackendOfflineBanner detail="La ronda cargó, pero las métricas operativas se muestran vacías temporalmente porque Convex no responde." />
+          <BackendOfflineBanner detail="La ronda cargó, pero las métricas operativas se muestran vacías temporalmente porque el servidor no responde." />
         )}
 
         {/* Progress Metrics */}

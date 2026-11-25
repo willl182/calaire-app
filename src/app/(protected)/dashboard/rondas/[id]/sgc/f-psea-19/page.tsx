@@ -4,6 +4,9 @@ import { notFound, redirect } from 'next/navigation'
 import { canEditSgcMaestro, isAdmin, requireAuth } from '@/server/auth'
 import { actualizarActaInicio, cambiarPublicacionActaInicio, getActaInicio, getActaInicioDownloadUrl, getPanelSgc, inicializarActaInicio } from '@/server/sgc'
 import ActaArchivos from './ActaArchivos'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'F-PSEA-19 Acta de apertura' }
 
 const PASOS = [
   { key: 'borrador', label: 'Borrador' },

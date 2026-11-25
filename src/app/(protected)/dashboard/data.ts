@@ -10,7 +10,7 @@ import {
   listRondasParticipante,
   type Ronda,
 } from '@/server/rondas'
-import { listWorkOSUsers } from '@/server/auth/workos'
+import { listWorkOSUsersCached } from '@/server/auth/workos'
 import type { ResultadoDashboardRonda } from './view-model'
 
 export type AdminDashboardBaseData = Awaited<ReturnType<typeof loadDashboardBaseData>>
@@ -100,7 +100,7 @@ export async function loadDashboardRegistrosData() {
   const [base, allParticipantesResult, workosUsers] = await Promise.all([
     loadDashboardBaseData(),
     listAllParticipantesWithStatus(),
-    listWorkOSUsers(),
+    listWorkOSUsersCached(),
   ])
 
   return {

@@ -7,6 +7,9 @@ import { isAdmin } from '@/server/auth'
 import { getRondaByCodigoWithStatus, getRondaParticipantePTWithStatus, isInvitadoWithStatus } from '@/server/rondas'
 import { getOrCreateFicha, getFichaByRondaParticipante } from '@/server/rondas/fichas'
 import FormularioRegistro from './FormularioRegistro'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Ficha de registro' }
 
 type Props = {
   params: Promise<{ codigo: string }>
@@ -80,7 +83,7 @@ function RegistroOfflineState({ codigo }: { codigo: string }) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <BackendOfflineBanner detail="No se pudo cargar o preparar la ficha de registro mientras Convex esta offline." />
+        <BackendOfflineBanner detail="No se pudo cargar o preparar la ficha de registro mientras el servidor no responde." />
         <section className="card p-8 text-center">
           <h1 className="text-xl font-semibold text-[var(--foreground)]">Ficha no disponible</h1>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">

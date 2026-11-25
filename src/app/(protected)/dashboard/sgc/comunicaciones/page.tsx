@@ -4,6 +4,9 @@ import { listRondas } from '@/server/rondas'
 import { listComunicaciones, createComunicacion, deleteComunicacion } from '@/server/sgc'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Comunicaciones SGC' }
 
 async function ComunicacionesPage() {
   const auth = await requireAuth()

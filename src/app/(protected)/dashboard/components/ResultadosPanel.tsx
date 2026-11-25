@@ -49,7 +49,7 @@ export function ResultadosGlobalView({
           <div className="sgc-kpi-value numeric">{totalParticipantes}</div>
         </div>
         <div className="sgc-kpi bg-success-soft/40">
-          <div className="sgc-kpi-label">Envios finales</div>
+          <div className="sgc-kpi-label">Envíos finales</div>
           <div className="sgc-kpi-value numeric">{totalEnviosFinales}</div>
         </div>
         <div className="sgc-kpi">

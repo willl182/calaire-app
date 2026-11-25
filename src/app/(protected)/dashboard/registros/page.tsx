@@ -3,6 +3,9 @@ import { AdminDashboardFrame } from '../AdminDashboardFrame'
 import { RegistrosTabView } from '../components/RegistrosPanel'
 import { loadDashboardRegistrosData } from '../data'
 import { getParamValue } from '../view-model'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Registros' }
 
 type DashboardRegistrosPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>

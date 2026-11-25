@@ -13,10 +13,10 @@ import {
 import { SubmitButton } from '@/components/ui/SubmitButton'
 
 const INFORME_CHECK_LABELS: Record<string, string> = {
-  participantes_revisados: 'Participantes, codigos y fichas revisados',
-  fichas_revisadas: 'F-PSEA-03 y registros de participacion consistentes',
-  envios_finales_revisados: 'F-PSEA-08/F-PSEA-12 revisados contra envios finales',
-  metricas_revisadas: 'Metricas y salidas usadas en el informe revisadas',
+  participantes_revisados: 'Participantes, códigos y fichas revisados',
+  fichas_revisadas: 'F-PSEA-03 y registros de participación consistentes',
+  envios_finales_revisados: 'F-PSEA-08/F-PSEA-12 revisados contra envíos finales',
+  metricas_revisadas: 'Métricas y salidas usadas en el informe revisadas',
   evidencias_revisadas: 'Evidencias F-PSEA-09, F-PSEA-10 y anexos revisadas',
   inconsistencias_resueltas: 'Inconsistencias resueltas o justificadas',
   f_psea_11_no_aplica: 'Homogeneidad/estabilidad revisada o no aplicabilidad justificada',
@@ -24,11 +24,11 @@ const INFORME_CHECK_LABELS: Record<string, string> = {
 
 const HOMOGENEIDAD_CHECK_LABELS: Record<string, string> = {
   plan_muestreo_revisado: 'Plan de muestreo revisado',
-  criterios_aceptacion_definidos: 'Criterios de aceptacion definidos',
+  criterios_aceptacion_definidos: 'Criterios de aceptación definidos',
   resultados_homogeneidad_revisados: 'Resultados de homogeneidad revisados',
   resultados_estabilidad_revisados: 'Resultados de estabilidad revisados',
   desviaciones_documentadas: 'Desviaciones documentadas',
-  conclusion_lote_aprobada: 'Conclusion de lote aprobada',
+  conclusion_lote_aprobada: 'Conclusión de lote aprobada',
 }
 
 /** Codigos de recurso Drive que tienen un registro diligenciable embebido en el detalle. */
@@ -124,7 +124,7 @@ function InformeFinalForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
                 <input type="checkbox" name={`check_${key}`} defaultChecked={check?.cumple ?? false} />
                 {INFORME_CHECK_LABELS[key]}
               </label>
-              <input className="input mt-2" name={`obs_${key}`} placeholder="Observacion si no cumple" defaultValue={check?.observacion ?? ''} />
+              <input className="input mt-2" name={`obs_${key}`} placeholder="Observación si no cumple" defaultValue={check?.observacion ?? ''} />
             </div>
           )
         })}
@@ -155,7 +155,7 @@ function HomogeneidadForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
         <textarea
           className="input min-h-24"
           name="homogeneidad_conclusiones"
-          placeholder="Conclusion documentada de homogeneidad y estabilidad"
+          placeholder="Conclusión documentada de homogeneidad y estabilidad"
           defaultValue={panel.revisionHomogeneidad?.conclusiones ?? ''}
         />
         <div className="grid gap-3 lg:grid-cols-2">
@@ -167,7 +167,7 @@ function HomogeneidadForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
                   <input type="checkbox" name={`homogeneidad_check_${key}`} defaultChecked={check?.cumple ?? false} />
                   {HOMOGENEIDAD_CHECK_LABELS[key]}
                 </label>
-                <input className="input mt-2" name={`homogeneidad_obs_${key}`} placeholder="Observacion si no cumple" defaultValue={check?.observacion ?? ''} />
+                <input className="input mt-2" name={`homogeneidad_obs_${key}`} placeholder="Observación si no cumple" defaultValue={check?.observacion ?? ''} />
               </div>
             )
           })}

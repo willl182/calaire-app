@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation'
 import { getMyPtCases, getRondaByCodigo } from '@/server/rondas'
 import { createCaseAction } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Casos' }
 
 export default async function CasesPage({ params }: { params: Promise<{ codigo: string }> }) {
   const { codigo } = await params

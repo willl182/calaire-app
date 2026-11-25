@@ -15,6 +15,10 @@ import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
 import { guardarDocumentoMaestroAction } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Centro documental' }
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -113,22 +117,22 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
       />
 
       {result.offline && (
-        <BackendOfflineBanner detail="El centro documental se muestra sin documentos mientras Convex no responde." />
+        <BackendOfflineBanner detail="El centro documental se muestra sin documentos mientras el servidor no responde." />
       )}
 
       <DriveStatsBar
         items={[
           { label: 'Documentos', value: data.resumen.total },
           { label: 'Vigentes', value: data.resumen.vigentes, tone: 'emerald' },
-          { label: 'En revision', value: data.resumen.enRevision, tone: 'amber' },
-          { label: 'Sin version', value: data.resumen.sinVersion, tone: 'rose' },
+          { label: 'En revisión', value: data.resumen.enRevision, tone: 'amber' },
+          { label: 'Sin versión', value: data.resumen.sinVersion, tone: 'rose' },
         ]}
       />
 
       <section className="sgc-filters">
         <form className="grid items-center gap-3 lg:grid-cols-12">
           {activeFolder && <input type="hidden" name="carpeta" value={activeFolder.familia} />}
-          <input className="input min-w-0 lg:col-span-5 xl:col-span-6" name="q" placeholder="Codigo o nombre" defaultValue={firstParam(params.q) ?? ''} />
+          <input className="input min-w-0 lg:col-span-5 xl:col-span-6" name="q" placeholder="Código o nombre" defaultValue={firstParam(params.q) ?? ''} />
           <select className="input min-w-0 lg:col-span-3" name="familia" defaultValue={firstParam(params.familia) ?? ''}>
             <option value="">Todas las familias</option>
             {data.familias.map((familia) => <option key={familia} value={familia}>{familia}</option>)}
@@ -136,7 +140,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
           <select className="input min-w-0 lg:col-span-2" name="estado" defaultValue={firstParam(params.estado) ?? ''}>
             <option value="">Todos los estados</option>
             <option value="vigente">Vigente</option>
-            <option value="en_revision">En revision</option>
+            <option value="en_revision">En revisión</option>
             <option value="borrador">Borrador</option>
             <option value="obsoleto">Obsoleto</option>
           </select>
@@ -189,7 +193,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                       iconTone={tipoTone(doc.tipo)}
                       estado={doc.estado}
                       codigo={doc.codigo}
-                      nombre={doc.nombre}
+                      nombre={etiquetaVisible(doc.nombre)}
                       meta={
                         <>
                           <span>{doc.tipo}</span>
@@ -215,7 +219,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
                   </>
                 }
                 codigo={selectedDoc.codigo}
-                nombre={selectedDoc.nombre}
+                nombre={etiquetaVisible(selectedDoc.nombre)}
                 subtitle={<p className="mt-2 text-sm text-[var(--foreground-muted)]">{selectedDoc.ambito ?? 'Sin ambito'} · {selectedDoc.proceso}</p>}
                 closeHref={buildDocumentosHref(params, { carpeta: activeFolder.familia, doc: null })}
               >
@@ -231,9 +235,9 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
 
                 <dl className="grid gap-4 text-sm">
                   <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-3">
-                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Version oficial</dt>
+                    <dt className="text-xs font-semibold uppercase tracking-[0.08em] text-[var(--foreground-muted)]">Versión oficial</dt>
                     <dd className="mt-1 text-[var(--foreground)]">
-                      {selectedVersion?.vigente ? `v${selectedVersion.vigente.version} · ${selectedVersion.vigente.fileName ?? 'archivo oficial'}${formatBytes(selectedVersion.vigente.size) ? ` · ${formatBytes(selectedVersion.vigente.size)}` : ''}` : 'Sin version registrada'}
+                      {selectedVersion?.vigente ? `v${selectedVersion.vigente.version} · ${selectedVersion.vigente.fileName ?? 'archivo oficial'}${formatBytes(selectedVersion.vigente.size) ? ` · ${formatBytes(selectedVersion.vigente.size)}` : ''}` : 'Sin versión registrada'}
                     </dd>
                   </div>
                   <div className="rounded-lg border border-[var(--border)] bg-[var(--surface-panel)] p-3">
@@ -273,7 +277,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <input className="input" name="proceso" defaultValue="SGC" />
             <select className="input" name="estado" defaultValue="borrador">
               <option value="borrador">Borrador</option>
-              <option value="en_revision">En revision</option>
+              <option value="en_revision">En revisión</option>
               <option value="vigente">Vigente</option>
               <option value="obsoleto">Obsoleto</option>
             </select>
@@ -286,7 +290,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <select className="input" name="visibilidad" defaultValue="interna">
               <option value="interna">Interna</option>
               <option value="participantes">Participantes</option>
-              <option value="publica">Publica</option>
+              <option value="publica">Pública</option>
             </select>
             <select className="input" name="modo_control" defaultValue="app_oficial">
               <option value="app_oficial">App oficial</option>

@@ -26,6 +26,10 @@ import { getNombresUsuarios } from './textos'
 import { SiguientePasoBar } from './SiguientePasoBar'
 import { transicionSgcAction } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Expediente SGC de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -120,8 +124,8 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
           <ul className="mt-1 grid gap-0.5 text-xs text-warning-strong">
             {criticos.map((item) => (
               <li key={item.codigo}>
-                <Link className="underline-offset-2 hover:underline" href={item.destino}>{item.codigo} · {item.nombre}</Link>
-                <span className="text-warning-strong"> — {item.motivo}</span>
+                <Link className="underline-offset-2 hover:underline" href={item.destino}>{item.codigo} · {etiquetaVisible(item.nombre)}</Link>
+                <span className="text-warning-strong"> — {etiquetaVisible(item.motivo)}</span>
               </li>
             ))}
           </ul>

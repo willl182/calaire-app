@@ -18,6 +18,9 @@ import {
 } from './actions'
 import { PTLevelsBulkForm } from './PTLevelsBulkForm'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Configuración PT' }
 
 type PageProps = {
   params: Promise<{ id: string }>

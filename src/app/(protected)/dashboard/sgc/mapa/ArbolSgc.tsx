@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useMemo, useState } from 'react'
 
 import { bloqueGeneralCarpetas } from '@/lib/sgc/arbolBloqueGeneral'
+import { Icon } from '@/components/ui/Icon'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type ArbolSgcProps = {
   /** Códigos con ficha en el inventario maestro, para enlazar el nodo del árbol. */
@@ -104,8 +106,8 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
                   <span aria-hidden="true" className="text-[var(--foreground-muted)]">
                     {abierto(carpeta.nombre) ? '▾' : '▸'}
                   </span>
-                  <span aria-hidden="true">📁</span>
-                  <span className="truncate">{carpeta.nombre}/</span>
+                  <Icon name="carpeta" />
+                  <span className="truncate">{etiquetaVisible(carpeta.nombre)}/</span>
                   <span className="ml-auto rounded bg-[var(--surface-muted)] px-1.5 py-0.5 text-[10px] font-semibold text-[var(--foreground-muted)]">
                     {carpeta.items.length}
                   </span>
@@ -119,8 +121,8 @@ export function ArbolSgc({ fichasPorCodigo = {} }: ArbolSgcProps) {
                       const fichaId = codigo ? fichasPorCodigo[codigo] : undefined
                       const etiqueta = (
                         <>
-                          <span aria-hidden="true">{item.carpeta ? '📂' : '📄'}</span>
-                          <span className="truncate text-[var(--foreground)]" title={item.nombre}>
+                          <Icon name={item.carpeta ? 'carpetaAbierta' : 'archivo'} />
+                          <span className="truncate text-[var(--foreground)]" title={etiquetaVisible(item.nombre)}>
                             {codigo ?? item.nombre}
                             {item.carpeta ? '/' : ''}
                           </span>

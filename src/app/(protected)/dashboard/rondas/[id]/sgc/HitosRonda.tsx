@@ -1,6 +1,7 @@
 import type { SgcPanel } from '@/server/sgc'
 import { actualizarHitoRondaAction, crearHitoRondaAction } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type Hito = SgcPanel['hitos'][number]
 
@@ -30,7 +31,7 @@ function HitoFechaForm({ hito, rondaId }: { hito: Hito; rondaId: string }) {
         type="date"
         name="fecha_objetivo"
         defaultValue={hito.fechaObjetivo ?? ''}
-        aria-label={`Fecha objetivo de ${hito.nombre}`}
+        aria-label={`Fecha objetivo de ${etiquetaVisible(hito.nombre)}`}
       />
       <SubmitButton className="btn-outline px-3 py-1 text-xs">Guardar fecha</SubmitButton>
     </form>
@@ -66,7 +67,7 @@ export function HitosRonda({ hitos, rondaId }: { hitos: SgcPanel['hitos']; ronda
           {ordenados.map((hito) => (
             <li key={hito._id} className="flex flex-col gap-2 rounded-lg border border-[var(--border)] px-3 py-2 md:flex-row md:items-center md:justify-between">
               <div>
-                <div className="text-sm font-medium text-[var(--foreground)]">{hito.nombre}</div>
+                <div className="text-sm font-medium text-[var(--foreground)]">{etiquetaVisible(hito.nombre)}</div>
                 <div className="text-xs text-[var(--foreground-muted)]">
                   {hito.codigo} · {fmtFechaIso(hito.fechaObjetivo)} · {hito.estado.replace('_', ' ')}
                 </div>

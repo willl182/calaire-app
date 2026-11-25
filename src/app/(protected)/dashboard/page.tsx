@@ -5,6 +5,9 @@ import { ParticipanteDashboard } from './components/ParticipanteDashboard'
 import { AdminDashboardFrame } from './AdminDashboardFrame'
 import { loadDashboardHomeData, loadParticipanteDashboardData } from './data'
 import { getLegacyDashboardTabRedirect, getParamValue } from './view-model'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Panel de rondas' }
 
 type DashboardPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>

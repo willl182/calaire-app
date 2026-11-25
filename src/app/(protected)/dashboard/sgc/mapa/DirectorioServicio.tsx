@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Icon } from '@/components/ui/Icon'
 
 type CarpetaServicio = {
   nombre: string
@@ -55,7 +56,7 @@ function FolderGlyph({ restringida = false }: { restringida?: boolean }) {
         restringida ? 'bg-warning-soft text-warning-strong' : 'bg-info-soft text-info-strong'
       }`}
     >
-      {restringida ? '🔒' : '📁'}
+      <Icon name={restringida ? 'candado' : 'carpeta'} className="h-5 w-5" />
     </span>
   )
 }
@@ -87,16 +88,16 @@ export function DirectorioServicio() {
             <span className="text-[10px] font-semibold tracking-[0.12em] text-info">ESTRUCTURA</span>
           </div>
           <div aria-label="Estructura del directorio del servicio comercial" className="space-y-2">
-            <div className="font-semibold text-white">📁 servicio_comercial/</div>
+            <div className="flex items-center gap-1.5 font-semibold text-white"><Icon name="carpeta" /> servicio_comercial/</div>
             <div className="space-y-2 border-l border-line-strong pl-4">
               {carpetas.map((carpeta) => (
-                <div key={carpeta.nombre} className={carpeta.restringida ? 'text-warning' : undefined}>
-                  {carpeta.restringida ? '🔒' : '📁'} {carpeta.nombre}/
+                <div key={carpeta.nombre} className={`flex items-center gap-1.5 ${carpeta.restringida ? 'text-warning' : ''}`}>
+                  <Icon name={carpeta.restringida ? 'candado' : 'carpeta'} /> {carpeta.nombre}/
                 </div>
               ))}
-              <div>📁 fichas/</div>
-              <div>📄 README.md</div>
-              <div>📄 presentación_del_sistema</div>
+              <div className="flex items-center gap-1.5"><Icon name="carpeta" /> fichas/</div>
+              <div className="flex items-center gap-1.5"><Icon name="archivo" /> README.md</div>
+              <div className="flex items-center gap-1.5"><Icon name="archivo" /> presentación_del_sistema</div>
             </div>
           </div>
         </div>

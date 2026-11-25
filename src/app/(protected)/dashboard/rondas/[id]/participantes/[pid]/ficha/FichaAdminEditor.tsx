@@ -7,6 +7,7 @@ import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import { adminCargarPdfAcompananteAction, adminGuardarCampoFichaAction, adminGuardarListasAction } from './actions'
 import { FileInput } from '@/components/ui/FileInput'
+import { Icon } from '@/components/ui/Icon'
 
 const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 
@@ -20,7 +21,7 @@ type SaveState = 'idle' | 'saving' | 'saved' | 'error'
 
 function FieldSaveIndicator({ state }: { state: SaveState }) {
   if (state === 'saving') return <span className="text-xs text-[var(--foreground-muted)]">Guardando…</span>
-  if (state === 'saved') return <span className="text-xs text-success-strong">✓ Guardado</span>
+  if (state === 'saved') return <span className="inline-flex items-center gap-1 text-xs text-success-strong"><Icon name="check" className="h-3.5 w-3.5" /> Guardado</span>
   if (state === 'error') return <span className="text-xs text-danger-strong">Error al guardar</span>
   return null
 }
@@ -625,7 +626,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
           >
             {listSaving ? 'Guardando…' : 'Guardar datos temporalmente'}
           </button>
-          {listSaved && <span className="text-sm text-success-strong">✓ Listas guardadas</span>}
+          {listSaved && <span className="inline-flex items-center gap-1 text-sm text-success-strong"><Icon name="check" /> Listas guardadas</span>}
           {listError && <span className="text-sm text-danger-strong">{listError}</span>}
         </div>
       </section>

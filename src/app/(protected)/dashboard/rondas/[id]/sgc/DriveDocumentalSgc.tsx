@@ -25,6 +25,7 @@ import {
 } from './actions'
 import { FileInput } from '@/components/ui/FileInput'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 type Props = {
   drive: SgcDriveTree
@@ -405,7 +406,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                     <FolderCard
                       key={folder._id}
                       href={`${basePath}?carpeta=${encodeURIComponent(folder.codigo)}#explorador`}
-                      nombre={folder.nombre}
+                      nombre={etiquetaVisible(folder.nombre)}
                       sublabel={`Carpeta · ${folderChildren.length} documento${folderChildren.length === 1 ? '' : 's'}`}
                       badge={`${folderDone}/${cuentan.length}`}
                     />
@@ -421,7 +422,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                 <div className="p-6">
                   <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-lg font-semibold text-[var(--foreground)]">{activeFolder.nombre}</h3>
+                      <h3 className="text-lg font-semibold text-[var(--foreground)]">{etiquetaVisible(activeFolder.nombre)}</h3>
                       <p className="text-sm text-[var(--foreground-muted)]">{notaVisible(activeFolder.notas) ?? activeFolder.codigo}</p>
                     </div>
                     <LinkActions recurso={activeFolder} />
@@ -436,7 +437,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                         estado={recurso.estado}
                         estadoLabel={ESTADO_LABELS[recurso.estado]}
                         codigo={recurso.codigo}
-                        nombre={recurso.nombre}
+                        nombre={etiquetaVisible(recurso.nombre)}
                         meta={
                           <>
                             <span>{tipoLabel(recurso.tipo)}</span>
@@ -470,7 +471,7 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
                       </>
                     }
                     codigo={selectedDoc.codigo}
-                    nombre={selectedDoc.nombre}
+                    nombre={etiquetaVisible(selectedDoc.nombre)}
                     subtitle={
                       <>
                         {notaVisible(selectedDoc.notas) && <p className="mt-2 text-sm text-[var(--foreground-muted)]">{notaVisible(selectedDoc.notas)}</p>}

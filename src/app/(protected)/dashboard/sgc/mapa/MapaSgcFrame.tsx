@@ -26,10 +26,10 @@ const routes = [
   { value: '', label: 'Ruta: ninguna' },
   { value: 'data', label: 'Flujo de datos' },
   { value: 'he', label: 'H/E' },
-  { value: 'planning', label: 'Planificacion' },
+  { value: 'planning', label: 'Planificación' },
   { value: 'round', label: 'Estructura' },
   { value: 'sgc', label: 'Cierre SGC' },
-  { value: 'update', label: 'Elaboracion' },
+  { value: 'update', label: 'Elaboración' },
 ]
 
 const legend = [
@@ -81,7 +81,7 @@ export function MapaSgcFrame({ src, title }: MapaSgcFrameProps) {
           className="h-8 min-w-48 flex-1 rounded-md border border-[var(--border)] bg-white px-2 text-xs outline-none focus:border-[var(--pt-primary)]"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          placeholder="Buscar codigo o relacion"
+          placeholder="Buscar código o relación"
           type="search"
         />
         <select className="h-8 rounded-md border border-[var(--border)] bg-white px-2 text-xs" value={family} onChange={(event) => setFamily(event.target.value)}>

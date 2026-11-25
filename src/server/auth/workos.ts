@@ -1,4 +1,5 @@
 import { WorkOS } from '@workos-inc/node'
+import { revalidateTag, unstable_cache } from 'next/cache'
 import { env, requireEnv } from '@/env'
 
 let _workos: WorkOS | null = null
@@ -49,6 +50,7 @@ export async function createWorkOSUser(
     ...(firstName ? { firstName } : {}),
     ...(lastName ? { lastName } : {}),
   })
+  revalidateTag(WORKOS_USERS_CACHE_TAG, 'max')
 
   const parts = [user.firstName, user.lastName].filter(Boolean)
   return {
@@ -73,3 +75,16 @@ export async function listWorkOSUsers(limit = 100): Promise<WorkOSUserListItem[]
     }
   })
 }
+
+export const WORKOS_USERS_CACHE_TAG = 'workos-users'
+
+/**
+ * `listWorkOSUsers` con caché del servidor (5 min). Recorrer todas las páginas de
+ * usuarios tarda varios segundos; los nombres casi no cambian. Al crear un
+ * usuario se invalida con `revalidateTag(WORKOS_USERS_CACHE_TAG, 'max')`.
+ */
+export const listWorkOSUsersCached = unstable_cache(
+  (limit: number = 100) => listWorkOSUsers(limit),
+  ['workos-users-list'],
+  { revalidate: 300, tags: [WORKOS_USERS_CACHE_TAG] },
+)

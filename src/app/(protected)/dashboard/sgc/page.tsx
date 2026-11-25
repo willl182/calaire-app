@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { canViewSgcMaestro, requireAuth } from '@/server/auth'
 import { listMapaSgcWithStatus, listNormativaSgcWithStatus, listSgcMaestroWithStatus } from '@/server/sgc'
 import { SgcResumenView } from './SgcResumenView'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Sistema de Gestión' }
 
 export default async function SgcResumenPage() {
   const auth = await requireAuth()

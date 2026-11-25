@@ -2,6 +2,9 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getRonda, listPtCasesAdmin } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Casos de la ronda' }
 
 export default async function AdminCasesPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params, ronda = await getRonda(id)

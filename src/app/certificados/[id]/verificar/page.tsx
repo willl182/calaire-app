@@ -1,6 +1,9 @@
 import { fetchQuery } from 'convex/nextjs'
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Verificar certificado' }
 
 export default async function VerifyCertificatePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

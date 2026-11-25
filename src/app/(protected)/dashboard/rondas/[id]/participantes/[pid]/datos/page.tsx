@@ -14,6 +14,9 @@ import {
   listPTSampleGroups,
 } from '@/server/rondas'
 import { RondaPageHeader } from '../../../RondaPageHeader'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados PT del participante' }
 
 type Props = {
   params: Promise<{ id: string; pid: string }>

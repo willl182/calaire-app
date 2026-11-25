@@ -6,6 +6,9 @@ import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
 import { ArbolSgc } from './ArbolSgc'
 import { MapaSgcFrame } from './MapaSgcFrame'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Mapa SGC' }
 
 export default async function MapaSgcPage() {
   const auth = await requireAuth()
@@ -31,7 +34,7 @@ export default async function MapaSgcPage() {
         email={auth.user.email}
       />
       {mapa.offline && (
-        <BackendOfflineBanner detail="El mapa SGC se muestra sin relaciones mientras Convex no responde." />
+        <BackendOfflineBanner detail="El mapa SGC se muestra sin relaciones mientras el servidor no responde." />
       )}
 
       <section className="sgc-kpis">
@@ -66,8 +69,8 @@ export default async function MapaSgcPage() {
               <h2 className="text-lg font-semibold text-[var(--foreground)]">Mapa SGC sin relaciones</h2>
               <p className="mx-auto mt-2 max-w-2xl text-sm text-[var(--foreground-muted)]">
                 {mapa.offline
-                  ? 'No se pudieron cargar relaciones documentales porque Convex no esta disponible.'
-                  : 'Todavia no hay relaciones documentales registradas para construir el mapa.'}
+                  ? 'No se pudieron cargar relaciones documentales porque el servidor de datos no está disponible.'
+                  : 'Todavía no hay relaciones documentales registradas para construir el mapa.'}
               </p>
             </section>
           )}

@@ -4,6 +4,7 @@ import { SGC_RONDA_ETAPAS } from '@/server/sgc/catalog'
 import { AccionPrincipal } from './AccionPrincipal'
 import { marcarAplicaDocumentoAction } from './actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
 
 export const RESPONSABLE_LABELS: Record<SgcAvanceItem['responsable'], string> = {
   coordinador: 'Tú',
@@ -116,7 +117,7 @@ function DocumentoFila({
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className={`text-xs font-semibold ${apagado ? 'text-muted' : 'text-[var(--foreground-muted)]'}`}>{item.codigo}</span>
-            <span className={`text-sm font-medium ${apagado ? 'text-muted' : 'text-[var(--foreground)]'}`}>{item.nombre}</span>
+            <span className={`text-sm font-medium ${apagado ? 'text-muted' : 'text-[var(--foreground)]'}`}>{etiquetaVisible(item.nombre)}</span>
           </div>
           <div className="mt-1 flex flex-wrap items-center gap-2">
             <ResponsableBadge responsable={item.responsable} />
@@ -125,7 +126,7 @@ function DocumentoFila({
             </span>
             {item.nivel === 'bloqueante' && <span className="rounded-full bg-danger-soft px-2 py-0.5 text-[11px] font-semibold text-danger-strong">Bloquea el cierre</span>}
             {item.estado !== 'completo' && item.estado !== 'no_aplica' && (
-              <span className="text-xs text-[var(--foreground-muted)]">{item.motivo}</span>
+              <span className="text-xs text-[var(--foreground-muted)]">{etiquetaVisible(item.motivo)}</span>
             )}
           </div>
         </div>
@@ -209,7 +210,7 @@ export function ExpedienteGuiado({ avance, recursos, rondaId, rondaCodigo, ronda
             <li key={etapa.key} id={`etapa-${etapa.key}`} className="scroll-mt-24 rounded-xl border border-[var(--border)] bg-[var(--surface-panel,white)] p-4">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <h3 className="text-base font-semibold text-[var(--foreground)]">
-                  <span className="numeric text-[var(--foreground-muted)]">{etapa.numero}</span> · {etapa.nombre}
+                  <span className="numeric text-[var(--foreground-muted)]">{etapa.numero}</span> · {etiquetaVisible(etapa.nombre)}
                 </h3>
                 <div className="flex items-center gap-2 text-xs text-[var(--foreground-muted)]">
                   <span className="numeric font-semibold text-[var(--foreground)]">{completos}/{total}</span>
@@ -219,7 +220,7 @@ export function ExpedienteGuiado({ avance, recursos, rondaId, rondaCodigo, ronda
                     aria-valuemin={0}
                     aria-valuemax={100}
                     aria-valuenow={pct}
-                    aria-label={`Avance de la etapa ${etapa.nombre}: ${completos} de ${total}`}
+                    aria-label={`Avance de la etapa ${etiquetaVisible(etapa.nombre)}: ${completos} de ${total}`}
                   >
                     <div className="h-full bg-[var(--pt-primary)]" style={{ width: `${pct}%` }} />
                   </div>

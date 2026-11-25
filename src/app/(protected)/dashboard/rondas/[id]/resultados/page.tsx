@@ -16,6 +16,9 @@ import { RondaPageHeader } from '../RondaPageHeader'
 import { FileInput } from '@/components/ui/FileInput'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import { Alert } from '@/components/ui/Alert'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados de la ronda' }
 
 type PageProps = {
   params: Promise<{ id: string }>

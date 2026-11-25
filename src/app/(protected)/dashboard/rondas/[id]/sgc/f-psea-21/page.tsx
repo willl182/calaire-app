@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation'
 import { canEditSgcMaestro, isAdmin, requireAuth } from '@/server/auth'
 import { getExportacionInstrumentosUrl, getRelacionInstrumentosRonda, inicializarRelacionInstrumentos } from '@/server/sgc'
 import InstrumentosEditor from './InstrumentosEditor'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'F-PSEA-21 Instrumentos' }
 
 export default async function InstrumentosRondaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params

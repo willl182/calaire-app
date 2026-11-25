@@ -5,6 +5,9 @@ import { requireAuth } from '@/server/auth'
 import { getMyPtCases, getMyPtCertificate, getMyPtResults, getRondaByCodigo } from '@/server/rondas'
 
 import { ResultsExplorer } from './ResultsExplorer'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Resultados' }
 
 const CASE_STATUS_LABELS = {
   abierto: 'Pendiente de análisis',

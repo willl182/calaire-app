@@ -17,6 +17,13 @@ import { isAdmin } from '@/server/auth'
 import { getFichaByRondaParticipante } from '@/server/rondas/fichas'
 import FormularioRonda from './FormularioRonda'
 import FormularioReferencia from './FormularioReferencia'
+import { Icon } from '@/components/ui/Icon'
+import type { Metadata } from 'next'
+
+export async function generateMetadata({ params }: { params: Promise<{ codigo: string }> }): Promise<Metadata> {
+  const { codigo } = await params
+  return { title: `Ronda ${decodeURIComponent(codigo)}` }
+}
 
 export default async function RondaPage({
   params,
@@ -91,7 +98,7 @@ export default async function RondaPage({
       return (
         <div className="flex min-h-screen items-center justify-center bg-surface px-6">
           <div className="w-full max-w-lg rounded-xl bg-white p-10 text-center shadow">
-            <div className="text-4xl mb-4">{evaluacion.estado === 'publicada' ? '📊' : '⏳'}</div>
+            <div className="mb-4 flex justify-center text-muted"><Icon name={evaluacion.estado === 'publicada' ? 'grafica' : 'reloj'} className="h-10 w-10" /></div>
             <h2 className="text-lg font-semibold text-foreground mb-2">
               {evaluacion.estado === 'publicada' ? 'Resultados disponibles' : 'En evaluación'}
             </h2>
@@ -181,7 +188,7 @@ function RondaOfflineState({ codigo }: { codigo: string }) {
   return (
     <div className="min-h-screen bg-[var(--background)] px-6 py-8">
       <div className="mx-auto flex max-w-3xl flex-col gap-6">
-        <BackendOfflineBanner detail="No se pudo cargar la ronda del participante. Las acciones de carga quedan deshabilitadas hasta recuperar conexion." />
+        <BackendOfflineBanner detail="No se pudo cargar la ronda del participante. Las acciones de carga quedan deshabilitadas hasta recuperar la conexión." />
         <section className="card p-8 text-center">
           <h1 className="text-xl font-semibold text-[var(--foreground)]">Ronda no disponible</h1>
           <p className="mt-2 text-sm text-[var(--foreground-muted)]">

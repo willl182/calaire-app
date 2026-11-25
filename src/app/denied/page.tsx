@@ -1,15 +1,19 @@
-import Link from 'next/link'
+import type { Metadata } from 'next'
+
+import { PaginaEstado } from '@/components/ui/PaginaEstado'
+
+export const metadata: Metadata = { title: 'Acceso denegado' }
 
 function resolveMessage(reason?: string) {
   switch (reason) {
     case 'role':
-      return 'La cuenta autenticada no tiene permisos para acceder a esta seccion administrativa.'
+      return 'Su cuenta no tiene permisos para acceder a esta sección administrativa.'
     case 'invite':
-      return 'La cuenta autenticada no esta asociada a la ronda solicitada.'
+      return 'Su cuenta no está asociada a la ronda solicitada. Use el enlace de invitación que recibió o pida uno nuevo al coordinador.'
     case 'reference-role':
-      return 'Este enlace es exclusivo para el perfil member special (referencia).'
+      return 'Este enlace es exclusivo para el laboratorio de referencia de la ronda.'
     default:
-      return 'No fue posible autorizar el acceso con la sesion actual.'
+      return 'No fue posible autorizar el acceso con la sesión actual. Cierre sesión e ingrese de nuevo.'
   }
 }
 
@@ -23,33 +27,16 @@ export default async function DeniedPage({
   const reason = Array.isArray(reasonRaw) ? reasonRaw[0] : reasonRaw
 
   return (
-    <div className="min-h-screen bg-[linear-gradient(180deg,#fff7ed_0%,#fffbeb_100%)] px-6 py-12">
-      <div className="mx-auto flex max-w-2xl flex-col gap-6 rounded-[2rem] border border-warning-border bg-white/95 p-8 shadow-sm">
-        <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-warning-soft text-2xl">
-          🔒
-        </div>
-        <div className="space-y-3">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-warning-strong">
-            Acceso denegado
-          </p>
-          <h1 className="text-3xl font-semibold text-foreground">No es posible abrir esta vista</h1>
-          <p className="max-w-xl text-sm leading-6 text-muted">{resolveMessage(reason)}</p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Link
-            href="/dashboard"
-            className="rounded-full bg-foreground px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-foreground"
-          >
-            Volver al dashboard
-          </Link>
-          <Link
-            href="/"
-            className="rounded-full border border-line px-5 py-2.5 text-sm font-semibold text-foreground transition hover:border-line-strong hover:text-foreground"
-          >
-            Ir al inicio
-          </Link>
-        </div>
-      </div>
-    </div>
+    <PaginaEstado
+      icono="candado"
+      etiqueta="Acceso denegado"
+      titulo="No es posible abrir esta vista"
+      acciones={[
+        { href: '/', texto: 'Ir al inicio' },
+        { href: '/login', texto: 'Ingresar con otra cuenta' },
+      ]}
+    >
+      <p>{resolveMessage(reason)}</p>
+    </PaginaEstado>
   )
 }

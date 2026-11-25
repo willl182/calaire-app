@@ -108,7 +108,7 @@ async function descargarFoto(url: string | null | undefined, contentType: string
 export async function generarExportacionesF21Action(rondaId: string) {
   await requireEditor()
   const [relacion, panel] = await Promise.all([getRelacionInstrumentosRonda(rondaId), getPanelSgc(rondaId)])
-  if (!relacion || !panel) throw new Error('Relacion o ronda no disponible.')
+  if (!relacion || !panel) throw new Error('Relación o ronda no disponible.')
   if (relacion.estado !== 'validado') throw new Error('Valide la relacion antes de exportar.')
   const items = await Promise.all(relacion.items.map(async (item: typeof relacion.items[number]) => ({
     ...item,

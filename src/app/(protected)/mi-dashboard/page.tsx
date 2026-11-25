@@ -17,12 +17,17 @@ import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from
 import { PerformanceDashboard } from './PerformanceDashboard'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Icon } from '@/components/ui/Icon'
+import { etiquetaVisible } from '@/lib/sgc/etiquetas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Mi panel' }
 
 function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estado'] }) {
   if (estado === 'enviado') {
     return (
-      <span className="rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong">
-        Ficha enviada ✓
+      <span className="inline-flex items-center gap-1 rounded-full bg-success-soft px-2.5 py-0.5 text-xs font-semibold text-success-strong">
+        <Icon name="check" className="h-3.5 w-3.5" /> Ficha enviada
       </span>
     )
   }
@@ -137,7 +142,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
                     target="_blank"
                     rel="noreferrer"
                   >
-                    <span className="font-medium">{documento.codigo} · {documento.nombre}</span>
+                    <span className="font-medium">{documento.codigo} · {etiquetaVisible(documento.nombre)}</span>
                     <span className="text-xs text-[var(--pt-primary-dark)]">Descargar</span>
                   </a>
                 ))}
@@ -152,7 +157,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
                 {sgc.hitos.map((hito) => (
                   <div key={hito._id} className="flex items-center justify-between rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
                     <div>
-                      <span className="font-medium">{hito.nombre}</span>
+                      <span className="font-medium">{etiquetaVisible(hito.nombre)}</span>
                       <span className="ml-2 text-[var(--foreground-muted)]">{hito.estado}</span>
                     </div>
                     <span className="text-xs text-[var(--foreground-muted)]">
@@ -171,13 +176,13 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
                 {sgc.evidencias.map(({ serie, vigente }) => (
                   <div key={serie._id} className="flex items-center justify-between rounded border border-[var(--border)] bg-[var(--card)] p-2 text-sm">
                     <div>
-                      <span className="font-medium">{serie.nombre}</span>
+                      <span className="font-medium">{etiquetaVisible(serie.nombre)}</span>
                       {vigente && (
                         <span className="ml-2 text-[var(--foreground-muted)]">{vigente.fileName}</span>
                       )}
                     </div>
                     <span className="text-xs text-[var(--foreground-muted)]">
-                      {vigente ? 'Vigente' : 'Sin version vigente'}
+                      {vigente ? 'Vigente' : 'Sin versión vigente'}
                     </span>
                   </div>
                 ))}
@@ -367,7 +372,7 @@ export default async function MiDashboardPage({ searchParams }: PageProps) {
         <Alert tone="success" message={success} />
         <Alert tone="error" message={error} />
         {backendOffline && (
-          <BackendOfflineBanner detail="Las rondas asignadas y la informacion de cierre documental se muestran vacias temporalmente." />
+          <BackendOfflineBanner detail="Las rondas asignadas y la información de cierre documental se muestran vacías temporalmente." />
         )}
 
         <section className="grid gap-6">

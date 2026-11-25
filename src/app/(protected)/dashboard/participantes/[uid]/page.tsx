@@ -11,6 +11,10 @@ import {
   type ResultadoParticipantePT,
   type RondaParticipanteAsignada,
 } from '@/server/rondas'
+import { Icon } from '@/components/ui/Icon'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Detalle del participante' }
 
 type PageProps = {
   params: Promise<{ uid: string }>
@@ -79,7 +83,7 @@ function estadoOperativoParticipante(rondas: RondaParticipanteAsignada[]) {
       label: 'Revisar fichas',
       message: 'Hay fichas pendientes para este participante.',
       classes: 'bg-warning-soft text-warning-strong border-warning-border',
-      icon: '⚡',
+      icon: 'alerta' as const,
     }
   }
 
@@ -88,7 +92,7 @@ function estadoOperativoParticipante(rondas: RondaParticipanteAsignada[]) {
       label: 'Revisar incompletos',
       message: 'Hay rondas en las que el participante no ha enviado resultados.',
       classes: 'bg-warning-soft text-warning-strong border-warning-border',
-      icon: '⚡',
+      icon: 'alerta' as const,
     }
   }
 
@@ -96,7 +100,7 @@ function estadoOperativoParticipante(rondas: RondaParticipanteAsignada[]) {
     label: 'Completo',
     message: 'El participante tiene fichas y envíos finales completos en sus rondas.',
     classes: 'bg-success-soft text-success-strong border-success-border',
-    icon: '✓',
+    icon: 'check' as const,
   }
 }
 
@@ -107,7 +111,7 @@ function EstadoOperativoBadge({
 }) {
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${estado.classes}`}>
-      <span>{estado.icon}</span>
+      <Icon name={estado.icon} className="h-3.5 w-3.5" />
       {estado.label}
     </span>
   )

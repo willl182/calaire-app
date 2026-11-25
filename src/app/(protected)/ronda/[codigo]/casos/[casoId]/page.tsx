@@ -4,6 +4,9 @@ import { getPtCase } from '@/server/rondas'
 import { messageCaseAction, submitCaseAction, uploadCaseDocumentAction } from '../actions'
 import { FileInput } from '@/components/ui/FileInput'
 import { SubmitButton } from '@/components/ui/SubmitButton'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Caso' }
 
 const labels = { analisis_causa: 'Análisis de causa', plan_accion: 'Plan de acción', implementacion: 'Implementación', verificacion_eficacia: 'Verificación de eficacia' }
 

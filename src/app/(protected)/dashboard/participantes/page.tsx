@@ -4,6 +4,9 @@ import { DirectorioPanel } from '../components/DirectorioPanel'
 import { ParticipantesGlobalView } from '../components/ParticipantesPanel'
 import { loadDashboardParticipantesData } from '../data'
 import { getParamValue } from '../view-model'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Participantes' }
 
 type DashboardParticipantesPageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>

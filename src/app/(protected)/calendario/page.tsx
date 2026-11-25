@@ -3,6 +3,9 @@ import { redirect } from 'next/navigation'
 import { isAdmin, requireAuth } from '@/server/auth'
 import { getMyCalendar } from '@/server/rondas'
 import { CalendarView } from './CalendarView'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Calendario' }
 
 export default async function CalendarioPage() {
   const auth = await requireAuth()
