@@ -60,6 +60,7 @@ export default function FormularioRonda({
     globalK,
     importFileInputRef,
     cerrada,
+    enBorrador,
     soloLectura,
     hasPTConfig,
     hasParticipantCodes,
@@ -187,6 +188,12 @@ export default function FormularioRonda({
               />
             </div>
           </div>
+
+          {enBorrador && !adminTarget && (
+            <div role="alert" className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+              La ronda está en borrador: la captura quedará habilitada cuando el coordinador la active.
+            </div>
+          )}
 
           {cerrada && (
             <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">

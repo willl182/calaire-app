@@ -82,7 +82,9 @@ export function useFormularioPT({
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
 
   const cerrada = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
-  const soloLectura = cerrada || submitDone
+  // Solo una ronda activa admite cambios: en borrador la captura también queda en solo lectura.
+  const enBorrador = ronda.estado === 'borrador'
+  const soloLectura = ronda.estado !== 'activa' || submitDone
   const hasPTConfig = ptItems.length > 0 && sampleGroups.length > 0
   const hasParticipantCodes = Boolean(participantCode) && replicateCode != null
 
@@ -368,6 +370,7 @@ export function useFormularioPT({
     globalK,
     importFileInputRef,
     cerrada,
+    enBorrador,
     soloLectura,
     hasPTConfig,
     hasParticipantCodes,
