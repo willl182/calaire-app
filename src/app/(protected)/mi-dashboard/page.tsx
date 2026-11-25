@@ -84,9 +84,15 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
 
         <div className="flex flex-col items-start gap-2 sm:items-end">
           <div className="flex flex-wrap justify-start gap-2 sm:justify-end">
-            <Link href={`/ronda/${ronda.codigo}/registro`} className="btn-primary self-start">
-              {fichaLabel} →
-            </Link>
+            {ronda.estado === 'borrador' ? (
+              <span className="self-start rounded-lg border border-[var(--border)] bg-[var(--surface-muted)] px-4 py-2 text-sm font-semibold text-[var(--foreground-muted)]">
+                {fichaLabel}
+              </span>
+            ) : (
+              <Link href={`/ronda/${ronda.codigo}/registro`} className="btn-primary self-start">
+                {fichaLabel} →
+              </Link>
+            )}
 
             {puedeCargarDatos ? (
               <Link href={`/ronda/${ronda.codigo}`} className="btn-outline self-start">
@@ -102,7 +108,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
           {!puedeCargarDatos && (
             <p className="max-w-64 text-left text-xs leading-5 text-[var(--foreground-muted)] sm:text-right">
               {ronda.estado === 'borrador'
-                ? 'Diligencie la ficha ahora. La carga de datos se habilita cuando el coordinador active la ronda.'
+                ? 'La ficha y la carga de datos se habilitan cuando el coordinador active la ronda.'
                 : fichaEnviada
                   ? 'La carga de datos no está disponible para esta ronda.'
                   : 'Complete la ficha para habilitar el ingreso de resultados.'}

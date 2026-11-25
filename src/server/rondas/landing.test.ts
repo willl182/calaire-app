@@ -32,6 +32,13 @@ test('ronda cerrada aterriza en el panel de cierre', () => {
   )
 })
 
+test('ronda en borrador deja al participante en su panel', () => {
+  assert.equal(
+    getRondaParticipanteLandingPath(ronda({ estado: 'borrador', ficha_estado: 'no_iniciada' })),
+    '/mi-dashboard'
+  )
+})
+
 test('el destino nunca es un dashboard global', () => {
   for (const estado of ['no_iniciada', 'borrador', 'enviado'] as const) {
     const path = getRondaParticipanteLandingPath(ronda({ ficha_estado: estado }))

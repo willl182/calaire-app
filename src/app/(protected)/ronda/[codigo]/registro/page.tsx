@@ -62,6 +62,22 @@ export default async function RegistroPage({ params }: Props) {
     }
     ficha = await getFichaByRondaParticipante(rp.id)
   }
+  if (!ficha && ronda.estado !== 'activa') {
+    return (
+      <div className="min-h-screen bg-[var(--background)] flex items-center justify-center px-6">
+        <div className="card max-w-md p-10 text-center" role="status">
+          <h2 className="text-lg font-semibold text-[var(--foreground)] mb-2">La ronda aún no está activa</h2>
+          <p className="text-sm text-[var(--foreground-muted)]">
+            Su cupo en la ronda {ronda.codigo} quedó registrado. La ficha de participación se habilita cuando
+            coordinación active la ronda.
+          </p>
+          <Link href={admin ? '/dashboard' : '/mi-dashboard'} className="btn-outline mt-4 inline-block">
+            Volver al panel
+          </Link>
+        </div>
+      </div>
+    )
+  }
   if (!ficha) notFound()
 
   const soloLectura = ronda.estado !== 'activa'

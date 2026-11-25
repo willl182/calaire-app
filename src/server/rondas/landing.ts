@@ -16,6 +16,8 @@ export function getRondaParticipanteLandingPath(ronda: ParticipanteLandingRonda)
   if (ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada') {
     return `/mi-dashboard#cierre-documental-${encodeURIComponent(ronda.codigo)}`
   }
+  // En borrador la ficha aún no existe: el participante espera en su panel.
+  if (ronda.estado === 'borrador') return '/mi-dashboard'
   if (ronda.ficha_estado !== 'enviado') return `/ronda/${ronda.codigo}/registro`
   return `/ronda/${ronda.codigo}`
 }
