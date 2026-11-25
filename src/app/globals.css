@@ -46,6 +46,9 @@
   --success: #00B050;
   --warning: #ECC94B;
   --danger:  #E53E3E;
+  --danger-strong: #B42318;
+  --danger-soft:   #FEF3F2;
+  --danger-border: #F4B7B2;
 
   /* Focus */
   --focus-ring: rgba(253, 185, 19, 0.4);
@@ -296,6 +299,67 @@ a, button, input, select, textarea {
   opacity: 0.5;
   cursor: not-allowed;
   transform: none;
+}
+
+/* ─── .menu-item (opciones de ActionsMenu) ───────────────────────────── */
+.menu-item {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  border-radius: 8px;
+  padding: 0.5rem 0.75rem;
+  color: var(--foreground);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+.menu-item:hover {
+  background: var(--pt-primary-subtle);
+  text-decoration: none;
+}
+
+/* ─── .btn-danger / .btn-danger-outline (acciones irreversibles) ────── */
+.btn-danger,
+.btn-danger-outline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1.25rem;
+  font-family: var(--font-sans), system-ui, sans-serif;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border-radius: 9px;
+  cursor: pointer;
+  text-decoration: none;
+}
+.btn-danger {
+  background: var(--danger-strong);
+  border: 1.5px solid var(--danger-strong);
+  color: white;
+}
+.btn-danger:hover {
+  background: #8F1C13;
+  border-color: #8F1C13;
+}
+.btn-danger-outline {
+  background: transparent;
+  border: 1.5px solid var(--danger-border);
+  color: var(--danger-strong);
+}
+.btn-danger-outline:hover {
+  background: var(--danger-soft);
+  border-color: var(--danger-strong);
+}
+.btn-danger:disabled,
+.btn-danger-outline:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 /* ─── .numeric (datos numéricos con JetBrains Mono) ──────────────────── */

@@ -13,6 +13,7 @@ import {
 } from '@/server/rondas'
 import { RondaContextNav } from '../RondaContextNav'
 import { Alert } from '@/components/ui/Alert'
+import { ActionsMenu } from '@/components/ui/ActionsMenu'
 import { ConfirmSubmitButton } from '@/components/ui/ConfirmSubmitButton'
 import { CopyInvitationLinkButton } from '@/components/ui/CopyInvitationLinkButton'
 import { RondaPageHeader } from '../RondaPageHeader'
@@ -203,6 +204,8 @@ function ParticipanteRow({
   rondaCodigo: string
   rondaId: string
 }) {
+  const correoMarcador = !p.email.includes('@')
+  const nombreVisible = correoMarcador ? (p.participant_code ?? 'este cupo') : p.email
   const enlace =
     p.slot_token != null
       ? buildAbsoluteAppUrl(`/ronda/${rondaCodigo}?token=${p.slot_token}`)
@@ -233,16 +236,20 @@ function ParticipanteRow({
           <form action={updateParticipanteEmailAction} className="flex flex-col gap-1.5">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-            <label className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]">
-              Correo
+            <label
+              htmlFor={`correo-${p.ronda_participante_id}`}
+              className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--foreground-muted)]"
+            >
+              Correo {correoMarcador && '(sin asignar)'}
             </label>
             <input
+              id={`correo-${p.ronda_participante_id}`}
               type="email"
               name="email"
-              defaultValue={p.email}
+              required
+              defaultValue={correoMarcador ? '' : p.email}
               placeholder="correo@laboratorio.com"
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--foreground)] outline-none ring-0"
-              aria-label={`Correo del participante ${p.email}`}
             />
             <button
               type="submit"
@@ -252,7 +259,9 @@ function ParticipanteRow({
             </button>
           </form>
         ) : (
-          <div className="text-sm text-[var(--foreground)]">{p.email}</div>
+          <div className="text-sm text-[var(--foreground)]">
+            {correoMarcador ? <span className="text-[var(--foreground-muted)]">Sin correo asignado</span> : p.email}
+          </div>
         )}
       </td>
 
@@ -293,49 +302,43 @@ function ParticipanteRow({
 
       {/* Col 6: Acciones */}
       <td className="px-5 py-4 align-top">
-        <div className="grid min-w-40 gap-2">
-          <Link
-            href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha#datos-participante`}
-            className="rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-3 py-1.5 text-center text-xs font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
-          >
-            Editar datos del participante
-          </Link>
-          <Link
-            href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`}
-            className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-center text-xs font-semibold text-[var(--foreground)] transition hover:border-[var(--pt-primary)]"
-          >
-            Editar ficha completa
-          </Link>
-          <Link
-            href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/datos`}
-            className="rounded-lg border border-blue-200 bg-blue-50 px-3 py-1.5 text-center text-xs font-semibold text-blue-700 transition hover:border-blue-400 hover:bg-blue-100"
-          >
-            Editar resultados PT
-          </Link>
-          {canEdit && (
-            <>
+        <div className="flex items-center justify-end gap-2">
+          <ActionsMenu>
+            <Link
+              href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha#datos-participante`}
+              className="menu-item"
+            >
+              Editar datos del participante
+            </Link>
+            <Link href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/ficha`} className="menu-item">
+              Editar ficha completa
+            </Link>
+            <Link href={`/dashboard/rondas/${rondaId}/participantes/${p.ronda_participante_id}/datos`} className="menu-item">
+              Editar resultados PT
+            </Link>
+            {canEdit && (
               <form action={regenerateSlotAction}>
                 <input type="hidden" name="ronda_id" value={rondaId} />
                 <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-                <button
-                  type="submit"
-                  className="w-full rounded-lg border border-[var(--border)] px-3 py-1.5 text-xs text-[var(--foreground-muted)] transition hover:border-amber-400 hover:bg-amber-50 hover:text-amber-700"
-                >
-                  Regenerar
+                <button type="submit" className="menu-item">
+                  Regenerar enlace de invitación
                 </button>
               </form>
-              <form action={removeParticipanteAction}>
-                <input type="hidden" name="ronda_id" value={rondaId} />
-                <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-                <ConfirmSubmitButton
-                  type="submit"
-                  message={`¿Eliminar a ${p.email} de esta ronda?`}
-                  className="w-full rounded-lg border border-rose-200 bg-rose-50/50 px-3 py-1.5 text-xs text-rose-600 transition hover:border-rose-400 hover:bg-rose-100 hover:text-rose-800"
-                >
-                  Eliminar
-                </ConfirmSubmitButton>
-              </form>
-            </>
+            )}
+          </ActionsMenu>
+          {canEdit && (
+            <form action={removeParticipanteAction}>
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
+              <ConfirmSubmitButton
+                type="submit"
+                message={`¿Eliminar a ${nombreVisible} de esta ronda? Se pierden su ficha y sus resultados en la ronda.`}
+                aria-label={`Eliminar a ${nombreVisible} de la ronda`}
+                className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 hover:text-rose-800"
+              >
+                Eliminar
+              </ConfirmSubmitButton>
+            </form>
           )}
         </div>
       </td>
@@ -528,7 +531,7 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
                   <col className="w-[11rem]" />
                   <col className="w-[9rem]" />
                   <col className="w-[9rem]" />
-                  <col className="w-[15rem]" />
+                  <col className="w-[13rem]" />
                 </colgroup>
                 <thead>
                   <tr className="border-b-2 border-[var(--pt-primary)]">
@@ -579,7 +582,7 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
                 <form action={addReferenceSlotAction}>
                   <input type="hidden" name="ronda_id" value={rondaId} />
                   <button type="submit" className="btn-outline">
-                    Agregar referencia (member special)
+                    Agregar cupo de referencia
                   </button>
                 </form>
               )}

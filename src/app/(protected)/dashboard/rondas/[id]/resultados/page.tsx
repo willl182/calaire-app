@@ -93,6 +93,19 @@ function MetricaCard({
   )
 }
 
+const ETIQUETA_EVALUACION: Record<string, string> = {
+  sin_cargar: 'Sin cargar',
+  importando: 'Importando',
+  borrador_validado: 'Borrador validado',
+  publicada: 'Publicada',
+}
+
+const NUMERO = new Intl.NumberFormat('es-CO', { maximumFractionDigits: 6 })
+
+function formatNumero(value: number) {
+  return NUMERO.format(value)
+}
+
 function ResultadosTable({
   resultados,
   columnas,
@@ -107,7 +120,7 @@ function ResultadosTable({
       <table className="border-separate border-spacing-0 text-sm" style={{ minWidth }}>
         <thead>
           <tr>
-            <th className="sticky left-0 z-20 border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
+            <th className="sticky left-0 z-20 min-w-56 border-b-2 border-r border-[var(--pt-primary)] border-r-[var(--border)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)] shadow-[4px_0_6px_-4px_rgba(17,24,39,0.15)]">
               Participante
             </th>
             <th className="border-b-2 border-[var(--pt-primary)] bg-[var(--surface)] px-4 py-3 text-left font-semibold text-[var(--foreground)]">
@@ -137,21 +150,24 @@ function ResultadosTable({
             const celdas = getCellMap(resultado)
             return (
               <tr key={resultado.participante_id} className="align-top">
-                <td className="sticky left-0 z-10 border-b border-[var(--border-soft)] bg-[var(--surface)] px-4 py-4">
+                <th
+                  scope="row"
+                  className="sticky left-0 z-10 min-w-56 border-b border-r border-[var(--border-soft)] border-r-[var(--border)] bg-[var(--surface)] px-4 py-4 text-left font-normal shadow-[4px_0_6px_-4px_rgba(17,24,39,0.15)]"
+                >
                   <div className="font-medium text-[var(--foreground)]">{resultado.email}</div>
                   <div className="mt-1 text-xs text-[var(--foreground-muted)]">
-                    participant_id:{' '}
+                    Código:{' '}
                     <span className="numeric text-[var(--foreground)]">
                       {resultado.participant_code ?? '—'}
                     </span>
                   </div>
                   <div className="text-xs text-[var(--foreground-muted)]">
-                    replicate:{' '}
+                    Réplica:{' '}
                     <span className="numeric text-[var(--foreground)]">
                       {resultado.replicate_code ?? '—'}
                     </span>
                   </div>
-                </td>
+                </th>
                 <td className="border-b border-[var(--border-soft)] px-4 py-4">
                   {completitudBadge(resultado)}
                 </td>
@@ -168,14 +184,14 @@ function ResultadosTable({
                       {celda ? (
                         <div className="space-y-1">
                           <div className="numeric text-sm font-medium text-[var(--foreground)]">
-                            mean {celda.mean_value}
+                            <abbr title="Promedio" className="no-underline">x̄</abbr> {formatNumero(celda.mean_value)}
                           </div>
                           <div className="numeric text-xs text-[var(--foreground-muted)]">
-                            sd {celda.sd_value}
+                            <abbr title="Desviación estándar" className="no-underline">s</abbr> {formatNumero(celda.sd_value)}
                           </div>
                         </div>
                       ) : (
-                        <span className="text-[var(--border)]">Sin dato</span>
+                        <span className="text-xs text-[var(--foreground-muted)]">Sin dato</span>
                       )}
                     </td>
                   )
@@ -252,8 +268,8 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
 
         <section className="card p-6">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
-            <div><h2 className="text-lg font-semibold">Evaluación importada</h2><p className="text-sm text-[var(--foreground-muted)]">Preview estricto, borrador reemplazable y publicación irreversible.</p></div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{evaluacion?.estado ?? 'sin_cargar'}</span>
+            <div><h2 className="text-lg font-semibold">Evaluación importada</h2><p className="text-sm text-[var(--foreground-muted)]">Se valida el CSV completo antes de importarlo; el borrador se puede reemplazar y la publicación es definitiva.</p></div>
+            <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">{ETIQUETA_EVALUACION[evaluacion?.estado ?? 'sin_cargar']}</span>
           </div>
           {evaluacion?.estado !== 'publicada' ? <div className="grid gap-5 lg:grid-cols-3">
             <form action={importPtScoresAction} className="rounded-xl border border-[var(--border-soft)] p-4">

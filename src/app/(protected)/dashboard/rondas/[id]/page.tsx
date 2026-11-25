@@ -158,65 +158,32 @@ function AccionesDeEstado({
   confirmCerrar: boolean
   confirmReabrir: boolean
 }) {
-  return (
-    <section className="card p-6">
-      <h2 className="text-lg font-semibold text-[var(--foreground)] mb-1">Acciones de estado</h2>
-      <p className="text-sm text-[var(--foreground-muted)] mb-4">
-        Transiciones del ciclo de vida de la ronda.
-      </p>
+  if (estado === 'borrador') {
+    return (
+      <section className="card p-6">
+        <h2 className="mb-1 text-lg font-semibold text-[var(--foreground)]">Activar la ronda</h2>
+        <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+          Al activarla, los participantes pueden reclamar sus cupos y empezar a capturar resultados.
+        </p>
+        <form action={activarRondaAction}>
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <button type="submit" className="btn-primary">
+            Activar ronda
+          </button>
+        </form>
+      </section>
+    )
+  }
 
-      <div className="flex flex-wrap gap-3">
-        {estado === 'borrador' && (
-          <form action={activarRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-primary">
-              Activar ronda →
-            </button>
-          </form>
-        )}
-
-        {estado === 'activa' && !confirmCerrar && (
-          <form action={cerrarRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-outline">
-              Cerrar ronda
-            </button>
-          </form>
-        )}
-
-        {estado === 'activa' && confirmCerrar && (
-          <div className="flex items-center gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
-            <span className="text-sm text-rose-800">¿Está seguro de cerrar la ronda?</span>
-            <form action={cerrarRondaAction}>
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="confirm" value="1" />
-              <button
-                type="submit"
-                className="rounded-lg bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700"
-              >
-                Confirmar cierre
-              </button>
-            </form>
-            <Link
-              href={`/dashboard/rondas/${rondaId}`}
-              className="text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
-            >
-              Cancelar
-            </Link>
-          </div>
-        )}
-
-        {estado === 'cerrada' && !confirmReabrir && (
-          <form action={reabrirRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-outline">
-              Reabrir ronda
-            </button>
-          </form>
-        )}
-
-        {estado === 'cerrada' && confirmReabrir && (
-          <div className="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
+  if (estado === 'cerrada') {
+    return (
+      <section className="card p-6">
+        <h2 className="mb-1 text-lg font-semibold text-[var(--foreground)]">Reabrir la ronda</h2>
+        <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+          Vuelve a permitir cambios en participantes, fichas y resultados.
+        </p>
+        {confirmReabrir ? (
+          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
             <span className="text-sm text-amber-800">¿Está seguro de reabrir la ronda?</span>
             <form action={reabrirRondaAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
@@ -225,13 +192,57 @@ function AccionesDeEstado({
                 Confirmar reapertura
               </button>
             </form>
-            <Link
-              href={`/dashboard/rondas/${rondaId}`}
-              className="text-sm text-[var(--foreground-muted)] hover:text-[var(--foreground)]"
-            >
+            <Link href={`/dashboard/rondas/${rondaId}`} className="btn-outline">
               Cancelar
             </Link>
           </div>
+        ) : (
+          <form action={reabrirRondaAction}>
+            <input type="hidden" name="ronda_id" value={rondaId} />
+            <button type="submit" className="btn-outline">
+              Reabrir ronda
+            </button>
+          </form>
+        )}
+      </section>
+    )
+  }
+
+  if (estado !== 'activa') return null
+
+  return (
+    <section aria-labelledby="zona-peligro" className="rounded-xl border-2 border-rose-200 bg-[var(--surface-panel)] p-6">
+      <h2 id="zona-peligro" className="mb-1 text-lg font-semibold text-rose-800">
+        Zona de peligro
+      </h2>
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <p className="text-sm font-semibold text-[var(--foreground)]">Cerrar ronda</p>
+          <p className="text-sm text-[var(--foreground-muted)]">
+            Detiene la captura de resultados y pasa la ronda a documentación pendiente. Los participantes ya
+            no podrán enviar datos.
+          </p>
+        </div>
+        {confirmCerrar ? (
+          <div className="flex flex-wrap items-center gap-3">
+            <form action={cerrarRondaAction}>
+              <input type="hidden" name="ronda_id" value={rondaId} />
+              <input type="hidden" name="confirm" value="1" />
+              <button type="submit" className="btn-danger">
+                Confirmar cierre
+              </button>
+            </form>
+            <Link href={`/dashboard/rondas/${rondaId}`} className="btn-outline">
+              Cancelar
+            </Link>
+          </div>
+        ) : (
+          <form action={cerrarRondaAction} className="shrink-0">
+            <input type="hidden" name="ronda_id" value={rondaId} />
+            <button type="submit" className="btn-danger-outline">
+              Cerrar ronda
+            </button>
+          </form>
         )}
       </div>
     </section>
