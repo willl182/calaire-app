@@ -247,6 +247,46 @@ export const backfillReplicateCodes = internalMutation({
   },
 })
 
+/**
+ * Borra los envios PT en borrador (sin finalSubmittedAt) de un cupo, por ejemplo datos de prueba.
+ * Los envios finales no se tocan nunca. Solo admite cupos pendientes (sin reclamar), porque
+ * reclamar un cupo reutiliza la fila y el laboratorio veria esos borradores en su formulario.
+ * Por defecto dryRun = true.
+ */
+export const eliminarBorradoresPT = internalMutation({
+  args: {
+    participanteId: v.id('rondaParticipantes'),
+    dryRun: v.optional(v.boolean()),
+  },
+  handler: async (ctx, { participanteId, dryRun = true }) => {
+    const participante = await ctx.db.get(participanteId)
+    if (!participante) throw new Error('Participante no encontrado.')
+    if (participante.claimedAt) {
+      throw new Error('El cupo ya fue reclamado por un laboratorio: sus borradores no se borran desde aqui.')
+    }
+
+    const envios = await ctx.db
+      .query('enviosPt')
+      .withIndex('by_participante', (q) => q.eq('rondaParticipanteId', participanteId))
+      .collect()
+    const borradores = envios.filter((envio) => envio.finalSubmittedAt == null)
+
+    if (!dryRun) {
+      for (const envio of borradores) await ctx.db.delete(envio._id)
+    }
+
+    return {
+      dryRun,
+      participanteId,
+      participantCode: participante.participantCode ?? null,
+      email: participante.email,
+      borradores: borradores.length,
+      finalesConservados: envios.length - borradores.length,
+      eliminados: dryRun ? 0 : borradores.length,
+    }
+  },
+})
+
 export const insertRonda = internalMutation({
   args: {
     codigo: v.string(),
