@@ -32,6 +32,10 @@ La aprobación final de las autorizaciones, incluida la de emitir informes final
 5. Si falta evidencia, la competencia está en formación, la autorización venció o existe una restricción incompatible con la tarea, la persona no ejecuta esa función de forma autónoma. El coordinador reasigna la tarea o acuerda supervisión documentada mientras se completa la evaluación.
 6. Los accesos a datos e información sensible se gestionan conforme a `P-PSEA-19`; `F-PSEA-16` no reemplaza los controles de acceso ni los compromisos de confidencialidad.
 
+## Control de autorización para `F-PSEA-21`
+
+El técnico autorizado diligencia la identificación y las fotografías de cada instrumento Calaire, confirma los mínimos operativos y envía la relación a validación. El coordinador verifica que esté completa y la aprueba o la devuelve con una observación. Solo una revisión validada puede generar PDF y XLSX. Toda edición, alta, retiro o sustitución de foto incrementa la revisión, revoca la validación y deja sin vigencia las exportaciones anteriores.
+
 ## Diligenciamiento y actualización de `F-PSEA-16` por ronda
 
 El gestor SGC mantiene el formato maestro en el bloque general y conserva una copia diligenciada, identificable por código de ronda, en el expediente correspondiente. El formato maestro no se modifica para registrar datos de una ronda.
