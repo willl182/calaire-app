@@ -53,6 +53,76 @@ No reemplaza los procedimientos de quejas, apelaciones, trabajo no conforme, con
 
 ---
 
+## Comunicaciones de ronda con participantes
+
+> Contenido reubicado desde el antiguo archivo `P-PSEA-20` ("Comunicación PT", borrador del 2026-04-08), que ahora corresponde a Competencia y autorización operativa. Los códigos se actualizaron a la numeración vigente del catálogo. Los plazos y aprobadores marcados con ⚠️ siguen pendientes de validar.
+
+### Solicitudes y acuerdos de participación
+
+1. El coordinador EA recibe la solicitud o confirma la invitación directa al laboratorio. En la prueba piloto no hay convocatoria abierta: los participantes se invitan directamente.
+2. Antes de confirmar la inclusión, verifica que el laboratorio cumpla los requisitos mínimos de participación:
+
+   | Requisito | Evidencia |
+   |---|---|
+   | Dispone de analizadores para los analitos de la ronda | Declarado en `F-PSEA-03`; exportado en `F-PSEA-04` |
+   | Cuenta con certificado de calibración vigente | Declarado en `F-PSEA-03`; exportado en `F-PSEA-04` |
+   | Puede trasladar los equipos al sitio en las fechas indicadas | Declarado en `F-PSEA-03` |
+   | Acepta las condiciones de confidencialidad | Confirmado en `F-PSEA-03` |
+
+3. Si no cumple algún requisito, se le notifican las razones por escrito y, si aplica, se le ofrece participar en una ronda futura.
+4. El código anónimo del participante lo asigna `calaire-app` y no se comparte con los demás participantes (ver `P-PSEA-19`).
+5. El acuerdo de participación queda formalizado con la aceptación registrada en `F-PSEA-03`. Cubre las condiciones de participación (`DG-PSEA-01`), la confidencialidad y el anonimato de los resultados, la disponibilidad de los equipos en las fechas indicadas y la veracidad de los datos declarados.
+6. En operación regular, se evalúa si hace falta un acuerdo contractual aparte, por ejemplo cuando el participante asume compromisos económicos o exige una confidencialidad específica. ⚠️ Por definir.
+
+### Calendario de comunicaciones de la ronda
+
+| Comunicación | Contenido | Plazo ⚠️ | Aprueba ⚠️ | Instrumento |
+|---|---|---|---|---|
+| Invitación | Descripción del esquema, analitos, fechas tentativas y condiciones generales | T-30 días | Directora del PEA | Correo institucional o carta formal |
+| Instrucciones previas a la ronda | Instrucciones completas para el participante y solicitud de actualizar `F-PSEA-03` en `calaire-app` | T-14 días | Coordinador EA y responsable de calidad | `F-PSEA-18` con `I-PSEA-02` |
+| Recordatorio | Verificación de `F-PSEA-03` y fecha límite | T-7 días | Coordinador EA | `F-PSEA-18` o correo breve |
+| Confirmación logística | Punto de encuentro, horario y contacto del día | T-1 día | Coordinador EA | Correo breve |
+| Comunicación de resultados | Informe individual de desempeño (confidencial) | ≤ 45 días después de la ronda | Directora del PEA | Informe formal publicado en el portal (`P-PSEA-09`) |
+
+Para las instrucciones previas a la ronda:
+
+1. El coordinador EA redacta la comunicación personalizada.
+2. El responsable de calidad verifica que esté completa frente a `I-PSEA-02`.
+3. La directora del PEA la aprueba si cambió respecto a la versión anterior.
+4. El coordinador EA la envía por un canal autorizado y la registra en `F-PSEA-18`.
+
+### Notificación de cambios y fe de erratas
+
+| Tipo de cambio | Obligación | Plazo máximo ⚠️ |
+|---|---|---|
+| Fechas de la ronda | Comunicar a todos los participantes confirmados y emitir fe de erratas | ≤ 24 h desde la decisión |
+| Analitos o niveles | Igual que el anterior, y evaluar si cada participante puede continuar | ≤ 24 h desde la decisión |
+| Lugar o sala | Comunicar a todos y actualizar las instrucciones logísticas | ≤ 24 h desde la decisión |
+| Corrección de un dato técnico de las instrucciones | Fe de erratas por correo y archivo en el SGC | ≤ 48 h desde que se detecta |
+| Criterios de evaluación (σ_pt, indicador) | Reemitir la sección correspondiente de las instrucciones | Al menos en T-5 días |
+
+Para emitir una fe de erratas:
+
+1. El coordinador EA redacta el correo con el asunto `[CALAIRE-EA] Fe de erratas — [código de ronda] — [tema]`.
+2. Indica qué decía la comunicación original y qué debe decir ahora.
+3. La envía a todos los participantes afectados.
+4. La registra como aclaración o cambio (`EVID-ACL`) en el expediente de la ronda.
+
+### Quejas y apelaciones
+
+Toda comunicación a participantes incluye el párrafo de referencia a quejas y apelaciones. Los plazos y la gestión se rigen por `P-PSEA-17` (quejas, registro `F-PSEA-14`) y `P-PSEA-18` (apelaciones, registro `F-PSEA-15`).
+
+### Criterios de verificación de la ronda
+
+| Criterio | Condición |
+|---|---|
+| Trazabilidad completa | Toda comunicación oficial queda archivada y registrada en `F-PSEA-18` o en el expediente de la ronda |
+| Plazo de las instrucciones | Enviadas a más tardar en T-14 días |
+| Acuerdos registrados | `F-PSEA-03` completo y aceptado por todos los participantes antes de T-7 días |
+| Canal autorizado | Ninguna comunicación oficial se envía por un canal no autorizado |
+
+---
+
 ## Reglas minimas de registro
 
 Toda comunicacion critica debe registrar:
