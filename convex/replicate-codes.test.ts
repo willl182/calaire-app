@@ -152,7 +152,7 @@ test('agent API addParticipante asigna codigo de replica', async () => {
   expect(await codesByUser(t, rondaId)).toEqual({ ag: 2 })
 })
 
-test('migracion backfillReplicateCodes es idempotente y no reasigna', async () => {
+test('migracion backfillReplicateCodes rellena huecos, es idempotente y no reasigna codigos validos', async () => {
   const t = convexTest(schema, modules)
   const rondaId = await seedRonda(t)
   await t.run(async (ctx) => {
@@ -164,13 +164,56 @@ test('migracion backfillReplicateCodes es idempotente y no reasigna', async () =
   })
 
   const dry = await t.mutation(internal.migrations.backfillReplicateCodes, {})
-  expect(dry).toMatchObject({ dryRun: true, missing: 3, updated: 0 })
+  expect(dry).toMatchObject({ dryRun: true, cambios: 3, asignados: 3, renumerados: 0, updated: 0, excluidas: [] })
   expect((await codesByUser(t, rondaId)).p1).toBeUndefined()
 
   const run = await t.mutation(internal.migrations.backfillReplicateCodes, { dryRun: false })
-  expect(run).toMatchObject({ missing: 3, updated: 3 })
+  expect(run).toMatchObject({ cambios: 3, updated: 3 })
   expect(await codesByUser(t, rondaId)).toEqual({ p1: 3, manual: 2, p2: 4, ref: 1 })
 
   const again = await t.mutation(internal.migrations.backfillReplicateCodes, { dryRun: false })
-  expect(again).toMatchObject({ missing: 0, updated: 0 })
+  expect(again).toMatchObject({ cambios: 0, updated: 0 })
+})
+
+test('migracion: la referencia recibe 1 y el participante con 1 a mano pasa al siguiente libre', async () => {
+  const t = convexTest(schema, modules)
+  const rondaId = await seedRonda(t, 'EA-PP-R3')
+  const heredada = await seedRonda(t, 'EA-PP2026-R2')
+  await t.run(async (ctx) => {
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'depulgar', email: 'depulgar@x', participantProfile: 'member', replicateCode: 1, invitadoAt: 1 })
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'ref', email: 'ref@x', participantProfile: 'member_special', invitadoAt: 2 })
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'p02', email: 'p02@x', participantProfile: 'member', invitadoAt: 3 })
+    await ctx.db.insert('rondaParticipantes', { rondaId: heredada, workosUserId: 'h-ref', email: 'hr@x', participantProfile: 'member_special', replicateCode: 1, invitadoAt: 1 })
+    await ctx.db.insert('rondaParticipantes', { rondaId: heredada, workosUserId: 'h-lab', email: 'hl@x', participantProfile: 'member', replicateCode: 1, invitadoAt: 2 })
+  })
+
+  const run = await t.mutation(internal.migrations.backfillReplicateCodes, { dryRun: false })
+  expect(run).toMatchObject({ cambios: 4, asignados: 2, renumerados: 2, updated: 4 })
+  expect(await codesByUser(t, rondaId)).toEqual({ depulgar: 2, ref: 1, p02: 3 })
+  expect(await codesByUser(t, heredada)).toEqual({ 'h-ref': 1, 'h-lab': 2 })
+  expect(await t.mutation(internal.migrations.backfillReplicateCodes, { dryRun: false })).toMatchObject({ cambios: 0 })
+})
+
+test('migracion: excluye rondas con envios finales salvo que se incluyan de forma explicita', async () => {
+  const t = convexTest(schema, modules)
+  const rondaId = await seedRonda(t, 'EA-PP2026-R3')
+  await t.run(async (ctx) => {
+    const now = Date.now()
+    const ref = await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'ref', email: 'ref@x', participantProfile: 'member_special', replicateCode: 1, invitadoAt: 1 })
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab', email: 'lab@x', participantProfile: 'member', replicateCode: 1, invitadoAt: 2 })
+    const ptItemId = await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'N1', sortOrder: 1, createdAt: now })
+    const sampleGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'A', sortOrder: 1, createdAt: now })
+    await ctx.db.insert('enviosPt', { rondaId, rondaParticipanteId: ref, ptItemId, sampleGroupId, meanValue: 1, sdValue: 0, draftSavedAt: now, finalSubmittedAt: now, updatedAt: now })
+  })
+
+  const run = await t.mutation(internal.migrations.backfillReplicateCodes, { dryRun: false })
+  expect(run).toMatchObject({ cambios: 0, updated: 0 })
+  expect(run.excluidas).toEqual([
+    expect.objectContaining({ codigo: 'EA-PP2026-R3', motivos: ['1 envio(s) PT finales'], cambios: [expect.objectContaining({ email: 'lab@x', anterior: 1, replicateCode: 2 })] }),
+  ])
+  expect(await codesByUser(t, rondaId)).toEqual({ ref: 1, lab: 1 })
+
+  const incluida = await t.mutation(internal.migrations.backfillReplicateCodes, { dryRun: false, incluirRondasConResultados: [rondaId] })
+  expect(incluida).toMatchObject({ cambios: 1, renumerados: 1, updated: 1, excluidas: [] })
+  expect(await codesByUser(t, rondaId)).toEqual({ ref: 1, lab: 2 })
 })

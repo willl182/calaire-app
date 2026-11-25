@@ -1,5 +1,5 @@
 import { v } from 'convex/values'
-import { internalMutation, internalQuery } from './_generated/server'
+import { internalMutation, internalQuery, type QueryCtx } from './_generated/server'
 import type { Id } from './_generated/dataModel'
 import { planReplicateCodes } from './rondas/codes'
 
@@ -157,16 +157,50 @@ export const backfillParticipantCodes = internalMutation({
   },
 })
 
+type ReplicateCodePlan = {
+  participanteId: Id<'rondaParticipantes'>
+  email: string
+  participantProfile: 'member' | 'member_special'
+  anterior: number | null
+  replicateCode: number
+}
+
 /**
- * Asigna replicateCode (referencia = 1, participantes 2, 3, ...) a los
- * participantes que no lo tengan. Idempotente: no toca valores existentes.
- * Por defecto dryRun = true.
+ * Indica por que una ronda tiene resultados PT. Se considera que los tiene si hay envios
+ * finales (ya exportables a pt_app) o puntajes, evaluaciones o resultados de pt_app importados.
+ */
+async function motivosResultadosRonda(ctx: QueryCtx, rondaId: Id<'rondas'>): Promise<string[]> {
+  const [envios, score, evaluacion, resultadoPtApp] = await Promise.all([
+    ctx.db.query('enviosPt').withIndex('by_ronda', (q) => q.eq('rondaId', rondaId)).collect(),
+    ctx.db.query('ptScores').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
+    ctx.db.query('ptEvaluaciones').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
+    ctx.db.query('sgcResultadosPtApp').withIndex('by_rondaId', (q) => q.eq('rondaId', rondaId)).first(),
+  ])
+  const motivos: string[] = []
+  const finales = envios.filter((e) => e.finalSubmittedAt != null).length
+  if (finales > 0) motivos.push(`${finales} envio(s) PT finales`)
+  if (score) motivos.push('puntajes importados')
+  if (evaluacion) motivos.push('evaluacion PT')
+  if (resultadoPtApp) motivos.push('resultados de pt_app')
+  return motivos
+}
+
+/**
+ * Normaliza replicateCode segun la convencion pt_app: referencia = 1, participantes 2, 3, ...
+ * La referencia recibe 1 aunque un participante ya lo tenga, y el participante que choque
+ * pasa al siguiente codigo libre (>= 2). Idempotente. Por defecto dryRun = true.
+ *
+ * Las rondas con resultados PT (envios finales o datos importados) se excluyen: su CSV para
+ * pt_app pudo exportarse ya con los codigos actuales. Solo se tocan si se listan en
+ * incluirRondasConResultados, como correccion aparte y revisada.
  */
 export const backfillReplicateCodes = internalMutation({
   args: {
     dryRun: v.optional(v.boolean()),
+    incluirRondasConResultados: v.optional(v.array(v.id('rondas'))),
   },
-  handler: async (ctx, { dryRun = true }) => {
+  handler: async (ctx, { dryRun = true, incluirRondasConResultados = [] }) => {
+    const incluidas = new Set<Id<'rondas'>>(incluirRondasConResultados)
     const rows = await ctx.db.query('rondaParticipantes').collect()
     const byRonda = new Map<Id<'rondas'>, typeof rows>()
     for (const row of rows) {
@@ -175,9 +209,23 @@ export const backfillReplicateCodes = internalMutation({
       byRonda.set(row.rondaId, rondaRows)
     }
 
-    const planned: Array<{ participanteId: Id<'rondaParticipantes'>; replicateCode: number }> = []
-    for (const rondaRows of byRonda.values()) {
-      planned.push(...planReplicateCodes(rondaRows))
+    const planned: Array<ReplicateCodePlan & { rondaId: Id<'rondas'>; codigo: string }> = []
+    const excluidas: Array<{ rondaId: Id<'rondas'>; codigo: string; motivos: string[]; cambios: ReplicateCodePlan[] }> = []
+    for (const [rondaId, rondaRows] of byRonda) {
+      const cambios = planReplicateCodes(rondaRows)
+      if (cambios.length === 0) continue
+      const porId = new Map(rondaRows.map((row) => [row._id, row]))
+      const detalle: ReplicateCodePlan[] = cambios.map((cambio) => {
+        const row = porId.get(cambio.participanteId)!
+        return { ...cambio, email: row.email, participantProfile: row.participantProfile }
+      })
+      const codigo = (await ctx.db.get(rondaId))?.codigo ?? String(rondaId)
+      const motivos = await motivosResultadosRonda(ctx, rondaId)
+      if (motivos.length > 0 && !incluidas.has(rondaId)) {
+        excluidas.push({ rondaId, codigo, motivos, cambios: detalle })
+        continue
+      }
+      planned.push(...detalle.map((item) => ({ ...item, rondaId, codigo })))
     }
 
     if (!dryRun) {
@@ -189,9 +237,12 @@ export const backfillReplicateCodes = internalMutation({
     return {
       dryRun,
       total: rows.length,
-      missing: planned.length,
+      cambios: planned.length,
+      asignados: planned.filter((item) => item.anterior === null).length,
+      renumerados: planned.filter((item) => item.anterior !== null).length,
       updated: dryRun ? 0 : planned.length,
-      planned: dryRun ? planned : [],
+      planned,
+      excluidas,
     }
   },
 })
