@@ -72,9 +72,24 @@ export async function generateNextReplicateCode(
   return nextReplicateCode(participantes.map((p) => p.replicateCode), profile)
 }
 
+export type ReplicateCodeCambio<Id extends string = string> = {
+  participanteId: Id
+  anterior: number | null
+  replicateCode: number
+}
+
+function esCodigoParticipanteValido(code: unknown): code is number {
+  return typeof code === 'number' && Number.isInteger(code) && code >= FIRST_PARTICIPANT_REPLICATE_CODE
+}
+
 /**
- * Planifica codigos para los participantes sin replicateCode de una ronda.
- * La referencia va primero (para que reciba el 1) y luego por orden de alta.
+ * Planifica los cambios de replicateCode de una ronda segun la convencion pt_app:
+ * - la referencia (member_special) siempre lleva 1, aunque un participante ya lo tenga a mano;
+ * - los participantes llevan codigos >= 2, unicos en la ronda;
+ * - un participante con 1, sin codigo, con un codigo no valido o repetido recibe el siguiente libre (>= 2).
+ * Ante repetidos conserva el codigo quien se dio de alta primero. Si hay varias referencias, la
+ * principal es la que ya tiene 1 (o la primera en darse de alta); las demas se tratan como participantes.
+ * Idempotente: sobre una ronda ya conforme devuelve una lista vacia.
  */
 export function planReplicateCodes<T extends {
   _id: string
@@ -82,18 +97,32 @@ export function planReplicateCodes<T extends {
   replicateCode?: number | null
   invitadoAt: number
   _creationTime: number
-}>(rows: T[]): Array<{ participanteId: T['_id']; replicateCode: number }> {
-  const used: number[] = rows.flatMap((r) => (typeof r.replicateCode === 'number' ? [r.replicateCode] : []))
-  const pending = rows
-    .filter((r) => r.replicateCode == null)
-    .sort((a, b) => {
-      const pa = a.participantProfile === 'member_special' ? 0 : 1
-      const pb = b.participantProfile === 'member_special' ? 0 : 1
-      return pa - pb || a.invitadoAt - b.invitadoAt || a._creationTime - b._creationTime
-    })
-  return pending.map((row) => {
-    const replicateCode = nextReplicateCode(used, row.participantProfile)
-    used.push(replicateCode)
-    return { participanteId: row._id, replicateCode }
-  })
+}>(rows: T[]): Array<ReplicateCodeCambio<T['_id']>> {
+  const ordenAlta = [...rows].sort((a, b) => a.invitadoAt - b.invitadoAt || a._creationTime - b._creationTime)
+  const referencias = ordenAlta.filter((r) => r.participantProfile === 'member_special')
+  const referencia = referencias.find((r) => r.replicateCode === REFERENCE_REPLICATE_CODE) ?? referencias[0] ?? null
+
+  // El 1 queda reservado a la referencia aunque la ronda todavia no tenga una.
+  const usados = new Set<number>([REFERENCE_REPLICATE_CODE])
+  const conservan = new Set<string>()
+  for (const row of ordenAlta) {
+    if (row === referencia) continue
+    if (esCodigoParticipanteValido(row.replicateCode) && !usados.has(row.replicateCode)) {
+      usados.add(row.replicateCode)
+      conservan.add(row._id)
+    }
+  }
+
+  const cambios: Array<ReplicateCodeCambio<T['_id']>> = []
+  if (referencia && referencia.replicateCode !== REFERENCE_REPLICATE_CODE) {
+    cambios.push({ participanteId: referencia._id, anterior: referencia.replicateCode ?? null, replicateCode: REFERENCE_REPLICATE_CODE })
+  }
+  for (const row of ordenAlta) {
+    if (row === referencia || conservan.has(row._id)) continue
+    let candidato = FIRST_PARTICIPANT_REPLICATE_CODE
+    while (usados.has(candidato)) candidato += 1
+    usados.add(candidato)
+    cambios.push({ participanteId: row._id, anterior: row.replicateCode ?? null, replicateCode: candidato })
+  }
+  return cambios
 }
