@@ -276,10 +276,17 @@ export async function updateRondaReplicasAction(formData: FormData) {
 export async function updateRondaBasicInfoAction(formData: FormData) {
   await requireAdmin()
 
-  let targetUrl = buildErrorUrl('No fue posible actualizar la ronda.')
+  const rondaId = parseText(formData, 'ronda_id')
+  // Vuelve a la página de la ronda; la ruta se arma desde el id, no desde el formulario.
+  const rondaPath = rondaId ? `/dashboard/rondas/${encodeURIComponent(rondaId)}` : null
+  const buildError = (msg: string) =>
+    rondaPath ? `${rondaPath}?error=${encodeURIComponent(msg)}` : buildErrorUrl(msg)
+  const buildSuccess = (msg: string) =>
+    rondaPath ? `${rondaPath}?success=${encodeURIComponent(msg)}` : buildSuccessUrl(msg)
+
+  let targetUrl = buildError('No fue posible actualizar la ronda.')
 
   try {
-    const rondaId = parseText(formData, 'ronda_id')
     const nombre = parseText(formData, 'nombre')
     const codigo = normalizeCodigo(parseText(formData, 'codigo'))
 
@@ -296,11 +303,11 @@ export async function updateRondaBasicInfoAction(formData: FormData) {
     revalidatePath('/dashboard')
     revalidatePath('/dashboard/rondas')
     revalidatePath(`/dashboard/rondas/${rondaId}`)
-    targetUrl = buildSuccessUrl('Datos básicos de la ronda actualizados.')
+    targetUrl = buildSuccess('Nombre y código de la ronda actualizados.')
   } catch (error) {
     const message =
       error instanceof Error ? error.message : 'No fue posible actualizar la ronda.'
-    targetUrl = buildErrorUrl(message)
+    targetUrl = buildError(limpiarMensajeError(message))
   }
 
   redirect(targetUrl)

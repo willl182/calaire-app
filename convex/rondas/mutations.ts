@@ -19,7 +19,7 @@ export const createRondaDefinition = defineRondaMutation({
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
       .first()
-    if (existing) throw new Error('Ya existe una ronda con ese codigo.')
+    if (existing) throw new Error('Ya existe una ronda con ese código.')
 
     return ctx.db.insert('rondas', { codigo, nombre, estado, createdAt: Date.now() })
   },
@@ -158,7 +158,7 @@ export const createConfiguredRondaDefinition = defineRondaMutation({
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
       .first()
-    if (existing) throw new Error('Ya existe una ronda con ese codigo.')
+    if (existing) throw new Error('Ya existe una ronda con ese código.')
 
     const now = Date.now()
     const rondaId = await ctx.db.insert('rondas', { codigo, nombre, estado: 'borrador', createdAt: now })
@@ -222,7 +222,7 @@ export const updateRondaConfigDefinition = defineRondaMutation({
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
       .first()
-    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese codigo.')
+    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese código.')
 
     await ctx.db.patch(id, { codigo, nombre })
 
@@ -309,7 +309,7 @@ export const updateRondaBasicInfoDefinition = defineRondaMutation({
       .query('rondas')
       .withIndex('by_codigo', (q) => q.eq('codigo', codigo))
       .first()
-    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese codigo.')
+    if (sameCode && sameCode._id !== id) throw new Error('Ya existe una ronda con ese código.')
 
     await ctx.db.patch(id, { codigo, nombre })
   },

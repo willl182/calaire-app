@@ -505,7 +505,7 @@ export const upsertDriveRecursoConfig = {
     if (args.recursoId) {
       const recursoConCodigo = await findRecursoByCodigo(ctx, args.rondaId, codigo)
       if (recursoConCodigo && (!existing || recursoConCodigo._id !== existing._id)) {
-        throw new Error('Ya existe un recurso Drive con ese codigo en la ronda.')
+        throw new Error('Ya existe un recurso Drive con ese código en la ronda.')
       }
     }
 

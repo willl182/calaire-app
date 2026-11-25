@@ -17,7 +17,7 @@ import { TONO_INSIGNIA } from '@/lib/ui/tonos'
 import { RondaContextNav } from './RondaContextNav'
 import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
-import { updateRondaReplicasAction } from '../../actions'
+import { updateRondaBasicInfoAction, updateRondaReplicasAction } from '../../actions'
 import { SubmitButton } from '@/components/ui/SubmitButton'
 import type { Metadata } from 'next'
 
@@ -235,6 +235,46 @@ function AccionesDeEstado({ rondaId, estado }: { rondaId: string; estado: Estado
   )
 }
 
+function DatosBasicosForm({ ronda }: { ronda: Ronda }) {
+  if (ronda.estado === 'cerrada') return null
+
+  return (
+    <section className="card p-6" aria-labelledby="datos-basicos-titulo">
+      <h2 id="datos-basicos-titulo" className="mb-1 text-lg font-semibold text-[var(--foreground)]">
+        Nombre y código
+      </h2>
+      <p className="mb-4 text-sm text-[var(--foreground-muted)]">
+        Cambiar el código deja sin validez los enlaces de invitación ya enviados, porque incluyen el código de la
+        ronda. Los códigos PT de los participantes no cambian.
+      </p>
+      <form action={updateRondaBasicInfoAction} className="grid gap-4 md:grid-cols-[2fr_1fr_auto] md:items-end">
+        <input type="hidden" name="ronda_id" value={ronda.id} />
+        <label className="grid gap-1.5 text-sm">
+          <span className="font-medium text-[var(--foreground)]">Nombre de la ronda</span>
+          <input className="min-h-[44px] rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--foreground)] outline-none focus:border-[var(--pt-primary)] focus:ring-2 focus:ring-[var(--pt-primary-subtle)] transition-colors" name="nombre" defaultValue={ronda.nombre} required maxLength={160} />
+        </label>
+        <label className="grid gap-1.5 text-sm">
+          <span className="font-medium text-[var(--foreground)]">Código</span>
+          <input
+            className="min-h-[44px] rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2.5 text-[var(--foreground)] outline-none focus:border-[var(--pt-primary)] focus:ring-2 focus:ring-[var(--pt-primary-subtle)] transition-colors uppercase"
+            name="codigo"
+            defaultValue={ronda.codigo}
+            required
+            maxLength={40}
+            aria-describedby="datos-basicos-codigo-ayuda"
+          />
+          <span id="datos-basicos-codigo-ayuda" className="text-xs text-[var(--foreground-muted)]">
+            Se guarda en mayúsculas; los espacios se cambian por guiones.
+          </span>
+        </label>
+        <SubmitButton className="btn-primary min-h-[44px]" pendingLabel="Guardando…">
+          Guardar
+        </SubmitButton>
+      </form>
+    </section>
+  )
+}
+
 function ReplicasForm({ ronda }: { ronda: Ronda }) {
   if (ronda.contaminantes.length === 0) return null
 
@@ -405,6 +445,8 @@ export default async function RondaEstadoPage({ params, searchParams }: PageProp
 
         {/* Operational Alerts */}
         <AlertasOperativas metricas={metricas} rondaId={rondaId} />
+
+        <DatosBasicosForm ronda={ronda} />
 
         {/* Replicas */}
         <ReplicasForm ronda={ronda} />
