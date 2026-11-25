@@ -220,3 +220,11 @@ Conviene integrar antes la rama en `main` para que prod no quede por delante del
 - Validación del `main` integrado: `sgc:validate-documents` OK, `pnpm test` (144) OK, `pnpm lint` OK, `pnpm exec tsc --noEmit` OK.
 - Sin push. `main` va por delante de `origin/main`. En `convex/` solo difieren los 3 archivos de la migración. El resto son documentos SGC y frontend (registro de ronda en borrador, panel del participante).
 - Simulación con datos frescos de prod y el código integrado: 9 cambios, 0 rondas excluidas (EA-PP2026-R3 ya está conforme).
+
+### Ejecutado en prod: migración de códigos de réplica (2026-11-25, confirmado por el usuario: "listo dale push commit merge todo")
+1. `pnpm exec convex deploy -y --typecheck enable --message "backfillReplicateCodes: referencia = 1 (main 014d8c7)"`: OK, sin índices eliminados, esquema validado.
+2. En seco: 13 participantes, 9 cambios (6 asignados, 3 renumerados), 0 excluidas. Coincide con la simulación.
+3. `backfillReplicateCodes '{"dryRun": false}'`: 9 actualizados.
+4. Segunda pasada en seco: 0 cambios (idempotente).
+5. Verificado en prod: en las 5 rondas la referencia tiene 1 y los participantes 2, 3, … sin repetidos.
+6. `git push origin main`.
