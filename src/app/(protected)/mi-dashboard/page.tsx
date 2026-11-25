@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation'
 import { Alert } from '@/components/ui/Alert'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { isAdmin, requireAuth } from '@/server/auth'
-import { getMyPtPerformance, getRondaParticipanteLandingPath, listRondasParticipanteWithStatus, type Ronda, type RondaParticipanteAsignada } from '@/server/rondas'
+import { getMyPtPerformance, getRondaParticipanteLandingPath, listRondasParticipanteWithStatus, type RondaParticipanteAsignada } from '@/server/rondas'
 import {
   getHitosVisibleParticipanteWithStatus,
   getEvidenciasPublicasWithStatus,
@@ -16,6 +16,7 @@ import {
 import { crearComentarioParticipanteAction, marcarNotificacionLeidaAction } from './actions'
 import { PerformanceDashboard } from './PerformanceDashboard'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 function FichaBadge({ estado }: { estado: RondaParticipanteAsignada['ficha_estado'] }) {
   if (estado === 'enviado') {
@@ -212,7 +213,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
                       {!notificacion.leidaAt && (
                         <form action={marcarNotificacionLeidaAction}>
                           <input type="hidden" name="notificacion_id" value={notificacion._id} />
-                          <button className="btn-outline text-xs" type="submit">Leida</button>
+                          <SubmitButton className="btn-outline text-xs">Leida</SubmitButton>
                         </form>
                       )}
                     </div>
@@ -227,7 +228,7 @@ function RondaParticipanteCard({ ronda, sgc }: { ronda: RondaParticipanteAsignad
             <form action={crearComentarioParticipanteAction} className="grid gap-2">
               <input type="hidden" name="ronda_id" value={ronda.id} />
               <textarea className="input min-h-20" name="mensaje" placeholder="Escriba un comentario para el equipo del Sistema de Gestión" required />
-              <button className="btn-primary justify-self-start" type="submit">Enviar comentario</button>
+              <SubmitButton className="btn-primary justify-self-start">Enviar comentario</SubmitButton>
             </form>
             <div className="grid gap-2">
               {sgc.comentarios.map((comentario) => (

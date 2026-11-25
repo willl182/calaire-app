@@ -2,6 +2,7 @@ import Link from 'next/link'
 import { notFound, redirect } from 'next/navigation'
 
 import { Alert } from '@/components/ui/Alert'
+import { ConfirmSubmitButton } from '@/components/ui/ConfirmSubmitButton'
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
@@ -17,6 +18,7 @@ import { RondaContextNav } from './RondaContextNav'
 import { RondaPageHeader } from './RondaPageHeader'
 import { activarRondaAction, cerrarRondaAction, reabrirRondaAction } from './actions'
 import { updateRondaReplicasAction } from '../../actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -147,17 +149,7 @@ function AlertasOperativas({ metricas, rondaId }: { metricas: RondaMetricas; ron
 // Acciones de estado
 // ---------------------------------------------------------------------------
 
-function AccionesDeEstado({
-  rondaId,
-  estado,
-  confirmCerrar,
-  confirmReabrir,
-}: {
-  rondaId: string
-  estado: EstadoRonda
-  confirmCerrar: boolean
-  confirmReabrir: boolean
-}) {
+function AccionesDeEstado({ rondaId, estado }: { rondaId: string; estado: EstadoRonda }) {
   if (estado === 'borrador') {
     return (
       <section className="card p-6">
@@ -167,9 +159,16 @@ function AccionesDeEstado({
         </p>
         <form action={activarRondaAction}>
           <input type="hidden" name="ronda_id" value={rondaId} />
-          <button type="submit" className="btn-primary">
+          <ConfirmSubmitButton
+            tone="primary"
+            title="Activar ronda"
+            message="Los participantes podrán reclamar sus cupos y capturar resultados. Revise antes la configuración PT y los participantes."
+            confirmLabel="Activar ronda"
+            pendingLabel="Activando…"
+            className="btn-primary"
+          >
             Activar ronda
-          </button>
+          </ConfirmSubmitButton>
         </form>
       </section>
     )
@@ -182,28 +181,20 @@ function AccionesDeEstado({
         <p className="mb-4 text-sm text-[var(--foreground-muted)]">
           Vuelve a permitir cambios en participantes, fichas y resultados.
         </p>
-        {confirmReabrir ? (
-          <div className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3">
-            <span className="text-sm text-amber-800">¿Está seguro de reabrir la ronda?</span>
-            <form action={reabrirRondaAction}>
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="confirm" value="1" />
-              <button type="submit" className="btn-primary">
-                Confirmar reapertura
-              </button>
-            </form>
-            <Link href={`/dashboard/rondas/${rondaId}`} className="btn-outline">
-              Cancelar
-            </Link>
-          </div>
-        ) : (
-          <form action={reabrirRondaAction}>
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-outline">
-              Reabrir ronda
-            </button>
-          </form>
-        )}
+        <form action={reabrirRondaAction}>
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <input type="hidden" name="confirm" value="1" />
+          <ConfirmSubmitButton
+            tone="primary"
+            title="Reabrir ronda"
+            message="¿Reabrir la ronda? Vuelve a permitir cambios en participantes, fichas y resultados."
+            confirmLabel="Reabrir ronda"
+            pendingLabel="Reabriendo…"
+            className="btn-outline"
+          >
+            Reabrir ronda
+          </ConfirmSubmitButton>
+        </form>
       </section>
     )
   }
@@ -211,8 +202,8 @@ function AccionesDeEstado({
   if (estado !== 'activa') return null
 
   return (
-    <section aria-labelledby="zona-peligro" className="rounded-xl border-2 border-rose-200 bg-[var(--surface-panel)] p-6">
-      <h2 id="zona-peligro" className="mb-1 text-lg font-semibold text-rose-800">
+    <section aria-labelledby="zona-peligro" className="rounded-xl border-2 border-danger-border bg-[var(--surface-panel)] p-6">
+      <h2 id="zona-peligro" className="mb-1 text-lg font-semibold text-danger-strong">
         Zona de peligro
       </h2>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -223,27 +214,19 @@ function AccionesDeEstado({
             no podrán enviar datos.
           </p>
         </div>
-        {confirmCerrar ? (
-          <div className="flex flex-wrap items-center gap-3">
-            <form action={cerrarRondaAction}>
-              <input type="hidden" name="ronda_id" value={rondaId} />
-              <input type="hidden" name="confirm" value="1" />
-              <button type="submit" className="btn-danger">
-                Confirmar cierre
-              </button>
-            </form>
-            <Link href={`/dashboard/rondas/${rondaId}`} className="btn-outline">
-              Cancelar
-            </Link>
-          </div>
-        ) : (
-          <form action={cerrarRondaAction} className="shrink-0">
-            <input type="hidden" name="ronda_id" value={rondaId} />
-            <button type="submit" className="btn-danger-outline">
-              Cerrar ronda
-            </button>
-          </form>
-        )}
+        <form action={cerrarRondaAction} className="shrink-0">
+          <input type="hidden" name="ronda_id" value={rondaId} />
+          <input type="hidden" name="confirm" value="1" />
+          <ConfirmSubmitButton
+            title="Cerrar ronda"
+            message="Los participantes ya no podrán enviar datos y la ronda pasará a documentación pendiente. ¿Desea continuar?"
+            confirmLabel="Cerrar ronda"
+            pendingLabel="Cerrando…"
+            className="btn-danger-outline"
+          >
+            Cerrar ronda
+          </ConfirmSubmitButton>
+        </form>
       </div>
     </section>
   )
@@ -288,9 +271,9 @@ function ReplicasForm({ ronda }: { ronda: Ronda }) {
           </div>
 
           <div className="flex justify-end">
-            <button type="submit" className="btn-primary">
+            <SubmitButton className="btn-primary">
               Guardar réplicas
-            </button>
+            </SubmitButton>
           </div>
         </form>
       ) : (
@@ -346,8 +329,6 @@ export default async function RondaEstadoPage({ params, searchParams }: PageProp
   const sp = searchParams ? await searchParams : {}
   const success = getParam(sp.success)
   const error = getParam(sp.error)
-  const confirmCerrar = getParam(sp.confirm_cerrar) === '1'
-  const confirmReabrir = getParam(sp.confirm_reabrir) === '1'
 
   // Derive metric card variants
   const cuposVariant =
@@ -426,12 +407,7 @@ export default async function RondaEstadoPage({ params, searchParams }: PageProp
         <ReplicasForm ronda={ronda} />
 
         {/* State Actions */}
-        <AccionesDeEstado
-          rondaId={rondaId}
-          estado={ronda.estado}
-          confirmCerrar={confirmCerrar}
-          confirmReabrir={confirmReabrir}
-        />
+        <AccionesDeEstado rondaId={rondaId} estado={ronda.estado} />
       </div>
     </div>
   )

@@ -4,6 +4,9 @@ import { canEditSgcMaestro, canViewSgcMaestro, requireAuth } from '@/server/auth
 import { normalizeHttpUrl } from '@/lib/safe-url'
 import { getDocumentoMaestro } from '@/server/sgc'
 import { crearRegistroDerivadoAction, guardarDocumentoMaestroAction, registrarVersionOficialAction } from '../actions'
+import { FileInput } from '@/components/ui/FileInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Alert } from '@/components/ui/Alert'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -50,8 +53,8 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
         </div>
       </header>
 
-      {firstParam(messages.success) && <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{firstParam(messages.success)}</div>}
-      {firstParam(messages.error) && <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{firstParam(messages.error)}</div>}
+      <Alert tone="success" message={firstParam(messages.success)} />
+      <Alert tone="error" message={firstParam(messages.error)} />
 
       <section className="grid gap-4 lg:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
         <div className="card p-5">
@@ -125,7 +128,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
             <input type="hidden" name="subproceso" value={documento.subproceso ?? ''} />
             <input type="hidden" name="retencion" value={documento.retencion ?? ''} />
             <textarea className="input" name="notas" defaultValue={documento.notas ?? ''} rows={3} aria-label="Notas del documento" />
-            <button className="btn-primary justify-self-start" type="submit">Guardar metadatos</button>
+            <SubmitButton className="btn-primary justify-self-start">Guardar metadatos</SubmitButton>
           </form>
         </div>}
       </section>
@@ -143,7 +146,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
                 <option value="retirada">Retirada</option>
               </select>
             </div>
-            <input className="input" type="file" name="archivo" aria-label="Archivo oficial" required />
+            <FileInput name="archivo" aria-label="Archivo oficial" required />
             <textarea className="input" name="resumen_cambios" placeholder="Resumen de cambios" rows={3} aria-label="Resumen de cambios" required />
             <div className="grid gap-3 sm:grid-cols-3">
               <input className="input" name="elaborado_por" placeholder="Elaborado por" aria-label="Elaborado por" />
@@ -155,7 +158,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
               <input className="input" name="fecha_aprobacion" type="date" aria-label="Fecha de aprobacion" />
               <input className="input" name="fecha_vigencia" type="date" aria-label="Fecha de vigencia" />
             </div>
-            <button className="btn-primary justify-self-start" type="submit">Subir version oficial</button>
+            <SubmitButton className="btn-primary justify-self-start">Subir version oficial</SubmitButton>
           </form>
         </div>
 
@@ -183,7 +186,7 @@ export default async function DocumentoDetallePage({ params, searchParams }: Pag
             </div>
             <input className="input" name="external_url" placeholder="URL externa contextual" aria-label="URL externa contextual" />
             <input className="input" name="external_ref" placeholder="Referencia externa" aria-label="Referencia externa" />
-            <button className="btn-primary justify-self-start" type="submit">Crear registro</button>
+            <SubmitButton className="btn-primary justify-self-start">Crear registro</SubmitButton>
           </form>
         </div>
       </section>}

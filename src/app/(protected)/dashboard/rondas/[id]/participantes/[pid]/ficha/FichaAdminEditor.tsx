@@ -6,6 +6,7 @@ import type { FichaCompleta, AcompananteInput, AnalizadorInput, InstrumentoInput
 import { api } from '@/convex/_generated/api'
 import type { Id } from '@/convex/_generated/dataModel'
 import { adminCargarPdfAcompananteAction, adminGuardarCampoFichaAction, adminGuardarListasAction } from './actions'
+import { FileInput } from '@/components/ui/FileInput'
 
 const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 
@@ -311,12 +312,11 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
                   }}
                 />
               </label>
-              <label className={`${labelClass} md:col-span-2`}>
+              <div className={`${labelClass} md:col-span-2`}>
                 <span>PDF seguridad social y ARL</span>
-                <input
-                  type="file"
+                <FileInput
                   accept="application/pdf,.pdf"
-                  className={inputClass}
+                  aria-label="PDF seguridad social y ARL"
                   onChange={(e) => handleAcompanantePdfChange(idx, e.target.files?.[0] ?? null)}
                 />
                 {item.seguridad_social_arl_file_name && (
@@ -328,7 +328,7 @@ export default function FichaAdminEditor({ fichaId, ficha: fichaInicial, partici
                     ) : item.seguridad_social_arl_file_name}
                   </span>
                 )}
-              </label>
+              </div>
             </div>
           ))}
         </div>

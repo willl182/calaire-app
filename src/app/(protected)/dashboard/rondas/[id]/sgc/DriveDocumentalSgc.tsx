@@ -23,6 +23,8 @@ import {
   retirarDriveRecursoAction,
   subirDriveDefinitivoAction,
 } from './actions'
+import { FileInput } from '@/components/ui/FileInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type Props = {
   drive: SgcDriveTree
@@ -143,7 +145,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <HiddenRecursoFields recurso={recurso} rondaId={rondaId} />
             <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_120px]">
               <input id={`web-url-${recurso._id}`} className="input" name="web_url" type="url" placeholder="https://drive.google.com/..." required />
-              <button className="btn-primary px-3 text-xs" type="submit">Registrar</button>
+              <SubmitButton className="btn-primary px-3 text-xs">Registrar</SubmitButton>
             </div>
             <input className="input" name="notas" placeholder="Notas" defaultValue={recurso.notas ?? ''} />
           </form>
@@ -154,7 +156,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <input type="hidden" name="tipo" value={recurso.tipo} />
             <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_120px]">
               <input id={`replace-url-${recurso._id}`} className="input" name="web_url" type="url" placeholder="Nueva URL de Drive" required />
-              <button className="btn-outline px-3 text-xs" type="submit">Reemplazar</button>
+              <SubmitButton className="btn-outline px-3 text-xs">Reemplazar</SubmitButton>
             </div>
             <input className="input" name="motivo" placeholder="Motivo obligatorio de reemplazo" required />
           </form>
@@ -178,7 +180,7 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                   <option value="documento">Doc</option>
                   <option value="archivo">Archivo</option>
                 </select>
-                <button className="btn-outline px-3 text-xs" type="submit">Guardar</button>
+                <SubmitButton className="btn-outline px-3 text-xs">Guardar</SubmitButton>
               </div>
             </form>
 
@@ -190,13 +192,13 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                 Cargar archivo
               </label>
               <div className="grid gap-2 md:grid-cols-[minmax(0,1fr)_96px_120px]">
-                <input id={`def-file-${recurso._id}`} className="input" name="archivo" type="file" required />
+                <FileInput id={`def-file-${recurso._id}`} name="archivo" required />
                 <select className="input" name="definitivo_tipo" defaultValue="pdf">
                   <option value="pdf">PDF</option>
                   <option value="documento">Doc</option>
                   <option value="archivo">Archivo</option>
                 </select>
-                <button className="btn-outline px-3 text-xs" type="submit">Cargar</button>
+                <SubmitButton className="btn-outline px-3 text-xs" pendingLabel="Cargando…">Cargar</SubmitButton>
               </div>
               <p className="text-xs text-[var(--foreground-muted)]">
                 El participante lo descarga desde la app (solo lectura); no requiere permisos ni cuenta de Google Drive.
@@ -212,22 +214,22 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="estado" value="diligenciado" />
-            <button className="btn-outline w-full px-3 text-xs" type="submit" disabled={!recurso.webUrl || recurso.estado === 'diligenciado'}>
+            <SubmitButton className="btn-outline w-full px-3 text-xs"  disabled={!recurso.webUrl || recurso.estado === 'diligenciado'}>
               Marcar diligenciado
-            </button>
+            </SubmitButton>
           </form>
           <form action={cambiarEstadoDriveAction} className="grid gap-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="estado" value="no_aplica" />
             <input className="input" name="notas" placeholder="Justificación de no aplica" required />
-            <button className="btn-outline px-3 text-xs" type="submit">No aplica</button>
+            <SubmitButton className="btn-outline px-3 text-xs">No aplica</SubmitButton>
           </form>
           <form action={retirarDriveRecursoAction} className="grid gap-2">
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input className="input" name="motivo" placeholder="Motivo de retiro" required />
-            <button className="btn-outline px-3 text-xs" type="submit">Retirar</button>
+            <SubmitButton className="btn-outline px-3 text-xs">Retirar</SubmitButton>
           </form>
         </div>
       </FormSection>
@@ -255,9 +257,9 @@ function RecursoForms({ recurso, rondaId }: { recurso: SgcDriveRecurso; rondaId:
                 </div>
               )}
             </div>
-            <button className="btn-outline px-3 text-xs" type="submit">
+            <SubmitButton className="btn-outline px-3 text-xs">
               {recurso.publicaParticipante ? 'Despublicar' : 'Publicar'}
-            </button>
+            </SubmitButton>
           </form>
         </FormSection>
       )}
@@ -340,13 +342,13 @@ export function DriveDocumentalSgc({ drive, panel, avanceItems, estadoDrive, nom
             </span>
             <form action={inicializarDriveRondaAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <button className="btn-outline" type="submit">{root ? 'Reparar expediente' : 'Inicializar expediente documental'}</button>
+              <SubmitButton className="btn-outline">{root ? 'Reparar expediente' : 'Inicializar expediente documental'}</SubmitButton>
             </form>
             <form action={crearDriveGoogleAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="ronda_codigo" value={rondaCodigo} />
               <input type="hidden" name="ronda_nombre" value={rondaNombre} />
-              <button className="btn-primary" type="submit" disabled={!driveGoogleReady} aria-describedby="crear-drive-ayuda">Crear en Google Drive</button>
+              <SubmitButton className="btn-primary"  disabled={!driveGoogleReady} aria-describedby="crear-drive-ayuda">Crear en Google Drive</SubmitButton>
             </form>
           </div>
         </div>

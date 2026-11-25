@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from 'react'
 
 import type { Contaminante } from '@/server/rondas'
 import { createPTItemsBulkAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type LevelRow = {
   id: number
@@ -156,9 +157,9 @@ export function PTLevelsBulkForm({ rondaId, contaminantes }: Props) {
             + 5 filas
           </button>
         </div>
-        <button type="submit" className="btn-primary min-w-44">
+        <SubmitButton className="btn-primary min-w-44">
           Agregar niveles PT
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )

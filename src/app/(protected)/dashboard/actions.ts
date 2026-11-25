@@ -6,6 +6,7 @@ import { revalidatePath } from 'next/cache'
 import { signOut } from '@workos-inc/authkit-nextjs'
 
 import { buildAbsoluteAppUrl } from '@/lib/app-url'
+import { limpiarMensajeError } from './rondas/[id]/sgc/mensajes'
 import { requireAuth, isAdmin } from '@/server/auth'
 import {
   CONTAMINANTES,
@@ -106,57 +107,86 @@ function buildSuccessUrl(message: string, rondaId?: string) {
   return `/dashboard/rondas?success=${encodeURIComponent(message)}`
 }
 
+async function crearRondaDesdeFormulario(formData: FormData) {
+  const nombre = parseText(formData, 'nombre')
+  const codigo = normalizeCodigo(parseText(formData, 'codigo'))
+  if (!nombre) {
+    throw new Error('El nombre de la ronda es obligatorio.')
+  }
+  if (!codigo) {
+    throw new Error('El código de la ronda es obligatorio.')
+  }
+  const participantesPlaneados = parseParticipantesPlaneados(formData)
+  const includeReference = parseIncludeReference(formData)
+  const contaminantes = parseContaminantes(formData)
+
+  const slots: Array<{
+    workosUserId: string
+    email: string
+    participantProfile: 'member' | 'member_special'
+  }> = Array.from({ length: participantesPlaneados }, (_, index) => ({
+    workosUserId: `${PENDING_PARTICIPANTE_PREFIX}${randomBytes(12).toString('hex')}`,
+    email: `Participante ${String(index + 1).padStart(2, '0')} (pendiente)`,
+    participantProfile: 'member',
+  }))
+
+  if (includeReference) {
+    slots.push({
+      workosUserId: `${PENDING_PARTICIPANTE_PREFIX}${randomBytes(12).toString('hex')}`,
+      email: 'Referencia (pendiente)',
+      participantProfile: 'member_special',
+    })
+  }
+
+  const rondaId = await createConfiguredRonda(nombre, codigo, contaminantes, slots)
+
+  revalidatePath('/dashboard')
+  revalidatePath('/dashboard/rondas')
+  return buildSuccessUrl(
+    includeReference
+      ? 'Ronda creada con analitos y enlaces. Configure los niveles PT.'
+      : 'Ronda creada con analitos y participantes. Configure los niveles PT.',
+    rondaId
+  )
+}
+
 export async function createRondaAction(formData: FormData) {
   await requireAdmin()
 
   let targetUrl = buildErrorUrl('No fue posible crear la ronda.')
-
   try {
-    const nombre = parseText(formData, 'nombre')
-    const codigo = normalizeCodigo(parseText(formData, 'codigo'))
-    const participantesPlaneados = parseParticipantesPlaneados(formData)
-    const includeReference = parseIncludeReference(formData)
-    const contaminantes = parseContaminantes(formData)
-
-    if (!nombre) {
-      throw new Error('El nombre de la ronda es obligatorio.')
-    }
-
-    if (!codigo) {
-      throw new Error('El código de la ronda es obligatorio.')
-    }
-
-    const slots: Array<{
-      workosUserId: string
-      email: string
-      participantProfile: 'member' | 'member_special'
-    }> = Array.from({ length: participantesPlaneados }, (_, index) => ({
-      workosUserId: `${PENDING_PARTICIPANTE_PREFIX}${randomBytes(12).toString('hex')}`,
-      email: `Participante ${String(index + 1).padStart(2, '0')} (pendiente)`,
-      participantProfile: 'member',
-    }))
-
-    if (includeReference) {
-      slots.push({
-        workosUserId: `${PENDING_PARTICIPANTE_PREFIX}${randomBytes(12).toString('hex')}`,
-        email: 'Referencia (pendiente)',
-        participantProfile: 'member_special',
-      })
-    }
-
-    const rondaId = await createConfiguredRonda(nombre, codigo, contaminantes, slots)
-
-    revalidatePath('/dashboard')
-    revalidatePath('/dashboard/rondas')
-    targetUrl = buildSuccessUrl(
-      includeReference
-        ? 'Ronda creada con analitos y enlaces. Configure los niveles PT.'
-        : 'Ronda creada con analitos y participantes. Configure los niveles PT.',
-      rondaId
-    )
+    targetUrl = await crearRondaDesdeFormulario(formData)
   } catch (error) {
     const message = error instanceof Error ? error.message : 'No fue posible crear la ronda.'
-    targetUrl = buildErrorUrl(message)
+    targetUrl = buildErrorUrl(limpiarMensajeError(message))
+  }
+
+  redirect(targetUrl)
+}
+
+export type CrearRondaFormState = {
+  error: string | null
+  /** Valores enviados, para no perder lo diligenciado cuando hay un error. */
+  values: Record<string, string>
+}
+
+/** Variante para `useActionState`: ante un error se queda en el formulario. */
+export async function createRondaFormAction(
+  _prev: CrearRondaFormState,
+  formData: FormData
+): Promise<CrearRondaFormState> {
+  await requireAdmin()
+
+  let targetUrl: string
+  try {
+    targetUrl = await crearRondaDesdeFormulario(formData)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'No fue posible crear la ronda.'
+    const values: Record<string, string> = {}
+    formData.forEach((value, key) => {
+      if (typeof value === 'string') values[key] = value
+    })
+    return { error: limpiarMensajeError(message), values }
   }
 
   redirect(targetUrl)

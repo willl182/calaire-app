@@ -26,6 +26,7 @@ import {
   createAndInviteAction,
   updateParticipanteEmailAction,
 } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -251,12 +252,11 @@ function ParticipanteRow({
               placeholder="correo@laboratorio.com"
               className="w-full rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-xs text-[var(--foreground)] outline-none ring-0"
             />
-            <button
-              type="submit"
-              className="w-fit rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black"
-            >
+            <SubmitButton
+              
+              className="w-fit rounded-lg border border-[var(--pt-primary)] bg-[var(--pt-primary-subtle)] px-2.5 py-1 text-[11px] font-semibold text-[var(--foreground)] transition hover:bg-[var(--pt-primary)] hover:text-black">
               Guardar correo
-            </button>
+            </SubmitButton>
           </form>
         ) : (
           <div className="text-sm text-[var(--foreground)]">
@@ -320,9 +320,9 @@ function ParticipanteRow({
               <form action={regenerateSlotAction}>
                 <input type="hidden" name="ronda_id" value={rondaId} />
                 <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
-                <button type="submit" className="menu-item">
+                <SubmitButton className="menu-item">
                   Regenerar enlace de invitación
-                </button>
+                </SubmitButton>
               </form>
             )}
           </ActionsMenu>
@@ -331,8 +331,9 @@ function ParticipanteRow({
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="participante_id" value={p.ronda_participante_id} />
               <ConfirmSubmitButton
-                type="submit"
+                title="Eliminar de la ronda"
                 message={`¿Eliminar a ${nombreVisible} de esta ronda? Se pierden su ficha y sus resultados en la ronda.`}
+                confirmLabel="Eliminar"
                 aria-label={`Eliminar a ${nombreVisible} de la ronda`}
                 className="inline-flex min-h-11 items-center rounded-lg px-3 text-xs font-semibold text-rose-700 transition hover:bg-rose-50 hover:text-rose-800"
               >
@@ -366,9 +367,9 @@ function SearchForm({
         placeholder="correo@laboratorio.com"
         className="min-w-0 flex-1 rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0"
       />
-      <button type="submit" className="btn-outline">
+      <SubmitButton className="btn-outline">
         Buscar
-      </button>
+      </SubmitButton>
     </form>
   )
 }
@@ -398,9 +399,9 @@ function FoundUserCard({
           <input type="hidden" name="ronda_id" value={rondaId} />
           <input type="hidden" name="workos_user_id" value={foundId} />
           <input type="hidden" name="email" value={foundEmail} />
-          <button type="submit" className="btn-primary">
+          <SubmitButton className="btn-primary">
             Agregar a la ronda
-          </button>
+          </SubmitButton>
         </form>
       ) : (
         <span className="text-xs text-[var(--foreground-muted)]">Ronda cerrada — no se admiten cambios.</span>
@@ -581,9 +582,9 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
               {referencias.length === 0 && (
                 <form action={addReferenceSlotAction}>
                   <input type="hidden" name="ronda_id" value={rondaId} />
-                  <button type="submit" className="btn-outline">
+                  <SubmitButton className="btn-outline">
                     Agregar cupo de referencia
-                  </button>
+                  </SubmitButton>
                 </form>
               )}
 
@@ -616,9 +617,9 @@ export default async function ParticipantesPage({ params, searchParams }: PagePr
                       placeholder="Apellido (opcional)"
                       className="rounded-lg border border-amber-300 bg-[var(--surface)] px-3 py-2 text-sm text-[var(--foreground)] outline-none ring-0"
                     />
-                    <button type="submit" className="btn-primary">
+                    <SubmitButton className="btn-primary">
                       Crear e invitar
-                    </button>
+                    </SubmitButton>
                   </form>
                 </div>
               )}

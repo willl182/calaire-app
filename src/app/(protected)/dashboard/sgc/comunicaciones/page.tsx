@@ -3,6 +3,7 @@ import { isAdmin, requireAuth } from '@/server/auth'
 import { listRondas } from '@/server/rondas'
 import { listComunicaciones, createComunicacion, deleteComunicacion } from '@/server/sgc'
 import { EstadoBadge } from '@/components/ui/EstadoBadge'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 async function ComunicacionesPage() {
   const auth = await requireAuth()
@@ -66,7 +67,7 @@ async function ComunicacionesPage() {
               <input className="input" name="fecha" type="date" />
               <input className="input" name="responsable" placeholder="Responsable" />
               <input className="input md:col-span-5" name="notas" placeholder="Notas (opcional)" />
-              <button className="btn-primary md:col-span-1" type="submit">Registrar</button>
+              <SubmitButton className="btn-primary md:col-span-1">Registrar</SubmitButton>
             </form>
 
             {comunicaciones.length === 0 ? (
@@ -92,7 +93,7 @@ async function ComunicacionesPage() {
                         }}
                       >
                         <input type="hidden" name="comunicacion_id" value={com._id} />
-                        <button className="btn-outline text-xs" type="submit">Eliminar</button>
+                        <SubmitButton className="btn-outline text-xs">Eliminar</SubmitButton>
                       </form>
                     </div>
                     {com.notas && (

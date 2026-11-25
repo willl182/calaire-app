@@ -3,6 +3,7 @@ import type { SgcAvanceExpediente, SgcAvanceItem, SgcDriveRecurso } from '@/serv
 import { SGC_RONDA_ETAPAS } from '@/server/sgc/catalog'
 import { AccionPrincipal } from './AccionPrincipal'
 import { marcarAplicaDocumentoAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 export const RESPONSABLE_LABELS: Record<SgcAvanceItem['responsable'], string> = {
   coordinador: 'Tú',
@@ -62,18 +63,17 @@ function AplicaToggle({ item, rondaId }: { item: SgcAvanceItem; rondaId: string 
       <input type="hidden" name="ronda_id" value={rondaId} />
       <input type="hidden" name="codigo" value={item.codigo} />
       <input type="hidden" name="aplica" value={item.aplica ? 'false' : 'true'} />
-      <button
-        type="submit"
+      <SubmitButton
+        
         role="switch"
         aria-checked={item.aplica}
         aria-label={`${item.codigo} ${item.aplica ? 'aplica' : 'no aplica'}: cambiar`}
-        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--pt-primary)]"
-      >
+        className="inline-flex items-center gap-2 rounded-full border border-[var(--border)] bg-white px-2 py-1 text-xs font-semibold text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--pt-primary)]">
         <span aria-hidden="true" className={`relative inline-block h-4 w-7 rounded-full transition ${item.aplica ? 'bg-[var(--pt-primary)]' : 'bg-slate-300'}`}>
           <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition ${item.aplica ? 'left-3.5' : 'left-0.5'}`} />
         </span>
         {item.aplica ? 'Aplica' : 'No aplica'}
-      </button>
+      </SubmitButton>
     </form>
   )
 }

@@ -10,6 +10,7 @@ import {
   guardarRevisionDatosAction,
   guardarRevisionHomogeneidadAction,
 } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 const INFORME_CHECK_LABELS: Record<string, string> = {
   participantes_revisados: 'Participantes, codigos y fichas revisados',
@@ -89,12 +90,12 @@ export function PlanRondaForm({ panel, rondaId, completa = false }: { panel: Sgc
           ))}
         </div>
         <input className="input" name="motivo_revision" placeholder="Motivo si edita un plan finalizado" />
-        <button className="btn-primary" type="submit">Guardar F-PSEA-06</button>
+        <SubmitButton className="btn-primary">Guardar F-PSEA-06</SubmitButton>
       </form>
       <form action={finalizarPlanRondaAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
         {completa && <input type="hidden" name="volver" value="f-psea-06" />}
-        <button className="btn-outline" type="submit">Finalizar registro</button>
+        <SubmitButton className="btn-outline">Finalizar registro</SubmitButton>
       </form>
     </SectionShell>
   )
@@ -127,11 +128,11 @@ function InformeFinalForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
             </div>
           )
         })}
-        <button className="btn-primary" type="submit">Guardar F-PSEA-13</button>
+        <SubmitButton className="btn-primary">Guardar F-PSEA-13</SubmitButton>
       </form>
       <form action={finalizarRevisionDatosAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-outline" type="submit">Finalizar F-PSEA-13 y crear snapshot</button>
+        <SubmitButton className="btn-outline">Finalizar F-PSEA-13 y crear snapshot</SubmitButton>
       </form>
     </SectionShell>
   )
@@ -171,11 +172,11 @@ function HomogeneidadForm({ panel, rondaId }: { panel: SgcPanel; rondaId: string
             )
           })}
         </div>
-        <button className="btn-primary" type="submit">Guardar F-PSEA-11</button>
+        <SubmitButton className="btn-primary">Guardar F-PSEA-11</SubmitButton>
       </form>
       <form action={finalizarRevisionHomogeneidadAction} className="mt-3">
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-outline" type="submit">Finalizar F-PSEA-11 y crear snapshot</button>
+        <SubmitButton className="btn-outline">Finalizar F-PSEA-11 y crear snapshot</SubmitButton>
       </form>
     </SectionShell>
   )

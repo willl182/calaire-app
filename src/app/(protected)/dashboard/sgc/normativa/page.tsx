@@ -5,6 +5,8 @@ import { listNormativaSgcWithStatus, listSgcMaestroWithStatus, type DocumentoReq
 import { BackendOfflineBanner } from '@/components/ui/BackendOfflineBanner'
 import { SgcHeader } from '@/components/ui/SgcHeader'
 import { relacionarDocumentoRequisitoAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Alert } from '@/components/ui/Alert'
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -105,8 +107,8 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
         email={auth.user.email}
       />
 
-      {firstParam(params.success) && <div className="rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800">{firstParam(params.success)}</div>}
-      {firstParam(params.error) && <div className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">{firstParam(params.error)}</div>}
+      <Alert tone="success" message={firstParam(params.success)} />
+      <Alert tone="error" message={firstParam(params.error)} />
       {backendOffline && (
         <BackendOfflineBanner detail="La matriz normativa se muestra sin requisitos ni documentos relacionables mientras Convex no responde." />
       )}
@@ -152,7 +154,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
             <option value="pendiente">Pendiente</option>
             <option value="no_aplica">No aplica</option>
           </select>
-          <button className="btn-primary" type="submit">Filtrar</button>
+          <SubmitButton className="btn-primary">Filtrar</SubmitButton>
         </form>
       </section>
 
@@ -242,7 +244,7 @@ export default async function NormativaSgcPage({ searchParams }: PageProps) {
                           <input className="input text-xs" name="responsable" placeholder="Responsable" />
                           <input className="input text-xs" name="fecha_revision" type="date" />
                           <input className="input text-xs" name="observacion" placeholder="Observacion" />
-                          <button className="btn-outline justify-self-start text-xs" type="submit">Guardar cobertura</button>
+                          <SubmitButton className="btn-outline justify-self-start text-xs">Guardar cobertura</SubmitButton>
                         </form>
                       )}
                     </td>

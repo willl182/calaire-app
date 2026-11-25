@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation'
 import { LogoUnal } from '@/components/LogoUnal'
 
 import { signOutAction } from './dashboard/actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 const linkBase =
   'relative inline-flex self-stretch items-center px-3 py-0 text-sm font-medium whitespace-nowrap transition-colors duration-150 ' +
@@ -63,9 +64,9 @@ export function ParticipantTopNav({ hasRondas }: { hasRondas: boolean }) {
         </nav>
 
         <form action={signOutAction} className="flex shrink-0 items-center">
-          <button type="submit" className="btn-outline whitespace-nowrap">
+          <SubmitButton className="btn-outline whitespace-nowrap">
             Cerrar sesión
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </header>

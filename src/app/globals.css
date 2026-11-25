@@ -1,30 +1,17 @@
 @import "tailwindcss";
 
-/* ─── Droid Sans font-face ───────────────────────────────────────────── */
-@font-face {
-  font-family: 'Droid Sans';
-  src: url('/fonts/DroidSans-Regular.ttf') format('truetype');
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: 'Droid Sans';
-  src: url('/fonts/DroidSans-Bold.ttf') format('truetype');
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 /* ─── Design tokens ───────────────────────────────────────────────────── */
 :root {
   /* Typography */
-  --font-sans: "Droid Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+  --font-sans: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), "SFMono-Regular", Consolas, "Liberation Mono", monospace;
 
   /* Brand */
   --pt-primary:        #FDB913;
-  --pt-primary-dark:   #E5A610;
+  /* Dorado oscuro para texto y enlaces sobre fondos claros (AA: 5,35:1 sobre el panel). */
+  --pt-primary-dark:   #8A6100;
+  /* Dorado intenso para rellenos (degradados, hover de botones, scrollbar). */
+  --pt-primary-deep:   #E5A610;
   --pt-primary-light:  #FFD54F;
   --pt-primary-subtle: #F5F5F0;
 
@@ -37,27 +24,78 @@
   /* Border */
   --border:        #D1D5DB;
   --border-soft:   #E5E7EB;
+  --border-strong: #9CA3AF;
 
   /* Text */
   --foreground:       #111827;
-  --foreground-muted: #6B7280;
+  /* AA sobre el fondo (5,70:1) y sobre el panel (6,6:1). */
+  --foreground-muted: #525B68;
 
-  /* Semantic */
-  --success: #00B050;
-  --warning: #ECC94B;
-  --danger:  #E53E3E;
-  --danger-strong: #B42318;
-  --danger-soft:   #FEF3F2;
-  --danger-border: #F4B7B2;
+  /* Semantic: base (relleno), -strong (texto), -soft (fondo), -border */
+  --success:        #0B7A3E;
+  --success-strong: #067647;
+  --success-soft:   #ECFDF3;
+  --success-border: #ABEFC6;
 
-  /* Focus */
-  --focus-ring: rgba(253, 185, 19, 0.4);
+  --warning:        #ECC94B;
+  --warning-strong: #8A5A00;
+  --warning-soft:   #FFF7E0;
+  --warning-border: #F5D48A;
+
+  --danger:         #E53E3E;
+  --danger-strong:  #B42318;
+  --danger-soft:    #FEF3F2;
+  --danger-border:  #F4B7B2;
+
+  --info:           #2E6FD8;
+  --info-strong:    #175CD3;
+  --info-soft:      #EFF6FF;
+  --info-border:    #B2CCFF;
+
+  --special:        #7C3AED;
+  --special-strong: #5B21B6;
+  --special-soft:   #F5F3FF;
+  --special-border: #DDD6FE;
+
+  /* Focus: contorno oscuro (6,4:1) + halo dorado de marca */
+  --focus-outline: #7A5600;
+  --focus-ring: rgba(253, 185, 19, 0.45);
 }
 
 /* ─── Tailwind theme bridge ───────────────────────────────────────────── */
 @theme inline {
   --color-background:    var(--background);
   --color-foreground:    var(--foreground);
+  --color-muted:         var(--foreground-muted);
+  --color-surface:       var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-panel:         var(--surface-panel);
+  --color-line:          var(--border);
+  --color-line-soft:     var(--border-soft);
+  --color-line-strong:   var(--border-strong);
+  --color-brand:         var(--pt-primary);
+  --color-brand-ink:     var(--pt-primary-dark);
+
+  --color-success:        var(--success);
+  --color-success-strong: var(--success-strong);
+  --color-success-soft:   var(--success-soft);
+  --color-success-border: var(--success-border);
+  --color-warning:        var(--warning);
+  --color-warning-strong: var(--warning-strong);
+  --color-warning-soft:   var(--warning-soft);
+  --color-warning-border: var(--warning-border);
+  --color-danger:         var(--danger);
+  --color-danger-strong:  var(--danger-strong);
+  --color-danger-soft:    var(--danger-soft);
+  --color-danger-border:  var(--danger-border);
+  --color-info:           var(--info);
+  --color-info-strong:    var(--info-strong);
+  --color-info-soft:      var(--info-soft);
+  --color-info-border:    var(--info-border);
+  --color-special:        var(--special);
+  --color-special-strong: var(--special-strong);
+  --color-special-soft:   var(--special-soft);
+  --color-special-border: var(--special-border);
   --font-sans:           var(--font-sans);
   --font-mono:           var(--font-mono);
 }
@@ -83,25 +121,25 @@ body {
 
 /* ─── Focus rings ─────────────────────────────────────────────────────── */
 :focus-visible {
-  outline: 2px solid var(--pt-primary);
+  outline: 2px solid var(--focus-outline);
   outline-offset: 2px;
   box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 /* ─── Scrollbar ───────────────────────────────────────────────────────── */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 10px;
+  height: 10px;
 }
 ::-webkit-scrollbar-track {
   background: var(--surface-muted);
 }
 ::-webkit-scrollbar-thumb {
   background: var(--pt-primary);
-  border-radius: 3px;
+  border-radius: 5px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--pt-primary-dark);
+  background: var(--pt-primary-deep);
 }
 
 /* ─── Transitions globales ────────────────────────────────────────────── */
@@ -169,7 +207,7 @@ a, button, input, select, textarea {
   border-color: #B8C0CC;
 }
 .input:focus {
-  border-color: var(--pt-primary);
+  border-color: var(--focus-outline);
   box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
@@ -244,7 +282,7 @@ a, button, input, select, textarea {
   justify-content: center;
   gap: 0.5rem;
   padding: 0.5rem 1.25rem;
-  background: linear-gradient(135deg, var(--pt-primary) 0%, var(--pt-primary-dark) 100%);
+  background: linear-gradient(135deg, var(--pt-primary) 0%, var(--pt-primary-deep) 100%);
   color: var(--foreground);
   font-family: var(--font-sans), system-ui, sans-serif;
   font-size: 0.875rem;
@@ -256,7 +294,7 @@ a, button, input, select, textarea {
   box-shadow: 0 1px 2px rgba(0,0,0,0.08);
 }
 .btn-primary:hover {
-  background: linear-gradient(135deg, var(--pt-primary-dark) 0%, #CC930E 100%);
+  background: linear-gradient(135deg, var(--pt-primary-deep) 0%, #CC930E 100%);
   box-shadow: 0 3px 8px rgba(253,185,19,0.35);
 }
 .btn-primary:active {
@@ -360,6 +398,18 @@ a, button, input, select, textarea {
 .btn-danger-outline:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* ─── Aviso emergente ────────────────────────────────────────────────── */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.toast-enter {
+  animation: toast-in 180ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .toast-enter { animation: none; }
 }
 
 /* ─── .numeric (datos numéricos con JetBrains Mono) ──────────────────── */
@@ -774,8 +824,8 @@ table thead th {
   align-items: center;
   min-height: 26px;
   border-radius: 999px;
-  background: #e5f8ef;
-  color: #008760;
+  background: var(--success-soft);
+  color: var(--success-strong);
   padding-inline: 0.625rem;
   font-size: 0.75rem;
   font-weight: 850;
@@ -785,18 +835,18 @@ table thead th {
 }
 
 .sgc-status-ok {
-  background: #e5f8ef;
-  color: #008760;
+  background: var(--success-soft);
+  color: var(--success-strong);
 }
 
 .sgc-status-warn {
-  background: #fff4db;
-  color: #a96200;
+  background: var(--warning-soft);
+  color: var(--warning-strong);
 }
 
 .sgc-status-bad {
-  background: #fff0f3;
-  color: #c0103a;
+  background: var(--danger-soft);
+  color: var(--danger-strong);
 }
 
 /* ─── Responsive base ─────────────────────────────────────────────────── */

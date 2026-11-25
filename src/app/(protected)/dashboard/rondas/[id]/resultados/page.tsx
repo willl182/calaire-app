@@ -13,6 +13,9 @@ import {
 import { importPtScoresAction, publishPtResultsAction, uploadPtReportAction } from './actions'
 import { RondaContextNav } from '../RondaContextNav'
 import { RondaPageHeader } from '../RondaPageHeader'
+import { FileInput } from '@/components/ui/FileInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
+import { Alert } from '@/components/ui/Alert'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -263,8 +266,8 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
           }
         />
 
-        {getParam(resolvedSearchParams.error) && <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800">{getParam(resolvedSearchParams.error)}</div>}
-        {getParam(resolvedSearchParams.success) && <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">{getParam(resolvedSearchParams.success)}</div>}
+        <Alert tone="error" message={getParam(resolvedSearchParams.error)} />
+        <Alert tone="success" message={getParam(resolvedSearchParams.success)} />
 
         <section className="card p-6">
           <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
@@ -274,23 +277,23 @@ export default async function ResultadosPage({ params, searchParams }: PageProps
           {evaluacion?.estado !== 'publicada' ? <div className="grid gap-5 lg:grid-cols-3">
             <form action={importPtScoresAction} className="rounded-xl border border-[var(--border-soft)] p-4">
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <label className="mb-2 block text-sm font-semibold">1. Puntajes CSV</label>
-              <input required name="csv" type="file" accept=".csv,text/csv" className="block w-full text-sm" />
-              <button className="btn-outline mt-4" type="submit">Validar e importar borrador</button>
+              <label className="mb-2 block text-sm font-semibold" htmlFor="pt-scores-csv">1. Puntajes CSV</label>
+              <FileInput id="pt-scores-csv" required name="csv" accept=".csv,text/csv" />
+              <SubmitButton className="btn-outline mt-4" pendingLabel="Validando…">Validar e importar borrador</SubmitButton>
             </form>
             <form action={uploadPtReportAction} className="rounded-xl border border-[var(--border-soft)] p-4">
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <label className="mb-2 block text-sm font-semibold">2. Informe general PDF</label>
-              <input required name="informe" type="file" accept="application/pdf" className="block w-full text-sm" />
-              <button className="btn-outline mt-4" type="submit">Subir informe</button>
+              <label className="mb-2 block text-sm font-semibold" htmlFor="pt-informe-pdf">2. Informe general PDF</label>
+              <FileInput id="pt-informe-pdf" required name="informe" accept="application/pdf" />
+              <SubmitButton className="btn-outline mt-4" pendingLabel="Subiendo…">Subir informe</SubmitButton>
               {evaluacion?.informeNombreArchivo && <p className="mt-2 text-xs text-emerald-700">Actual: {evaluacion.informeNombreArchivo}</p>}
             </form>
             <form action={publishPtResultsAction} className="rounded-xl border border-amber-200 bg-amber-50 p-4">
               <input type="hidden" name="ronda_id" value={rondaId} />
-              <label className="block text-sm font-semibold text-amber-900">3. Publicar</label>
+              <label className="block text-sm font-semibold text-amber-900" htmlFor="pt-publicar-confirmacion">3. Publicar</label>
               <p className="my-2 text-xs text-amber-800">No se puede editar, reemplazar ni despublicar después.</p>
-              <input required name="confirmacion" placeholder="Escriba PUBLICAR" className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm" />
-              <button disabled={evaluacion?.estado !== 'borrador_validado' || !evaluacion.informeStorageId} className="btn-primary mt-4 disabled:cursor-not-allowed disabled:opacity-50" type="submit">Publicar resultados</button>
+              <input id="pt-publicar-confirmacion" required name="confirmacion" placeholder="Escriba PUBLICAR" className="w-full rounded-lg border border-amber-300 bg-white px-3 py-2 text-sm" />
+              <SubmitButton disabled={evaluacion?.estado !== 'borrador_validado' || !evaluacion.informeStorageId} className="btn-primary mt-4" pendingLabel="Publicando…">Publicar resultados</SubmitButton>
             </form>
           </div> : <p className="text-sm text-emerald-700">Publicada el {evaluacion.publicadaAt ? formatDate(new Date(evaluacion.publicadaAt).toISOString()) : '—'} por {evaluacion.publicadaBy}.</p>}
         </section>

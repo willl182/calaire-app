@@ -25,6 +25,7 @@ import { nombrarUsuarios } from './notas'
 import { getNombresUsuarios } from './textos'
 import { SiguientePasoBar } from './SiguientePasoBar'
 import { transicionSgcAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type PageProps = {
   params: Promise<{ id: string }>
@@ -73,18 +74,18 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
             <form action={transicionSgcAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="accion" value="documentacion_pendiente" />
-              <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
+              <SubmitButton className="btn-primary"  disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
                 Pasar a documentación pendiente
-              </button>
+              </SubmitButton>
             </form>
           )}
           {puedeCerrar && (
             <form action={transicionSgcAction}>
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="accion" value="cerrar" />
-              <button className="btn-primary" type="submit" disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
+              <SubmitButton className="btn-primary"  disabled={!sinBloqueantesActuales} aria-describedby={motivo ? motivoId : undefined}>
                 Cerrar documentalmente
-              </button>
+              </SubmitButton>
             </form>
           )}
           {puedeReabrir && (
@@ -92,7 +93,7 @@ function CierreDocumentalBar({ panel, avance, rondaId }: { panel: SgcPanel; avan
               <input type="hidden" name="ronda_id" value={rondaId} />
               <input type="hidden" name="accion" value="reabrir" />
               <input className="input" name="motivo" placeholder="Motivo de reapertura" aria-label="Motivo de reapertura" required />
-              <button className="btn-outline" type="submit">Reabrir</button>
+              <SubmitButton className="btn-outline">Reabrir</SubmitButton>
             </form>
           )}
         </div>

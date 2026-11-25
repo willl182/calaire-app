@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation'
 import { Suspense, useState } from 'react'
 import { LogoUnal } from '@/components/LogoUnal'
 import { signOutAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 const PT_APP_URL = 'https://w421.shinyapps.io/pt_app/'
 
@@ -135,9 +136,9 @@ function UserMenu({ userEmail }: { userEmail: string }) {
           <span className="sr-only">(aplicativo externo, abre en nueva pestaña)</span>
         </a>
         <form action={signOutAction} className="mt-3">
-          <button type="submit" className="btn-outline w-full">
+          <SubmitButton className="btn-outline w-full">
             Cerrar sesión
-          </button>
+          </SubmitButton>
         </form>
       </div>
     </details>

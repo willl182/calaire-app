@@ -14,6 +14,7 @@ import { FolderCard } from '@/components/ui/drive/FolderCard'
 import type { FileTone } from '@/components/ui/drive/DriveIcons'
 import { estadoBadgeTone } from '@/components/ui/drive/estadoTone'
 import { guardarDocumentoMaestroAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type PageProps = {
   searchParams?: Promise<Record<string, string | string[] | undefined>>
@@ -139,7 +140,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <option value="borrador">Borrador</option>
             <option value="obsoleto">Obsoleto</option>
           </select>
-          <button className="btn-primary h-11 px-5 lg:col-span-2 xl:col-span-1" type="submit">Filtrar</button>
+          <SubmitButton className="btn-primary h-11 px-5 lg:col-span-2 xl:col-span-1">Filtrar</SubmitButton>
         </form>
       </section>
 
@@ -295,7 +296,7 @@ export default async function CentroDocumentalPage({ searchParams }: PageProps) 
             <input className="input" name="responsable" placeholder="Responsable" />
             <input className="input md:col-span-2" name="fuente_editable_url" placeholder="URL editable opcional" />
             <textarea className="input md:col-span-3" name="notas" placeholder="Notas" rows={3} />
-            <button className="btn-primary justify-self-start" type="submit">Guardar documento</button>
+            <SubmitButton className="btn-primary justify-self-start">Guardar documento</SubmitButton>
           </form>
         </details>
       )}

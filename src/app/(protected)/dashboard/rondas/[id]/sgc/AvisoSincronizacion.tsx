@@ -1,5 +1,6 @@
 import type { SincronizacionExpediente } from '@/server/sgc'
 import { actualizarExpedienteAction, inicializarDriveRondaAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 /** Aviso cuando el expediente guardado no coincide con el catálogo vigente (DIAG 2.3). */
 export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExpediente; rondaId: string }) {
@@ -19,9 +20,9 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
         </div>
         <form action={inicializarDriveRondaAction}>
           <input type="hidden" name="ronda_id" value={rondaId} />
-          <button className="btn-primary whitespace-nowrap" type="submit">
+          <SubmitButton className="btn-primary whitespace-nowrap">
             Inicializar expediente
-          </button>
+          </SubmitButton>
         </form>
       </section>
     )
@@ -55,9 +56,9 @@ export function AvisoSincronizacion({ sync, rondaId }: { sync: SincronizacionExp
       </div>
       <form action={actualizarExpedienteAction}>
         <input type="hidden" name="ronda_id" value={rondaId} />
-        <button className="btn-primary whitespace-nowrap" type="submit">
+        <SubmitButton className="btn-primary whitespace-nowrap">
           Actualizar expediente ({etiqueta})
-        </button>
+        </SubmitButton>
       </form>
     </section>
   )

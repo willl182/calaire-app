@@ -1,5 +1,6 @@
 import type { SgcPanel } from '@/server/sgc'
 import { actualizarHitoRondaAction, crearHitoRondaAction } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type Hito = SgcPanel['hitos'][number]
 
@@ -31,7 +32,7 @@ function HitoFechaForm({ hito, rondaId }: { hito: Hito; rondaId: string }) {
         defaultValue={hito.fechaObjetivo ?? ''}
         aria-label={`Fecha objetivo de ${hito.nombre}`}
       />
-      <button className="btn-outline px-3 py-1 text-xs" type="submit">Guardar fecha</button>
+      <SubmitButton className="btn-outline px-3 py-1 text-xs">Guardar fecha</SubmitButton>
     </form>
   )
 }
@@ -57,7 +58,7 @@ export function HitosRonda({ hitos, rondaId }: { hitos: SgcPanel['hitos']; ronda
             Fecha de INICIO_RONDA
             <input className="input" type="date" name="fecha_objetivo" required />
           </label>
-          <button className="btn-primary" type="submit">Crear hito de inicio</button>
+          <SubmitButton className="btn-primary">Crear hito de inicio</SubmitButton>
         </form>
       )}
       {ordenados.length > 0 && (

@@ -12,6 +12,8 @@ import {
   enviarFichaFinalAction,
   cerrarSesionParticipanteAction,
 } from './actions'
+import { FileInput } from '@/components/ui/FileInput'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 const ANALITOS = ['CO', 'SO2', 'O3', 'NO', 'NO2'] as const
 
@@ -219,9 +221,9 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
               </span>
             )}
             <form action={cerrarSesionParticipanteAction}>
-              <button type="submit" className="btn-outline">
+              <SubmitButton className="btn-outline">
                 Cerrar sesión
-              </button>
+              </SubmitButton>
             </form>
           </div>
         </section>
@@ -351,15 +353,14 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                     }}
                   />
                 </label>
-                <label className={`${labelClass} md:col-span-2`}>
+                <div className={`${labelClass} md:col-span-2`}>
                   <span>PDF seguridad social y ARL</span>
-                  <input
-                    type="file"
-                    accept="application/pdf,.pdf"
-                    className={inputClass}
-                    disabled={disabled}
-                    onChange={(e) => handleAcompanantePdfChange(idx, e.target.files?.[0] ?? null)}
-                  />
+                  <FileInput
+                  accept="application/pdf,.pdf"
+                  aria-label="PDF seguridad social y ARL"
+                  disabled={disabled}
+                  onChange={(e) => handleAcompanantePdfChange(idx, e.target.files?.[0] ?? null)}
+                />
                   {item.seguridad_social_arl_file_name && (
                     <span className="text-xs text-[var(--foreground-muted)]">
                       {item.seguridad_social_arl_url ? (
@@ -369,7 +370,7 @@ export default function FormularioRegistro({ codigoRonda, rondaCodigo, rondaEsta
                       ) : item.seguridad_social_arl_file_name}
                     </span>
                   )}
-                </label>
+                </div>
               </div>
             ))}
           </div>

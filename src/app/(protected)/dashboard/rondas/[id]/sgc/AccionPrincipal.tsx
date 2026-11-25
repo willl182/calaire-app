@@ -5,6 +5,7 @@ import {
   cambiarVisibilidadDriveAction,
   crearDriveGoogleAction,
 } from './actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 type Props = {
   item: SgcAvanceItem
@@ -67,9 +68,9 @@ export function AccionPrincipal({ item, recurso, rondaId, rondaCodigo, rondaNomb
         <input type="hidden" name="ronda_id" value={rondaId} />
         <input type="hidden" name="codigo" value={item.codigo} />
         <input type="hidden" name="aprobado" value={aprobado ? 'false' : 'true'} />
-        <button className={aprobado ? clsSec : cls} type="submit" disabled={bloqueado} title={bloqueado ? item.motivo : undefined}>
+        <SubmitButton className={aprobado ? clsSec : cls}  disabled={bloqueado} title={bloqueado ? item.motivo : undefined}>
           {aprobado ? aprobable.retirar : aprobable.aprobar}
-        </button>
+        </SubmitButton>
         {bloqueado && <span className="text-xs text-rose-800">Resuelva primero los bloqueantes.</span>}
       </form>
     )
@@ -109,7 +110,7 @@ export function AccionPrincipal({ item, recurso, rondaId, rondaCodigo, rondaNomb
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="recurso_id" value={recurso._id} />
             <input type="hidden" name="publica_participante" value="true" />
-            <button className={clsSec} type="submit" aria-label={`Publicar ${item.codigo} a participantes`}>Publicar</button>
+            <SubmitButton className={clsSec}  aria-label={`Publicar ${item.codigo} a participantes`}>Publicar</SubmitButton>
           </form>
         </div>
       )
@@ -133,13 +134,12 @@ export function AccionPrincipal({ item, recurso, rondaId, rondaCodigo, rondaNomb
             <input type="hidden" name="ronda_id" value={rondaId} />
             <input type="hidden" name="ronda_codigo" value={rondaCodigo} />
             <input type="hidden" name="ronda_nombre" value={rondaNombre} />
-            <button
+            <SubmitButton
               className={cls}
-              type="submit"
-              title={carpetaRondaCreada ? 'Copia en Drive las plantillas que falten' : 'Crea la carpeta de la ronda y copia las plantillas'}
-            >
+              
+              title={carpetaRondaCreada ? 'Copia en Drive las plantillas que falten' : 'Crea la carpeta de la ronda y copia las plantillas'}>
               Crear en Drive
-            </button>
+            </SubmitButton>
           </form>
         </div>
       )

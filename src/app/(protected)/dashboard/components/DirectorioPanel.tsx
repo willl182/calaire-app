@@ -1,5 +1,6 @@
 import type { DirectorioParticipante, ParticipanteGlobal } from '@/server/rondas'
 import { upsertDirectorioParticipanteAction } from '../participantes/actions'
+import { SubmitButton } from '@/components/ui/SubmitButton'
 
 function DirectorioForm() {
   return (
@@ -88,9 +89,9 @@ function DirectorioForm() {
       </div>
 
       <div className="flex justify-end">
-        <button type="submit" className="btn-primary">
+        <SubmitButton className="btn-primary">
           Guardar en el directorio
-        </button>
+        </SubmitButton>
       </div>
     </form>
   )
