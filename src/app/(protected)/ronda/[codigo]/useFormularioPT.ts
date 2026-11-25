@@ -39,6 +39,7 @@ import {
   type KMode,
   type SaveStatus,
 } from './formulario-pt'
+import { formatDecimal } from '@/lib/decimal'
 
 export type GuardarCsvResult = { ok?: boolean; saved?: number; errors?: string[]; error?: string }
 
@@ -240,14 +241,14 @@ export function useFormularioPT({
         const next = { ...prev }
         for (const row of savedRows) {
           next[toCellKey(row.ptItemId, row.sampleGroupId)] = {
-            d1: String(row.d1),
-            d2: row.d2 != null ? String(row.d2) : '',
-            d3: row.d3 != null ? String(row.d3) : '',
-            meanValue: String(row.meanValue),
-            sdValue: String(row.sdValue),
-            ux: String(row.ux),
-            k: String(row.k),
-            uxExp: String(row.uxExp),
+            d1: formatDecimal(row.d1),
+            d2: formatDecimal(row.d2),
+            d3: formatDecimal(row.d3),
+            meanValue: formatDecimal(row.meanValue),
+            sdValue: formatDecimal(row.sdValue),
+            ux: formatDecimal(row.ux),
+            k: formatDecimal(row.k),
+            uxExp: formatDecimal(row.uxExp),
           }
         }
         return next

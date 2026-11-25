@@ -34,6 +34,12 @@ export function toDecimal(raw: string): number | null {
   return parsed.kind === 'ok' ? parsed.value : null
 }
 
+/** Número guardado → texto con coma decimal para mostrar en la captura (10.1 → "10,1"). */
+export function formatDecimal(value: number | null | undefined): string {
+  if (value == null || !Number.isFinite(value)) return ''
+  return String(value).replace('.', ',')
+}
+
 export function isValidDecimal(raw: string): boolean {
   return parseDecimal(raw).kind === 'ok'
 }

@@ -1,6 +1,6 @@
 // Lógica pura de la captura PT compartida por FormularioRonda y FormularioReferencia:
 // celdas (corrida × grupo), validación decimal, completitud y estado inicial.
-import { isValidDecimal, toDecimal } from '@/lib/decimal'
+import { formatDecimal, isValidDecimal, toDecimal } from '@/lib/decimal'
 import type { EnvioPT, RondaPTItem, RondaPTSampleGroup } from '@/server/rondas'
 
 export type AdminPTTarget = {
@@ -115,14 +115,14 @@ export function initCells(
       const key = toCellKey(item.id, group.id)
       const envio = enviosMap.get(key)
       cells[key] = {
-        d1: envio?.d1 != null ? String(envio.d1) : '',
-        d2: envio?.d2 != null ? String(envio.d2) : '',
-        d3: envio?.d3 != null ? String(envio.d3) : '',
-        meanValue: envio != null ? String(envio.mean_value) : '',
-        sdValue: envio != null ? String(envio.sd_value) : '',
-        ux: envio?.ux != null ? String(envio.ux) : '',
-        k: envio?.k != null ? String(envio.k) : '2',
-        uxExp: envio?.ux_exp != null ? String(envio.ux_exp) : '',
+        d1: formatDecimal(envio?.d1),
+        d2: formatDecimal(envio?.d2),
+        d3: formatDecimal(envio?.d3),
+        meanValue: envio != null ? formatDecimal(envio.mean_value) : '',
+        sdValue: envio != null ? formatDecimal(envio.sd_value) : '',
+        ux: formatDecimal(envio?.ux),
+        k: envio?.k != null ? formatDecimal(envio.k) : '2',
+        uxExp: formatDecimal(envio?.ux_exp),
       }
     }
   }
