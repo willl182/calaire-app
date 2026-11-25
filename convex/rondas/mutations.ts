@@ -1,7 +1,7 @@
 import { v } from 'convex/values'
 import { contaminanteValidator, participantProfileValidator, replicasValidator, rondaEstadoValidator } from './validators'
 import { defineRondaMutation } from './definitions'
-import { generateNextReplicateCode, generateUniqueParticipantCode } from './codes'
+import { asignarReplicateCodeAlta, assertReplicateCodeManual, generateUniqueParticipantCode } from './codes'
 import { getDirectorioByLookup, normalizeEmail } from './directorio'
 import { assertAllowedEstadoTransition } from './state'
 import { assertNivelesPTCuadran } from './ptLevels'
@@ -78,6 +78,7 @@ export const addParticipanteDefinition = defineRondaMutation({
       .unique()
     if (existing) throw new Error('Este usuario ya esta asignado a esta ronda.')
 
+    await assertReplicateCodeManual(ctx, rondaId, null, participantProfile, replicateCode)
     const assignedParticipantCode = participantCode ?? await generateUniqueParticipantCode(ctx, rondaId)
     const directorio = await getDirectorioByLookup(ctx, email)
 
@@ -88,7 +89,7 @@ export const addParticipanteDefinition = defineRondaMutation({
       directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode: assignedParticipantCode,
-      replicateCode: replicateCode ?? await generateNextReplicateCode(ctx, rondaId, participantProfile),
+      replicateCode: replicateCode ?? await asignarReplicateCodeAlta(ctx, rondaId, participantProfile),
       invitadoAt: Date.now(),
     })
   },
@@ -119,6 +120,8 @@ export const updateParticipanteAdminDefinition = defineRondaMutation({
       const duplicate = participantes.find((p) => p._id !== participanteId && p.participantCode === normalizedCode)
       if (duplicate) throw new Error('Ya existe otro cupo con ese código en la ronda.')
     }
+
+    await assertReplicateCodeManual(ctx, participante.rondaId, participanteId, participantProfile, replicateCode)
 
     await ctx.db.patch(participanteId, {
       email: normalizedEmail,
@@ -178,7 +181,7 @@ export const createConfiguredRondaDefinition = defineRondaMutation({
 
     for (const slot of slots) {
       const participantCode = await generateUniqueParticipantCode(ctx, rondaId)
-      const replicateCode = await generateNextReplicateCode(ctx, rondaId, slot.participantProfile)
+      const replicateCode = await asignarReplicateCodeAlta(ctx, rondaId, slot.participantProfile)
       const directorio = await getDirectorioByLookup(ctx, slot.email)
       await ctx.db.insert('rondaParticipantes', {
         rondaId,
@@ -371,7 +374,7 @@ export const assignParticipanteDefinition = defineRondaMutation({
       directorioParticipanteId: directorio?._id ?? null,
       participantProfile,
       participantCode,
-      replicateCode: await generateNextReplicateCode(ctx, rondaId, participantProfile),
+      replicateCode: await asignarReplicateCodeAlta(ctx, rondaId, participantProfile),
       invitadoAt: Date.now(),
     })
   },
@@ -463,7 +466,7 @@ export const addReferenceSlotDefinition = defineRondaMutation({
       email,
       participantProfile: 'member_special',
       participantCode,
-      replicateCode: await generateNextReplicateCode(ctx, rondaId, 'member_special'),
+      replicateCode: await asignarReplicateCodeAlta(ctx, rondaId, 'member_special'),
       invitadoAt: Date.now(),
     })
   },

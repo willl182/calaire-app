@@ -1,3 +1,4 @@
+import { ConvexError } from 'convex/values'
 import type { MutationCtx } from '../_generated/server'
 import type { Id } from '../_generated/dataModel'
 
@@ -41,7 +42,7 @@ export async function generateUniqueParticipantCode(
 
 // ---------------------------------------------------------------------------
 // Codigo de replica (convencion pt_app): referencia = 1, participantes 2, 3, ...
-// Nunca se pisan valores asignados a mano: se toma el siguiente numero libre.
+// La referencia siempre lleva 1; los participantes toman el siguiente numero libre (>= 2).
 // ---------------------------------------------------------------------------
 
 export type ParticipantProfile = 'member' | 'member_special'
@@ -60,7 +61,15 @@ export function nextReplicateCode(used: Iterable<number | null | undefined>, pro
   return candidate
 }
 
-export async function generateNextReplicateCode(
+/**
+ * Codigo de replica para un alta nueva en la ronda.
+ * - Participante: siguiente libre (>= 2).
+ * - Referencia: siempre 1. Si un participante tiene el 1 puesto a mano, se mueve al siguiente
+ *   libre (>= 2). Si ese participante ya tiene envios PT finales (pudieron exportarse a pt_app
+ *   con el 1), el alta se rechaza para que el cambio se revise a mano.
+ * Si la ronda ya tiene otra referencia con el 1, la nueva recibe el siguiente libre.
+ */
+export async function asignarReplicateCodeAlta(
   ctx: MutationCtx,
   rondaId: Id<'rondas'>,
   profile: ParticipantProfile
@@ -69,7 +78,60 @@ export async function generateNextReplicateCode(
     .query('rondaParticipantes')
     .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
     .collect()
-  return nextReplicateCode(participantes.map((p) => p.replicateCode), profile)
+  const usados = participantes.map((p) => p.replicateCode)
+  if (profile === 'member') return nextReplicateCode(usados, 'member')
+
+  const ocupante = participantes.find((p) => p.replicateCode === REFERENCE_REPLICATE_CODE)
+  if (!ocupante) return REFERENCE_REPLICATE_CODE
+  if (ocupante.participantProfile === 'member_special') return nextReplicateCode(usados, 'member')
+
+  const envioFinal = (
+    await ctx.db.query('enviosPt').withIndex('by_participante', (q) => q.eq('rondaParticipanteId', ocupante._id)).collect()
+  ).some((envio) => envio.finalSubmittedAt != null)
+  if (envioFinal) {
+    throw new ConvexError(
+      `El cupo ${ocupante.participantCode ?? ocupante.email} tiene el código de réplica 1 y envíos PT finales. ` +
+        'Cámbialo a mano en Configuración PT antes de dar de alta la referencia.'
+    )
+  }
+  await ctx.db.patch(ocupante._id, { replicateCode: nextReplicateCode(usados, 'member') })
+  return REFERENCE_REPLICATE_CODE
+}
+
+/**
+ * Motivo por el que un codigo de replica puesto a mano incumple la convencion, o null si es valido.
+ * Sin codigo (null) es valido: el cupo queda pendiente de configurar.
+ */
+export function motivoReplicateCodeInvalido(
+  otros: Array<{ replicateCode?: number | null }>,
+  profile: ParticipantProfile,
+  code: number | null | undefined
+): string | null {
+  if (code == null) return null
+  if (!Number.isInteger(code) || code < 1) return 'El código de réplica debe ser un entero mayor o igual a 1.'
+  if (profile === 'member_special' && code !== REFERENCE_REPLICATE_CODE) return 'La referencia siempre lleva el código de réplica 1.'
+  if (profile === 'member' && code === REFERENCE_REPLICATE_CODE) {
+    return 'El código de réplica 1 está reservado a la referencia. Los participantes usan 2, 3, …'
+  }
+  if (otros.some((otro) => otro.replicateCode === code)) return `Ya existe otro cupo con el código de réplica ${code} en la ronda.`
+  return null
+}
+
+/** Rechaza un codigo de replica puesto a mano que incumpla la convencion (referencia = 1, participantes >= 2, unicos). */
+export async function assertReplicateCodeManual(
+  ctx: MutationCtx,
+  rondaId: Id<'rondas'>,
+  participanteId: Id<'rondaParticipantes'> | null,
+  profile: ParticipantProfile,
+  code: number | null | undefined
+) {
+  if (code == null) return
+  const participantes = await ctx.db
+    .query('rondaParticipantes')
+    .withIndex('by_ronda', (q) => q.eq('rondaId', rondaId))
+    .collect()
+  const motivo = motivoReplicateCodeInvalido(participantes.filter((p) => p._id !== participanteId), profile, code)
+  if (motivo) throw new ConvexError(motivo)
 }
 
 export type ReplicateCodeCambio<Id extends string = string> = {

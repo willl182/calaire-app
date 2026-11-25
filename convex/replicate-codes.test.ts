@@ -4,7 +4,7 @@ import { convexTest } from 'convex-test'
 import { expect, test } from 'vitest'
 import { api, internal } from './_generated/api'
 import schema from './schema'
-import { nextReplicateCode, planReplicateCodes } from './rondas/codes'
+import { motivoReplicateCodeInvalido, nextReplicateCode, planReplicateCodes } from './rondas/codes'
 
 const modules = import.meta.glob('./**/*.ts')
 delete modules['./replicate-codes.test.ts']
@@ -131,6 +131,71 @@ test('no pisa un codigo dado a mano y usa el siguiente libre', async () => {
   await asAdmin.mutation(api.rondas.index.addParticipante, { rondaId, workosUserId: 'x', email: 'x@lab.test', participantProfile: 'member' })
 
   expect(await codesByUser(t, rondaId)).toEqual({ m: 2, x: 3 })
+})
+
+test('alta de referencia: toma el 1 y mueve al participante que lo tenia a mano', async () => {
+  const t = convexTest(schema, modules)
+  const asAdmin = t.withIdentity(ADMIN)
+  const rondaId = await seedRonda(t)
+  await t.run(async (ctx) => {
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab1', email: 'lab1@x', participantProfile: 'member', replicateCode: 1, invitadoAt: 1 })
+    await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab2', email: 'lab2@x', participantProfile: 'member', replicateCode: 2, invitadoAt: 2 })
+  })
+
+  await asAdmin.mutation(api.rondas.index.addReferenceSlot, { rondaId, workosUserId: 'ref', email: 'ref@lab.test' })
+  expect(await codesByUser(t, rondaId)).toEqual({ lab1: 3, lab2: 2, ref: 1 })
+})
+
+test('alta de referencia: se rechaza si quien tiene el 1 ya tiene envios PT finales', async () => {
+  const t = convexTest(schema, modules)
+  const asAdmin = t.withIdentity(ADMIN)
+  const rondaId = await seedRonda(t)
+  await t.run(async (ctx) => {
+    const now = Date.now()
+    const lab = await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab1', email: 'lab1@x', participantProfile: 'member', participantCode: 'LAB001', replicateCode: 1, invitadoAt: 1 })
+    const ptItemId = await ctx.db.insert('rondaPtItems', { rondaId, contaminante: 'CO', runCode: 'R1', levelLabel: 'N1', sortOrder: 1, createdAt: now })
+    const sampleGroupId = await ctx.db.insert('rondaPtSampleGroups', { rondaId, sampleGroup: 'A', sortOrder: 1, createdAt: now })
+    await ctx.db.insert('enviosPt', { rondaId, rondaParticipanteId: lab, ptItemId, sampleGroupId, meanValue: 1, sdValue: 0, draftSavedAt: now, finalSubmittedAt: now, updatedAt: now })
+  })
+
+  await expect(asAdmin.mutation(api.rondas.index.addReferenceSlot, { rondaId, workosUserId: 'ref', email: 'ref@lab.test' })).rejects.toThrow(/LAB001/)
+  expect(await codesByUser(t, rondaId)).toEqual({ lab1: 1 })
+})
+
+test('motivoReplicateCodeInvalido: referencia = 1, participantes >= 2 y unicos', () => {
+  expect(motivoReplicateCodeInvalido([], 'member_special', 1)).toBeNull()
+  expect(motivoReplicateCodeInvalido([], 'member', 2)).toBeNull()
+  expect(motivoReplicateCodeInvalido([], 'member', null)).toBeNull()
+  expect(motivoReplicateCodeInvalido([], 'member_special', 2)).toMatch(/referencia siempre lleva/)
+  expect(motivoReplicateCodeInvalido([], 'member', 1)).toMatch(/reservado a la referencia/)
+  expect(motivoReplicateCodeInvalido([], 'member', 0)).toMatch(/mayor o igual a 1/)
+  expect(motivoReplicateCodeInvalido([], 'member', 2.5)).toMatch(/entero/)
+  expect(motivoReplicateCodeInvalido([{ replicateCode: 3 }], 'member', 3)).toMatch(/Ya existe otro cupo/)
+})
+
+test('edicion manual: Configuracion PT y edicion de admin rechazan codigos fuera de la convencion', async () => {
+  const t = convexTest(schema, modules)
+  const asAdmin = t.withIdentity(ADMIN)
+  const rondaId = await seedRonda(t)
+  const { ref, lab, otro } = await t.run(async (ctx) => ({
+    ref: await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'ref', email: 'ref@x', participantProfile: 'member_special', participantCode: 'REF001', replicateCode: 1, invitadoAt: 1 }),
+    lab: await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'lab', email: 'lab@x', participantProfile: 'member', participantCode: 'LAB001', replicateCode: 2, invitadoAt: 2 }),
+    otro: await ctx.db.insert('rondaParticipantes', { rondaId, workosUserId: 'otro', email: 'otro@x', participantProfile: 'member', participantCode: 'LAB002', replicateCode: 3, invitadoAt: 3 }),
+  }))
+
+  await expect(asAdmin.mutation(api.pt.index.updateParticipantePT, { participanteId: lab, participantCode: 'LAB001', replicateCode: 1 })).rejects.toThrow(/reservado a la referencia/)
+  await expect(asAdmin.mutation(api.pt.index.updateParticipantePT, { participanteId: lab, participantCode: 'LAB001', replicateCode: 3 })).rejects.toThrow(/Ya existe otro cupo/)
+  await expect(asAdmin.mutation(api.pt.index.updateParticipantePT, { participanteId: ref, participantCode: 'REF001', replicateCode: 4 })).rejects.toThrow(/referencia siempre lleva/)
+  await expect(
+    asAdmin.mutation(api.rondas.index.updateParticipanteAdmin, { participanteId: otro, email: 'otro@x', participantProfile: 'member_special', participantCode: 'LAB002', replicateCode: 3 })
+  ).rejects.toThrow(/referencia siempre lleva/)
+  await expect(
+    asAdmin.mutation(api.rondas.index.addParticipante, { rondaId, workosUserId: 'nuevo', email: 'n@x', participantProfile: 'member', replicateCode: 1 })
+  ).rejects.toThrow(/reservado a la referencia/)
+
+  await asAdmin.mutation(api.pt.index.updateParticipantePT, { participanteId: lab, participantCode: 'LAB001', replicateCode: 5 })
+  await asAdmin.mutation(api.pt.index.updateParticipantePT, { participanteId: otro, participantCode: 'LAB002', replicateCode: null })
+  expect(await codesByUser(t, rondaId)).toEqual({ ref: 1, lab: 5, otro: null })
 })
 
 test('agent API addParticipante asigna codigo de replica', async () => {
