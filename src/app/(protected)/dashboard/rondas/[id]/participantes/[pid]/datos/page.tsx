@@ -72,6 +72,21 @@ export default async function DatosParticipanteAdminPage({ params }: Props) {
           )}
         />
 
+        {ronda.estado !== 'activa' && (
+          <div role="alert" className="rounded-xl border border-warning-border bg-warning-soft px-4 py-3 text-sm text-warning-strong">
+            {ronda.estado === 'borrador' ? (
+              <>
+                La ronda está en borrador: los cambios que escriba aquí no se guardarán hasta activarla.{' '}
+                <Link href={`/dashboard/rondas/${rondaId}`} className="font-semibold underline underline-offset-2">
+                  Ir a activar la ronda
+                </Link>
+              </>
+            ) : (
+              'La ronda ya no admite cambios en los resultados: la captura está en solo lectura.'
+            )}
+          </div>
+        )}
+
         {isReferencia ? <FormularioReferencia {...formProps} /> : <FormularioRonda {...formProps} />}
 
         <div className="flex flex-wrap gap-2">
