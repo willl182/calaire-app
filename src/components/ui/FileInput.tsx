@@ -1,10 +1,16 @@
 'use client'
 
-import { useId, useState, type InputHTMLAttributes } from 'react'
+import { useId, useState, type InputHTMLAttributes, type Ref } from 'react'
 
 type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
   /** Texto del botón (por defecto "Elegir archivo"). */
   buttonLabel?: string
+  ref?: Ref<HTMLInputElement>
+  /**
+   * Nombre a mostrar cuando el padre controla el archivo elegido (p. ej. lo limpia
+   * por código tras importar). Si se omite, se usa el último archivo elegido.
+   */
+  fileName?: string | null
 }
 
 /**
@@ -12,17 +18,18 @@ type Props = Omit<InputHTMLAttributes<HTMLInputElement>, 'type'> & {
  * `required`, validación) pero oculto visualmente; el nombre del archivo
  * elegido se muestra al lado del botón.
  */
-export function FileInput({ buttonLabel = 'Elegir archivo', multiple, onChange, className, id, disabled, ...props }: Props) {
+export function FileInput({ buttonLabel = 'Elegir archivo', multiple, onChange, className, id, disabled, fileName, ...props }: Props) {
   const autoId = useId()
   const inputId = id ?? autoId
   const [nombres, setNombres] = useState<string[]>([])
 
+  const elegidos = fileName !== undefined ? (fileName ? [fileName] : []) : nombres
   const texto =
-    nombres.length === 0
+    elegidos.length === 0
       ? 'Ningún archivo seleccionado'
-      : nombres.length === 1
-        ? nombres[0]
-        : `${nombres.length} archivos seleccionados`
+      : elegidos.length === 1
+        ? elegidos[0]
+        : `${elegidos.length} archivos seleccionados`
 
   return (
     <div className={`flex min-w-0 flex-wrap items-center gap-3 ${className ?? ''}`}>

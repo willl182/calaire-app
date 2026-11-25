@@ -11,6 +11,7 @@ import type { AdminPTTarget } from './formulario-pt'
 import { guardarReferenciaCsvAction, limpiarEnviosReferenciaAction } from './actions'
 import { TablasCapturaPT } from './TablasCapturaPT'
 import { useFormularioPT } from './useFormularioPT'
+import { FileInput } from '@/components/ui/FileInput'
 
 export default function FormularioReferencia({
   ronda,
@@ -77,6 +78,7 @@ export default function FormularioReferencia({
     handlePreviewImport,
     resetCaptura,
     handleReopen,
+    confirmDialog,
   } = form
 
   function handleImportSave() {
@@ -112,6 +114,7 @@ export default function FormularioReferencia({
 
   return (
     <div className={adminTarget ? '' : 'min-h-screen bg-[var(--background)] px-6 py-8'}>
+      {confirmDialog}
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         {!adminTarget && <header className="header-bar px-8 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -299,10 +302,12 @@ export default function FormularioReferencia({
                 className="w-24 rounded border border-[var(--border)] px-3 py-2 text-sm numeric disabled:bg-[var(--surface-muted)]"
                 aria-label="Valor grupal del factor de cobertura k"
               />
-              <input
+              <FileInput
                 ref={importFileInputRef}
-                type="file"
                 accept=".csv,text/csv"
+                aria-label="Archivo CSV de resultados"
+                buttonLabel="Elegir CSV"
+                fileName={importFile?.name ?? null}
                 disabled={soloLectura}
                 onChange={(event) => {
                   setImportFile(event.target.files?.[0] ?? null)
@@ -310,7 +315,6 @@ export default function FormularioReferencia({
                   setImportStatus('idle')
                   setImportMessage(null)
                 }}
-                className="max-w-72 rounded border border-[var(--border)] px-3 py-2 text-sm disabled:bg-[var(--surface-muted)]"
               />
               <button
                 type="button"

@@ -40,6 +40,7 @@ import {
   type SaveStatus,
 } from './formulario-pt'
 import { formatDecimal } from '@/lib/decimal'
+import { useConfirm } from '@/components/ui/ConfirmDialog'
 
 export type GuardarCsvResult = { ok?: boolean; saved?: number; errors?: string[]; error?: string }
 
@@ -79,6 +80,7 @@ export function useFormularioPT({
   const [kMode, setKMode] = useState<KMode>('individual')
   const [globalK, setGlobalK] = useState('2')
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
+  const { confirm, dialog: confirmDialog } = useConfirm()
   const importFileInputRef = useRef<HTMLInputElement | null>(null)
 
   const cerrada = ronda.estado === 'documentacion_pendiente' || ronda.estado === 'cerrada'
@@ -318,9 +320,12 @@ export function useFormularioPT({
 
   async function handleReopen() {
     if (!adminTarget || ronda.estado !== 'activa') return
-    const confirmed = window.confirm(
-      'Se conservarán los valores, pero el informe volverá a borrador y podrá editarse hasta enviarlo nuevamente. ¿Continuar?'
-    )
+    const confirmed = await confirm({
+      title: 'Reabrir informe',
+      message: 'Se conservarán los valores, pero el informe volverá a borrador y podrá editarse hasta enviarlo nuevamente. ¿Continuar?',
+      confirmLabel: 'Reabrir informe',
+      tone: 'primary',
+    })
     if (!confirmed) return
     setFormMessage(null)
     const result = await adminReabrirInformeFinalAction(ronda.id, adminTarget.rondaParticipanteId)
@@ -389,6 +394,7 @@ export function useFormularioPT({
     resetCaptura,
     handleSubmit,
     handleReopen,
+    confirmDialog,
     itemsByContaminante,
     pendingCells,
     focusPendingCell,

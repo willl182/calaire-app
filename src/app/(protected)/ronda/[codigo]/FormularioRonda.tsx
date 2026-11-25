@@ -7,6 +7,7 @@ import { adminGuardarResultadosCsvAction } from '@/app/(protected)/dashboard/ron
 import type { AdminPTTarget } from './formulario-pt'
 import { TablasCapturaPT } from './TablasCapturaPT'
 import { useFormularioPT } from './useFormularioPT'
+import { FileInput } from '@/components/ui/FileInput'
 
 export type { AdminPTTarget } from './formulario-pt'
 
@@ -73,6 +74,7 @@ export default function FormularioRonda({
     handleGlobalKChange,
     handlePreviewImport,
     handleReopen,
+    confirmDialog,
   } = form
 
   function handleImportSave() {
@@ -86,6 +88,7 @@ export default function FormularioRonda({
 
   return (
     <div className={adminTarget ? '' : 'min-h-screen bg-[var(--background)] px-6 py-8'}>
+      {confirmDialog}
       <div className="mx-auto flex max-w-7xl flex-col gap-6">
         {!adminTarget && <header className="header-bar px-8 py-6">
           <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -246,19 +249,20 @@ export default function FormularioRonda({
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <input
-                  ref={importFileInputRef}
-                  type="file"
-                  accept=".csv,text/csv"
-                  disabled={soloLectura}
-                  onChange={(event) => {
+                <FileInput
+                ref={importFileInputRef}
+                accept=".csv,text/csv"
+                aria-label="Archivo CSV de resultados"
+                buttonLabel="Elegir CSV"
+                fileName={importFile?.name ?? null}
+                disabled={soloLectura}
+                onChange={(event) => {
                     setImportFile(event.target.files?.[0] ?? null)
                     setImportPreview(null)
                     setImportStatus('idle')
                     setImportMessage(null)
                   }}
-                  className="max-w-72 rounded border border-[var(--border)] px-3 py-2 text-sm disabled:bg-[var(--surface-muted)]"
-                />
+              />
                 <button
                   type="button"
                   onClick={() => void handlePreviewImport()}
